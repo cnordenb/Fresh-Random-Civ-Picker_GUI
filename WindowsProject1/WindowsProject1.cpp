@@ -3,6 +3,8 @@
 
 #include "framework.h"
 #include "WindowsProject1.h"
+#include <iostream>
+#include <string>
 
 #define MAX_LOADSTRING 100
 
@@ -10,6 +12,11 @@
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+HWND hLabel;
+HWND hCenterLabel;
+HWND hResetButton;
+HWND hSizeLabel;
+WCHAR szSizeText[50];
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -125,6 +132,98 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
+    case WM_CREATE:
+        CreateWindow(
+            L"BUTTON",  // Predefined class; Unicode assumed 
+            L"Enable Logging",      // Button text 
+            WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,  // Styles 
+            10,         // x position 
+            10,         // y position 
+            160,        // Button width
+            30,         // Button height
+            hWnd,       // Parent window
+            NULL,       // No menu.
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+            NULL);      // Pointer not needed.
+
+        hResetButton = CreateWindow(
+            L"BUTTON",  // Predefined class; Unicode assumed 
+            L"Reset",      // Button text 
+            WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
+            0,         // x position 
+            0,         // y position 
+            100,        // Button width
+            30,         // Button height
+            hWnd,       // Parent window
+            (HMENU)1,       // No menu.
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+            NULL);      // Pointer not needed.
+
+        hLabel = CreateWindow(
+            L"STATIC",  // Predefined class; Unicode assumed
+            L"0/45",  // Label text from variable..
+            WS_VISIBLE | WS_CHILD,  // Styles
+            0,  // x position (will be set in WM_SIZE)
+            0,  // y position (will be set in WM_SIZE)
+            30,  // Label width
+            15,  // Label height
+            hWnd,  // Parent window
+            NULL,  // No menu.
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+            NULL);  // Pointer not needed.
+
+
+        hCenterLabel = CreateWindow(
+            L"STATIC",  // Predefined class; Unicode assumed
+            L"Aztecs",  // Label text
+            WS_VISIBLE | WS_CHILD,  // Styles
+            0,  // x position (will be set in WM_SIZE)
+            0,  // y position (will be set in WM_SIZE)
+            100,  // Label width
+            30,  // Label height
+            hWnd,  // Parent window
+            NULL,  // No menu.
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+            NULL);  // Pointer not needed.
+
+        hSizeLabel = CreateWindow(
+            L"STATIC",  // Predefined class; Unicode assumed
+            L"",  // Initial text (empty)
+            WS_VISIBLE | WS_CHILD,  // Styles
+            0,  // x position (will be set in WM_SIZE)
+            0,  // y position (will be set in WM_SIZE)
+            100,  // Label width
+            30,  // Label height
+            hWnd,  // Parent window
+            NULL,  // No menu.
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+            NULL);  // Pointer not needed.
+
+        break;
+    case WM_SIZE:
+    {
+        int width = LOWORD(lParam);
+        int height = HIWORD(lParam);
+
+        SetWindowPos(hLabel, NULL, width - 40, height - 20, 30, 15, SWP_NOZORDER);
+        SetWindowPos(hCenterLabel, NULL, (width - 100) / 2, (height - 30) / 2, 100, 30, SWP_NOZORDER);  // Centered positio
+        SetWindowPos(hResetButton, NULL, width - 150, height - 70, 100, 30, SWP_NOZORDER);
+        SetWindowPos(hSizeLabel, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);  // Bottom left position
+
+        wsprintf(szSizeText, L"%dx%d", width, height);
+        SetWindowText(hSizeLabel, szSizeText);
+
+    }
+        break;
+
+    case WM_GETMINMAXINFO:
+    {
+        MINMAXINFO* pmmi = (MINMAXINFO*)lParam;
+        pmmi->ptMinTrackSize.x = 400; // Minimum width
+        pmmi->ptMinTrackSize.y = 300; // Minimum height
+    }
+        break;
+
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
@@ -144,6 +243,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_PAINT:
         {
+		    
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: Add any drawing code that uses hdc here...
