@@ -176,7 +176,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         hLabel = CreateWindow(
             L"STATIC",  // Predefined class; Unicode assumed
-            L"0/45",  // Label text from variable..
+            L"",  // Label text from variable..
             WS_VISIBLE | WS_CHILD,  // Styles
             0,  // x position (will be set in WM_SIZE)
             0,  // y position (will be set in WM_SIZE)
@@ -409,7 +409,7 @@ int result(int max) {
 }
 
 void resetter() {
-    for (int i = 0; i < 45, i++) {
+    for (int i = 0; i < 45; i++) {
         available[i] = true;
     }
 }
