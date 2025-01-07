@@ -10,7 +10,7 @@
 
 
 #define MAX_LOADSTRING 100
-int count = 0; // Global variable to keep track of the count
+int count = 1; // Global variable to keep track of the count
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
@@ -26,6 +26,10 @@ std::string civ_name(int);
 int result(int);
 bool available[45];
 void resetter();
+
+
+int iterator = 0;
+int remaining = 45;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -44,8 +48,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // TODO: Place code here.
     resetter();
 
-    int iterator = 0;
-    int remaining = 45;
+    
 
 
     // Initialize global strings
@@ -148,18 +151,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_CREATE:
-        CreateWindow(
-            L"BUTTON",  // Predefined class; Unicode assumed 
-            L"Enable Logging",      // Button text 
-            WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX,  // Styles 
-            10,         // x position 
-            10,         // y position 
-            160,        // Button width
-            30,         // Button height
-            hWnd,       // Parent window
-            NULL,       // No menu.
-            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-            NULL);      // Pointer not needed.
+        
 
         hGenerateButton = CreateWindow(
             L"BUTTON",  // Predefined class; Unicode assumed 
@@ -176,7 +168,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         hLabel = CreateWindow(
             L"STATIC",  // Predefined class; Unicode assumed
-            L"",  // Label text from variable..
+            L"0/45",  // Label text from variable..
             WS_VISIBLE | WS_CHILD,  // Styles
             0,  // x position (will be set in WM_SIZE)
             0,  // y position (will be set in WM_SIZE)
@@ -190,11 +182,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         hCenterLabel = CreateWindow(
             L"STATIC",  // Predefined class; Unicode assumed
-            L"Aztecs",  // Label text
+            L"",  // Label text
             WS_VISIBLE | WS_CHILD,  // Styles
             0,  // x position (will be set in WM_SIZE)
             0,  // y position (will be set in WM_SIZE)
-            50,  // Label width
+            100,  // Label width
             15,  // Label height
             hWnd,  // Parent window
             NULL,  // No menu.
@@ -221,7 +213,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         int height = HIWORD(lParam);
 
         SetWindowPos(hLabel, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);
-        SetWindowPos(hCenterLabel, NULL, (width - 50) / 2, (height - 15) / 2, 50, 15, SWP_NOZORDER);  // Centered positio
+        SetWindowPos(hCenterLabel, NULL, (width - 100) / 2, (height - 15) / 2, 100, 15, SWP_NOZORDER);  // Centered positio
         SetWindowPos(hGenerateButton, NULL, (width - 100) / 2, (height + 25) / 2, 100, 30, SWP_NOZORDER);
         SetWindowPos(hSizeLabel, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);  // Bottom left position
 
@@ -243,6 +235,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             int wmId = LOWORD(wParam);
             // Parse the menu selections:
+            int res = 0;
+            std::string civ = "";
             std::wstring labelText = std::to_wstring(count) + L"/45";
             switch (wmId)
             {
@@ -254,8 +248,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case 1: // Handle Generate button click
                 count = (count + 1) % 46; // Increment count and reset to 0 after 45
-                
+
+                res = result(remaining);
+                civ = civ_name(res);
+
                 SetWindowText(hLabel, labelText.c_str());
+                SetWindowTextA(hCenterLabel, civ.c_str());
+
+                if (remaining == 0) {
+                    resetter();
+                    remaining = 45;
+                    count = 1;
+                }
+                else remaining--;
+
                 break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
