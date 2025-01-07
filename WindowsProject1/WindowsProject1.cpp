@@ -21,6 +21,8 @@ HWND hGenerateButton;
 HWND hSizeLabel;
 WCHAR szSizeText[50];
 
+std::string civ_name(int);
+
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -287,4 +289,103 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+std::string civ_name(int index)
+{
+    switch (index)
+    {
+    case 0:
+        return "Armenians";
+    case 1:
+        return "Aztecs";
+    case 2:
+        return "Bengalis";
+    case 3:
+        return "Berbers";
+    case 4:
+        return "Bohemians";
+    case 5:
+        return "Britons";
+    case 6:
+        return "Bulgarians";
+    case 7:
+        return "Burgundians";
+    case 8:
+        return "Burmese";
+    case 9:
+        return "Byzantines";
+    case 10:
+        return "Celts";
+    case 11:
+        return "Chinese";
+    case 12:
+        return "Cumans";
+    case 13:
+        return "Dravidians";
+    case 14:
+        return "Ethiopians";
+    case 15:
+        return "Franks";
+    case 16:
+        return "Georgians";
+    case 17:
+        return "Goths";
+    case 18:
+        return "Gurjaras";
+    case 19:
+        return "Hindustanis";
+    case 20:
+        return "Huns";
+    case 21:
+        return "Incas";
+    case 22:
+        return "Italians";
+    case 23:
+        return "Japanese";
+    case 24:
+        return "Khmer";
+    case 25:
+        return "Koreans";
+    case 26:
+        return "Lithuanians";
+    case 27:
+        return "Magyars";
+    case 28:
+        return "Malay";
+    case 29:
+        return "Malians";
+    case 30:
+        return "Mayans";
+    case 31:
+        return "Mongols";
+    case 32:
+        return "Persians";
+    case 33:
+        return "Poles";
+    case 34:
+        return "Portuguese";
+    case 35:
+        return "Romans";
+    case 36:
+        return "Saracens";
+    case 37:
+        return "Sicilians";
+    case 38:
+        return "Slavs";
+    case 39:
+        return "Spanish";
+    case 40:
+        return "Tatars";
+    case 41:
+        return "Teutons";
+    case 42:
+        return "Turks";
+    case 43:
+        return "Vietnamese";
+    case 44:
+        return "Vikings";
+    default:
+        return "(no civ chosen)";
+    }
 }
