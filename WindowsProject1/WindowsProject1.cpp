@@ -6,6 +6,7 @@
 #include "WindowsProject1.h"
 #include <iostream>
 #include <string>
+#include <random>
 
 
 #define MAX_LOADSTRING 100
@@ -22,6 +23,9 @@ HWND hSizeLabel;
 WCHAR szSizeText[50];
 
 std::string civ_name(int);
+int result(int);
+bool available[45];
+void resetter();
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -38,6 +42,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: Place code here.
+    resetter();
+
+    int iterator = 0;
+    int remaining = 45;
+
 
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -387,5 +396,20 @@ std::string civ_name(int index)
         return "Vikings";
     default:
         return "(no civ chosen)";
+    }
+}
+
+int result(int max) {
+    // Create a random device and seed the Mersenne Twister engine
+    std::random_device rd;  // Obtain a random number from hardware
+    std::mt19937 mt(rd());  // Seed the Mersenne Twister engine
+    std::uniform_int_distribution<int> dist(0, max);  // Define the range
+
+    return dist(mt);  // Return a random number between 0 and 44
+}
+
+void resetter() {
+    for (int i = 0; i < 45, i++) {
+        available[i] = true;
     }
 }
