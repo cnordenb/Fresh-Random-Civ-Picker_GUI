@@ -1,16 +1,12 @@
 // WindowsProject1.cpp : Defines the entry point for the application.
 //
 
-extern "C" {
-    #include "main.c"
-}
 
 #include "framework.h"
 #include "WindowsProject1.h"
 #include <iostream>
 #include <string>
 
-main();
 
 #define MAX_LOADSTRING 100
 
