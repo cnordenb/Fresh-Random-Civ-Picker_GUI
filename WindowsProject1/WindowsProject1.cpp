@@ -16,7 +16,7 @@ WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 HWND hLabel;
 HWND hCenterLabel;
-HWND hResetButton;
+HWND hGenerateButton;
 HWND hSizeLabel;
 WCHAR szSizeText[50];
 
@@ -104,20 +104,21 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   hInst = hInstance; // Store instance handle in our global variable
+    hInst = hInstance; // Store instance handle in our global variable
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+    // Set the default window size to 400x300
+    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, 0, 400, 300, nullptr, nullptr, hInstance, nullptr);
 
-   if (!hWnd)
-   {
-      return FALSE;
-   }
+    if (!hWnd)
+    {
+        return FALSE;
+    }
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+    ShowWindow(hWnd, nCmdShow);
+    UpdateWindow(hWnd);
 
-   return TRUE;
+    return TRUE;
 }
 
 //
@@ -148,9 +149,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
             NULL);      // Pointer not needed.
 
-        hResetButton = CreateWindow(
+        hGenerateButton = CreateWindow(
             L"BUTTON",  // Predefined class; Unicode assumed 
-            L"Reset",      // Button text 
+            L"Generate",      // Button text 
             WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
             0,         // x position 
             0,         // y position 
@@ -181,8 +182,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             WS_VISIBLE | WS_CHILD,  // Styles
             0,  // x position (will be set in WM_SIZE)
             0,  // y position (will be set in WM_SIZE)
-            100,  // Label width
-            30,  // Label height
+            50,  // Label width
+            15,  // Label height
             hWnd,  // Parent window
             NULL,  // No menu.
             (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
@@ -208,8 +209,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         int height = HIWORD(lParam);
 
         SetWindowPos(hLabel, NULL, width - 40, height - 20, 30, 15, SWP_NOZORDER);
-        SetWindowPos(hCenterLabel, NULL, (width - 100) / 2, (height - 30) / 2, 100, 30, SWP_NOZORDER);  // Centered positio
-        SetWindowPos(hResetButton, NULL, width - 150, height - 70, 100, 30, SWP_NOZORDER);
+        SetWindowPos(hCenterLabel, NULL, (width - 50) / 2, (height - 15) / 2, 50, 15, SWP_NOZORDER);  // Centered positio
+        SetWindowPos(hGenerateButton, NULL, width - 150, height - 70, 100, 30, SWP_NOZORDER);
         SetWindowPos(hSizeLabel, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);  // Bottom left position
 
         wsprintf(szSizeText, L"%dx%d", width, height);
