@@ -300,7 +300,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 civ = civ_name(res);
 
-                
+                labelText = std::to_wstring(iterator) + L"/45";
                 SetWindowText(hLabel, labelText.c_str());
                 SetWindowTextA(hCenterLabel, civ.c_str());
 
