@@ -7,10 +7,12 @@
 #include <iostream>
 #include <string>
 #include <random>
+#include <cstdio>
+#include <Windows.h>
 
 
 #define MAX_LOADSTRING 100
-int count = 1; // Global variable to keep track of the count
+int iterator = 0; // Global variable to keep track of the count
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
@@ -48,7 +50,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // TODO: Place code here.
     resetter();
 
-    
+    AllocConsole();
+
+    // Redirect standard output to the console
+    FILE *fp;
+    freopen_s(&fp, "CONOUT$", "w", stdout);
+
+    // Now you can use printf and std::cout to output to the console
+    printf("Console window successfully attached.\n");
 
 
     // Initialize global strings
@@ -237,8 +246,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Parse the menu selections:
             int res = 0;
             int j = 0;
+            
             std::string civ = "";
-            std::wstring labelText = std::to_wstring(count) + L"/45";
+            std::wstring labelText = std::to_wstring(iterator + 1) + L"/45";
+
             switch (wmId)
             {
             case IDM_ABOUT:
@@ -248,35 +259,55 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DestroyWindow(hWnd);
                 break;
             case 1: // Handle Generate button click
-                count = (count + 1) % 46; // Increment count and reset to 0 after 45
+                
+
+                if (iterator == 45)
+                {
+                    printf("\nProgram has been reset.\n");
+                    iterator = 0;
+
+                    resetter();
+                    remaining = 45;
+                }
+
+                 // Increment count and reset to 0 after 45
 
                 res = result(remaining);
+
                 
                 j = 0;
                 for (int i = 0; i < 45; i++) {
-                    while (!available[j]) j++;
+                    
                     if (i == res) {
+                        printf("res (i) is now %d\n", res);
+                        printf("available[%d] is currently %s\n", res, available[res] ? "true" : "false");
                         res = j;
+                        printf("res (j) is now %d\n", res);
+                        printf("available[%d] is currently %s\n", res, available[res] ? "true" : "false");
                         break;
                     }
+                    while (!available[j]) j++;
                     j++;
 
                 }
 
+                
+
+                printf("\n%s (current set: %d/%d)\n", civ_name(res), iterator + 1, 45);
+                available[res] = 0;
+                iterator++;
+                remaining--;
+
                 civ = civ_name(res);
 
-
+                
                 SetWindowText(hLabel, labelText.c_str());
                 SetWindowTextA(hCenterLabel, civ.c_str());
 
-                available[res] = false;
+                
+                
 
-                if (remaining == 0) {
-                    resetter();
-                    remaining = 45;
-                    count = 1;
-                }
-                else remaining--;
+                
 
                 break;
             default:
