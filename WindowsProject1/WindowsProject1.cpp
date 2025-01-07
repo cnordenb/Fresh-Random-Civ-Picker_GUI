@@ -28,7 +28,7 @@ bool available[45];
 void resetter();
 
 
-int iterator = 0;
+
 int remaining = 45;
 
 // Forward declarations of functions included in this code module:
@@ -236,6 +236,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             int wmId = LOWORD(wParam);
             // Parse the menu selections:
             int res = 0;
+            int j = 0;
             std::string civ = "";
             std::wstring labelText = std::to_wstring(count) + L"/45";
             switch (wmId)
@@ -250,10 +251,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 count = (count + 1) % 46; // Increment count and reset to 0 after 45
 
                 res = result(remaining);
+                
+                j = 0;
+                for (int i = 0; i < 45; i++) {
+                    while (!available[j]) j++;
+                    if (i == res) {
+                        res = j;
+                        break;
+                    }
+                    j++;
+
+                }
+
                 civ = civ_name(res);
+
 
                 SetWindowText(hLabel, labelText.c_str());
                 SetWindowTextA(hCenterLabel, civ.c_str());
+
+                available[res] = false;
 
                 if (remaining == 0) {
                     resetter();
