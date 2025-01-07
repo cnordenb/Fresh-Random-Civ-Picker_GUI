@@ -9,6 +9,7 @@
 
 
 #define MAX_LOADSTRING 100
+int count = 0; // Global variable to keep track of the count
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
@@ -208,9 +209,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         int width = LOWORD(lParam);
         int height = HIWORD(lParam);
 
-        SetWindowPos(hLabel, NULL, width - 40, height - 20, 30, 15, SWP_NOZORDER);
+        SetWindowPos(hLabel, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);
         SetWindowPos(hCenterLabel, NULL, (width - 50) / 2, (height - 15) / 2, 50, 15, SWP_NOZORDER);  // Centered positio
-        SetWindowPos(hGenerateButton, NULL, width - 150, height - 70, 100, 30, SWP_NOZORDER);
+        SetWindowPos(hGenerateButton, NULL, (width - 100) / 2, (height + 25) / 2, 100, 30, SWP_NOZORDER);
         SetWindowPos(hSizeLabel, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);  // Bottom left position
 
         wsprintf(szSizeText, L"%dx%d", width, height);
@@ -231,6 +232,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             int wmId = LOWORD(wParam);
             // Parse the menu selections:
+            std::wstring labelText = std::to_wstring(count) + L"/45";
             switch (wmId)
             {
             case IDM_ABOUT:
@@ -238,6 +240,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case IDM_EXIT:
                 DestroyWindow(hWnd);
+                break;
+            case 1: // Handle Generate button click
+                count = (count + 1) % 46; // Increment count and reset to 0 after 45
+                
+                SetWindowText(hLabel, labelText.c_str());
                 break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
