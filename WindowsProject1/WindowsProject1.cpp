@@ -227,7 +227,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             0,         // y position 
             100,        // Button width
             30,         // Button height
-            hTab,       // Parent window
+            hWnd,       // Parent window
             (HMENU)1,       // No menu.
             (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
             NULL);      // Pointer not needed.
@@ -253,7 +253,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             0,  // y position (will be set in WM_SIZE)
             100,  // Label width
             15,  // Label height
-            hTab,  // Parent window
+            hWnd,  // Parent window
             NULL,  // No menu.
             (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
             NULL);  // Pointer not needed.
@@ -318,6 +318,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DestroyWindow(hWnd);
                 break;
             case 1: // Handle Generate button click
+                printf("it reaches here\n");
                 if (iterator == 45)
                 {
                     printf("\nProgram has been reset.\n");
