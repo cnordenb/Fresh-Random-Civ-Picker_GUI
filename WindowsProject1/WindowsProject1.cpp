@@ -9,6 +9,9 @@
 #include <random>
 #include <cstdio>
 #include <Windows.h>
+#include <commctrl.h>
+
+#pragma comment(lib, "comctl32.lib")
 
 
 #define MAX_LOADSTRING 100
@@ -25,9 +28,12 @@ HWND hSizeLabel;
 WCHAR szSizeText[50];
 
 std::string civ_name(int);
+void CreateTabs(HWND);
+void ShowTabComponents(int);
 int result(int);
 bool available[45];
 void resetter();
+
 
 
 
@@ -38,6 +44,55 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+HWND hTab;
+
+// Function to create tabs
+void CreateTabs(HWND hWnd)
+{
+    // Initialize common controls
+    INITCOMMONCONTROLSEX icex;
+    icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
+    icex.dwICC = ICC_TAB_CLASSES;
+    InitCommonControlsEx(&icex);
+
+    // Create the tab control
+    hTab = CreateWindow(WC_TABCONTROL, L"",
+        WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
+        0, 0, 400, 300,
+        hWnd, NULL, hInst, NULL);
+
+    // Add tabs
+    TCITEM tie;
+    tie.mask = TCIF_TEXT;
+
+    // Change the type of pszText to LPCWSTR
+    tie.pszText = const_cast<LPWSTR>(L"Tab 1");
+    TabCtrl_InsertItem(hTab, 0, &tie);
+
+    tie.pszText = const_cast<LPWSTR>(L"Tab 2");
+    TabCtrl_InsertItem(hTab, 1, &tie);
+}
+
+// Function to show/hide components based on the selected tab
+void ShowTabComponents(int tabIndex)
+{
+    if (tabIndex == 0)
+    {
+        ShowWindow(hGenerateButton, SW_SHOW);
+        ShowWindow(hLabel, SW_SHOW);
+        ShowWindow(hCenterLabel, SW_SHOW);
+        ShowWindow(hSizeLabel, SW_SHOW);
+    }
+    else if (tabIndex == 1)
+    {
+        ShowWindow(hGenerateButton, SW_HIDE);
+        ShowWindow(hLabel, SW_HIDE);
+        ShowWindow(hCenterLabel, SW_HIDE);
+        ShowWindow(hSizeLabel, SW_HIDE);
+        // Add components for the second tab here
+    }
+}
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -159,8 +214,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
+
+       
     case WM_CREATE:
-        
+        CreateTabs(hWnd);
 
         hGenerateButton = CreateWindow(
             L"BUTTON",  // Predefined class; Unicode assumed 
@@ -170,7 +227,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             0,         // y position 
             100,        // Button width
             30,         // Button height
-            hWnd,       // Parent window
+            hTab,       // Parent window
             (HMENU)1,       // No menu.
             (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
             NULL);      // Pointer not needed.
@@ -183,39 +240,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             0,  // y position (will be set in WM_SIZE)
             30,  // Label width
             15,  // Label height
-            hWnd,  // Parent window
+            hTab,  // Parent window
             NULL,  // No menu.
             (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
             NULL);  // Pointer not needed.
 
-
         hCenterLabel = CreateWindow(
             L"STATIC",  // Predefined class; Unicode assumed
-            L"",  // Label text
+            L"[default_text]",  // Label text
             WS_VISIBLE | WS_CHILD,  // Styles
             0,  // x position (will be set in WM_SIZE)
             0,  // y position (will be set in WM_SIZE)
             100,  // Label width
             15,  // Label height
-            hWnd,  // Parent window
+            hTab,  // Parent window
             NULL,  // No menu.
             (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
             NULL);  // Pointer not needed.
+        break; 
 
-        hSizeLabel = CreateWindow(
-            L"STATIC",  // Predefined class; Unicode assumed
-            L"",  // Initial text (empty)
-            WS_VISIBLE | WS_CHILD,  // Styles
-            0,  // x position (will be set in WM_SIZE)
-            0,  // y position (will be set in WM_SIZE)
-            100,  // Label width
-            30,  // Label height
-            hWnd,  // Parent window
-            NULL,  // No menu.
-            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-            NULL);  // Pointer not needed.
+    
+        
 
-        break;
     case WM_SIZE:
     {
         int width = LOWORD(lParam);
@@ -224,29 +270,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         SetWindowPos(hLabel, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);
         SetWindowPos(hCenterLabel, NULL, (width - 100) / 2, (height - 15) / 2, 100, 15, SWP_NOZORDER);  // Centered positio
         SetWindowPos(hGenerateButton, NULL, (width - 100) / 2, (height + 25) / 2, 100, 30, SWP_NOZORDER);
-        SetWindowPos(hSizeLabel, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);  // Bottom left position
 
-        wsprintf(szSizeText, L"%dx%d", width, height);
-        SetWindowText(hSizeLabel, szSizeText);
 
     }
         break;
+
+    case WM_NOTIFY:
+    {
+        LPNMHDR pnmhdr = (LPNMHDR)lParam;
+        if (pnmhdr->hwndFrom == hTab && pnmhdr->code == TCN_SELCHANGE)
+        {
+            int tabIndex = TabCtrl_GetCurSel(hTab);
+            ShowTabComponents(tabIndex);
+        }
+    }
+    break;
 
     case WM_GETMINMAXINFO:
     {
         MINMAXINFO* pmmi = (MINMAXINFO*)lParam;
         pmmi->ptMinTrackSize.x = 400; // Minimum width
         pmmi->ptMinTrackSize.y = 300; // Minimum height
+
+        pmmi->ptMaxTrackSize.x = 400; // Minimum width
+        pmmi->ptMaxTrackSize.y = 300; // Minimum height
+
     }
         break;
 
-    case WM_COMMAND:
+        
+        case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
             // Parse the menu selections:
             int res = 0;
             int j = 0;
-            
+
             std::string civ = "";
             std::wstring labelText = std::to_wstring(iterator + 1) + L"/45";
 
@@ -259,8 +318,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DestroyWindow(hWnd);
                 break;
             case 1: // Handle Generate button click
-                
-
                 if (iterator == 45)
                 {
                     printf("\nProgram has been reset.\n");
@@ -270,14 +327,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     remaining = 45;
                 }
 
-                 // Increment count and reset to 0 after 45
-
+                // Increment count and reset to 0 after 45
                 res = result(remaining);
 
-                
                 j = 0;
                 for (int i = 0; i < 45; i++) {
-                    
                     if (i == res) {
                         printf("res (i) is now %d\n", res);
                         printf("available[%d] is currently %s\n", res, available[res] ? "true" : "false");
@@ -286,28 +340,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         printf("available[%d] is currently %s\n", res, available[res] ? "true" : "false");
                         break;
                     }
-                    while (!available[j]) j++;
+                    while (j < 45 && !available[j]) j++;
+                    if (j >= 45) {
+                        printf("Error: Index j out of bounds\n");
+                        break;
+                    }
                     j++;
-
                 }
 
-                
-
-                printf("\n%s (current set: %d/%d)\n", civ_name(res), iterator + 1, 45);
+                printf("\n(current set: %d/%d)\n", iterator + 1, 45);
                 available[res] = 0;
                 iterator++;
                 remaining--;
 
                 civ = civ_name(res);
 
+                // Update the labels
                 labelText = std::to_wstring(iterator) + L"/45";
                 SetWindowText(hLabel, labelText.c_str());
                 SetWindowTextA(hCenterLabel, civ.c_str());
 
-                
-                
-
-                
+                // Invalidate and update the labels to force redraw
+                InvalidateRect(hLabel, NULL, TRUE);
+                UpdateWindow(hLabel);
+                InvalidateRect(hCenterLabel, NULL, TRUE);
+                UpdateWindow(hCenterLabel);
 
                 break;
             default:
@@ -315,6 +372,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+
     case WM_PAINT:
         {
 		    
