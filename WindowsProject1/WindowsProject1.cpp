@@ -25,6 +25,7 @@ HWND hLabel;
 HWND hCenterLabel;
 HWND hGenerateButton;
 HWND hSizeLabel;
+HWND hLogTextField;
 WCHAR szSizeText[50];
 
 std::string civ_name(int);
@@ -67,10 +68,10 @@ void CreateTabs(HWND hWnd)
     tie.mask = TCIF_TEXT;
 
     // Change the type of pszText to LPCWSTR
-    tie.pszText = const_cast<LPWSTR>(L"Tab 1");
+    tie.pszText = const_cast<LPWSTR>(L"Draw Civ");
     TabCtrl_InsertItem(hTab, 0, &tie);
 
-    tie.pszText = const_cast<LPWSTR>(L"Tab 2");
+    tie.pszText = const_cast<LPWSTR>(L"Log");
     TabCtrl_InsertItem(hTab, 1, &tie);
 }
 
@@ -83,6 +84,7 @@ void ShowTabComponents(int tabIndex)
         ShowWindow(hLabel, SW_SHOW);
         ShowWindow(hCenterLabel, SW_SHOW);
         ShowWindow(hSizeLabel, SW_SHOW);
+		ShowWindow(hLogTextField, SW_HIDE);
     }
     else if (tabIndex == 1)
     {
@@ -90,6 +92,7 @@ void ShowTabComponents(int tabIndex)
         ShowWindow(hLabel, SW_HIDE);
         ShowWindow(hCenterLabel, SW_HIDE);
         ShowWindow(hSizeLabel, SW_HIDE);
+		ShowWindow(hLogTextField, SW_SHOW);
         // Add components for the second tab here
     }
 }
@@ -185,6 +188,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
     hInst = hInstance; // Store instance handle in our global variable
 
+	wcscpy_s(szTitle, L"Fresh Random Civ Picker");
+
     // Set the default window size to 400x300
     HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, 0, 400, 300, nullptr, nullptr, hInstance, nullptr);
@@ -221,7 +226,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         hGenerateButton = CreateWindow(
             L"BUTTON",  // Predefined class; Unicode assumed 
-            L"Generate",      // Button text 
+            L"Draw",      // Button text 
             WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
             0,         // x position 
             0,         // y position 
@@ -247,7 +252,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         hCenterLabel = CreateWindow(
             L"STATIC",  // Predefined class; Unicode assumed
-            L"[default_text]",  // Label text
+            L"",  // Label text
             WS_VISIBLE | WS_CHILD,  // Styles
             0,  // x position (will be set in WM_SIZE)
             0,  // y position (will be set in WM_SIZE)
@@ -257,6 +262,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             NULL,  // No menu.
             (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
             NULL);  // Pointer not needed.
+
+		hLogTextField = CreateWindow(
+			L"EDIT",  // Predefined class; Unicode assumed
+			L"",  // Label text
+			WS_VISIBLE | WS_CHILD | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY,  // Styles
+			10,  // x position (will be set in WM_SIZE)
+			25,  // y position (will be set in WM_SIZE)
+			350,  // Label width
+			200,  // Label height
+			hTab,  // Parent window
+			NULL,  // No menu.
+			(HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+			NULL);  // Pointer not needed.
+
+		ShowWindow(hLogTextField, SW_HIDE);
+
         break; 
 
     
@@ -268,8 +289,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         int height = HIWORD(lParam);
 
         SetWindowPos(hLabel, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);
-        SetWindowPos(hCenterLabel, NULL, (width - 100) / 2, (height - 15) / 2, 100, 15, SWP_NOZORDER);  // Centered positio
-        SetWindowPos(hGenerateButton, NULL, (width - 100) / 2, (height + 25) / 2, 100, 30, SWP_NOZORDER);
+        SetWindowPos(hCenterLabel, NULL, (width - 80) / 2, (height - 15) / 2, 100, 15, SWP_NOZORDER);  // Centered positio
+        SetWindowPos(hGenerateButton, NULL, (width - 100) / 2, (height + 70) / 2, 100, 30, SWP_NOZORDER);
 
 
     }
@@ -292,8 +313,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         pmmi->ptMinTrackSize.x = 400; // Minimum width
         pmmi->ptMinTrackSize.y = 300; // Minimum height
 
-        pmmi->ptMaxTrackSize.x = 400; // Minimum width
-        pmmi->ptMaxTrackSize.y = 300; // Minimum height
+        pmmi->ptMaxTrackSize.x = 400; // Maximum width
+        pmmi->ptMaxTrackSize.y = 300; // Maximum height
 
     }
         break;
@@ -308,6 +329,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             std::string civ = "";
             std::wstring labelText = std::to_wstring(iterator + 1) + L"/45";
+			int length = GetWindowTextLength(hLogTextField);
+            std::wstring newLogEntry;
+            std::wstring logText;
+            
+
 
             switch (wmId)
             {
@@ -318,12 +344,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DestroyWindow(hWnd);
                 break;
             case 1: // Handle Generate button click
-                printf("it reaches here\n");
+                
+
+
                 if (iterator == 45)
                 {
                     printf("\nProgram has been reset.\n");
                     iterator = 0;
 
+					
                     resetter();
                     remaining = 45;
                 }
@@ -333,39 +362,48 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 j = 0;
                 for (int i = 0; i < 45; i++) {
-                    if (i == res) {
-                        printf("res (i) is now %d\n", res);
-                        printf("available[%d] is currently %s\n", res, available[res] ? "true" : "false");
-                        res = j;
-                        printf("res (j) is now %d\n", res);
-                        printf("available[%d] is currently %s\n", res, available[res] ? "true" : "false");
-                        break;
-                    }
                     while (j < 45 && !available[j]) j++;
                     if (j >= 45) {
                         printf("Error: Index j out of bounds\n");
                         break;
                     }
+                    if (i == res) {
+                        printf("\nres (i) is now %d\n", res);
+                        printf("available[%d] is currently %s\n\n", res, available[res] ? "true" : "false");
+                        res = j;
+                        printf("res (j) is now %d\n", res);
+                        printf("available[%d] is currently %s\n", res, available[res] ? "true" : "false");
+                        break;
+                    }
+                    
                     j++;
                 }
 
+                civ = civ_name(res);
+
                 printf("\n(current set: %d/%d)\n", iterator + 1, 45);
-                available[res] = 0;
+                available[res] = false;
                 iterator++;
                 remaining--;
 
-                civ = civ_name(res);
+                
 
                 // Update the labels
                 labelText = std::to_wstring(iterator) + L"/45";
                 SetWindowText(hLabel, labelText.c_str());
                 SetWindowTextA(hCenterLabel, civ.c_str());
 
-                // Invalidate and update the labels to force redraw
-                InvalidateRect(hLabel, NULL, TRUE);
-                UpdateWindow(hLabel);
-                InvalidateRect(hCenterLabel, NULL, TRUE);
-                UpdateWindow(hCenterLabel);
+                length = GetWindowTextLength(hLogTextField);
+                logText.resize(length + 1);
+                GetWindowText(hLogTextField, &logText[0], length + 1);
+                logText.pop_back(); // Remove the null terminator
+
+                newLogEntry = std::wstring(civ.begin(), civ.end()) + L" (" + std::to_wstring(iterator) + L"/45)" + L"\r\n";
+                logText += newLogEntry;
+                if (iterator == 45) logText += L"\r\n";
+
+                SetWindowText(hLogTextField, logText.c_str());
+
 
                 break;
             default:
@@ -391,6 +429,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     return 0;
 }
+
 
 // Message handler for about box.
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
