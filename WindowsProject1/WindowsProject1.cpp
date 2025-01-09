@@ -24,6 +24,7 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 HWND hLabel;
 HWND hCenterLabel;
 HWND hGenerateButton;
+HWND hResetButton;
 HWND hSizeLabel;
 HWND hLogTextField;
 WCHAR szSizeText[50];
@@ -85,6 +86,7 @@ void ShowTabComponents(int tabIndex)
         ShowWindow(hCenterLabel, SW_SHOW);
         ShowWindow(hSizeLabel, SW_SHOW);
 		ShowWindow(hLogTextField, SW_HIDE);
+		ShowWindow(hResetButton, SW_SHOW);
     }
     else if (tabIndex == 1)
     {
@@ -92,6 +94,7 @@ void ShowTabComponents(int tabIndex)
         ShowWindow(hLabel, SW_HIDE);
         ShowWindow(hCenterLabel, SW_HIDE);
         ShowWindow(hSizeLabel, SW_HIDE);
+		ShowWindow(hResetButton, SW_HIDE);
 		ShowWindow(hLogTextField, SW_SHOW);
         // Add components for the second tab here
     }
@@ -237,6 +240,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
             NULL);      // Pointer not needed.
 
+		hResetButton = CreateWindow(
+			L"BUTTON",  // Predefined class; Unicode assumed 
+			L"Reset",      // Button text 
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
+		    10,         // x position 
+			200,         // y position 
+			100,        // Button width
+			30,         // Button height
+			hWnd,       // Parent window
+			(HMENU)2,       // No menu.
+			(HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+			NULL);      // Pointer not needed.
+
         hLabel = CreateWindow(
             L"STATIC",  // Predefined class; Unicode assumed
             L"0/45",  // Label text from variable..
@@ -291,6 +307,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         SetWindowPos(hLabel, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);
         SetWindowPos(hCenterLabel, NULL, (width - 80) / 2, (height - 15) / 2, 100, 15, SWP_NOZORDER);  // Centered positio
         SetWindowPos(hGenerateButton, NULL, (width - 100) / 2, (height + 70) / 2, 100, 30, SWP_NOZORDER);
+		
 
 
     }
@@ -345,13 +362,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case 1: // Handle Generate button click
                 
+                
 
 
                 if (iterator == 45)
                 {
                     printf("\nProgram has been reset.\n");
                     iterator = 0;
-
 					
                     resetter();
                     remaining = 45;
@@ -400,12 +417,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 newLogEntry = std::wstring(civ.begin(), civ.end()) + L" (" + std::to_wstring(iterator) + L"/45)" + L"\r\n";
                 logText += newLogEntry;
-                if (iterator == 45) logText += L"\r\n";
+                
+
 
                 SetWindowText(hLogTextField, logText.c_str());
 
 
                 break;
+			case 2: // Handle Reset button click
+				iterator = 0;
+				resetter();
+				remaining = 45;
+				SetWindowText(hLabel, L"0/45");
+				SetWindowText(hCenterLabel, L"");
+
+                length = GetWindowTextLength(hLogTextField);
+                logText.resize(length + 1);
+                GetWindowText(hLogTextField, &logText[0], length + 1);
+                logText.pop_back(); // Remove the null terminator
+
+                logText += L"\r\n";
+
+
+
+                SetWindowText(hLogTextField, logText.c_str());
+
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
