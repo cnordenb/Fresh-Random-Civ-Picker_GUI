@@ -11,10 +11,15 @@
 #include <Windows.h>
 #include <commctrl.h>
 
+
 #pragma comment(lib, "comctl32.lib")
 
-
+#define CIVS_MAX 45
 #define MAX_LOADSTRING 100
+#define HOTKEY_ID_TAB 1
+#define HOTKEY_ID_SPACE 2
+#define HOTKEY_ID_RETURN 3
+
 int iterator = 0; // Global variable to keep track of the count
 
 // Global Variables:
@@ -33,13 +38,22 @@ std::string civ_name(int);
 void CreateTabs(HWND);
 void ShowTabComponents(int);
 int result(int);
-bool available[45];
+bool available[CIVS_MAX];
 void resetter();
+void draw_civ();
 
 
 
+int res = 0;
+int j = 0;
 
-int remaining = 45;
+std::string civ = "";
+std::wstring labelText = std::to_wstring(iterator + 1) + L"/" + std::to_wstring(CIVS_MAX);
+int length = GetWindowTextLength(hLogTextField);
+std::wstring newLogEntry;
+std::wstring logText;
+int remaining = CIVS_MAX;
+std::wstring default_hlabel;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -255,7 +269,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         hLabel = CreateWindow(
             L"STATIC",  // Predefined class; Unicode assumed
-            L"0/45",  // Label text from variable..
+            L"",  // Label text from variable..
             WS_VISIBLE | WS_CHILD,  // Styles
             0,  // x position (will be set in WM_SIZE)
             0,  // y position (will be set in WM_SIZE)
@@ -268,7 +282,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         hCenterLabel = CreateWindow(
             L"STATIC",  // Predefined class; Unicode assumed
-            L"",  // Label text
+            L"?",  // Label text
             WS_VISIBLE | WS_CHILD,  // Styles
             0,  // x position (will be set in WM_SIZE)
             0,  // y position (will be set in WM_SIZE)
@@ -293,6 +307,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			NULL);  // Pointer not needed.
 
 		ShowWindow(hLogTextField, SW_HIDE);
+
+        RegisterHotKey(hWnd, HOTKEY_ID_TAB, 0, VK_TAB);
+		RegisterHotKey(hWnd, HOTKEY_ID_SPACE, 0, VK_SPACE);
+        RegisterHotKey(hWnd, HOTKEY_ID_RETURN, 0, VK_RETURN);
+
+        default_hlabel = L"0/" + std::to_wstring(CIVS_MAX);
+
+        resetter();
 
         break; 
 
@@ -337,116 +359,60 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
 
         
-        case WM_COMMAND:
-        {
-            int wmId = LOWORD(wParam);
-            // Parse the menu selections:
-            int res = 0;
-            int j = 0;
+    case WM_HOTKEY:
+    {
+        if (GetForegroundWindow() == hWnd) {
+			
+            if (wParam == HOTKEY_ID_TAB)
+            {
+                int tabIndex = TabCtrl_GetCurSel(hTab);
+                int newTabIndex = tabIndex == 0 ? 1 : 0;
+                TabCtrl_SetCurSel(hTab, newTabIndex);
+                ShowTabComponents(newTabIndex);
+            }
+            if (wParam == HOTKEY_ID_SPACE)
+            {
+                SendMessage(hWnd, WM_COMMAND, MAKEWPARAM(1, BN_CLICKED), (LPARAM)hGenerateButton);
+            }
+            if (wParam == HOTKEY_ID_RETURN)
+            {
+                SendMessage(hWnd, WM_COMMAND, MAKEWPARAM(2, BN_CLICKED), (LPARAM)hResetButton);
+            
+            }
+        }
+        
+    }
+	
+    break;
 
-            std::string civ = "";
-            std::wstring labelText = std::to_wstring(iterator + 1) + L"/45";
-			int length = GetWindowTextLength(hLogTextField);
-            std::wstring newLogEntry;
-            std::wstring logText;
+
+    case WM_COMMAND:
+    {
+        int wmId = LOWORD(wParam);
+        // Parse the menu selections:
+        
             
 
 
-            switch (wmId)
-            {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                break;
-            case 1: // Handle Generate button click
-                
-                
-
-
-                if (iterator == 45)
-                {
-                    printf("\nProgram has been reset.\n");
-                    iterator = 0;
-					
-                    resetter();
-                    remaining = 45;
-                }
-
-                // Increment count and reset to 0 after 45
-                res = result(remaining);
-
-                j = 0;
-                for (int i = 0; i < 45; i++) {
-                    while (j < 45 && !available[j]) j++;
-                    if (j >= 45) {
-                        printf("Error: Index j out of bounds\n");
-                        break;
-                    }
-                    if (i == res) {
-                        printf("\nres (i) is now %d\n", res);
-                        printf("available[%d] is currently %s\n\n", res, available[res] ? "true" : "false");
-                        res = j;
-                        printf("res (j) is now %d\n", res);
-                        printf("available[%d] is currently %s\n", res, available[res] ? "true" : "false");
-                        break;
-                    }
-                    
-                    j++;
-                }
-
-                civ = civ_name(res);
-
-                printf("\n(current set: %d/%d)\n", iterator + 1, 45);
-                available[res] = false;
-                iterator++;
-                remaining--;
-
-                
-
-                // Update the labels
-                labelText = std::to_wstring(iterator) + L"/45";
-                SetWindowText(hLabel, labelText.c_str());
-                SetWindowTextA(hCenterLabel, civ.c_str());
-
-                length = GetWindowTextLength(hLogTextField);
-                logText.resize(length + 1);
-                GetWindowText(hLogTextField, &logText[0], length + 1);
-                logText.pop_back(); // Remove the null terminator
-
-                newLogEntry = std::wstring(civ.begin(), civ.end()) + L" (" + std::to_wstring(iterator) + L"/45)" + L"\r\n";
-                logText += newLogEntry;
-                if (iterator == 45) logText += L"\r\n";
-
-
-                SetWindowText(hLogTextField, logText.c_str());
-
-
-                break;
-			case 2: // Handle Reset button click
-				iterator = 0;
-				resetter();
-				remaining = 45;
-				SetWindowText(hLabel, L"0/45");
-				SetWindowText(hCenterLabel, L"");
-
-                length = GetWindowTextLength(hLogTextField);
-                logText.resize(length + 1);
-                GetWindowText(hLogTextField, &logText[0], length + 1);
-                logText.pop_back(); // Remove the null terminator
-
-                logText += L"\r\n";
-
-
-
-                SetWindowText(hLogTextField, logText.c_str());
-
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
-            }
+        switch (wmId)
+        {
+        case IDM_ABOUT:
+            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+            break;
+        case IDM_EXIT:
+            DestroyWindow(hWnd);
+            break;
+        case 1: // Handle Generate button click              
+            draw_civ();     
+            break;
+		case 2: // Handle Reset button click
+			resetter();
+            break;
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
         }
-        break;
+    }
+    break;
 
     case WM_PAINT:
         {
@@ -474,6 +440,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_INITDIALOG:
+        SetDlgItemText(hDlg, IDC_STATIC_TEXT, L"Chupnis");
         return (INT_PTR)TRUE;
 
     case WM_COMMAND:
@@ -592,11 +559,94 @@ int result(int max) {
     std::mt19937 mt(rd());  // Seed the Mersenne Twister engine
     std::uniform_int_distribution<int> dist(0, max);  // Define the range
 
-    return dist(mt);  // Return a random number between 0 and 44
+    return dist(mt);  // Return a random number between 0 and CIVS_MAX
 }
 
 void resetter() {
-    for (int i = 0; i < 45; i++) {
+
+    if (iterator > 0)
+    {
+        length = GetWindowTextLength(hLogTextField);
+        logText.resize(length + 1);
+        GetWindowText(hLogTextField, &logText[0], length + 1);
+        logText.pop_back(); // Remove the null terminator
+
+        logText = L"\r\n" + logText;
+        SetWindowText(hLogTextField, logText.c_str());
+    }
+
+    for (int i = 0; i < CIVS_MAX; i++) {
         available[i] = true;
     }
+    iterator = 0;
+    remaining = CIVS_MAX;
+
+    SetWindowText(hLabel, (L"0/" + std::to_wstring(CIVS_MAX)).c_str());
+    SetWindowText(hCenterLabel, L"?");
+
+    
+}
+
+void draw_civ() {
+    if (iterator == CIVS_MAX)
+    {
+        printf("\nProgram has been reset.\n");
+        resetter();
+        
+    }
+
+    
+    res = result(remaining);
+
+    j = 0;
+    for (int i = 0; i < CIVS_MAX; i++) {
+        while (j < CIVS_MAX && !available[j]) j++;
+        if (j >= CIVS_MAX) {
+            printf("\n\n=====================\n\n");
+            printf("i is now %d\n", i);
+            printf("j is now %d\n", j);
+            printf("Error: Index j out of bounds\n\n==================== = \n\n\n");
+            break;
+        }
+        if (i == res) {
+            printf("\nres (i) is now %d\n", res);
+            //printf("available[%d] is currently %s\n\n", res, available[res] ? "true" : "false");
+            res = j;
+            printf("res (j) is now %d\n", res);
+            //printf("available[%d] is currently %s\n", res, available[res] ? "true" : "false");
+            break;
+        }
+
+        j++;
+    }
+
+    civ = civ_name(res);
+
+    printf("\n(current set: %d/%d)\n", iterator + 1, CIVS_MAX);
+	if (res >= 0 && res < sizeof(available)) available[res] = false;
+	else printf("\n\n=====================\n\nIndex out of range: %d\n\n=====================\n\n\n", res);
+
+    
+    iterator++;
+    remaining--;
+
+
+
+    // Update the labels
+    labelText = std::to_wstring(iterator) + L"/" + std::to_wstring(CIVS_MAX);
+    SetWindowText(hLabel, labelText.c_str());
+    SetWindowTextA(hCenterLabel, civ.c_str());
+
+    length = GetWindowTextLength(hLogTextField);
+    logText.resize(length + 1);
+    GetWindowText(hLogTextField, &logText[0], length + 1);
+    logText.pop_back(); // Remove the null terminator
+
+    newLogEntry = std::wstring(civ.begin(), civ.end()) + L" (" + std::to_wstring(iterator) + L"/" + std::to_wstring(CIVS_MAX) + L")" + L"\r\n";
+    logText = newLogEntry + logText;
+    if (iterator == CIVS_MAX) logText += L"\r\n";
+
+
+    SetWindowText(hLogTextField, logText.c_str());
+
 }
