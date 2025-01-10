@@ -417,7 +417,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 newLogEntry = std::wstring(civ.begin(), civ.end()) + L" (" + std::to_wstring(iterator) + L"/45)" + L"\r\n";
                 logText += newLogEntry;
-                
+                if (iterator == 45) logText += L"\r\n";
 
 
                 SetWindowText(hLogTextField, logText.c_str());
