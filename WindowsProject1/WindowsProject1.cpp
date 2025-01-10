@@ -44,7 +44,7 @@ void draw_civ();
 
 
 
-int res = 0;
+int given_index = 0;
 int j = 0;
 
 std::string civ = "";
@@ -372,11 +372,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             if (wParam == HOTKEY_ID_SPACE)
             {
-                SendMessage(hWnd, WM_COMMAND, MAKEWPARAM(1, BN_CLICKED), (LPARAM)hGenerateButton);
+                draw_civ();
             }
             if (wParam == HOTKEY_ID_RETURN)
             {
-                SendMessage(hWnd, WM_COMMAND, MAKEWPARAM(2, BN_CLICKED), (LPARAM)hResetButton);
+				resetter();
             
             }
         }
@@ -584,47 +584,59 @@ void resetter() {
     SetWindowText(hLabel, (L"0/" + std::to_wstring(CIVS_MAX)).c_str());
     SetWindowText(hCenterLabel, L"?");
 
+    printf("\n\nProgram has been reset.\n");
+
     
 }
 
 void draw_civ() {
     if (iterator == CIVS_MAX)
     {
-        printf("\nProgram has been reset.\n");
         resetter();
         
     }
 
     
-    res = result(remaining);
+    given_index = result(remaining);
 
     j = 0;
-    for (int i = 0; i < CIVS_MAX; i++) {
-        while (j < CIVS_MAX && !available[j]) j++;
-        if (j >= CIVS_MAX) {
+    for (int i = 0; i < CIVS_MAX; i++) { // the purpose of this for-loop is to check tha the civ is not drawn already
+
+
+		printf("\niteration %d out of %d\n", i, CIVS_MAX);
+        printf("given index: %d\n", given_index);
+        
+        while (!available[j]) { // at the start, both i and j are 0, separate j has purpose so that a drawn civ is not checked more than once
+            if (j == CIVS_MAX) j = 0;
+            printf("drawing civ no. %d...\n", j);
+            printf("civ no. %d has already been drawn... Incrementing j.\n", j);
+            j++;
+        }
+        if (j >= CIVS_MAX) { // this shouldn't happen. something is wrong
             printf("\n\n=====================\n\n");
             printf("i is now %d\n", i);
             printf("j is now %d\n", j);
             printf("Error: Index j out of bounds\n\n==================== = \n\n\n");
             break;
         }
-        if (i == res) {
-            printf("\nres (i) is now %d\n", res);
+        if (i == given_index) {
+           
+            printf("\nres (i) is now %d\n", given_index);
             //printf("available[%d] is currently %s\n\n", res, available[res] ? "true" : "false");
-            res = j;
-            printf("res (j) is now %d\n", res);
+            given_index = j; // given index updated with increment to skip already drawn civs
+            printf("res (j) is now %d\n", given_index);
             //printf("available[%d] is currently %s\n", res, available[res] ? "true" : "false");
-            break;
+            break; // given drawn civ has not already been drawn
         }
 
-        j++;
+        j++; // j incremented to keep up with i
     }
 
-    civ = civ_name(res);
+    civ = civ_name(given_index);
 
-    printf("\n(current set: %d/%d)\n", iterator + 1, CIVS_MAX);
-	if (res >= 0 && res < sizeof(available)) available[res] = false;
-	else printf("\n\n=====================\n\nIndex out of range: %d\n\n=====================\n\n\n", res);
+    printf("\n%d. %s (current set: %d/%d)\n",(given_index+1), civ_name(given_index).c_str(), iterator + 1, CIVS_MAX);
+	if (given_index >= 0 && given_index < sizeof(available)) available[given_index] = false;
+	else printf("\n\n=====================\n\nIndex out of range: %d\n\n=====================\n\n\n", given_index);
 
     
     iterator++;
