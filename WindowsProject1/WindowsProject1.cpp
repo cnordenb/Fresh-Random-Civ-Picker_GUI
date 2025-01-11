@@ -609,7 +609,7 @@ void draw_civ() {
         while (!available[j]) { // at the start, both i and j are 0, separate j has purpose so that a drawn civ is not checked more than once
             if (j == CIVS_MAX) j = 0;
             printf("drawing civ no. %d...\n", j);
-            printf("civ no. %d has already been drawn... Incrementing j.\n", j);
+            printf("civ no. %d has already been drawn... Incrementing j from %d to %d.\n", j, j, (j+1));
             j++;
         }
         if (j >= CIVS_MAX) { // this shouldn't happen. something is wrong
@@ -621,10 +621,10 @@ void draw_civ() {
         }
         if (i == given_index) {
            
-            printf("\nres (i) is now %d\n", given_index);
+            //printf("\nres (i) is now %d\n", given_index);
             //printf("available[%d] is currently %s\n\n", res, available[res] ? "true" : "false");
             given_index = j; // given index updated with increment to skip already drawn civs
-            printf("res (j) is now %d\n", given_index);
+            //printf("res (j) is now %d\n", given_index);
             //printf("available[%d] is currently %s\n", res, available[res] ? "true" : "false");
             break; // given drawn civ has not already been drawn
         }
