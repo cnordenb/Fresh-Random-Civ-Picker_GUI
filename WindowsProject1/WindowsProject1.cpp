@@ -14,6 +14,7 @@
 
 #pragma comment(lib, "comctl32.lib")
 
+#define IDM_TOGGLE_CHECK 32771
 #define CIVS_MAX 45
 #define MAX_LOADSTRING 100
 #define HOTKEY_ID_TAB 1
@@ -33,6 +34,8 @@ HWND hResetButton;
 HWND hSizeLabel;
 HWND hLogTextField;
 WCHAR szSizeText[50];
+HBRUSH hBrushWhite;
+HBRUSH hBrushBlack;
 
 std::string civ_name(int);
 void CreateTabs(HWND);
@@ -41,7 +44,7 @@ int result(int);
 bool available[CIVS_MAX];
 void resetter();
 void draw_civ();
-
+bool isChecked = false;
 
 
 int given_index = 0;
@@ -316,6 +319,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         resetter();
 
+		hBrushBlack = CreateSolidBrush(RGB(0, 0, 0));
+		hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
+
         break; 
 
     
@@ -333,7 +339,35 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
     }
-        break;
+    break;
+
+    case WM_CTLCOLORSTATIC:
+    {
+        HDC hdcStatic = (HDC)wParam;
+        SetTextColor(hdcStatic, isChecked ? RGB(255, 255, 255) : RGB(0, 0, 0));
+        SetBkColor(hdcStatic, isChecked ? RGB(0, 0, 0) : RGB(255, 255, 255));
+        return (INT_PTR)(isChecked ? hBrushBlack : hBrushWhite);
+    }
+    break;
+
+    case WM_ERASEBKGND:
+    {
+        HDC hdc = (HDC)wParam;
+        RECT rect;
+        GetClientRect(hWnd, &rect);
+        FillRect(hdc, &rect, isChecked ? hBrushBlack : hBrushWhite);
+        return 1;
+    }
+    break;
+
+    case WM_CTLCOLORBTN:
+    {
+        HDC hdcButton = (HDC)wParam;
+        SetTextColor(hdcButton, isChecked ? RGB(255, 255, 255) : RGB(0, 0, 0));
+        SetBkColor(hdcButton, isChecked ? RGB(0, 0, 0) : RGB(255, 255, 255));
+        return (INT_PTR)(isChecked ? hBrushBlack : hBrushWhite);
+    }
+    break;
 
     case WM_NOTIFY:
     {
@@ -402,6 +436,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case IDM_EXIT:
             DestroyWindow(hWnd);
             break;
+		case IDM_TOGGLE_CHECK:
+            isChecked = !isChecked;
+            CheckMenuItem(GetMenu(hWnd), IDM_TOGGLE_CHECK, isChecked ? MF_CHECKED : MF_UNCHECKED);
+            InvalidateRect(hWnd, NULL, TRUE); // Force the window to repaint
+            EnumChildWindows(hWnd, [](HWND hwnd, LPARAM lParam) -> BOOL {
+                InvalidateRect(hwnd, NULL, TRUE);
+                return TRUE;
+                }, 0);
+            break;
         case 1: // Handle Generate button click              
             draw_civ();     
             break;
@@ -424,6 +467,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
+        DeleteObject(hBrushWhite);
+        DeleteObject(hBrushBlack);
         PostQuitMessage(0);
         break;
     default:
