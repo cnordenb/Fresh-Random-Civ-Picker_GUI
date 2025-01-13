@@ -37,6 +37,7 @@ WCHAR szSizeText[50];
 HBRUSH hBrushWhite;
 HBRUSH hBrushBlack;
 
+
 std::string civ_name(int);
 void CreateTabs(HWND);
 void ShowTabComponents(int);
@@ -186,7 +187,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hInstance      = hInstance;
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_WINDOWSPROJECT1));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
+    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW + 1);
     wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_WINDOWSPROJECT1);
     wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -321,6 +322,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		hBrushBlack = CreateSolidBrush(RGB(0, 0, 0));
 		hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
+		
 
         break; 
 
@@ -436,7 +438,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case IDM_EXIT:
             DestroyWindow(hWnd);
             break;
-		case IDM_TOGGLE_CHECK:
+        case IDM_TOGGLE_CHECK:
             isChecked = !isChecked;
             CheckMenuItem(GetMenu(hWnd), IDM_TOGGLE_CHECK, isChecked ? MF_CHECKED : MF_UNCHECKED);
             InvalidateRect(hWnd, NULL, TRUE); // Force the window to repaint
