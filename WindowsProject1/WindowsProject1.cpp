@@ -243,6 +243,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
        
     case WM_CREATE:
+
         CreateTabs(hWnd);
 
         hGenerateButton = CreateWindow(
@@ -338,10 +339,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         SetWindowPos(hCenterLabel, NULL, (width - 80) / 2, (height - 15) / 2, 100, 15, SWP_NOZORDER);  // Centered positio
         SetWindowPos(hGenerateButton, NULL, (width - 100) / 2, (height + 70) / 2, 100, 30, SWP_NOZORDER);
 		
-
+        
+        RegisterHotKey(hWnd, HOTKEY_ID_TAB, 0, VK_TAB);
+        RegisterHotKey(hWnd, HOTKEY_ID_SPACE, 0, VK_SPACE);
+        RegisterHotKey(hWnd, HOTKEY_ID_RETURN, 0, VK_RETURN);
+        
 
     }
     break;
+
+    case WM_ACTIVATE:
+    
+		if (wParam == WA_ACTIVE || wParam == WA_CLICKACTIVE)
+		{
+            RegisterHotKey(hWnd, HOTKEY_ID_TAB, 0, VK_TAB);
+            RegisterHotKey(hWnd, HOTKEY_ID_SPACE, 0, VK_SPACE);
+            RegisterHotKey(hWnd, HOTKEY_ID_RETURN, 0, VK_RETURN);
+		}
+		else if (wParam == WA_INACTIVE)
+		{
+			UnregisterHotKey(hWnd, HOTKEY_ID_TAB);
+			UnregisterHotKey(hWnd, HOTKEY_ID_SPACE);
+			UnregisterHotKey(hWnd, HOTKEY_ID_RETURN);
+		}
+
+        break;
+    
+    
 
     case WM_CTLCOLORSTATIC:
     {
@@ -397,25 +421,40 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         
     case WM_HOTKEY:
     {
-        if (GetForegroundWindow() == hWnd) {
-			
-            if (wParam == HOTKEY_ID_TAB)
-            {
-                int tabIndex = TabCtrl_GetCurSel(hTab);
-                int newTabIndex = tabIndex == 0 ? 1 : 0;
-                TabCtrl_SetCurSel(hTab, newTabIndex);
-                ShowTabComponents(newTabIndex);
-            }
-            if (wParam == HOTKEY_ID_SPACE)
-            {
-                draw_civ();
-            }
-            if (wParam == HOTKEY_ID_RETURN)
-            {
-				resetter();
-            
-            }
+        
+        if (GetForegroundWindow() != hWnd)
+        {
+            UnregisterHotKey(hWnd, HOTKEY_ID_TAB);
+            UnregisterHotKey(hWnd, HOTKEY_ID_SPACE);
+            UnregisterHotKey(hWnd, HOTKEY_ID_RETURN);
+            break;
         }
+        else
+        {
+            RegisterHotKey(hWnd, HOTKEY_ID_TAB, 0, VK_TAB);
+            RegisterHotKey(hWnd, HOTKEY_ID_SPACE, 0, VK_SPACE);
+            RegisterHotKey(hWnd, HOTKEY_ID_RETURN, 0, VK_RETURN);
+        }
+        
+
+
+        if (wParam == HOTKEY_ID_TAB)
+        {
+            int tabIndex = TabCtrl_GetCurSel(hTab);
+            int newTabIndex = tabIndex == 0 ? 1 : 0;
+            TabCtrl_SetCurSel(hTab, newTabIndex);
+            ShowTabComponents(newTabIndex);
+        }
+        if (wParam == HOTKEY_ID_SPACE)
+        {
+            draw_civ();
+        }
+        if (wParam == HOTKEY_ID_RETURN)
+        {
+			resetter();
+            
+        }
+        
         
     }
 	
@@ -469,6 +508,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
+		UnregisterHotKey(hWnd, HOTKEY_ID_TAB);
+		UnregisterHotKey(hWnd, HOTKEY_ID_SPACE);
+		UnregisterHotKey(hWnd, HOTKEY_ID_RETURN);
         DeleteObject(hBrushWhite);
         DeleteObject(hBrushBlack);
         PostQuitMessage(0);
