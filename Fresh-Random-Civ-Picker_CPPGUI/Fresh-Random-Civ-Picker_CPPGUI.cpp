@@ -699,12 +699,23 @@ void draw_civ() {
 
 		printf("\niteration %d out of %d\n", i, CIVS_MAX);
         printf("given index: %d\n", given_index);
+		bool internal_reset = false;
         
         while (!available[j]) { // at the start, both i and j are 0, separate j has purpose so that a drawn civ is not checked more than once
-            if (j == CIVS_MAX) j = 0;
+            if (j == CIVS_MAX) {
+                internal_reset = true;
+                j = 0;
+            }
             printf("drawing civ no. %d...\n", j);
             printf("civ no. %d has already been drawn... Incrementing j from %d to %d.\n", j, j, (j+1));
             j++;
+			if (j >= CIVS_MAX && internal_reset == true) {
+                internal_reset = false;
+				printf("========================================\n");
+                printf("\nAll civs have been iterated through.\n");
+                printf("========================================\n");
+                break;
+			}
         }
         if (j >= CIVS_MAX) { // this shouldn't happen. something is wrong
             printf("\n\n=====================\n\n");
