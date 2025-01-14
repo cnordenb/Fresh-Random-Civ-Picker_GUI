@@ -22,6 +22,7 @@
 #define HOTKEY_ID_TAB 1
 #define HOTKEY_ID_SPACE 2
 #define HOTKEY_ID_RETURN 3
+#define HOTKEY_ID_ESC 4
 
 int iterator = 0; // Global variable to keep track of the count
 
@@ -45,9 +46,12 @@ void CreateTabs(HWND);
 void ShowTabComponents(int);
 int result(int);
 bool available[CIVS_MAX];
-void resetter();
+void reset();
 void draw_civ();
 bool isChecked = false;
+void kill_application();
+void enable_hotkeys(HWND);
+void disable_hotkeys(HWND);
 
 
 int given_index = 0;
@@ -129,16 +133,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: Place code here.
-    resetter();
+    reset();
 
-    AllocConsole();
-
+    /*AllocConsole();
+    
     // Redirect standard output to the console
     FILE *fp;
     freopen_s(&fp, "CONOUT$", "w", stdout);
 
     // Now you can use printf and std::cout to output to the console
-    printf("Console window successfully attached.\n");
+    printf("Console window successfully attached.\n");*/
 
 
     // Initialize global strings
@@ -315,17 +319,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		ShowWindow(hLogTextField, SW_HIDE);
 
-        RegisterHotKey(hWnd, HOTKEY_ID_TAB, 0, VK_TAB);
-		RegisterHotKey(hWnd, HOTKEY_ID_SPACE, 0, VK_SPACE);
-        RegisterHotKey(hWnd, HOTKEY_ID_RETURN, 0, VK_RETURN);
-
         default_hlabel = L"0/" + std::to_wstring(CIVS_MAX);
 
-        resetter();
+        reset();
 
 		hBrushBlack = CreateSolidBrush(RGB(0, 0, 0));
 		hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
 		
+        enable_hotkeys(hWnd);
 
         break; 
 
@@ -342,9 +343,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         SetWindowPos(hGenerateButton, NULL, (width - 100) / 2, (height + 70) / 2, 100, 30, SWP_NOZORDER);
 		
         
-        RegisterHotKey(hWnd, HOTKEY_ID_TAB, 0, VK_TAB);
-        RegisterHotKey(hWnd, HOTKEY_ID_SPACE, 0, VK_SPACE);
-        RegisterHotKey(hWnd, HOTKEY_ID_RETURN, 0, VK_RETURN);
+		enable_hotkeys(hWnd);
         
 
     }
@@ -352,18 +351,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WM_ACTIVATE:
     
-		if (wParam == WA_ACTIVE || wParam == WA_CLICKACTIVE)
-		{
-            RegisterHotKey(hWnd, HOTKEY_ID_TAB, 0, VK_TAB);
-            RegisterHotKey(hWnd, HOTKEY_ID_SPACE, 0, VK_SPACE);
-            RegisterHotKey(hWnd, HOTKEY_ID_RETURN, 0, VK_RETURN);
-		}
-		else if (wParam == WA_INACTIVE)
-		{
-			UnregisterHotKey(hWnd, HOTKEY_ID_TAB);
-			UnregisterHotKey(hWnd, HOTKEY_ID_SPACE);
-			UnregisterHotKey(hWnd, HOTKEY_ID_RETURN);
-		}
+		if (wParam == WA_ACTIVE || wParam == WA_CLICKACTIVE) enable_hotkeys(hWnd);
+		else if (wParam == WA_INACTIVE) disable_hotkeys(hWnd);
 
         break;
     
@@ -424,21 +413,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_HOTKEY:
     {
         
-        if (GetForegroundWindow() != hWnd)
-        {
-            UnregisterHotKey(hWnd, HOTKEY_ID_TAB);
-            UnregisterHotKey(hWnd, HOTKEY_ID_SPACE);
-            UnregisterHotKey(hWnd, HOTKEY_ID_RETURN);
-            break;
-        }
-        else
-        {
-            RegisterHotKey(hWnd, HOTKEY_ID_TAB, 0, VK_TAB);
-            RegisterHotKey(hWnd, HOTKEY_ID_SPACE, 0, VK_SPACE);
-            RegisterHotKey(hWnd, HOTKEY_ID_RETURN, 0, VK_RETURN);
-        }
-        
-
+		if (GetForegroundWindow() != hWnd) disable_hotkeys(hWnd);
+		else enable_hotkeys(hWnd);
 
         if (wParam == HOTKEY_ID_TAB)
         {
@@ -447,17 +423,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             TabCtrl_SetCurSel(hTab, newTabIndex);
             ShowTabComponents(newTabIndex);
         }
-        if (wParam == HOTKEY_ID_SPACE)
-        {
-            draw_civ();
-        }
-        if (wParam == HOTKEY_ID_RETURN)
-        {
-			resetter();
-            
-        }
-        
-        
+
+        if (wParam == HOTKEY_ID_SPACE) draw_civ();
+
+        if (wParam == HOTKEY_ID_RETURN) reset();     
+
+        if (wParam == HOTKEY_ID_ESC) kill_application();        
+
     }
 	
     break;
@@ -495,7 +467,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             draw_civ();     
             break;
 		case 2: // Handle Reset button click
-			resetter();
+			reset();
             break;
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
@@ -513,12 +485,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
-		UnregisterHotKey(hWnd, HOTKEY_ID_TAB);
-		UnregisterHotKey(hWnd, HOTKEY_ID_SPACE);
-		UnregisterHotKey(hWnd, HOTKEY_ID_RETURN);
-        DeleteObject(hBrushWhite);
-        DeleteObject(hBrushBlack);
-        PostQuitMessage(0);
+		kill_application();
         break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
@@ -656,7 +623,7 @@ int result(int max) {
     return dist(mt);  // Return a random number between 0 and CIVS_MAX
 }
 
-void resetter() {
+void reset() {
 
     if (iterator > 0)
     {
@@ -686,7 +653,7 @@ void resetter() {
 void draw_civ() {
     if (iterator == CIVS_MAX)
     {
-        resetter();
+        reset();
         
     }
 
@@ -766,4 +733,24 @@ void draw_civ() {
 
     SetWindowText(hLogTextField, logText.c_str());
 
+}
+
+void enable_hotkeys(HWND hWnd) {
+	RegisterHotKey(hWnd, HOTKEY_ID_TAB, 0, VK_TAB);
+	RegisterHotKey(hWnd, HOTKEY_ID_SPACE, 0, VK_SPACE);
+	RegisterHotKey(hWnd, HOTKEY_ID_RETURN, 0, VK_RETURN);
+	RegisterHotKey(hWnd, HOTKEY_ID_ESC, 0, VK_ESCAPE);
+}
+
+void disable_hotkeys(HWND hWnd) {
+	UnregisterHotKey(hWnd, HOTKEY_ID_TAB);
+	UnregisterHotKey(hWnd, HOTKEY_ID_SPACE);
+	UnregisterHotKey(hWnd, HOTKEY_ID_RETURN);
+	UnregisterHotKey(hWnd, HOTKEY_ID_ESC);
+}
+
+void kill_application() {
+    DeleteObject(hBrushWhite);
+    DeleteObject(hBrushBlack);
+    PostQuitMessage(0);
 }
