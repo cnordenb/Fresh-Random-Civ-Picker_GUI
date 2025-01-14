@@ -1,1 +1,7 @@
-experimenting in visual studio
+This is the C++ GUI version of the Fresh Random Civ Picker.
+
+Purpose of Fresh Random Civ Picker: the user can randomly iterate through the entire civ pool without drawing the same civ twice.
+
+The C++ GUI version: the program has a graphical user interface which is a window. This window contains two tabs. The first tab (titled "Draw"), contains two labels and two buttons. The first label, is centred onto the window and is "?" by default. The second label is anchored to the bottom right corner of the window and is "0/45" by default. The first button is named "Draw" and is positioned just under the first centre label. The second button is named "Reset" and is anchored to the bottom left corner of the window. The second tab (titled Log) contains a text field.
+
+How to use: the user can click the "Draw" button (or press spacebar) to have the centre label display a fresh random civ. There is an indicator at the bottom right which tells how many civs have been drawn so far. Once all civs have been drawn, the next draw will reset the program and all civs are once again available to draw. The user can at any time reset the program manually by clicking the "Reset" button (or pressing Return). The user can at any time navigate to the "Log" tab (by either clicking it or pressing Tab) to view the history of drawn civs from the duration of the current application session.
