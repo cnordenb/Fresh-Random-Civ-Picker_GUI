@@ -3,7 +3,7 @@
 
 
 #include "framework.h"
-#include "WindowsProject1.h"
+#include "Fresh-Random-Civ-Picker_CPPGUI.h"
 #include <iostream>
 #include <string>
 #include <random>

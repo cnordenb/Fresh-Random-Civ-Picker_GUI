@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35527.113 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WindowsProject1", "WindowsProject1\WindowsProject1.vcxproj", "{1F6F8E1B-BCFC-4D35-9647-0D8096E0CA6B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fresh-Random-Civ-Picker_CPPGUI", "Fresh-Random-Civ-Picker_CPPGUI\Fresh-Random-Civ-Picker_CPPGUI.vcxproj", "{1F6F8E1B-BCFC-4D35-9647-0D8096E0CA6B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
