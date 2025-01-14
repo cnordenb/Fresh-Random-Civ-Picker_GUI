@@ -10,11 +10,13 @@
 #include <cstdio>
 #include <Windows.h>
 #include <commctrl.h>
+#include <shellapi.h>
 
 
 #pragma comment(lib, "comctl32.lib")
 
 #define IDM_TOGGLE_CHECK 32771
+#define IDM_GITHUB 32772
 #define CIVS_MAX 45
 #define MAX_LOADSTRING 100
 #define HOTKEY_ID_TAB 1
@@ -485,6 +487,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 InvalidateRect(hwnd, NULL, TRUE);
                 return TRUE;
                 }, 0);
+            break;
+        case IDM_GITHUB:
+            ShellExecute(0, 0, L"https://github.com/cnordenb/CPP_Desktop_Application_test/", 0, 0, SW_SHOW);
             break;
         case 1: // Handle Generate button click              
             draw_civ();     

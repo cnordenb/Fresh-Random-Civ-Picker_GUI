@@ -13,7 +13,7 @@
 #define IDC_WINDOWSPROJECT1             109
 #define IDR_MAINFRAME                   128
 #define ID_FILE_TOGGLECHECK             32771
-#define ID_HELP_DONATE                  32772
+#define IDM_GITHUB                      32772
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
