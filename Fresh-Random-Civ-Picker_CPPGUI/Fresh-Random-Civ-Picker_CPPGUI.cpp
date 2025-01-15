@@ -338,15 +338,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         SetWindowPos(hLabel, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);
         SetWindowPos(hCenterLabel, NULL, (width - 80) / 2, (height - 15) / 2, 100, 15, SWP_NOZORDER);  // Centered positio
         SetWindowPos(hGenerateButton, NULL, (width - 100) / 2, (height + 70) / 2, 100, 30, SWP_NOZORDER);
-		
-        
-		enable_hotkeys(hWnd);
+
         
 
     }
     break;
 
-    case WM_ACTIVATE:
+    case WM_ACTIVATE: // re-enables hotkeys when window returns to foreground
     
 		if (wParam == WA_ACTIVE || wParam == WA_CLICKACTIVE) enable_hotkeys(hWnd);
 		else if (wParam == WA_INACTIVE) disable_hotkeys(hWnd);
@@ -400,9 +398,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         pmmi->ptMinTrackSize.x = 400; // Minimum width
         pmmi->ptMinTrackSize.y = 300; // Minimum height
 
+        /*
         pmmi->ptMaxTrackSize.x = 400; // Maximum width
         pmmi->ptMaxTrackSize.y = 300; // Maximum height
-
+*/
     }
         break;
 
@@ -410,7 +409,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_HOTKEY:
     {
         
-		if (GetForegroundWindow() != hWnd) disable_hotkeys(hWnd);
+		if (GetForegroundWindow() != hWnd) { // disables hotkeys if window is not in foreground
+            disable_hotkeys(hWnd);
+            break;
+        }
 		else enable_hotkeys(hWnd);
 
         if (wParam == HOTKEY_ID_TAB)
