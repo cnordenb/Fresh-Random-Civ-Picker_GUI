@@ -7,6 +7,7 @@
 #include <commctrl.h>
 #include <shellapi.h>
 
+
 #pragma comment(lib, "comctl32.lib")
 
 #define IDM_TOGGLE_CHECK 32771
@@ -44,6 +45,8 @@ std::wstring logText;
 std::wstring default_hlabel;
 bool available[CIVS_MAX];
 bool isChecked = false;
+bool isOutOfBounds = false;             // for unit testing
+int times_drawn[CIVS_MAX] = { 0 };      // for unit testing
 
 // Function declarations
 std::string civ_name(int);
@@ -55,6 +58,7 @@ void draw_civ(HWND);
 void kill_application();
 void enable_hotkeys(HWND);
 void disable_hotkeys(HWND);
+void draw_civ_logic();
 
 
 
@@ -620,6 +624,7 @@ void reset() { 							    // resets the program
 
     for (int i = 0; i < CIVS_MAX; i++) {    // marks all civs as available
         available[i] = true;
+		times_drawn[i] = 0;                 // for unit testing
     }
 	iterator = 0;                           // resets iterator
 	remaining = CIVS_MAX;				    // resets remaining civs
@@ -719,4 +724,64 @@ void kill_application() {
     DeleteObject(hBrushWhite);
     DeleteObject(hBrushBlack);
     PostQuitMessage(0);
+}
+
+void draw_civ_logic() {                         // for unit testing
+    if (iterator == CIVS_MAX)
+    {
+        reset();
+
+    }
+
+
+    given_index = result(remaining);
+
+    j = 0; // i keeps track of total civ elements, j keeps track of available civ elements (how many unavailable civs to skip)
+    for (int i = 0; i < CIVS_MAX; i++) { // finds fresh random civ on O(1) time complexity. Only iterates through remaining amount of civs (see line 683)
+
+
+        bool internal_reset = false;
+
+        while (!available[j]) { // defines amount of empty elements (already drawn civs) to jump over in one step instead of iterating through all of them
+            if (j == CIVS_MAX) {    // in rare case j exceeds number of elements, restarts from 0 to prevent out of bounds exception
+                internal_reset = true;
+                j = 0;
+            }
+            j++;
+            if (j >= CIVS_MAX && internal_reset == true) {  // ensures while loop exits after less than two iterations through the array
+                internal_reset = false;
+                break;
+            }
+        }
+        if (i == given_index) {
+
+            given_index = j; // given index updated with increment to skip already drawn civs
+
+            break; // fresh random civ found; end search for undrawn civ
+        }
+
+        j++; // j incremented to keep up with i
+    }
+
+    civ = civ_name(given_index);
+
+    if (given_index < 0 || given_index >= sizeof(available)) isOutOfBounds = true;
+	else isOutOfBounds = false;
+    if (given_index >= 0 && given_index < sizeof(available)) {
+        available[given_index] = false; // marks civ as unavailable
+		times_drawn[given_index]++; // increments times drawn counter
+    }
+    else { // in rare case of out of bounds exception, restarts function.
+        draw_civ_logic();
+        return;
+    }
+
+
+    iterator++;
+    remaining--;
+
+
+
+    
+
 }
