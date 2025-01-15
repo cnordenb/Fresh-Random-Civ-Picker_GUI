@@ -3,7 +3,6 @@
 #include <iostream>
 #include <string>
 #include <random>
-#include <cstdio> // for print statement debugging
 #include <Windows.h>
 #include <commctrl.h>
 #include <shellapi.h>
@@ -52,7 +51,7 @@ void CreateTabs(HWND);
 void ShowTabComponents(int);
 int result(int);
 void reset();
-void draw_civ();
+void draw_civ(HWND);
 void kill_application();
 void enable_hotkeys(HWND);
 void disable_hotkeys(HWND);
@@ -113,7 +112,7 @@ void ShowTabComponents(int tabIndex)
         ShowWindow(hCenterLabel, SW_HIDE);
 		ShowWindow(hResetButton, SW_HIDE);
 		ShowWindow(hLogTextField, SW_SHOW);
-        // Add components for the second tab here
+        
     }
 }
 
@@ -127,15 +126,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     
     reset();
-
-    /*AllocConsole();                                                           // for print statement debugging
-    
-    // Redirect standard output to the console
-    FILE *fp;
-    freopen_s(&fp, "CONOUT$", "w", stdout);
-
-    // Now you can use printf and std::cout to output to the console
-    printf("Console window successfully attached.\n");*/
 
 
     // Initialize global strings
@@ -414,7 +404,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             ShowTabComponents(newTabIndex);
         }
 
-		if (wParam == HOTKEY_ID_SPACE) draw_civ();          // space for drawing civ
+		if (wParam == HOTKEY_ID_SPACE) draw_civ(hWnd);          // space for drawing civ
 
 		if (wParam == HOTKEY_ID_RETURN) reset();            // return for resetting
 
@@ -457,7 +447,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             ShellExecute(0, 0, L"https://github.com/cnordenb/Fresh-Random-Civ-Picker_CPPGUI", 0, 0, SW_SHOW);
             break;
         case 1:                                             // "Draw"            
-            draw_civ();     
+            draw_civ(hWnd);     
             break;
 		case 2:                                             // "Reset"
 			reset();
@@ -640,7 +630,7 @@ void reset() { 							    // resets the program
     
 }
 
-void draw_civ() {
+void draw_civ(HWND hWnd) {
     if (iterator == CIVS_MAX)
     {
         reset();
@@ -650,12 +640,10 @@ void draw_civ() {
     
     given_index = result(remaining);
 
-    j = 0;
+    j = 0; // i keeps track of total civ elements, j keeps track of available civ elements (how many unavailable civs to skip)
 	for (int i = 0; i < CIVS_MAX; i++) { // finds fresh random civ on O(1) time complexity. Only iterates through remaining amount of civs (see line 683)
 
 
-		printf("\niteration %d out of %d\n", i, CIVS_MAX);
-        printf("given index: %d\n", given_index);
 		bool internal_reset = false;
         
 		while (!available[j]) { // defines amount of empty elements (already drawn civs) to jump over in one step instead of iterating through all of them
@@ -663,21 +651,14 @@ void draw_civ() {
                 internal_reset = true;
                 j = 0;
             }
-            printf("drawing civ no. %d...\n", j);
-            printf("civ no. %d has already been drawn... Incrementing j from %d to %d.\n", j, j, (j+1));
             j++;
-			if (j >= CIVS_MAX && internal_reset == true) {
+			if (j >= CIVS_MAX && internal_reset == true) {  // ensures while loop exits after less than two iterations through the array
                 internal_reset = false;
-				printf("========================================\n");
-                printf("\nAll civs have been iterated through.\n");
-                printf("========================================\n");
-                break;
+				break;
 			}
         }
         if (i == given_index) {
            
-            //printf("\nres (i) is now %d\n", given_index);
-            //printf("available[%d] is currently %s\n\n", res, available[res] ? "true" : "false");
             given_index = j; // given index updated with increment to skip already drawn civs
         
 			break; // fresh random civ found; end search for undrawn civ
@@ -688,9 +669,12 @@ void draw_civ() {
 
     civ = civ_name(given_index);
 
-    printf("\n%d. %s (current set: %d/%d)\n",(given_index+1), civ_name(given_index).c_str(), iterator + 1, CIVS_MAX);       // print statement debugging
-	if (given_index >= 0 && given_index < sizeof(available)) available[given_index] = false;
-	else printf("\n\n=====================\n\nIndex out of range: %d\n\n=====================\n\n\n", given_index);
+    if (given_index < 0 || given_index >= sizeof(available)) MessageBox(hWnd, L"Out of bounds! line 672.\nRedrawing...", L"Error", MB_OK);
+    if (given_index >= 0 && given_index < sizeof(available)) available[given_index] = false; // marks civ as unavailable
+	else { // in rare case of out of bounds exception, restarts function.
+        draw_civ(hWnd);
+        return;
+    }
 
     
     iterator++;
