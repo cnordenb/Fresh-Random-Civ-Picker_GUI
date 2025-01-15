@@ -30,7 +30,6 @@ HWND hLabel;
 HWND hCenterLabel;
 HWND hGenerateButton;
 HWND hResetButton;
-HWND hSizeLabel;
 HWND hLogTextField;
 WCHAR szSizeText[50];
 HBRUSH hBrushWhite;
@@ -105,7 +104,6 @@ void ShowTabComponents(int tabIndex)
         ShowWindow(hGenerateButton, SW_SHOW);
         ShowWindow(hLabel, SW_SHOW);
         ShowWindow(hCenterLabel, SW_SHOW);
-        ShowWindow(hSizeLabel, SW_SHOW);
 		ShowWindow(hLogTextField, SW_HIDE);
 		ShowWindow(hResetButton, SW_SHOW);
     }
@@ -114,7 +112,6 @@ void ShowTabComponents(int tabIndex)
         ShowWindow(hGenerateButton, SW_HIDE);
         ShowWindow(hLabel, SW_HIDE);
         ShowWindow(hCenterLabel, SW_HIDE);
-        ShowWindow(hSizeLabel, SW_HIDE);
 		ShowWindow(hResetButton, SW_HIDE);
 		ShowWindow(hLogTextField, SW_SHOW);
         // Add components for the second tab here
@@ -335,11 +332,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         int width = LOWORD(lParam);
         int height = HIWORD(lParam);
 
+        SetWindowPos(hTab, NULL, 0, 0, width, height, SWP_NOZORDER);
+
         SetWindowPos(hLabel, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);
         SetWindowPos(hCenterLabel, NULL, (width - 80) / 2, (height - 15) / 2, 100, 15, SWP_NOZORDER);  // Centered positio
-        SetWindowPos(hGenerateButton, NULL, (width - 100) / 2, (height + 70) / 2, 100, 30, SWP_NOZORDER);
-
-        
+        SetWindowPos(hGenerateButton, NULL, (width - 100) / 2, (height + 50) / 2, 100, 30, SWP_NOZORDER);
+        SetWindowPos(hResetButton, NULL, 10, height - 40, 100, 30, SWP_NOZORDER); // Anchored to bottom left corner
+		SetWindowPos(hLogTextField, NULL, 10, 25, width - 20, height - 50, SWP_NOZORDER);
 
     }
     break;
@@ -442,15 +441,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             
 
 
-        switch (wmId)
+        switch (wmId) // action listener for clicks
         {
-        case IDM_ABOUT:
+        case IDM_ABOUT: // "About"
             DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
             break;
-        case IDM_EXIT:
+		case IDM_EXIT: // "Exit"
             DestroyWindow(hWnd);
             break;
-        case IDM_TOGGLE_CHECK:
+		case IDM_TOGGLE_CHECK: // "Dark Mode (beta)"
             isChecked = !isChecked;
             CheckMenuItem(GetMenu(hWnd), IDM_TOGGLE_CHECK, isChecked ? MF_CHECKED : MF_UNCHECKED);
             InvalidateRect(hWnd, NULL, TRUE); // Force the window to repaint
@@ -459,13 +458,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 return TRUE;
                 }, 0);
             break;
-        case IDM_GITHUB:
+		case IDM_GITHUB: // "GitHub"
             ShellExecute(0, 0, L"https://github.com/cnordenb/CPP_Desktop_Application_test/", 0, 0, SW_SHOW);
             break;
-        case 1: // Handle Generate button click              
+        case 1: // "Draw"            
             draw_civ();     
             break;
-		case 2: // Handle Reset button click
+		case 2: // "Reset"
 			reset();
             break;
         default:
