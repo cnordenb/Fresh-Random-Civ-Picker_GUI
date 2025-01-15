@@ -1,7 +1,3 @@
-// WindowsProject1.cpp : Defines the entry point for the application.
-//
-
-
 #include "framework.h"
 #include "Fresh-Random-Civ-Picker_CPPGUI.h"
 #include <iostream>
@@ -24,9 +20,9 @@
 #define HOTKEY_ID_RETURN 3
 #define HOTKEY_ID_ESC 4
 
-int iterator = 0; // Global variable to keep track of the count
 
-// Global Variables:
+
+// Global Variables
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
@@ -39,31 +35,32 @@ HWND hLogTextField;
 WCHAR szSizeText[50];
 HBRUSH hBrushWhite;
 HBRUSH hBrushBlack;
+int iterator = 0; // Global variable to keep track of the count
+int given_index = 0;
+int j = 0;
+int length = GetWindowTextLength(hLogTextField);
+int remaining = CIVS_MAX;
+std::string civ = "";
+std::wstring labelText = std::to_wstring(iterator + 1) + L"/" + std::to_wstring(CIVS_MAX);
+std::wstring newLogEntry;
+std::wstring logText;
+std::wstring default_hlabel;
+bool available[CIVS_MAX];
+bool isChecked = false;
 
-
+// Function declarations
 std::string civ_name(int);
 void CreateTabs(HWND);
 void ShowTabComponents(int);
 int result(int);
-bool available[CIVS_MAX];
 void reset();
 void draw_civ();
-bool isChecked = false;
 void kill_application();
 void enable_hotkeys(HWND);
 void disable_hotkeys(HWND);
 
 
-int given_index = 0;
-int j = 0;
 
-std::string civ = "";
-std::wstring labelText = std::to_wstring(iterator + 1) + L"/" + std::to_wstring(CIVS_MAX);
-int length = GetWindowTextLength(hLogTextField);
-std::wstring newLogEntry;
-std::wstring logText;
-int remaining = CIVS_MAX;
-std::wstring default_hlabel;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -132,7 +129,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    // TODO: Place code here.
+    
     reset();
 
     /*AllocConsole();
@@ -319,7 +316,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		ShowWindow(hLogTextField, SW_HIDE);
 
-        default_hlabel = L"0/" + std::to_wstring(CIVS_MAX);
+        //default_hlabel = L"0/" + std::to_wstring(CIVS_MAX);
 
         reset();
 
