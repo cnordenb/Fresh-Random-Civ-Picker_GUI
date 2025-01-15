@@ -3,11 +3,10 @@
 #include <iostream>
 #include <string>
 #include <random>
-#include <cstdio>
+#include <cstdio> // for print statement debugging
 #include <Windows.h>
 #include <commctrl.h>
 #include <shellapi.h>
-
 
 #pragma comment(lib, "comctl32.lib")
 
@@ -129,7 +128,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     
     reset();
 
-    /*AllocConsole();
+    /*AllocConsole();                                                           // for print statement debugging
     
     // Redirect standard output to the console
     FILE *fp;
@@ -313,9 +312,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		ShowWindow(hLogTextField, SW_HIDE);
 
-        //default_hlabel = L"0/" + std::to_wstring(CIVS_MAX);
-
-        reset();
+		reset();    // resetter is called in order to enable remaining civ indicator label (hLabel)
 
 		hBrushBlack = CreateSolidBrush(RGB(0, 0, 0));
 		hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
@@ -332,13 +329,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         int width = LOWORD(lParam);
         int height = HIWORD(lParam);
 
-        SetWindowPos(hTab, NULL, 0, 0, width, height, SWP_NOZORDER);
-
-        SetWindowPos(hLabel, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);
-        SetWindowPos(hCenterLabel, NULL, (width - 80) / 2, (height - 15) / 2, 100, 15, SWP_NOZORDER);  // Centered positio
-        SetWindowPos(hGenerateButton, NULL, (width - 100) / 2, (height + 50) / 2, 100, 30, SWP_NOZORDER);
-        SetWindowPos(hResetButton, NULL, 10, height - 40, 100, 30, SWP_NOZORDER); // Anchored to bottom left corner
-		SetWindowPos(hLogTextField, NULL, 10, 25, width - 20, height - 50, SWP_NOZORDER);
+        SetWindowPos(hTab, NULL, 0, 0, width, height, SWP_NOZORDER);                                        // tab size anchored to window size
+		SetWindowPos(hLabel, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);                          // remaining civ indicator anchored to bottom right corner 
+		SetWindowPos(hCenterLabel, NULL, (width - 80) / 2, (height - 15) / 2, 100, 15, SWP_NOZORDER);       // drawn civ label anchored to centre
+		SetWindowPos(hGenerateButton, NULL, (width - 100) / 2, (height + 50) / 2, 100, 30, SWP_NOZORDER);   // draw button anchored to centre
+        SetWindowPos(hResetButton, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);                           // reset button anchored to bottom left corner
+		SetWindowPos(hLogTextField, NULL, 10, 25, width - 20, height - 50, SWP_NOZORDER);                   // log text field anchored to window size
 
     }
     break;
@@ -391,16 +387,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     break;
 
-    case WM_GETMINMAXINFO:
+	case WM_GETMINMAXINFO:                                  // minimum window size
     {
         MINMAXINFO* pmmi = (MINMAXINFO*)lParam;
         pmmi->ptMinTrackSize.x = 400; // Minimum width
         pmmi->ptMinTrackSize.y = 300; // Minimum height
 
-        /*
-        pmmi->ptMaxTrackSize.x = 400; // Maximum width
-        pmmi->ptMaxTrackSize.y = 300; // Maximum height
-*/
     }
         break;
 
@@ -408,13 +400,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_HOTKEY:
     {
         
-		if (GetForegroundWindow() != hWnd) { // disables hotkeys if window is not in foreground
+		if (GetForegroundWindow() != hWnd) {                // disables hotkeys if window is not in foreground
             disable_hotkeys(hWnd);
             break;
         }
 		else enable_hotkeys(hWnd);
 
-        if (wParam == HOTKEY_ID_TAB)
+        if (wParam == HOTKEY_ID_TAB)                        // tab for switching tabs
         {
             int tabIndex = TabCtrl_GetCurSel(hTab);
             int newTabIndex = tabIndex == 0 ? 1 : 0;
@@ -422,18 +414,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             ShowTabComponents(newTabIndex);
         }
 
-        if (wParam == HOTKEY_ID_SPACE) draw_civ();
+		if (wParam == HOTKEY_ID_SPACE) draw_civ();          // space for drawing civ
 
-        if (wParam == HOTKEY_ID_RETURN) reset();     
+		if (wParam == HOTKEY_ID_RETURN) reset();            // return for resetting
 
-        if (wParam == HOTKEY_ID_ESC) kill_application();        
+		if (wParam == HOTKEY_ID_ESC) kill_application();    // escape for exiting
 
     }
 	
     break;
 
 
-    case WM_COMMAND:
+    case WM_COMMAND:                                        // action listener for clicks
     {
         int wmId = LOWORD(wParam);
         // Parse the menu selections:
@@ -441,44 +433,45 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             
 
 
-        switch (wmId) // action listener for clicks
+        switch (wmId) 
         {
-        case IDM_ABOUT: // "About"
+        case IDM_ABOUT:                                     // "About"
             DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
             break;
-		case IDM_EXIT: // "Exit"
+		case IDM_EXIT:                                      // "Exit"
             DestroyWindow(hWnd);
             break;
-		case IDM_TOGGLE_CHECK: // "Dark Mode (beta)"
+		case IDM_TOGGLE_CHECK:                              // "Dark Mode (beta)"
+           
+            
             isChecked = !isChecked;
             CheckMenuItem(GetMenu(hWnd), IDM_TOGGLE_CHECK, isChecked ? MF_CHECKED : MF_UNCHECKED);
-            InvalidateRect(hWnd, NULL, TRUE); // Force the window to repaint
+            InvalidateRect(hWnd, NULL, TRUE);
             EnumChildWindows(hWnd, [](HWND hwnd, LPARAM lParam) -> BOOL {
                 InvalidateRect(hwnd, NULL, TRUE);
                 return TRUE;
                 }, 0);
+            
             break;
-		case IDM_GITHUB: // "GitHub"
-            ShellExecute(0, 0, L"https://github.com/cnordenb/CPP_Desktop_Application_test/", 0, 0, SW_SHOW);
+		case IDM_GITHUB:                                    // "GitHub"
+            ShellExecute(0, 0, L"https://github.com/cnordenb/Fresh-Random-Civ-Picker_CPPGUI", 0, 0, SW_SHOW);
             break;
-        case 1: // "Draw"            
+        case 1:                                             // "Draw"            
             draw_civ();     
             break;
-		case 2: // "Reset"
+		case 2:                                             // "Reset"
 			reset();
             break;
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
         }
     }
-    break;
-
+        break;
+    
     case WM_PAINT:
-        {
-		    
+        {       
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: Add any drawing code that uses hdc here...
             EndPaint(hWnd, &ps);
         }
         break;
@@ -492,7 +485,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 
-// Message handler for about box.
+// Message handler for about box. 
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);
@@ -513,7 +506,8 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
-std::string civ_name(int index)
+
+std::string civ_name(int index)         // returns the name of the civ based on the index
 {
     switch (index)
     {
@@ -612,38 +606,36 @@ std::string civ_name(int index)
     }
 }
 
-int result(int max) {
-    // Create a random device and seed the Mersenne Twister engine
-    std::random_device rd;  // Obtain a random number from hardware
-    std::mt19937 mt(rd());  // Seed the Mersenne Twister engine
-    std::uniform_int_distribution<int> dist(0, max);  // Define the range
+int result(int max) {                       // returns a random number between 0 and max
+    
+    std::random_device rd;  
+    std::mt19937 mt(rd());  
+    std::uniform_int_distribution<int> dist(0, max);
 
     return dist(mt);  // Return a random number between 0 and CIVS_MAX
 }
 
-void reset() {
+void reset() { 							    // resets the program
 
-    if (iterator > 0)
+    if (iterator > 0)                       // adds blank line to log before next iteration of civ drawing
     {
         length = GetWindowTextLength(hLogTextField);
         logText.resize(length + 1);
         GetWindowText(hLogTextField, &logText[0], length + 1);
-        logText.pop_back(); // Remove the null terminator
+        logText.pop_back();
 
         logText = L"\r\n" + logText;
         SetWindowText(hLogTextField, logText.c_str());
     }
 
-    for (int i = 0; i < CIVS_MAX; i++) {
+    for (int i = 0; i < CIVS_MAX; i++) {    // marks all civs as available
         available[i] = true;
     }
-    iterator = 0;
-    remaining = CIVS_MAX;
+	iterator = 0;                           // resets iterator
+	remaining = CIVS_MAX;				    // resets remaining civs
 
-    SetWindowText(hLabel, (L"0/" + std::to_wstring(CIVS_MAX)).c_str());
-    SetWindowText(hCenterLabel, L"?");
-
-    printf("\n\nProgram has been reset.\n");
+	SetWindowText(hLabel, (L"0/" + std::to_wstring(CIVS_MAX)).c_str());     // resets remaining civs label
+	SetWindowText(hCenterLabel, L"?");                                      // resets drawn civ label
 
     
 }
@@ -659,15 +651,15 @@ void draw_civ() {
     given_index = result(remaining);
 
     j = 0;
-    for (int i = 0; i < CIVS_MAX; i++) { // the purpose of this for-loop is to check tha the civ is not drawn already
+	for (int i = 0; i < CIVS_MAX; i++) { // finds fresh random civ on O(1) time complexity. Only iterates through remaining amount of civs (see line 683)
 
 
 		printf("\niteration %d out of %d\n", i, CIVS_MAX);
         printf("given index: %d\n", given_index);
 		bool internal_reset = false;
         
-        while (!available[j]) { // at the start, both i and j are 0, separate j has purpose so that a drawn civ is not checked more than once
-            if (j == CIVS_MAX) {
+		while (!available[j]) { // defines amount of empty elements (already drawn civs) to jump over in one step instead of iterating through all of them
+            if (j == CIVS_MAX) {    // in rare case j exceeds number of elements, restarts from 0 to prevent out of bounds exception
                 internal_reset = true;
                 j = 0;
             }
@@ -682,21 +674,13 @@ void draw_civ() {
                 break;
 			}
         }
-        if (j >= CIVS_MAX) { // this shouldn't happen. something is wrong
-            printf("\n\n=====================\n\n");
-            printf("i is now %d\n", i);
-            printf("j is now %d\n", j);
-            printf("Error: Index j out of bounds\n\n==================== = \n\n\n");
-            break;
-        }
         if (i == given_index) {
            
             //printf("\nres (i) is now %d\n", given_index);
             //printf("available[%d] is currently %s\n\n", res, available[res] ? "true" : "false");
             given_index = j; // given index updated with increment to skip already drawn civs
-            //printf("res (j) is now %d\n", given_index);
-            //printf("available[%d] is currently %s\n", res, available[res] ? "true" : "false");
-            break; // given drawn civ has not already been drawn
+        
+			break; // fresh random civ found; end search for undrawn civ
         }
 
         j++; // j incremented to keep up with i
@@ -704,7 +688,7 @@ void draw_civ() {
 
     civ = civ_name(given_index);
 
-    printf("\n%d. %s (current set: %d/%d)\n",(given_index+1), civ_name(given_index).c_str(), iterator + 1, CIVS_MAX);
+    printf("\n%d. %s (current set: %d/%d)\n",(given_index+1), civ_name(given_index).c_str(), iterator + 1, CIVS_MAX);       // print statement debugging
 	if (given_index >= 0 && given_index < sizeof(available)) available[given_index] = false;
 	else printf("\n\n=====================\n\nIndex out of range: %d\n\n=====================\n\n\n", given_index);
 
