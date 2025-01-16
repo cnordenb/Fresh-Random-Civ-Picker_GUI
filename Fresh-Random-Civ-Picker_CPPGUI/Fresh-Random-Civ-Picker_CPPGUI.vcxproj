@@ -138,6 +138,7 @@
   <ItemGroup>
     <Image Include="Fresh Random Civ Picker.ico" />
     <Image Include="small_Fresh Random Civ Picker.ico" />
+    <Image Include="social-preview.png" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Fresh-Random-Civ-Picker_CPPGUI.rc" />
