@@ -331,7 +331,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		SetWindowPos(hLogTextField, NULL, 10, 25, width - 20, height - 50, SWP_NOZORDER);                   // log text field anchored to window size
 
     }
-    break;
+        break;
 
     case WM_ACTIVATE: // re-enables hotkeys when window returns to foreground
     
@@ -349,7 +349,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         SetBkColor(hdcStatic, isChecked ? RGB(0, 0, 0) : RGB(255, 255, 255));
         return (INT_PTR)(isChecked ? hBrushBlack : hBrushWhite);
     }
-    break;
+        break;
 
     case WM_ERASEBKGND:
     {
@@ -359,7 +359,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         FillRect(hdc, &rect, isChecked ? hBrushBlack : hBrushWhite);
         return 1;
     }
-    break;
+        break;
 
     case WM_CTLCOLORBTN:
     {
@@ -368,7 +368,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         SetBkColor(hdcButton, isChecked ? RGB(0, 0, 0) : RGB(255, 255, 255));
         return (INT_PTR)(isChecked ? hBrushBlack : hBrushWhite);
     }
-    break;
+        break;
 
     case WM_NOTIFY:
     {
@@ -379,7 +379,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             ShowTabComponents(tabIndex);
         }
     }
-    break;
+        break;
 
 	case WM_GETMINMAXINFO:                                  // minimum window size
     {
@@ -416,7 +416,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     }
 	
-    break;
+        break;
 
 
     case WM_COMMAND:                                        // action listener for clicks
@@ -486,7 +486,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_INITDIALOG:
-        SetDlgItemText(hDlg, IDC_STATIC_TEXT, L"Chupnis");
+        SetDlgItemText(hDlg, IDC_STATIC_TEXT, L"");
         return (INT_PTR)TRUE;
 
     case WM_COMMAND:
@@ -674,7 +674,7 @@ void draw_civ(HWND hWnd) {
 
     civ = civ_name(given_index);
 
-    if (given_index < 0 || given_index >= sizeof(available)) MessageBox(hWnd, L"Out of bounds! line 672.\nRedrawing...", L"Error", MB_OK);
+    if (given_index < 0 || given_index >= sizeof(available)) MessageBox(hWnd, L"Out of bounds! Line 677.\nRedrawing...", L"Error", MB_OK);
     if (given_index >= 0 && given_index < sizeof(available)) available[given_index] = false; // marks civ as unavailable
 	else { // in rare case of out of bounds exception, restarts function.
         draw_civ(hWnd);
