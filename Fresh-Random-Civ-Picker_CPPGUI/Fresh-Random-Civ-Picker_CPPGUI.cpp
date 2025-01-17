@@ -394,7 +394,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_HOTKEY:
     {
         
-		if (GetForegroundWindow() != hWnd) {                // disables hotkeys if window is not in foreground
+		if (GetForegroundWindow() != hWnd)  // disables hotkeys if window is not in foreground
+        {                
             disable_hotkeys(hWnd);
             break;
         }
@@ -600,7 +601,8 @@ std::string civ_name(int index)         // returns the name of the civ based on 
     }
 }
 
-int result(int max) {                       // returns a random number between 0 and max
+int result(int max)
+{                       // returns a random number between 0 and max
     
     std::random_device rd;  
     std::mt19937 mt(rd());  
@@ -609,7 +611,8 @@ int result(int max) {                       // returns a random number between 0
     return dist(mt);  // Return a random number between 0 and CIVS_MAX
 }
 
-void reset() { 							    // resets the program
+void reset()
+{ 							    // resets the program
 
     if (iterator > 0)                       // adds blank line to log before next iteration of civ drawing
     {
@@ -635,7 +638,8 @@ void reset() { 							    // resets the program
     
 }
 
-void draw_civ(HWND hWnd) {
+void draw_civ(HWND hWnd)
+{
     if (iterator == CIVS_MAX)
     {
         reset();
@@ -646,23 +650,26 @@ void draw_civ(HWND hWnd) {
     given_index = result(remaining);
 
     j = 0; // i keeps track of total civ elements, j keeps track of available civ elements (how many unavailable civs to skip)
-	for (int i = 0; i < CIVS_MAX; i++) { // finds fresh random civ on O(1) time complexity. Only iterates through remaining amount of civs (see line 683)
-
-
+	for (int i = 0; i < CIVS_MAX; i++)  // finds fresh random civ on. Only iterates through remaining amount of civs (see line 657)
+    { 
 		bool internal_reset = false;
         
-		while (!available[j]) { // defines amount of empty elements (already drawn civs) to jump over in one step instead of iterating through all of them
-            if (j == CIVS_MAX) {    // in rare case j exceeds number of elements, restarts from 0 to prevent out of bounds exception
+		while (!available[j])  // defines amount of empty elements (already drawn civs) to jump over in one step instead of iterating through all of them
+        { 
+            if (j == CIVS_MAX)  // in rare case j exceeds number of elements, restarts from 0 to prevent out of bounds exception
+            {    
                 internal_reset = true;
                 j = 0;
             }
             j++;
-			if (j >= CIVS_MAX && internal_reset == true) {  // ensures while loop exits after less than two iterations through the array
+			if (j >= CIVS_MAX && internal_reset == true)  // ensures while loop exits after less than two iterations through the array
+            {  
                 internal_reset = false;
 				break;
 			}
         }
-        if (i == given_index) {
+        if (i == given_index)
+        {
            
             given_index = j; // given index updated with increment to skip already drawn civs
         
@@ -676,7 +683,8 @@ void draw_civ(HWND hWnd) {
 
     if (given_index < 0 || given_index >= sizeof(available)) MessageBox(hWnd, L"Out of bounds! Line 677.\nRedrawing...", L"Error", MB_OK);
     if (given_index >= 0 && given_index < sizeof(available)) available[given_index] = false; // marks civ as unavailable
-	else { // in rare case of out of bounds exception, restarts function.
+	else  // in rare case of out of bounds exception, restarts function.
+    { 
         draw_civ(hWnd);
         return;
     }
@@ -706,27 +714,31 @@ void draw_civ(HWND hWnd) {
 
 }
 
-void enable_hotkeys(HWND hWnd) {
+void enable_hotkeys(HWND hWnd)
+{
 	RegisterHotKey(hWnd, HOTKEY_ID_TAB, 0, VK_TAB);
 	RegisterHotKey(hWnd, HOTKEY_ID_SPACE, 0, VK_SPACE);
 	RegisterHotKey(hWnd, HOTKEY_ID_RETURN, 0, VK_RETURN);
 	RegisterHotKey(hWnd, HOTKEY_ID_ESC, 0, VK_ESCAPE);
 }
 
-void disable_hotkeys(HWND hWnd) {
+void disable_hotkeys(HWND hWnd)
+{
 	UnregisterHotKey(hWnd, HOTKEY_ID_TAB);
 	UnregisterHotKey(hWnd, HOTKEY_ID_SPACE);
 	UnregisterHotKey(hWnd, HOTKEY_ID_RETURN);
 	UnregisterHotKey(hWnd, HOTKEY_ID_ESC);
 }
 
-void kill_application() {
+void kill_application()
+{
     DeleteObject(hBrushWhite);
     DeleteObject(hBrushBlack);
     PostQuitMessage(0);
 }
 
-void draw_civ_logic() {                         // for unit testing
+void draw_civ_logic()
+{                         // for unit testing
     if (iterator == CIVS_MAX)
     {
         reset();
@@ -736,42 +748,47 @@ void draw_civ_logic() {                         // for unit testing
 
     given_index = result(remaining);
 
-    j = 0; // i keeps track of total civ elements, j keeps track of available civ elements (how many unavailable civs to skip)
-    for (int i = 0; i < CIVS_MAX; i++) { // finds fresh random civ on O(1) time complexity. Only iterates through remaining amount of civs (see line 683)
-
-
+    j = 0; 
+    for (int i = 0; i < CIVS_MAX; i++)
+    {
         bool internal_reset = false;
 
-        while (!available[j]) { // defines amount of empty elements (already drawn civs) to jump over in one step instead of iterating through all of them
-            if (j == CIVS_MAX) {    // in rare case j exceeds number of elements, restarts from 0 to prevent out of bounds exception
+        while (!available[j])
+        { 
+            if (j == CIVS_MAX)
+            {    
                 internal_reset = true;
                 j = 0;
             }
             j++;
-            if (j >= CIVS_MAX && internal_reset == true) {  // ensures while loop exits after less than two iterations through the array
+            if (j >= CIVS_MAX && internal_reset == true)
+            {  
                 internal_reset = false;
                 break;
             }
         }
-        if (i == given_index) {
+        if (i == given_index)
+        {
 
-            given_index = j; // given index updated with increment to skip already drawn civs
+            given_index = j; 
 
-            break; // fresh random civ found; end search for undrawn civ
+            break; 
         }
 
-        j++; // j incremented to keep up with i
+        j++; 
     }
 
     civ = civ_name(given_index);
 
     if (given_index < 0 || given_index >= sizeof(available)) isOutOfBounds = true;
 	else isOutOfBounds = false;
-    if (given_index >= 0 && given_index < sizeof(available)) {
-        available[given_index] = false; // marks civ as unavailable
-		times_drawn[given_index]++; // increments times drawn counter
+    if (given_index >= 0 && given_index < sizeof(available))
+    {
+        available[given_index] = false; 
+		times_drawn[given_index]++; 
     }
-    else { // in rare case of out of bounds exception, restarts function.
+    else
+    { 
         draw_civ_logic();
         return;
     }
