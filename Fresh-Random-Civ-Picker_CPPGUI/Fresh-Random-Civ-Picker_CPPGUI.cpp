@@ -4,6 +4,7 @@
 #include <string>
 #include <random>
 #include <Windows.h>
+#include "Resource.h"
 #include <commctrl.h>
 #include <shellapi.h>
 
@@ -11,17 +12,21 @@
 #pragma comment(lib, "comctl32.lib")
 
 #define IDM_TOGGLE_CHECK 32771
-#define IDM_GITHUB 32772
 #define CIVS_MAX 45
 #define MAX_LOADSTRING 100
 #define HOTKEY_ID_TAB 1
 #define HOTKEY_ID_SPACE 2
 #define HOTKEY_ID_RETURN 3
 #define HOTKEY_ID_ESC 4
+#define DT_UNDERLINE 0x80000000
 
 
 
 // Global Variables
+
+PAINTSTRUCT ps;
+HDC hdc;
+RECT rect;
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
@@ -47,6 +52,7 @@ bool available[CIVS_MAX];
 bool isChecked = false;
 bool isOutOfBounds = false;             // for unit testing
 int times_drawn[CIVS_MAX] = { 0 };      // for unit testing
+HFONT hUnderlineFont = NULL;
 
 // Function declarations
 std::string civ_name(int);
@@ -59,6 +65,7 @@ void kill_application();
 void enable_hotkeys(HWND);
 void disable_hotkeys(HWND);
 void draw_civ_logic();
+void CreateUnderlineFont();
 
 
 
@@ -67,7 +74,9 @@ void draw_civ_logic();
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+//INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK    HyperlinkProc(HWND, UINT, WPARAM, LPARAM);
 
 HWND hTab;
 
@@ -128,6 +137,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
+    CreateUnderlineFont();
     
     reset();
 
@@ -156,6 +166,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             DispatchMessage(&msg);
         }
     }
+
+    DeleteObject(hUnderlineFont);
 
     return (int) msg.wParam;
 }
@@ -431,7 +443,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         switch (wmId) 
         {
         case IDM_ABOUT:                                     // "About"
-            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
             break;
 		case IDM_EXIT:                                      // "Exit"
             DestroyWindow(hWnd);
@@ -451,6 +463,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_GITHUB:                                    // "GitHub"
             ShellExecute(0, 0, L"https://github.com/cnordenb/Fresh-Random-Civ-Picker_CPPGUI", 0, 0, SW_SHOW);
             break;
+		case IDM_WEBVERSION:                                // "Web Version"
+			ShellExecute(0, 0, L"https://cnordenb.github.io/Fresh-Random-Civ-Picker_web/", 0, 0, SW_SHOW);
+			break;
         case 1:                                             // "Draw"            
             draw_civ(hWnd);     
             break;
@@ -479,7 +494,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-
+/*
 // Message handler for about box. 
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -488,6 +503,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_INITDIALOG:
         SetDlgItemText(hDlg, IDC_STATIC_TEXT, L"");
+
         return (INT_PTR)TRUE;
 
     case WM_COMMAND:
@@ -496,10 +512,68 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
             EndDialog(hDlg, LOWORD(wParam));
             return (INT_PTR)TRUE;
         }
+        else if (LOWORD(wParam) == IDC_HYPERLINK)
+        {
+			ShellExecute(NULL, L"open", L"https://linktr.ee/hjoerleif", NULL, NULL, SW_SHOWNORMAL);
+			return(INT_PTR)TRUE;
+        }
         break;
     }
     return (INT_PTR)FALSE;
 }
+*/
+
+INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    static WNDPROC oldProc;
+    switch (message)
+    {
+    case WM_INITDIALOG:
+    {
+        HWND hwndHyperlink = GetDlgItem(hDlg, IDC_HYPERLINK);
+        oldProc = (WNDPROC)SetWindowLongPtr(hwndHyperlink, GWLP_WNDPROC, (LONG_PTR)HyperlinkProc);
+        return(INT_PTR)TRUE;
+    }
+    case WM_COMMAND:
+        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+        {
+            EndDialog(hDlg, LOWORD(wParam));
+            return(INT_PTR)TRUE;
+        }
+        break;
+    }
+    return (INT_PTR)FALSE;
+}
+
+
+
+LRESULT CALLBACK HyperlinkProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    
+    switch (msg)
+    {
+    case WM_PAINT:    
+        hdc = BeginPaint(hwnd, &ps);
+        SetTextColor(hdc, RGB(0, 0, 255)); // Blue color
+        SetBkMode(hdc, TRANSPARENT);
+        SelectObject(hdc, hUnderlineFont);        
+        GetClientRect(hwnd, &rect);
+        DrawText(hdc, L"Hjörleif", -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX | DT_UNDERLINE);
+        EndPaint(hwnd, &ps);
+        return 0;    
+    case WM_LBUTTONDOWN:    
+        ShellExecute(NULL, L"open", L"https://linktr.ee/hjoerleif", NULL, NULL, SW_SHOWNORMAL);
+        return 0;    
+    case WM_SETCURSOR:
+		SetCursor(LoadCursor(NULL, IDC_HAND));
+		return 0;
+    }
+    return DefWindowProc(hwnd, msg, wParam, lParam);
+}
+
+
+
+
 
 
 std::string civ_name(int index)         // returns the name of the civ based on the index
@@ -801,4 +875,13 @@ void draw_civ_logic()
 
     
 
+}
+
+void CreateUnderlineFont()
+{
+    LOGFONT lf;
+    HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+    GetObject(hFont, sizeof(LOGFONT), &lf);
+    lf.lfUnderline = TRUE;
+    hUnderlineFont = CreateFontIndirect(&lf);
 }

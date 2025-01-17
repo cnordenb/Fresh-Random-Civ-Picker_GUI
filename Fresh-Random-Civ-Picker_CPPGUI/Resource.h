@@ -14,7 +14,9 @@
 #define IDR_MAINFRAME                   128
 #define ID_FILE_TOGGLECHECK             32771
 #define IDM_GITHUB                      32772
+#define IDM_WEBVERSION                  32773
 #define IDC_STATIC                      -1
+#define IDC_HYPERLINK				    1002
 
 // Next default values for new objects
 // 
