@@ -2,21 +2,21 @@
 #include "../Fresh-Random-Civ-Picker_CPPGUI/Fresh-Random-Civ-Picker_CPPGUI.cpp"
 
 TEST(CompletenessTest, AllCivsAreDrawn) {
-	reset();
+	ResetProgram();
 
 	for (int i = 0; i < CIVS_MAX; i++) {
-		draw_civ_logic();
+		DrawCivLogic();
 	}
 
 	for (int i = 0; i < CIVS_MAX; i++) {
-		EXPECT_EQ(available[i], false);
+		EXPECT_EQ(civ_is_available[i], false);
 	}
 }
 
 TEST(FreshnessTest, NoCivIsDrawnMoreThanOnce) {
-	reset();
+	ResetProgram();
 	for (int i = 0; i < CIVS_MAX; i++) {
-		draw_civ_logic();
+		DrawCivLogic();
 	}
 	for (int i = 0; i < CIVS_MAX; i++) {
 		EXPECT_EQ(times_drawn[i], 1);
@@ -24,10 +24,10 @@ TEST(FreshnessTest, NoCivIsDrawnMoreThanOnce) {
 }
 
 TEST(ExtraTest, NoOutOfBoundsError) {
-	reset();
+	ResetProgram();
 	for (int i = 0; i < 1000; i++) {
-		draw_civ_logic();
-		ASSERT_NE(isOutOfBounds, true);
+		DrawCivLogic();
+		ASSERT_NE(accessor_out_of_bounds, true);
 	}
 }
 
@@ -38,7 +38,7 @@ TEST(RandomnessTest, IsNotPredictable) {
 	}
 	int supposed_random[CIVS_MAX];
 	for (int i = 0; i < CIVS_MAX; i++) {
-		supposed_random[i] = result(CIVS_MAX);
+		supposed_random[i] = GetRandomIndex(CIVS_MAX);
 	}
 	int check = 0;
 	for (int i = 0; i < CIVS_MAX; i++) {

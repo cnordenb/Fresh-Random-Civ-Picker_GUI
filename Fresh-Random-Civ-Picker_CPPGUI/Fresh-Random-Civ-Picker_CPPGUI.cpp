@@ -23,48 +23,47 @@
 
 
 // Global Variables
-
-PAINTSTRUCT ps;
-HDC hdc;
-RECT rect;
-HINSTANCE hInst;                                // current instance
-WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
-WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
-HWND hLabel;
-HWND hCenterLabel;
-HWND hGenerateButton;
-HWND hResetButton;
-HWND hLogTextField;
-WCHAR szSizeText[50];
-HBRUSH hBrushWhite;
-HBRUSH hBrushBlack;
+PAINTSTRUCT paint_struct;
+HDC device_handling_context;
+RECT rectangle_struct;
+HINSTANCE instance;                                // current instance
+WCHAR title[MAX_LOADSTRING];                  // The title bar text
+WCHAR window_class[MAX_LOADSTRING];            // the main window class name
+HWND label_corner;
+HWND label_centre;
+HWND button_draw;
+HWND button_reset;
+HWND textfield_log;
+HBRUSH brush_white;
+HBRUSH brush_black;
 int iterator = 0; // Global variable to keep track of the count
-int given_index = 0;
-int j = 0;
-int length = GetWindowTextLength(hLogTextField);
-int remaining = CIVS_MAX;
-std::string civ = "";
-std::wstring labelText = std::to_wstring(iterator + 1) + L"/" + std::to_wstring(CIVS_MAX);
-std::wstring newLogEntry;
-std::wstring logText;
-std::wstring default_hlabel;
-bool available[CIVS_MAX];
-bool isChecked = false;
-bool isOutOfBounds = false;             // for unit testing
-int times_drawn[CIVS_MAX] = { 0 };      // for unit testing
-HFONT hUnderlineFont = NULL;
+int index_given = 0;
+int slot_jumper = 0;
+int length = GetWindowTextLength(textfield_log);
+int civs_remaining = CIVS_MAX;
+std::string civ_name = "";
+std::wstring label_text = std::to_wstring(iterator + 1) + L"/" + std::to_wstring(CIVS_MAX);
+std::wstring log_entry;
+std::wstring log_text;
+std::wstring hlabel_default;
+bool civ_is_available[CIVS_MAX];
+bool mode_dark = false;
+bool accessor_out_of_bounds = false;             // for unit testing
+int times_drawn[CIVS_MAX] = { 0 };               // for unit testing
+HFONT font_underline = NULL;
+HWND tab;
 
 // Function declarations
-std::string civ_name(int);
+std::string GetCivName(int);
 void CreateTabs(HWND);
 void ShowTabComponents(int);
-int result(int);
-void reset();
-void draw_civ(HWND);
-void kill_application();
-void enable_hotkeys(HWND);
-void disable_hotkeys(HWND);
-void draw_civ_logic();
+int GetRandomIndex(int);
+void ResetProgram();
+void DrawCiv(HWND);
+void KillApplication();
+void EnableHotkeys(HWND);
+void DisableHotkeys(HWND);
+void DrawCivLogic();
 void CreateUnderlineFont();
 
 
@@ -74,11 +73,9 @@ void CreateUnderlineFont();
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
-//INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK    HyperlinkProc(HWND, UINT, WPARAM, LPARAM);
 
-HWND hTab;
 
 // Function to create tabs
 void CreateTabs(HWND hWnd)
@@ -90,10 +87,10 @@ void CreateTabs(HWND hWnd)
     InitCommonControlsEx(&icex);
 
     // Create the tab control
-    hTab = CreateWindow(WC_TABCONTROL, L"",
+    tab = CreateWindow(WC_TABCONTROL, L"",
         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
         0, 0, 400, 300,
-        hWnd, NULL, hInst, NULL);
+        hWnd, NULL, instance, NULL);
 
     // Add tabs
     TCITEM tie;
@@ -101,10 +98,10 @@ void CreateTabs(HWND hWnd)
 
     // Change the type of pszText to LPCWSTR
     tie.pszText = const_cast<LPWSTR>(L"Draw Civ");
-    TabCtrl_InsertItem(hTab, 0, &tie);
+    TabCtrl_InsertItem(tab, 0, &tie);
 
     tie.pszText = const_cast<LPWSTR>(L"Log");
-    TabCtrl_InsertItem(hTab, 1, &tie);
+    TabCtrl_InsertItem(tab, 1, &tie);
 }
 
 // Function to show/hide components based on the selected tab
@@ -112,19 +109,19 @@ void ShowTabComponents(int tabIndex)
 {
     if (tabIndex == 0)
     {
-        ShowWindow(hGenerateButton, SW_SHOW);
-        ShowWindow(hLabel, SW_SHOW);
-        ShowWindow(hCenterLabel, SW_SHOW);
-		ShowWindow(hLogTextField, SW_HIDE);
-		ShowWindow(hResetButton, SW_SHOW);
+        ShowWindow(button_draw, SW_SHOW);
+        ShowWindow(label_corner, SW_SHOW);
+        ShowWindow(label_centre, SW_SHOW);
+		ShowWindow(textfield_log, SW_HIDE);
+		ShowWindow(button_reset, SW_SHOW);
     }
     else if (tabIndex == 1)
     {
-        ShowWindow(hGenerateButton, SW_HIDE);
-        ShowWindow(hLabel, SW_HIDE);
-        ShowWindow(hCenterLabel, SW_HIDE);
-		ShowWindow(hResetButton, SW_HIDE);
-		ShowWindow(hLogTextField, SW_SHOW);
+        ShowWindow(button_draw, SW_HIDE);
+        ShowWindow(label_corner, SW_HIDE);
+        ShowWindow(label_centre, SW_HIDE);
+		ShowWindow(button_reset, SW_HIDE);
+		ShowWindow(textfield_log, SW_SHOW);
         
     }
 }
@@ -139,12 +136,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     CreateUnderlineFont();
     
-    reset();
+    ResetProgram();
 
 
     // Initialize global strings
-    LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-    LoadStringW(hInstance, IDC_WINDOWSPROJECT1, szWindowClass, MAX_LOADSTRING);
+    LoadStringW(hInstance, IDS_APP_TITLE, title, MAX_LOADSTRING);
+    LoadStringW(hInstance, IDC_WINDOWSPROJECT1, window_class, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
     // Perform application initialization:
@@ -167,7 +164,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
     }
 
-    DeleteObject(hUnderlineFont);
+    DeleteObject(font_underline);
 
     return (int) msg.wParam;
 }
@@ -194,7 +191,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW + 1);
     wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_WINDOWSPROJECT1);
-    wcex.lpszClassName  = szWindowClass;
+    wcex.lpszClassName  = window_class;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
     return RegisterClassExW(&wcex);
@@ -212,12 +209,12 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-    hInst = hInstance; // Store instance handle in our global variable
+    instance = hInstance; // Store instance handle in our global variable
 
-	wcscpy_s(szTitle, L"Fresh Random Civ Picker");
+	wcscpy_s(title, L"Fresh Random Civ Picker");
 
     // Set the default window size to 400x300
-    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+    HWND hWnd = CreateWindowW(window_class, title, WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, 0, 400, 300, nullptr, nullptr, hInstance, nullptr);
 
     if (!hWnd)
@@ -251,7 +248,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         CreateTabs(hWnd);
 
-        hGenerateButton = CreateWindow(
+        button_draw = CreateWindow(
             L"BUTTON",  // Predefined class; Unicode assumed 
             L"Draw",      // Button text 
             WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
@@ -264,7 +261,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
             NULL);      // Pointer not needed.
 
-		hResetButton = CreateWindow(
+		button_reset = CreateWindow(
 			L"BUTTON",  // Predefined class; Unicode assumed 
 			L"Reset",      // Button text 
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
@@ -277,7 +274,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			(HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
 			NULL);      // Pointer not needed.
 
-        hLabel = CreateWindow(
+        label_corner = CreateWindow(
             L"STATIC",  // Predefined class; Unicode assumed
             L"",  // Label text from variable..
             WS_VISIBLE | WS_CHILD,  // Styles
@@ -285,12 +282,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             0,  // y position (will be set in WM_SIZE)
             30,  // Label width
             15,  // Label height
-            hTab,  // Parent window
+            tab,  // Parent window
             NULL,  // No menu.
             (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
             NULL);  // Pointer not needed.
 
-        hCenterLabel = CreateWindow(
+        label_centre = CreateWindow(
             L"STATIC",  // Predefined class; Unicode assumed
             L"?",  // Label text
             WS_VISIBLE | WS_CHILD,  // Styles
@@ -303,7 +300,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
             NULL);  // Pointer not needed.
 
-		hLogTextField = CreateWindow(
+		textfield_log = CreateWindow(
 			L"EDIT",  // Predefined class; Unicode assumed
 			L"",  // Label text
 			WS_VISIBLE | WS_CHILD | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY,  // Styles
@@ -311,19 +308,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			25,  // y position (will be set in WM_SIZE)
 			350,  // Label width
 			200,  // Label height
-			hTab,  // Parent window
+			tab,  // Parent window
 			NULL,  // No menu.
 			(HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
 			NULL);  // Pointer not needed.
 
-		ShowWindow(hLogTextField, SW_HIDE);
+		ShowWindow(textfield_log, SW_HIDE);
 
-		reset();    // resetter is called in order to enable remaining civ indicator label (hLabel)
+		ResetProgram();    // resetter is called in order to enable remaining civ indicator label (hLabel)
 
-		hBrushBlack = CreateSolidBrush(RGB(0, 0, 0));
-		hBrushWhite = CreateSolidBrush(RGB(255, 255, 255));
+		brush_black = CreateSolidBrush(RGB(0, 0, 0));
+		brush_white = CreateSolidBrush(RGB(255, 255, 255));
 		
-        enable_hotkeys(hWnd);
+        EnableHotkeys(hWnd);
 
         break; 
 
@@ -335,20 +332,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         int width = LOWORD(lParam);
         int height = HIWORD(lParam);
 
-        SetWindowPos(hTab, NULL, 0, 0, width, height, SWP_NOZORDER);                                        // tab size anchored to window size
-		SetWindowPos(hLabel, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);                          // remaining civ indicator anchored to bottom right corner 
-		SetWindowPos(hCenterLabel, NULL, (width - 80) / 2, (height - 15) / 2, 100, 15, SWP_NOZORDER);       // drawn civ label anchored to centre
-		SetWindowPos(hGenerateButton, NULL, (width - 100) / 2, (height + 50) / 2, 100, 30, SWP_NOZORDER);   // draw button anchored to centre
-        SetWindowPos(hResetButton, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);                           // reset button anchored to bottom left corner
-		SetWindowPos(hLogTextField, NULL, 10, 25, width - 20, height - 50, SWP_NOZORDER);                   // log text field anchored to window size
+        SetWindowPos(tab, NULL, 0, 0, width, height, SWP_NOZORDER);                                        // tab size anchored to window size
+		SetWindowPos(label_corner, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);                          // remaining civ indicator anchored to bottom right corner 
+		SetWindowPos(label_centre, NULL, (width - 80) / 2, (height - 15) / 2, 100, 15, SWP_NOZORDER);       // drawn civ label anchored to centre
+		SetWindowPos(button_draw, NULL, (width - 100) / 2, (height + 50) / 2, 100, 30, SWP_NOZORDER);   // draw button anchored to centre
+        SetWindowPos(button_reset, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);                           // reset button anchored to bottom left corner
+		SetWindowPos(textfield_log, NULL, 10, 25, width - 20, height - 50, SWP_NOZORDER);                   // log text field anchored to window size
 
     }
         break;
 
     case WM_ACTIVATE: // re-enables hotkeys when window returns to foreground
     
-		if (wParam == WA_ACTIVE || wParam == WA_CLICKACTIVE) enable_hotkeys(hWnd);
-		else if (wParam == WA_INACTIVE) disable_hotkeys(hWnd);
+		if (wParam == WA_ACTIVE || wParam == WA_CLICKACTIVE) EnableHotkeys(hWnd);
+		else if (wParam == WA_INACTIVE) DisableHotkeys(hWnd);
 
         break;
     
@@ -357,9 +354,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CTLCOLORSTATIC:
     {
         HDC hdcStatic = (HDC)wParam;
-        SetTextColor(hdcStatic, isChecked ? RGB(255, 255, 255) : RGB(0, 0, 0));
-        SetBkColor(hdcStatic, isChecked ? RGB(0, 0, 0) : RGB(255, 255, 255));
-        return (INT_PTR)(isChecked ? hBrushBlack : hBrushWhite);
+        SetTextColor(hdcStatic, mode_dark ? RGB(255, 255, 255) : RGB(0, 0, 0));
+        SetBkColor(hdcStatic, mode_dark ? RGB(0, 0, 0) : RGB(255, 255, 255));
+        return (INT_PTR)(mode_dark ? brush_black : brush_white);
     }
         break;
 
@@ -368,7 +365,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         HDC hdc = (HDC)wParam;
         RECT rect;
         GetClientRect(hWnd, &rect);
-        FillRect(hdc, &rect, isChecked ? hBrushBlack : hBrushWhite);
+        FillRect(hdc, &rect, mode_dark ? brush_black : brush_white);
         return 1;
     }
         break;
@@ -376,18 +373,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CTLCOLORBTN:
     {
         HDC hdcButton = (HDC)wParam;
-        SetTextColor(hdcButton, isChecked ? RGB(255, 255, 255) : RGB(0, 0, 0));
-        SetBkColor(hdcButton, isChecked ? RGB(0, 0, 0) : RGB(255, 255, 255));
-        return (INT_PTR)(isChecked ? hBrushBlack : hBrushWhite);
+        SetTextColor(hdcButton, mode_dark ? RGB(255, 255, 255) : RGB(0, 0, 0));
+        SetBkColor(hdcButton, mode_dark ? RGB(0, 0, 0) : RGB(255, 255, 255));
+        return (INT_PTR)(mode_dark ? brush_black : brush_white);
     }
         break;
 
     case WM_NOTIFY:
     {
         LPNMHDR pnmhdr = (LPNMHDR)lParam;
-        if (pnmhdr->hwndFrom == hTab && pnmhdr->code == TCN_SELCHANGE)
+        if (pnmhdr->hwndFrom == tab && pnmhdr->code == TCN_SELCHANGE)
         {
-            int tabIndex = TabCtrl_GetCurSel(hTab);
+            int tabIndex = TabCtrl_GetCurSel(tab);
             ShowTabComponents(tabIndex);
         }
     }
@@ -408,24 +405,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         
 		if (GetForegroundWindow() != hWnd)  // disables hotkeys if window is not in foreground
         {                
-            disable_hotkeys(hWnd);
+            DisableHotkeys(hWnd);
             break;
         }
-		else enable_hotkeys(hWnd);
+		else EnableHotkeys(hWnd);
 
         if (wParam == HOTKEY_ID_TAB)                        // tab for switching tabs
         {
-            int tabIndex = TabCtrl_GetCurSel(hTab);
+            int tabIndex = TabCtrl_GetCurSel(tab);
             int newTabIndex = tabIndex == 0 ? 1 : 0;
-            TabCtrl_SetCurSel(hTab, newTabIndex);
+            TabCtrl_SetCurSel(tab, newTabIndex);
             ShowTabComponents(newTabIndex);
         }
 
-		if (wParam == HOTKEY_ID_SPACE) draw_civ(hWnd);          // space for drawing civ
+		if (wParam == HOTKEY_ID_SPACE) DrawCiv(hWnd);           // space for drawing civ
 
-		if (wParam == HOTKEY_ID_RETURN) reset();            // return for resetting
+		if (wParam == HOTKEY_ID_RETURN) ResetProgram();            // return for resetting
 
-		if (wParam == HOTKEY_ID_ESC) kill_application();    // escape for exiting
+		if (wParam == HOTKEY_ID_ESC) KillApplication();                // escape for exiting
 
     }
 	
@@ -435,15 +432,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_COMMAND:                                        // action listener for clicks
     {
         int wmId = LOWORD(wParam);
-        // Parse the menu selections:
-        
+        // Parse the menu selections:     
             
 
 
         switch (wmId) 
         {
         case IDM_ABOUT:                                     // "About"
-            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
+            DialogBox(instance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
             break;
 		case IDM_EXIT:                                      // "Exit"
             DestroyWindow(hWnd);
@@ -451,8 +447,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_TOGGLE_CHECK:                              // "Dark Mode (beta)"
            
             
-            isChecked = !isChecked;
-            CheckMenuItem(GetMenu(hWnd), IDM_TOGGLE_CHECK, isChecked ? MF_CHECKED : MF_UNCHECKED);
+            mode_dark = !mode_dark;
+            CheckMenuItem(GetMenu(hWnd), IDM_TOGGLE_CHECK, mode_dark ? MF_CHECKED : MF_UNCHECKED);
             InvalidateRect(hWnd, NULL, TRUE);
             EnumChildWindows(hWnd, [](HWND hwnd, LPARAM lParam) -> BOOL {
                 InvalidateRect(hwnd, NULL, TRUE);
@@ -467,10 +463,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			ShellExecute(0, 0, L"https://cnordenb.github.io/Fresh-Random-Civ-Picker_web/", 0, 0, SW_SHOW);
 			break;
         case 1:                                             // "Draw"            
-            draw_civ(hWnd);     
+            DrawCiv(hWnd);     
             break;
 		case 2:                                             // "Reset"
-			reset();
+			ResetProgram();
             break;
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
@@ -486,7 +482,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
-		kill_application();
+		KillApplication();
         break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
@@ -524,13 +520,13 @@ LRESULT CALLBACK HyperlinkProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
     switch (msg)
     {
     case WM_PAINT:    
-        hdc = BeginPaint(hwnd, &ps);
-        SetTextColor(hdc, RGB(0, 0, 255)); // Blue color
-        SetBkMode(hdc, TRANSPARENT);
-        SelectObject(hdc, hUnderlineFont);        
-        GetClientRect(hwnd, &rect);
-        DrawText(hdc, L"Hjörleif", -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX | DT_UNDERLINE);
-        EndPaint(hwnd, &ps);
+        device_handling_context = BeginPaint(hwnd, &paint_struct);
+        SetTextColor(device_handling_context, RGB(0, 0, 255)); // Blue color
+        SetBkMode(device_handling_context, TRANSPARENT);
+        SelectObject(device_handling_context, font_underline);        
+        GetClientRect(hwnd, &rectangle_struct);
+        DrawText(device_handling_context, L"Hjörleif", -1, &rectangle_struct, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX | DT_UNDERLINE);
+        EndPaint(hwnd, &paint_struct);
         return 0;    
     case WM_LBUTTONDOWN:    
         ShellExecute(NULL, L"open", L"https://linktr.ee/hjoerleif", NULL, NULL, SW_SHOWNORMAL);
@@ -547,7 +543,7 @@ LRESULT CALLBACK HyperlinkProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 
 
-std::string civ_name(int index)         // returns the name of the civ based on the index
+std::string GetCivName(int index)         // returns the name of the civ based on the index
 {
     switch (index)
     {
@@ -646,7 +642,7 @@ std::string civ_name(int index)         // returns the name of the civ based on 
     }
 }
 
-int result(int max)
+int GetRandomIndex(int max)
 {                       // returns a random number between 0 and max
     
     std::random_device rd;  
@@ -656,110 +652,110 @@ int result(int max)
     return dist(mt);  // Return a random number between 0 and CIVS_MAX
 }
 
-void reset()
+void ResetProgram()
 { 							    // resets the program
 
     if (iterator > 0)                       // adds blank line to log before next iteration of civ drawing
     {
-        length = GetWindowTextLength(hLogTextField);
-        logText.resize(length + 1);
-        GetWindowText(hLogTextField, &logText[0], length + 1);
-        logText.pop_back();
+        length = GetWindowTextLength(textfield_log);
+        log_text.resize(length + 1);
+        GetWindowText(textfield_log, &log_text[0], length + 1);
+        log_text.pop_back();
 
-        logText = L"\r\n" + logText;
-        SetWindowText(hLogTextField, logText.c_str());
+        log_text = L"\r\n" + log_text;
+        SetWindowText(textfield_log, log_text.c_str());
     }
 
     for (int i = 0; i < CIVS_MAX; i++) {    // marks all civs as available
-        available[i] = true;
+        civ_is_available[i] = true;
 		times_drawn[i] = 0;                 // for unit testing
     }
 	iterator = 0;                           // resets iterator
-	remaining = CIVS_MAX;				    // resets remaining civs
+	civs_remaining = CIVS_MAX;				    // resets remaining civs
 
-	SetWindowText(hLabel, (L"0/" + std::to_wstring(CIVS_MAX)).c_str());     // resets remaining civs label
-	SetWindowText(hCenterLabel, L"?");                                      // resets drawn civ label
+	SetWindowText(label_corner, (L"0/" + std::to_wstring(CIVS_MAX)).c_str());     // resets remaining civs label
+	SetWindowText(label_centre, L"?");                                      // resets drawn civ label
 
     
 }
 
-void draw_civ(HWND hWnd)
+void DrawCiv(HWND hWnd)
 {
     if (iterator == CIVS_MAX)
     {
-        reset();
+        ResetProgram();
         
     }
 
     
-    given_index = result(remaining);
+    index_given = GetRandomIndex(civs_remaining);
 
-    j = 0; // i keeps track of total civ elements, j keeps track of available civ elements (how many unavailable civs to skip)
+    slot_jumper = 0; // i keeps track of total civ elements, j keeps track of available civ elements (how many unavailable civs to skip)
 	for (int i = 0; i < CIVS_MAX; i++)  // finds fresh random civ on. Only iterates through remaining amount of civs (see line 657)
     { 
-		bool internal_reset = false;
+		bool reset_internal = false;
         
-		while (!available[j])  // defines amount of empty elements (already drawn civs) to jump over in one step instead of iterating through all of them
+		while (!civ_is_available[slot_jumper])  // defines amount of empty elements (already drawn civs) to jump over in one step instead of iterating through all of them
         { 
-            if (j == CIVS_MAX)  // in rare case j exceeds number of elements, restarts from 0 to prevent out of bounds exception
+            if (slot_jumper == CIVS_MAX)  // in rare case j exceeds number of elements, restarts from 0 to prevent out of bounds exception
             {    
-                internal_reset = true;
-                j = 0;
+                reset_internal = true;
+                slot_jumper = 0;
             }
-            j++;
-			if (j >= CIVS_MAX && internal_reset == true)  // ensures while loop exits after less than two iterations through the array
+            slot_jumper++;
+			if (slot_jumper >= CIVS_MAX && reset_internal == true)  // ensures while loop exits after less than two iterations through the array
             {  
-                internal_reset = false;
+                reset_internal = false;
 				break;
 			}
         }
-        if (i == given_index)
+        if (i == index_given)
         {
            
-            given_index = j; // given index updated with increment to skip already drawn civs
+            index_given = slot_jumper; // given index updated with increment to skip already drawn civs
         
 			break; // fresh random civ found; end search for undrawn civ
         }
 
-        j++; // j incremented to keep up with i
+        slot_jumper++; // j incremented to keep up with i
     }
 
-    civ = civ_name(given_index);
+    civ_name = GetCivName(index_given);
 
-    if (given_index < 0 || given_index >= sizeof(available)) MessageBox(hWnd, L"Out of bounds! Line 677.\nRedrawing...", L"Error", MB_OK);
-    if (given_index >= 0 && given_index < sizeof(available)) available[given_index] = false; // marks civ as unavailable
+    if (index_given < 0 || index_given >= sizeof(civ_is_available)) MessageBox(hWnd, L"Out of bounds! Line 677.\nRedrawing...", L"Error", MB_OK);
+    if (index_given >= 0 && index_given < sizeof(civ_is_available)) civ_is_available[index_given] = false; // marks civ as unavailable
 	else  // in rare case of out of bounds exception, restarts function.
     { 
-        draw_civ(hWnd);
+        DrawCiv(hWnd);
         return;
     }
 
     
     iterator++;
-    remaining--;
+    civs_remaining--;
 
 
 
     // Update the labels
-    labelText = std::to_wstring(iterator) + L"/" + std::to_wstring(CIVS_MAX);
-    SetWindowText(hLabel, labelText.c_str());
-    SetWindowTextA(hCenterLabel, civ.c_str());
+    label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(CIVS_MAX);
+    SetWindowText(label_corner, label_text.c_str());
+    SetWindowTextA(label_centre, civ_name.c_str());
 
-    length = GetWindowTextLength(hLogTextField);
-    logText.resize(length + 1);
-    GetWindowText(hLogTextField, &logText[0], length + 1);
-    logText.pop_back(); // Remove the null terminator
+    length = GetWindowTextLength(textfield_log);
+    log_text.resize(length + 1);
+    GetWindowText(textfield_log, &log_text[0], length + 1);
+    log_text.pop_back(); // Remove the null terminator
 
-    newLogEntry = std::wstring(civ.begin(), civ.end()) + L" (" + std::to_wstring(iterator) + L"/" + std::to_wstring(CIVS_MAX) + L")" + L"\r\n";
-    logText = newLogEntry + logText;
-    if (iterator == CIVS_MAX) logText += L"\r\n";
+    log_entry = std::wstring(civ_name.begin(), civ_name.end()) + L" (" + std::to_wstring(iterator) + L"/" + std::to_wstring(CIVS_MAX) + L")" + L"\r\n";
+    log_text = log_entry + log_text;
+    if (iterator == CIVS_MAX) log_text += L"\r\n";
 
 
-    SetWindowText(hLogTextField, logText.c_str());
+    SetWindowText(textfield_log, log_text.c_str());
 
 }
 
-void enable_hotkeys(HWND hWnd)
+void EnableHotkeys(HWND hWnd)
 {
 	RegisterHotKey(hWnd, HOTKEY_ID_TAB, 0, VK_TAB);
 	RegisterHotKey(hWnd, HOTKEY_ID_SPACE, 0, VK_SPACE);
@@ -767,7 +763,7 @@ void enable_hotkeys(HWND hWnd)
 	RegisterHotKey(hWnd, HOTKEY_ID_ESC, 0, VK_ESCAPE);
 }
 
-void disable_hotkeys(HWND hWnd)
+void DisableHotkeys(HWND hWnd)
 {
 	UnregisterHotKey(hWnd, HOTKEY_ID_TAB);
 	UnregisterHotKey(hWnd, HOTKEY_ID_SPACE);
@@ -775,72 +771,72 @@ void disable_hotkeys(HWND hWnd)
 	UnregisterHotKey(hWnd, HOTKEY_ID_ESC);
 }
 
-void kill_application()
+void KillApplication()
 {
-    DeleteObject(hBrushWhite);
-    DeleteObject(hBrushBlack);
+    DeleteObject(brush_white);
+    DeleteObject(brush_black);
     PostQuitMessage(0);
 }
 
-void draw_civ_logic()
+void DrawCivLogic()
 {                         // for unit testing
     if (iterator == CIVS_MAX)
     {
-        reset();
+        ResetProgram();
 
     }
 
 
-    given_index = result(remaining);
+    index_given = GetRandomIndex(civs_remaining);
 
-    j = 0; 
+    slot_jumper = 0; 
     for (int i = 0; i < CIVS_MAX; i++)
     {
         bool internal_reset = false;
 
-        while (!available[j])
+        while (!civ_is_available[slot_jumper])
         { 
-            if (j == CIVS_MAX)
+            if (slot_jumper == CIVS_MAX)
             {    
                 internal_reset = true;
-                j = 0;
+                slot_jumper = 0;
             }
-            j++;
-            if (j >= CIVS_MAX && internal_reset == true)
+            slot_jumper++;
+            if (slot_jumper >= CIVS_MAX && internal_reset == true)
             {  
                 internal_reset = false;
                 break;
             }
         }
-        if (i == given_index)
+        if (i == index_given)
         {
 
-            given_index = j; 
+            index_given = slot_jumper; 
 
             break; 
         }
 
-        j++; 
+        slot_jumper++; 
     }
 
-    civ = civ_name(given_index);
+    civ_name = GetCivName(index_given);
 
-    if (given_index < 0 || given_index >= sizeof(available)) isOutOfBounds = true;
-	else isOutOfBounds = false;
-    if (given_index >= 0 && given_index < sizeof(available))
+    if (index_given < 0 || index_given >= sizeof(civ_is_available)) accessor_out_of_bounds = true;
+	else accessor_out_of_bounds = false;
+    if (index_given >= 0 && index_given < sizeof(civ_is_available))
     {
-        available[given_index] = false; 
-		times_drawn[given_index]++; 
+        civ_is_available[index_given] = false; 
+		times_drawn[index_given]++; 
     }
     else
     { 
-        draw_civ_logic();
+        DrawCivLogic();
         return;
     }
 
 
     iterator++;
-    remaining--;
+    civs_remaining--;
 
 
 
@@ -854,5 +850,5 @@ void CreateUnderlineFont()
     HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
     GetObject(hFont, sizeof(LOGFONT), &lf);
     lf.lfUnderline = TRUE;
-    hUnderlineFont = CreateFontIndirect(&lf);
+    font_underline = CreateFontIndirect(&lf);
 }
