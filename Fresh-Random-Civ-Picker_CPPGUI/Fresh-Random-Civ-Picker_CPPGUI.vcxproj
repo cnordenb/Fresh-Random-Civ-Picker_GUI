@@ -143,6 +143,9 @@
   <ItemGroup>
     <ResourceCompile Include="Fresh-Random-Civ-Picker_CPPGUI.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="formatting_notes.md" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
