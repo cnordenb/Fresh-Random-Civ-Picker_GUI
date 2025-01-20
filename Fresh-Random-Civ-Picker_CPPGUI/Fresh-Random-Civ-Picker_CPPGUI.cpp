@@ -37,35 +37,28 @@ HWND textfield_log;
 HBRUSH brush_white;
 HBRUSH brush_black;
 int iterator = 0; // Global variable to keep track of the count
-int index_given = 0;
-int slot_jumper = 0;
 int length = GetWindowTextLength(textfield_log);
-int civs_remaining = CIVS_MAX;
-std::string civ_name = "";
 std::wstring label_text = std::to_wstring(iterator + 1) + L"/" + std::to_wstring(CIVS_MAX);
 std::wstring log_entry;
 std::wstring log_text;
 std::wstring hlabel_default;
-bool civ_is_available[CIVS_MAX];
 bool mode_dark = false;
 bool accessor_out_of_bounds = false;             // for unit testing
 int times_drawn[CIVS_MAX] = { 0 };               // for unit testing
 HFONT font_underline = NULL;
 HWND tab;
+std::vector<std::wstring> civs;
 
 // Function declarations
-std::string GetCivName(int);
 void CreateTabs(HWND);
 void ShowTabComponents(int);
-int GetRandomIndex(int);
 void ResetProgram();
-void DrawCiv(HWND);
+void DrawCiv();
 void KillApplication();
 void EnableHotkeys(HWND);
 void DisableHotkeys(HWND);
-void DrawCivLogic();
 void CreateUnderlineFont();
-
+std::string ConvertToString(const std::wstring&);
 
 
 
@@ -418,7 +411,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             ShowTabComponents(newTabIndex);
         }
 
-		if (wParam == HOTKEY_ID_SPACE) DrawCiv(hWnd);           // space for drawing civ
+		if (wParam == HOTKEY_ID_SPACE) DrawCiv();           // space for drawing civ
 
 		if (wParam == HOTKEY_ID_RETURN) ResetProgram();            // return for resetting
 
@@ -463,7 +456,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			ShellExecute(0, 0, L"https://cnordenb.github.io/Fresh-Random-Civ-Picker_web/", 0, 0, SW_SHOW);
 			break;
         case 1:                                             // "Draw"            
-            DrawCiv(hWnd);     
+            DrawCiv();     
             break;
 		case 2:                                             // "Reset"
 			ResetProgram();
@@ -542,119 +535,8 @@ LRESULT CALLBACK HyperlinkProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 
 
-
-std::string GetCivName(int index)         // returns the name of the civ based on the index
-{
-    switch (index)
-    {
-    case 0:
-        return "Armenians";
-    case 1:
-        return "Aztecs";
-    case 2:
-        return "Bengalis";
-    case 3:
-        return "Berbers";
-    case 4:
-        return "Bohemians";
-    case 5:
-        return "Britons";
-    case 6:
-        return "Bulgarians";
-    case 7:
-        return "Burgundians";
-    case 8:
-        return "Burmese";
-    case 9:
-        return "Byzantines";
-    case 10:
-        return "Celts";
-    case 11:
-        return "Chinese";
-    case 12:
-        return "Cumans";
-    case 13:
-        return "Dravidians";
-    case 14:
-        return "Ethiopians";
-    case 15:
-        return "Franks";
-    case 16:
-        return "Georgians";
-    case 17:
-        return "Goths";
-    case 18:
-        return "Gurjaras";
-    case 19:
-        return "Hindustanis";
-    case 20:
-        return "Huns";
-    case 21:
-        return "Incas";
-    case 22:
-        return "Italians";
-    case 23:
-        return "Japanese";
-    case 24:
-        return "Khmer";
-    case 25:
-        return "Koreans";
-    case 26:
-        return "Lithuanians";
-    case 27:
-        return "Magyars";
-    case 28:
-        return "Malay";
-    case 29:
-        return "Malians";
-    case 30:
-        return "Mayans";
-    case 31:
-        return "Mongols";
-    case 32:
-        return "Persians";
-    case 33:
-        return "Poles";
-    case 34:
-        return "Portuguese";
-    case 35:
-        return "Romans";
-    case 36:
-        return "Saracens";
-    case 37:
-        return "Sicilians";
-    case 38:
-        return "Slavs";
-    case 39:
-        return "Spanish";
-    case 40:
-        return "Tatars";
-    case 41:
-        return "Teutons";
-    case 42:
-        return "Turks";
-    case 43:
-        return "Vietnamese";
-    case 44:
-        return "Vikings";
-    default:
-        return "(no civ chosen)";
-    }
-}
-
-int GetRandomIndex(int max)
-{                       // returns a random number between 0 and max
-    
-    std::random_device rd;  
-    std::mt19937 mt(rd());  
-    std::uniform_int_distribution<int> dist(0, max);
-
-    return dist(mt);  // Return a random number between 0 and CIVS_MAX
-}
-
 void ResetProgram()
-{ 							    // resets the program
-
+{ 
     if (iterator > 0)                       // adds blank line to log before next iteration of civ drawing
     {
         length = GetWindowTextLength(textfield_log);
@@ -666,80 +548,43 @@ void ResetProgram()
         SetWindowText(textfield_log, log_text.c_str());
     }
 
-    for (int i = 0; i < CIVS_MAX; i++) {    // marks all civs as available
-        civ_is_available[i] = true;
-		times_drawn[i] = 0;                 // for unit testing
-    }
-	iterator = 0;                           // resets iterator
-	civs_remaining = CIVS_MAX;				    // resets remaining civs
 
-	SetWindowText(label_corner, (L"0/" + std::to_wstring(CIVS_MAX)).c_str());     // resets remaining civs label
-	SetWindowText(label_centre, L"?");                                      // resets drawn civ label
+	civs = { L"Armenians", L"Aztecs", L"Bengalis", L"Berbers", L"Bohemians", L"Britons",
+        L"Bulgarians", L"Burgundians", L"Burmese", L"Byzantines", L"Celts", L"Chinese", 
+        L"Cumans", L"Dravidians", L"Ethiopians", L"Franks", L"Georgians", L"Goths", L"Gurjaras",
+        L"Hindustanis", L"Huns", L"Incas", L"Italians", L"Japanese", L"Khmer", L"Koreans", 
+        L"Lithuanians", L"Magyars", L"Malay", L"Malians", L"Mayans", L"Mongols", L"Persians",
+        L"Poles", L"Portuguese", L"Romans", L"Saracens", L"Sicilians", L"Slavs", L"Spanish", 
+        L"Tatars", L"Teutons", L"Turks", L"Vietnamese", L"Vikings" };
 
-    
+    iterator = 0;
+
+    SetWindowText(label_corner, (L"0/" + std::to_wstring(CIVS_MAX)).c_str());     // resets remaining civs label
+    SetWindowText(label_centre, L"?");                                      // resets drawn civ label
+
+
 }
 
-void DrawCiv(HWND hWnd)
+void DrawCiv()
 {
-    if (iterator == CIVS_MAX)
-    {
-        ResetProgram();
-        
-    }
+	if (size(civs) == 0) ResetProgram();
 
-    
-    index_given = GetRandomIndex(civs_remaining);
+    std::random_device rd;      // seeding random number
+	std::mt19937 mt(rd());      // with Mersenne Twister
 
-    slot_jumper = 0; // i keeps track of total civ elements, j keeps track of available civ elements (how many unavailable civs to skip)
-	for (int i = 0; i < CIVS_MAX; i++)  // finds fresh random civ on. Only iterates through remaining amount of civs (see line 657)
-    { 
-		bool reset_internal = false;
-        
-		while (!civ_is_available[slot_jumper])  // defines amount of empty elements (already drawn civs) to jump over in one step instead of iterating through all of them
-        { 
-            if (slot_jumper == CIVS_MAX)  // in rare case j exceeds number of elements, restarts from 0 to prevent out of bounds exception
-            {    
-                reset_internal = true;
-                slot_jumper = 0;
-            }
-            slot_jumper++;
-			if (slot_jumper >= CIVS_MAX && reset_internal == true)  // ensures while loop exits after less than two iterations through the array
-            {  
-                reset_internal = false;
-				break;
-			}
-        }
-        if (i == index_given)
-        {
-           
-            index_given = slot_jumper; // given index updated with increment to skip already drawn civs
-        
-			break; // fresh random civ found; end search for undrawn civ
-        }
+	std::shuffle(civs.begin(), civs.end(), mt); // shuffling civs vector
+	std::wstring civ_name = civs.back();		// draws last element
+	civs.pop_back();							// removes last element from pool
 
-        slot_jumper++; // j incremented to keep up with i
-    }
+    std::string civ_name_str = ConvertToString(civ_name);
 
-    civ_name = GetCivName(index_given);
-
-    if (index_given < 0 || index_given >= sizeof(civ_is_available)) MessageBox(hWnd, L"Out of bounds! Line 677.\nRedrawing...", L"Error", MB_OK);
-    if (index_given >= 0 && index_given < sizeof(civ_is_available)) civ_is_available[index_given] = false; // marks civ as unavailable
-	else  // in rare case of out of bounds exception, restarts function.
-    { 
-        DrawCiv(hWnd);
-        return;
-    }
-
-    
     iterator++;
-    civs_remaining--;
-
-
 
     // Update the labels
     label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(CIVS_MAX);
     SetWindowText(label_corner, label_text.c_str());
-    SetWindowTextA(label_centre, civ_name.c_str());
+    SetWindowTextA(label_centre, civ_name_str.c_str());
+    
 
     length = GetWindowTextLength(textfield_log);
     log_text.resize(length + 1);
@@ -778,71 +623,6 @@ void KillApplication()
     PostQuitMessage(0);
 }
 
-void DrawCivLogic()
-{                         // for unit testing
-    if (iterator == CIVS_MAX)
-    {
-        ResetProgram();
-
-    }
-
-
-    index_given = GetRandomIndex(civs_remaining);
-
-    slot_jumper = 0; 
-    for (int i = 0; i < CIVS_MAX; i++)
-    {
-        bool internal_reset = false;
-
-        while (!civ_is_available[slot_jumper])
-        { 
-            if (slot_jumper == CIVS_MAX)
-            {    
-                internal_reset = true;
-                slot_jumper = 0;
-            }
-            slot_jumper++;
-            if (slot_jumper >= CIVS_MAX && internal_reset == true)
-            {  
-                internal_reset = false;
-                break;
-            }
-        }
-        if (i == index_given)
-        {
-
-            index_given = slot_jumper; 
-
-            break; 
-        }
-
-        slot_jumper++; 
-    }
-
-    civ_name = GetCivName(index_given);
-
-    if (index_given < 0 || index_given >= sizeof(civ_is_available)) accessor_out_of_bounds = true;
-	else accessor_out_of_bounds = false;
-    if (index_given >= 0 && index_given < sizeof(civ_is_available))
-    {
-        civ_is_available[index_given] = false; 
-		times_drawn[index_given]++; 
-    }
-    else
-    { 
-        DrawCivLogic();
-        return;
-    }
-
-
-    iterator++;
-    civs_remaining--;
-
-
-
-    
-
-}
 
 void CreateUnderlineFont()
 {
@@ -851,4 +631,11 @@ void CreateUnderlineFont()
     GetObject(hFont, sizeof(LOGFONT), &lf);
     lf.lfUnderline = TRUE;
     font_underline = CreateFontIndirect(&lf);
+}
+
+std::string ConvertToString(const std::wstring& wstr) {
+    int bufferSize = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    std::string str(bufferSize, 0);
+    WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, &str[0], bufferSize, nullptr, nullptr);
+    return str;
 }
