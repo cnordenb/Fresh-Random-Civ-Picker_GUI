@@ -12,15 +12,18 @@
 #pragma comment(lib, "comctl32.lib")
 
 #define IDM_TOGGLE_CHECK 32771
-#define CIVS_MAX 45
+#define MAX_CIVS 45
 #define MAX_LOADSTRING 100
 #define HOTKEY_ID_TAB 1
 #define HOTKEY_ID_SPACE 2
 #define HOTKEY_ID_RETURN 3
 #define HOTKEY_ID_ESC 4
 #define DT_UNDERLINE 0x80000000
-#define LENGTH_MAX 10 // currently longest civ name is 10 characters (portuguese)
-
+#define MAX_LENGTH 10 // currently longest civ name is 10 characters (portuguese)
+#define MIN_WIDTH 400
+#define MIN_HEIGHT 300
+#define BUTTON_WIDTH 100
+#define BUTTON_HEIGHT 30
 
 
 // Global Variables
@@ -39,13 +42,13 @@ HBRUSH brush_white;
 HBRUSH brush_black;
 int iterator = 0; // Global variable to keep track of the count
 int length = GetWindowTextLength(textfield_log);
-std::wstring label_text = std::to_wstring(iterator + 1) + L"/" + std::to_wstring(CIVS_MAX);
+std::wstring label_text = std::to_wstring(iterator + 1) + L"/" + std::to_wstring(MAX_CIVS);
 std::wstring log_entry;
 std::wstring log_text;
 std::wstring hlabel_default;
 bool mode_dark = false;
 bool accessor_out_of_bounds = false;             // for unit testing
-int times_drawn[CIVS_MAX] = { 0 };               // for unit testing
+int times_drawn[MAX_CIVS] = { 0 };               // for unit testing
 HFONT font_underline = NULL;
 HWND tab;
 std::vector<std::wstring> civs;
@@ -83,7 +86,7 @@ void CreateTabs(HWND hWnd)
     // Create the tab control
     tab = CreateWindow(WC_TABCONTROL, L"",
         WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
-        0, 0, 400, 300,
+        0, 0, MIN_WIDTH, MIN_HEIGHT,
         hWnd, NULL, instance, NULL);
 
     // Add tabs
@@ -248,8 +251,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
             0,         // x position 
             0,         // y position 
-            100,        // Button width
-            30,         // Button height
+            BUTTON_WIDTH,      
+            BUTTON_HEIGHT,      
             hWnd,       // Parent window
             (HMENU)1,       // No menu.
             (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
@@ -261,8 +264,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
 		    10,         // x position 
 			200,         // y position 
-			100,        // Button width
-			30,         // Button height
+			BUTTON_WIDTH,       
+			BUTTON_HEIGHT,         
 			hWnd,       // Parent window
 			(HMENU)2,       // No menu.
 			(HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
@@ -560,7 +563,7 @@ void ResetProgram()
 
     iterator = 0;
 
-    SetWindowText(label_corner, (L"0/" + std::to_wstring(CIVS_MAX)).c_str());     // resets remaining civs label
+    SetWindowText(label_corner, (L"0/" + std::to_wstring(MAX_CIVS)).c_str());     // resets remaining civs label
     SetWindowText(label_centre, L"?");                                      // resets drawn civ label
 
 
@@ -582,7 +585,7 @@ void DrawCiv()
     iterator++;
 
     // Update the labels
-    label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(CIVS_MAX);
+    label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(MAX_CIVS);
     SetWindowText(label_corner, label_text.c_str());
     SetWindowTextA(label_centre, civ_name_str.c_str());
     
@@ -592,9 +595,9 @@ void DrawCiv()
     GetWindowText(textfield_log, &log_text[0], length + 1);
     log_text.pop_back(); // Remove the null terminator
 
-    log_entry = std::wstring(civ_name.begin(), civ_name.end()) + L" (" + std::to_wstring(iterator) + L"/" + std::to_wstring(CIVS_MAX) + L")" + L"\r\n";
+    log_entry = std::wstring(civ_name.begin(), civ_name.end()) + L" (" + std::to_wstring(iterator) + L"/" + std::to_wstring(MAX_CIVS) + L")" + L"\r\n";
     log_text = log_entry + log_text;
-    if (iterator == CIVS_MAX) log_text += L"\r\n";
+    if (iterator == MAX_CIVS) log_text += L"\r\n";
 
 
     SetWindowText(textfield_log, log_text.c_str());
@@ -636,7 +639,7 @@ void CreateUnderlineFont()
 
 std::string ConvertToString(const std::wstring& wstr) {
     std::string str;
-    str.reserve(LENGTH_MAX);
-    WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, &str[0], LENGTH_MAX, nullptr, nullptr);
+    str.reserve(MAX_LENGTH);
+    WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, &str[0], MAX_LENGTH, nullptr, nullptr);
     return str;
 }

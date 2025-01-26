@@ -5,11 +5,11 @@
 TEST(CompletenessTest, AllCivsAreDrawn) {
 	ResetProgram();
 
-	for (int i = 0; i < CIVS_MAX; i++) {
+	for (int i = 0; i < MAX_CIVS; i++) {
 		DrawCiv();
 	}
 
-	for (int i = 0; i < CIVS_MAX; i++) {
+	for (int i = 0; i < MAX_CIVS; i++) {
 		EXPECT_EQ(size(civs), 0);
 	}
 }
