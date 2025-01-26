@@ -19,6 +19,7 @@
 #define HOTKEY_ID_RETURN 3
 #define HOTKEY_ID_ESC 4
 #define DT_UNDERLINE 0x80000000
+#define LENGTH_MAX 10 // currently longest civ name is 10 characters (portuguese)
 
 
 
@@ -634,8 +635,8 @@ void CreateUnderlineFont()
 }
 
 std::string ConvertToString(const std::wstring& wstr) {
-    int bufferSize = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, nullptr, 0, nullptr, nullptr);
-    std::string str(bufferSize, 0);
-    WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, &str[0], bufferSize, nullptr, nullptr);
+    std::string str;
+    str.reserve(LENGTH_MAX);
+    WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, &str[0], LENGTH_MAX, nullptr, nullptr);
     return str;
 }
