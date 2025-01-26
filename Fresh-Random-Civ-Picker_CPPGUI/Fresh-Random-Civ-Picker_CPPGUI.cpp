@@ -567,7 +567,7 @@ void ResetProgram()
 
 void DrawCiv()
 {
-	if (size(civs) == 0) ResetProgram();
+	if (size(civs) == 0) ResetProgram();        // if all civs have been drawn, reset progrma and civ vector
 
     std::random_device rd;      // seeding random number
 	std::mt19937 mt(rd());      // with Mersenne Twister
