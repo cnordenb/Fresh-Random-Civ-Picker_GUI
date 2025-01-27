@@ -24,6 +24,7 @@
     <ProjectGuid>{1f6f8e1b-bcfc-4d35-9647-0d8096e0ca6b}</ProjectGuid>
     <RootNamespace>WindowsProject1</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>FRCP_GUI</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -130,10 +131,10 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="Fresh-Random-Civ-Picker_CPPGUI.h" />
+    <ClInclude Include="FRCP_GUI.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Fresh-Random-Civ-Picker_CPPGUI.cpp" />
+    <ClCompile Include="FRCP_GUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Fresh Random Civ Picker.ico" />
@@ -141,7 +142,7 @@
     <Image Include="social-preview.png" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Fresh-Random-Civ-Picker_CPPGUI.rc" />
+    <ResourceCompile Include="FRCP_GUI.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="formatting_notes.md" />

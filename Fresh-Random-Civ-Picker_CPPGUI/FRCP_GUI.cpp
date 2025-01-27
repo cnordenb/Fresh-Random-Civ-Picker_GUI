@@ -1,5 +1,5 @@
 #include "framework.h"
-#include "Fresh-Random-Civ-Picker_CPPGUI.h"
+#include "FRCP_GUI.h"
 #include <iostream>
 #include <string>
 #include <random>
