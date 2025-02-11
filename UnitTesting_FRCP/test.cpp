@@ -1,6 +1,6 @@
 #include "pch.h"
 #include <gtest/gtest.h>
-#include "../Fresh-Random-Civ-Picker_CPPGUI/Fresh-Random-Civ-Picker_CPPGUI.cpp"
+#include "../Fresh-Random-Civ-Picker_CPPGUI/FRCP_GUI.cpp"
 
 TEST(CompletenessTest, AllCivsAreDrawn) {
 	ResetProgram();

@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by WindowsProject1.rc
+// Used by FRCP_GUI.rc
 //
 #define IDC_MYICON                      2
 #define IDD_WINDOWSPROJECT1_DIALOG      102
@@ -11,12 +11,15 @@
 #define IDI_WINDOWSPROJECT1             107
 #define IDI_SMALL                       108
 #define IDC_WINDOWSPROJECT1             109
+#define IDD_OPTIONS                     110
 #define IDR_MAINFRAME                   128
+#define IDC_HYPERLINK                   1002
+#define IDC_CHECKBOX1					1003
 #define ID_FILE_TOGGLECHECK             32771
 #define IDM_GITHUB                      32772
 #define IDM_WEBVERSION                  32773
+#define IDM_OPTIONS                     32774
 #define IDC_STATIC                      -1
-#define IDC_HYPERLINK				    1002
 
 // Next default values for new objects
 // 
@@ -24,7 +27,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        130
-#define _APS_NEXT_COMMAND_VALUE         32773
+#define _APS_NEXT_COMMAND_VALUE         32775
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           110
 #endif

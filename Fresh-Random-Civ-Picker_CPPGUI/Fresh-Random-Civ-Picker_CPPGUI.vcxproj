@@ -109,6 +109,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -137,6 +138,51 @@
     <ClCompile Include="FRCP_GUI.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="civ_icons\armenians.bmp" />
+    <Image Include="civ_icons\aztecs.bmp" />
+    <Image Include="civ_icons\bengalis.bmp" />
+    <Image Include="civ_icons\berber.bmp" />
+    <Image Include="civ_icons\bohemians.bmp" />
+    <Image Include="civ_icons\britons.bmp" />
+    <Image Include="civ_icons\bulgarians.bmp" />
+    <Image Include="civ_icons\burgundians.bmp" />
+    <Image Include="civ_icons\burmese.bmp" />
+    <Image Include="civ_icons\byzantines.bmp" />
+    <Image Include="civ_icons\celts.bmp" />
+    <Image Include="civ_icons\chinese.bmp" />
+    <Image Include="civ_icons\cumans.bmp" />
+    <Image Include="civ_icons\dravidians.bmp" />
+    <Image Include="civ_icons\ethiopians.bmp" />
+    <Image Include="civ_icons\franks.bmp" />
+    <Image Include="civ_icons\georgians.bmp" />
+    <Image Include="civ_icons\goths.bmp" />
+    <Image Include="civ_icons\gurjaras.bmp" />
+    <Image Include="civ_icons\huns.bmp" />
+    <Image Include="civ_icons\inca.bmp" />
+    <Image Include="civ_icons\indians.bmp" />
+    <Image Include="civ_icons\italians.bmp" />
+    <Image Include="civ_icons\japanese.bmp" />
+    <Image Include="civ_icons\khmer.bmp" />
+    <Image Include="civ_icons\koreans.bmp" />
+    <Image Include="civ_icons\lithuanians.bmp" />
+    <Image Include="civ_icons\magyars.bmp" />
+    <Image Include="civ_icons\malay.bmp" />
+    <Image Include="civ_icons\malians.bmp" />
+    <Image Include="civ_icons\mayans.bmp" />
+    <Image Include="civ_icons\mongols.bmp" />
+    <Image Include="civ_icons\persians.bmp" />
+    <Image Include="civ_icons\poles.bmp" />
+    <Image Include="civ_icons\portuguese.bmp" />
+    <Image Include="civ_icons\romans.bmp" />
+    <Image Include="civ_icons\saracens.bmp" />
+    <Image Include="civ_icons\sicilians.bmp" />
+    <Image Include="civ_icons\slavs.bmp" />
+    <Image Include="civ_icons\spanish.bmp" />
+    <Image Include="civ_icons\tatars.bmp" />
+    <Image Include="civ_icons\teutons.bmp" />
+    <Image Include="civ_icons\turks.bmp" />
+    <Image Include="civ_icons\vietnamese.bmp" />
+    <Image Include="civ_icons\vikings.bmp" />
     <Image Include="Fresh Random Civ Picker.ico" />
     <Image Include="small_Fresh Random Civ Picker.ico" />
     <Image Include="social-preview.png" />
