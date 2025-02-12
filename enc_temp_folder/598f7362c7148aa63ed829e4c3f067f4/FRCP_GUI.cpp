@@ -72,8 +72,6 @@ HWND civ_checkbox[] = { checkbox_armenians, checkbox_aztecs, checkbox_bengalis, 
                         checkbox_saracens, checkbox_sicilians, checkbox_slavs, checkbox_spanish, checkbox_tatars,
                         checkbox_teutons, checkbox_turks, checkbox_vietnamese, checkbox_vikings };
 
-HWND checkbox_enableall;
-
 
 HBRUSH brush_white;
 HBRUSH brush_black;
@@ -473,7 +471,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		civ_checkbox[26] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 130, 100, 20, 28, L"Lithuanians");
 		civ_checkbox[27] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 130, 100, 20, 29, L"Magyars");
 		civ_checkbox[28] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 130, 100, 20, 30, L"Malay");
-		civ_checkbox[29] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 130, 100, 20, 31, L"Malians");
+		civ_checkbox[29] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 130, 100, 20, 31, L"Malian");
 		// row 7
 		civ_checkbox[30] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 150, 100, 20, 32, L"Mayans");
 		civ_checkbox[31] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 150, 100, 20, 33, L"Mongols");
@@ -1143,8 +1141,4 @@ void HideCustomPoolCheckboxes() {
 	for (int i = 0; i < 45; i++) {
 		ShowWindow(civ_checkbox[i], SW_HIDE);
 	}
-}
-
-void EnableAll() {
-
 }
