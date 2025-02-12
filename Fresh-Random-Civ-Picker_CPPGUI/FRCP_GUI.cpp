@@ -11,7 +11,10 @@
 #include <shlwapi.h>
 #include <strsafe.h>
 #include <gdiplus.h>
+#include <mmsystem.h>
 
+
+#pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "comctl32.lib")
@@ -56,7 +59,7 @@ HBITMAP icon_armenians, icon_aztecs, icon_bengalis, icon_berber, icon_bohemians,
         icon_lithuanians, icon_magyars, icon_malay, icon_malians, icon_mayans,
         icon_mongols, icon_persians, icon_poles, icon_portuguese, icon_romans,
         icon_saracens, icon_sicilians, icon_slavs, icon_spanish, icon_tatars,
-        icon_teutons, icon_turks, icon_vietnamese, icon_vikings, icon_default;
+        icon_teutons, icon_turks, icon_vietnamese, icon_vikings, icon_random;
 
 int iterator = 0; // Global variable to keep track of the count
 int length = GetWindowTextLength(textfield_log);
@@ -65,8 +68,10 @@ std::wstring label_text = std::to_wstring(iterator + 1) + L"/" + std::to_wstring
 std::wstring log_entry;
 std::wstring log_text;
 std::wstring hlabel_default;
+std::wstring current_civ = L"Random";
 bool mode_dark = false;
 bool icons_enabled = false;
+bool jingles_enabled = false;
 bool accessor_out_of_bounds = false;             // for unit testing
 int times_drawn[MAX_CIVS] = { 0 };               // for unit testing
 HFONT font_underline = NULL;
@@ -84,6 +89,7 @@ void EnableHotkeys(HWND);
 void DisableHotkeys(HWND);
 void CreateUnderlineFont();
 void LoadImages();
+void PlayJingle(std::wstring);
 std::string ConvertToString(const std::wstring&);
 
 
@@ -398,7 +404,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
         break;
 
-    case WM_ACTIVATE: // re-enables hotkeys when window returns to foreground
+    case WM_ACTIVATE: // re-enables hotkeys when window returns to foreground 
     
 		if (wParam == WA_ACTIVE || wParam == WA_CLICKACTIVE) EnableHotkeys(hWnd);
 		else if (wParam == WA_INACTIVE) DisableHotkeys(hWnd);
@@ -584,14 +590,16 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
     {
         
         //oldProc = (WNDPROC)SetWindowLongPtr(hwndHyperlink, GWLP_WNDPROC, (LONG_PTR)HyperlinkProc);
-        CheckDlgButton(hDlg, IDC_CHECKBOX1, icons_enabled ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(hDlg, IDC_CHECKBOX_ICONS, icons_enabled ? BST_CHECKED : BST_UNCHECKED);
+		CheckDlgButton(hDlg, IDC_CHECKBOX_JINGLES, jingles_enabled ? BST_CHECKED : BST_UNCHECKED);
 
         return(INT_PTR)TRUE;
     }
     case WM_COMMAND:
         if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
         {
-			icons_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX1) == BST_CHECKED;
+			icons_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_ICONS) == BST_CHECKED;
+			jingles_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_JINGLES) == BST_CHECKED;
 
             // Handle the checkbox state as needed
             if (icons_enabled && tab_current == 0)
@@ -602,6 +610,13 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
             {
                 ShowWindow(civ_icon, SW_HIDE);
             }
+
+            // Handle the checkbox state as needed
+            if (jingles_enabled) PlayJingle(current_civ);
+            
+            
+
+
 
             EndDialog(hDlg, LOWORD(wParam));
             return(INT_PTR)TRUE;
@@ -662,11 +677,13 @@ void ResetProgram()
         L"Poles", L"Portuguese", L"Romans", L"Saracens", L"Sicilians", L"Slavs", L"Spanish", 
         L"Tatars", L"Teutons", L"Turks", L"Vietnamese", L"Vikings" };
 
+	current_civ = L"Random";
     iterator = 0;
 
     SetWindowText(label_corner, (L"0/" + std::to_wstring(MAX_CIVS)).c_str());     // resets remaining civs label
     SetWindowText(label_centre, L"?");                                      // resets drawn civ label
-    SendMessageW(civ_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_default);
+    SendMessageW(civ_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_random);
+	if (jingles_enabled) PlayJingle(current_civ);
 
 
 }
@@ -679,10 +696,10 @@ void DrawCiv()
 	std::mt19937 mt(rd());      // with Mersenne Twister
 
 	std::shuffle(civs.begin(), civs.end(), mt); // shuffling civs vector
-	std::wstring civ_name = civs.back();		// draws last element
+	current_civ = civs.back();		// draws last element
 	civs.pop_back();							// removes last element from pool
 
-    std::string civ_name_str = ConvertToString(civ_name);
+    std::string civ_name_str = ConvertToString(current_civ);
 
     iterator++;
 
@@ -691,8 +708,10 @@ void DrawCiv()
     SetWindowText(label_corner, label_text.c_str());
     SetWindowTextA(label_centre, civ_name_str.c_str());
 
-    HBITMAP drawn_civ_icon = FetchIcon(civ_name);
+    HBITMAP drawn_civ_icon = FetchIcon(current_civ);
     SendMessageW(civ_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
+
+    
    
 
 
@@ -701,7 +720,7 @@ void DrawCiv()
     GetWindowText(textfield_log, &log_text[0], length + 1);
     log_text.pop_back(); // Remove the null terminator
 
-    log_entry = std::wstring(civ_name.begin(), civ_name.end()) + L" (" + std::to_wstring(iterator) + L"/" + std::to_wstring(MAX_CIVS) + L")" + L"\r\n";
+    log_entry = std::wstring(current_civ.begin(), current_civ.end()) + L" (" + std::to_wstring(iterator) + L"/" + std::to_wstring(MAX_CIVS) + L")" + L"\r\n";
     log_text = log_entry + log_text;
     if (iterator == MAX_CIVS) log_text += L"\r\n";
 
@@ -709,6 +728,11 @@ void DrawCiv()
 
     SetWindowText(textfield_log, log_text.c_str());
     if (tab_current == 1) ShowWindow(civ_icon, SW_HIDE);
+
+    if (jingles_enabled) PlayJingle(current_civ);
+    
+
+
 
 }
 
@@ -798,7 +822,7 @@ void LoadImages() {
 	icon_turks = (HBITMAP)LoadImageW(NULL, L"civ_icons\\turks.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_vietnamese = (HBITMAP)LoadImageW(NULL, L"civ_icons\\vietnamese.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_vikings = (HBITMAP)LoadImageW(NULL, L"civ_icons\\vikings.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    icon_default = (HBITMAP)LoadImageW(NULL, L"civ_icons\\random.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    icon_random = (HBITMAP)LoadImageW(NULL, L"civ_icons\\random.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 }
 
 HBITMAP FetchIcon(std::wstring civ_name) {
@@ -847,4 +871,24 @@ HBITMAP FetchIcon(std::wstring civ_name) {
 	if (civ_name == L"Turks") return icon_turks;
 	if (civ_name == L"Vietnamese") return icon_vietnamese;
 	if (civ_name == L"Vikings") return icon_vikings;
+}
+
+void PlayJingle(std::wstring civ_name) {
+
+
+
+    std::wstring processed_civ_name = civ_name;
+    processed_civ_name[0] = std::tolower(processed_civ_name[0]);
+	std::wstring jingle_path = L"jingles\\" + processed_civ_name + L".wav";
+
+    
+    
+    PlaySound(jingle_path.c_str(), NULL, SND_FILENAME | SND_ASYNC);
+
+
+    
+
+	
+    
+    
 }
