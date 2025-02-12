@@ -1,3 +1,20 @@
+/*
+TODO
+
+- add ui sounds toggle to options
+- add edition views in custom civ pool: radio buttons for editions + group checkboxes for dlc's
+    - fetch dlc and edition icons
+- add toggleable remaining civs text field to log tab
+- add tech tree link button to draw tab
+    - fetch tech tree icon
+- add hotkeys for option toggles
+- implement ini file for persistent settings
+- implement log file for persistent states
+
+
+*/
+
+
 #include "framework.h"
 #include "FRCP_GUI.h"
 #include <iostream>
@@ -45,7 +62,7 @@ WCHAR window_class[MAX_LOADSTRING];            // the main window class name
 
 HWND label_corner, label_centre;    // labels
 
-HWND button_draw, button_reset;	    // buttons
+HWND button_draw, button_reset, button_enableall, button_disableall;	    // buttons
 
 HWND textfield_log;				 // textfield for log tab
 
@@ -72,8 +89,6 @@ HWND civ_checkbox[] = { checkbox_armenians, checkbox_aztecs, checkbox_bengalis, 
                         checkbox_saracens, checkbox_sicilians, checkbox_slavs, checkbox_spanish, checkbox_tatars,
                         checkbox_teutons, checkbox_turks, checkbox_vietnamese, checkbox_vikings };
 
-HWND checkbox_enableall;
-
 
 HBRUSH brush_white;
 HBRUSH brush_black;
@@ -98,11 +113,22 @@ std::wstring log_text;
 std::wstring hlabel_default;
 std::wstring current_civ = L"Random";
 
+std::wstring civ_index[] = { L"Armenians", L"Aztecs", L"Bengalis", L"Berbers", L"Bohemians",       // array of civ names
+							L"Britons", L"Bulgarians", L"Burgundians", L"Burmese", L"Byzantines",
+							L"Celts", L"Chinese", L"Cumans", L"Dravidians", L"Ethiopians",
+							L"Franks", L"Georgians", L"Goths", L"Gurjaras", L"Huns", L"Incas",
+							L"Hindustanis", L"Italians", L"Japanese", L"Khmer", L"Koreans",
+							L"Lithuanians", L"Magyars", L"Malay", L"Malians", L"Mayans",
+							L"Mongols", L"Persians", L"Poles", L"Portuguese", L"Romans",
+							L"Saracens", L"Sicilians", L"Slavs", L"Spanish", L"Tatars",
+							L"Teutons", L"Turks", L"Vietnamese", L"Vikings" };
+
 bool mode_dark = false;
 bool icons_enabled = false;
 bool jingles_enabled = false;
 bool labels_enabled = true;
 bool legacy_jingle_enabled = false;
+bool ui_sounds_enabled = false;
 
 bool custom_civ_pool = false;
 std::vector<std::pair<std::wstring, bool>> civ_enabled;
@@ -140,6 +166,14 @@ void SetCivStatus(const std::wstring, bool);
 bool GetCivStatus(const std::wstring);
 void ShowCustomPoolCheckboxes();
 void HideCustomPoolCheckboxes();
+
+void EnableAll();
+void DisableAll();
+
+void ShowDrawTab(bool);
+void ShowLogTab(bool);
+void ShowCustomTab(bool);
+
 
 
 std::string ConvertToString(const std::wstring&);
@@ -189,38 +223,31 @@ void CreateTabs(HWND hWnd)
 // Function to show/hide components based on the selected tab
 void ShowTabComponents(int tabIndex)
 {
+    if (ui_sounds_enabled) PlaySound(L"tab_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
     if (tabIndex == 0)
     {
         tab_current = 0;
-        ShowWindow(button_draw, SW_SHOW);
-        ShowWindow(label_corner, SW_SHOW);
-        if (labels_enabled) ShowWindow(label_centre, SW_SHOW);
-		ShowWindow(textfield_log, SW_HIDE);
-		ShowWindow(button_reset, SW_SHOW);
-        if (icons_enabled) ShowWindow(civ_icon, SW_SHOW);
-		HideCustomPoolCheckboxes();
+		ShowLogTab(false);
+		ShowCustomTab(false);
+
+        ShowDrawTab(true);
     }
     else if (tabIndex == 1)
     {
         tab_current = 1;
-        ShowWindow(button_draw, SW_HIDE);
-        ShowWindow(label_corner, SW_HIDE);
-        ShowWindow(label_centre, SW_HIDE);
-		ShowWindow(button_reset, SW_HIDE);
-		ShowWindow(textfield_log, SW_SHOW);
-        if (icons_enabled) ShowWindow(civ_icon, SW_HIDE);
-        HideCustomPoolCheckboxes();
+		ShowDrawTab(false);
+		ShowCustomTab(false);
+
+        ShowLogTab(true);
     }
     else if (tabIndex == 2)
     {
         tab_current = 2;
-        ShowWindow(button_draw, SW_HIDE);
-        ShowWindow(label_corner, SW_HIDE);
-        ShowWindow(label_centre, SW_HIDE);
-        ShowWindow(button_reset, SW_HIDE);
-        ShowWindow(textfield_log, SW_HIDE);
-        if (icons_enabled) ShowWindow(civ_icon, SW_HIDE);
-        ShowCustomPoolCheckboxes();
+		ShowDrawTab(false);
+		ShowLogTab(false);
+
+		ShowCustomTab(true);
+
     }
 }
 
@@ -438,65 +465,98 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             NULL,
             NULL);  // Pointer not needed.
 
+        button_enableall = CreateWindow(
+            L"BUTTON",  // Predefined class; Unicode assumed 
+            L"Enable All",      // Button text 
+            WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
+            10,         // x position 
+            250,         // y position 
+            BUTTON_WIDTH,
+            BUTTON_HEIGHT,
+            hWnd,       // Parent window
+            (HMENU)3,       // No menu.
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+            NULL);      // Pointer not needed.
+
+        button_disableall = CreateWindow(
+            L"BUTTON",  // Predefined class; Unicode assumed 
+            L"Disable All",      // Button text 
+            WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
+            125,         // x position 
+            250,         // y position 
+            BUTTON_WIDTH,
+            BUTTON_HEIGHT,
+            hWnd,       // Parent window
+            (HMENU)4,       // No menu.
+            (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+            NULL);      // Pointer not needed.
+
         // row 1
-        civ_checkbox[0] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 30, 100, 20, 3, L"Armenians");
-        civ_checkbox[1] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 30, 100, 20, 4, L"Aztecs");
-		civ_checkbox[2] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 30, 100, 20, 5, L"Bengalis");
-        civ_checkbox[3] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 30, 100, 20, 6, L"Berbers");
-        civ_checkbox[4] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 30, 100, 20, 6, L"Bohemians");
+        civ_checkbox[0] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 30, 100, 20, 5, L"Armenians");
+        civ_checkbox[1] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 30, 100, 20, 6, L"Aztecs");
+		civ_checkbox[2] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 30, 100, 20, 7, L"Bengalis");
+        civ_checkbox[3] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 30, 100, 20, 8, L"Berbers");
+        civ_checkbox[4] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 30, 100, 20, 9, L"Bohemians");
         // row 2
-		civ_checkbox[5] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 50, 100, 20, 7, L"Britons");
-		civ_checkbox[6] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 50, 100, 20, 8, L"Bulgarians");
-		civ_checkbox[7] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 50, 100, 20, 9, L"Burgundians");
-		civ_checkbox[8] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 50, 100, 20, 10, L"Burmese");
-		civ_checkbox[9] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 50, 100, 20, 11, L"Byzantines");
+		civ_checkbox[5] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 50, 100, 20, 10, L"Britons");
+		civ_checkbox[6] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 50, 100, 20, 11, L"Bulgarians");
+		civ_checkbox[7] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 50, 100, 20, 12, L"Burgundians");
+		civ_checkbox[8] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 50, 100, 20, 13, L"Burmese");
+		civ_checkbox[9] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 50, 100, 20, 14, L"Byzantines");
 		// row 3
-		civ_checkbox[10] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 70, 100, 20, 12, L"Celts");
-		civ_checkbox[11] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 70, 100, 20, 13, L"Chinese");
-		civ_checkbox[12] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 70, 100, 20, 14, L"Cumans");
-		civ_checkbox[13] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 70, 100, 20, 15, L"Dravidians");
-		civ_checkbox[14] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 70, 100, 20, 16, L"Ethiopians");
+		civ_checkbox[10] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 70, 100, 20, 15, L"Celts");
+		civ_checkbox[11] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 70, 100, 20, 16, L"Chinese");
+		civ_checkbox[12] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 70, 100, 20, 17, L"Cumans");
+		civ_checkbox[13] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 70, 100, 20, 18, L"Dravidians");
+		civ_checkbox[14] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 70, 100, 20, 19, L"Ethiopians");
 		// row 4
-		civ_checkbox[15] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 90, 100, 20, 17, L"Franks");
-		civ_checkbox[16] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 90, 100, 20, 18, L"Georgians");
-		civ_checkbox[17] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 90, 100, 20, 19, L"Goths");
-		civ_checkbox[18] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 90, 100, 20, 20, L"Gurjaras");
-		civ_checkbox[19] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 90, 100, 20, 21, L"Huns");
+		civ_checkbox[15] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 90, 100, 20, 20, L"Franks");
+		civ_checkbox[16] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 90, 100, 20, 21, L"Georgians");
+		civ_checkbox[17] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 90, 100, 20, 22, L"Goths");
+		civ_checkbox[18] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 90, 100, 20, 23, L"Gurjaras");
+		civ_checkbox[19] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 90, 100, 20, 24, L"Huns");
 		// row 5
-		civ_checkbox[20] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 110, 100, 20, 22, L"Incas");
-		civ_checkbox[21] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 110, 100, 20, 23, L"Hindustanis");
-		civ_checkbox[22] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 110, 100, 20, 24, L"Italians");
-		civ_checkbox[23] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 110, 100, 20, 25, L"Japanese");
-		civ_checkbox[24] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 110, 100, 20, 26, L"Khmer");
+		civ_checkbox[20] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 110, 100, 20, 25, L"Incas");
+		civ_checkbox[21] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 110, 100, 20, 26, L"Hindustanis");
+		civ_checkbox[22] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 110, 100, 20, 27, L"Italians");
+		civ_checkbox[23] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 110, 100, 20, 28, L"Japanese");
+		civ_checkbox[24] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 110, 100, 20, 29, L"Khmer");
 		// row 6
-		civ_checkbox[25] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 130, 100, 20, 27, L"Koreans");
-		civ_checkbox[26] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 130, 100, 20, 28, L"Lithuanians");
-		civ_checkbox[27] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 130, 100, 20, 29, L"Magyars");
-		civ_checkbox[28] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 130, 100, 20, 30, L"Malay");
-		civ_checkbox[29] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 130, 100, 20, 31, L"Malians");
+		civ_checkbox[25] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 130, 100, 20, 30, L"Koreans");
+		civ_checkbox[26] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 130, 100, 20, 31, L"Lithuanians");
+		civ_checkbox[27] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 130, 100, 20, 32, L"Magyars");
+		civ_checkbox[28] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 130, 100, 20, 33, L"Malay");
+		civ_checkbox[29] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 130, 100, 20, 34, L"Malians");
 		// row 7
-		civ_checkbox[30] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 150, 100, 20, 32, L"Mayans");
-		civ_checkbox[31] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 150, 100, 20, 33, L"Mongols");
-		civ_checkbox[32] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 150, 100, 20, 34, L"Persians");
-		civ_checkbox[33] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 150, 100, 20, 35, L"Poles");
-		civ_checkbox[34] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 150, 100, 20, 36, L"Portuguese");
+		civ_checkbox[30] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 150, 100, 20, 35, L"Mayans");
+		civ_checkbox[31] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 150, 100, 20, 36, L"Mongols");
+		civ_checkbox[32] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 150, 100, 20, 37, L"Persians");
+		civ_checkbox[33] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 150, 100, 20, 38, L"Poles");
+		civ_checkbox[34] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 150, 100, 20, 39, L"Portuguese");
 		// row 8
-		civ_checkbox[35] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 170, 100, 20, 37, L"Romans");
-		civ_checkbox[36] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 170, 100, 20, 38, L"Saracens");
-		civ_checkbox[37] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 170, 100, 20, 39, L"Sicilians");
-		civ_checkbox[38] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 170, 100, 20, 40, L"Slavs");
-		civ_checkbox[39] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 170, 100, 20, 41, L"Spanish");
+		civ_checkbox[35] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 170, 100, 20, 40, L"Romans");
+		civ_checkbox[36] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 170, 100, 20, 41, L"Saracens");
+		civ_checkbox[37] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 170, 100, 20, 42, L"Sicilians");
+		civ_checkbox[38] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 170, 100, 20, 43, L"Slavs");
+		civ_checkbox[39] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 170, 100, 20, 44, L"Spanish");
 		// row 9
-		civ_checkbox[40] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 190, 100, 20, 42, L"Tatars");
-		civ_checkbox[41] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 190, 100, 20, 43, L"Teutons");
-		civ_checkbox[42] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 190, 100, 20, 44, L"Turks");
-		civ_checkbox[43] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 190, 100, 20, 45, L"Vietnamese");
-		civ_checkbox[44] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 190, 100, 20, 46, L"Vikings");
+		civ_checkbox[40] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 190, 100, 20, 45, L"Tatars");
+		civ_checkbox[41] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 110, 190, 100, 20, 46, L"Teutons");
+		civ_checkbox[42] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 210, 190, 100, 20, 47, L"Turks");
+		civ_checkbox[43] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 190, 100, 20, 48, L"Vietnamese");
+		civ_checkbox[44] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 410, 190, 100, 20, 49, L"Vikings");
 		
 		
 		HideCustomPoolCheckboxes();
         ShowWindow(civ_icon, SW_HIDE);
+
+        ShowLogTab(false);
+        ShowCustomTab(false);
+
+
 		ShowWindow(textfield_log, SW_HIDE);
+
+		
 
 
 		ResetProgram();    // resetter is called in order to enable remaining civ indicator label (hLabel)
@@ -605,11 +665,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             ShowTabComponents(newTabIndex);
         }
 
-		if (wParam == HOTKEY_ID_SPACE) DrawCiv();           // space for drawing civ
+        if (wParam == HOTKEY_ID_SPACE) {
+			DrawCiv();           // space for drawing civ
 
-		if (wParam == HOTKEY_ID_RETURN) ResetProgram();            // return for resetting
+        }
 
-		if (wParam == HOTKEY_ID_ESC) KillApplication();                // escape for exiting
+
+        if (wParam == HOTKEY_ID_RETURN) {
+            ResetProgram();            // return for resetting
+
+        }
+            
+
+        if (wParam == HOTKEY_ID_ESC) {
+            if (ui_sounds_enabled) {
+                PlaySound(L"exit.wav", NULL, SND_FILENAME | SND_ASYNC);
+                Sleep(200);
+            }
+            
+            KillApplication();                // escape for exiting
+        }
+
 
     }
 	
@@ -621,17 +697,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         int wmId = LOWORD(wParam);
         // Parse the menu selections:     
             
-
+		if (ui_sounds_enabled && wmId >= 5 && wmId <= 49) {
+            PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+		}
 
         switch (wmId) 
         {
         case IDM_ABOUT:                                     // "About"
+            if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
             DialogBox(instance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
             break;
 		case IDM_EXIT:                                      // "Exit"
+            if (ui_sounds_enabled) PlaySound(L"exit.wav", NULL, SND_FILENAME | SND_ASYNC);
+            Sleep(200);
             DestroyWindow(hWnd);
             break;
 		case IDM_OPTIONS:								   // "Options"
+            if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
             DialogBox(instance, MAKEINTRESOURCE(IDD_OPTIONS), hWnd, OptionsDlgProc);
             break;
 		case IDM_TOGGLE_CHECK:                              // "Dark Mode (beta)"
@@ -647,9 +729,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             
             break;
 		case IDM_GITHUB:                                    // "GitHub"
+            if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
             ShellExecute(0, 0, L"https://github.com/cnordenb/Fresh-Random-Civ-Picker_CPPGUI", 0, 0, SW_SHOW);
             break;
 		case IDM_WEBVERSION:                                // "Web Version"
+            if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
 			ShellExecute(0, 0, L"https://cnordenb.github.io/Fresh-Random-Civ-Picker_web/", 0, 0, SW_SHOW);
 			break;
         case 1:                                             // "Draw"            
@@ -658,6 +742,194 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case 2:                                             // "Reset"
 			ResetProgram();
             break;
+		case 3:                                             // "Enable All"
+			EnableAll();
+            if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+			break;
+		case 4:                                             // "Disable All"
+			DisableAll();
+            if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+			break;
+		case 5:											                                // Armenians Checkbox
+			if (IsDlgButtonChecked(hWnd, 5) == BST_CHECKED) AddCiv(L"Armenians");
+			else RemoveCiv(L"Armenians");
+            break;
+		case 6:											                                // Aztecs Checkbox
+			if (IsDlgButtonChecked(hWnd, 6) == BST_CHECKED) AddCiv(L"Aztecs");
+			else RemoveCiv(L"Aztecs");
+            break;
+		case 7:											                                // Bengalis Checkbox
+			if (IsDlgButtonChecked(hWnd, 7) == BST_CHECKED) AddCiv(L"Bengalis");
+			else RemoveCiv(L"Bengalis");
+			break;
+		case 8:											                                // Berbers Checkbox
+			if (IsDlgButtonChecked(hWnd, 8) == BST_CHECKED) AddCiv(L"Berbers");
+			else RemoveCiv(L"Berbers");
+			break;
+		case 9:											                                // Bohemians Checkbox
+			if (IsDlgButtonChecked(hWnd, 9) == BST_CHECKED) AddCiv(L"Bohemians");
+			else RemoveCiv(L"Bohemians");
+			break;
+		case 10:											                            // Britons Checkbox
+			if (IsDlgButtonChecked(hWnd, 10) == BST_CHECKED) AddCiv(L"Britons");
+			else RemoveCiv(L"Britons");
+			break;
+		case 11:											                            // Bulgarians Checkbox
+			if (IsDlgButtonChecked(hWnd, 11) == BST_CHECKED) AddCiv(L"Bulgarians");
+			else RemoveCiv(L"Bulgarians");
+			break;
+		case 12:											                            // Burgundians Checkbox
+			if (IsDlgButtonChecked(hWnd, 12) == BST_CHECKED) AddCiv(L"Burgundians");
+			else RemoveCiv(L"Burgundians");
+			break;
+		case 13:											                            // Burmese Checkbox
+			if (IsDlgButtonChecked(hWnd, 13) == BST_CHECKED) AddCiv(L"Burmese");
+			else RemoveCiv(L"Burmese");
+			break;
+		case 14:											                            // Byzantines Checkbox
+			if (IsDlgButtonChecked(hWnd, 14) == BST_CHECKED) AddCiv(L"Byzantines");
+			else RemoveCiv(L"Byzantines");
+            break;
+		case 15:											                            // Celts Checkbox
+			if (IsDlgButtonChecked(hWnd, 15) == BST_CHECKED) AddCiv(L"Celts");
+			else RemoveCiv(L"Celts");
+			break;
+		case 16:											                            // Chinese Checkbox
+			if (IsDlgButtonChecked(hWnd, 16) == BST_CHECKED) AddCiv(L"Chinese");
+			else RemoveCiv(L"Chinese");
+			break;
+		case 17:											                            // Cumans Checkbox
+			if (IsDlgButtonChecked(hWnd, 17) == BST_CHECKED) AddCiv(L"Cumans");
+			else RemoveCiv(L"Cumans");
+			break;
+		case 18:											                            // Dravidians Checkbox
+			if (IsDlgButtonChecked(hWnd, 18) == BST_CHECKED) AddCiv(L"Dravidians");
+			else RemoveCiv(L"Dravidians");
+			break;
+		case 19:											                            // Ethiopians Checkbox
+			if (IsDlgButtonChecked(hWnd, 19) == BST_CHECKED) AddCiv(L"Ethiopians");
+			else RemoveCiv(L"Ethiopians");
+			break;
+		case 20:											                            // Franks Checkbox
+			if (IsDlgButtonChecked(hWnd, 20) == BST_CHECKED) AddCiv(L"Franks");
+			else RemoveCiv(L"Franks");
+			break;
+		case 21:											                            // Georgians Checkbox
+			if (IsDlgButtonChecked(hWnd, 21) == BST_CHECKED) AddCiv(L"Georgians");
+			else RemoveCiv(L"Georgians");
+			break;
+		case 22:											                            // Goths Checkbox
+			if (IsDlgButtonChecked(hWnd, 22) == BST_CHECKED) AddCiv(L"Goths");
+			else RemoveCiv(L"Goths");
+			break;
+		case 23:											                            // Gurjaras Checkbox
+			if (IsDlgButtonChecked(hWnd, 23) == BST_CHECKED) AddCiv(L"Gurjaras");
+			else RemoveCiv(L"Gurjaras");
+			break;
+		case 24:											                            // Huns Checkbox
+			if (IsDlgButtonChecked(hWnd, 24) == BST_CHECKED) AddCiv(L"Huns");
+			else RemoveCiv(L"Huns");
+			break;
+		case 25:											                            // Incas Checkbox
+			if (IsDlgButtonChecked(hWnd, 25) == BST_CHECKED) AddCiv(L"Incas");
+			else RemoveCiv(L"Incas");
+			break;
+		case 26:											                            // Hindustanis Checkbox
+			if (IsDlgButtonChecked(hWnd, 26) == BST_CHECKED) AddCiv(L"Hindustanis");
+			else RemoveCiv(L"Hindustanis");
+			break;
+		case 27:											                            // Italians Checkbox
+			if (IsDlgButtonChecked(hWnd, 27) == BST_CHECKED) AddCiv(L"Italians");
+			else RemoveCiv(L"Italians");
+			break;
+		case 28:											                            // Japanese Checkbox
+			if (IsDlgButtonChecked(hWnd, 28) == BST_CHECKED) AddCiv(L"Japanese");
+			else RemoveCiv(L"Japanese");
+			break;
+		case 29:											                            // Khmer Checkbox
+			if (IsDlgButtonChecked(hWnd, 29) == BST_CHECKED) AddCiv(L"Khmer");
+			else RemoveCiv(L"Khmer");
+			break;
+		case 30:											                            // Koreans Checkbox
+			if (IsDlgButtonChecked(hWnd, 30) == BST_CHECKED) AddCiv(L"Koreans");
+			else RemoveCiv(L"Koreans");
+			break;
+		case 31:											                            // Lithuanians Checkbox
+			if (IsDlgButtonChecked(hWnd, 31) == BST_CHECKED) AddCiv(L"Lithuanians");
+			else RemoveCiv(L"Lithuanians");
+			break;
+		case 32:											                            // Magyars Checkbox
+			if (IsDlgButtonChecked(hWnd, 32) == BST_CHECKED) AddCiv(L"Magyars");
+			else RemoveCiv(L"Magyars");
+			break;
+		case 33:											                            // Malay Checkbox
+			if (IsDlgButtonChecked(hWnd, 33) == BST_CHECKED) AddCiv(L"Malay");
+			else RemoveCiv(L"Malay");
+			break;
+		case 34:											                            // Malians Checkbox
+			if (IsDlgButtonChecked(hWnd, 34) == BST_CHECKED) AddCiv(L"Malians");
+			else RemoveCiv(L"Malians");
+			break;
+		case 35:											                            // Mayans Checkbox
+			if (IsDlgButtonChecked(hWnd, 35) == BST_CHECKED) AddCiv(L"Mayans");
+			else RemoveCiv(L"Mayans");
+			break;
+		case 36:											                            // Mongols Checkbox
+			if (IsDlgButtonChecked(hWnd, 36) == BST_CHECKED) AddCiv(L"Mongols");
+			else RemoveCiv(L"Mongols");
+			break;
+		case 37:											                            // Persians Checkbox
+			if (IsDlgButtonChecked(hWnd, 37) == BST_CHECKED) AddCiv(L"Persians");
+			else RemoveCiv(L"Persians");
+			break;
+		case 38:											                            // Poles Checkbox
+			if (IsDlgButtonChecked(hWnd, 38) == BST_CHECKED) AddCiv(L"Poles");
+			else RemoveCiv(L"Poles");
+			break;
+		case 39:											                            // Portuguese Checkbox
+			if (IsDlgButtonChecked(hWnd, 39) == BST_CHECKED) AddCiv(L"Portuguese");
+			else RemoveCiv(L"Portuguese");
+			break;
+		case 40:											                            // Romans Checkbox
+			if (IsDlgButtonChecked(hWnd, 40) == BST_CHECKED) AddCiv(L"Romans");
+			else RemoveCiv(L"Romans");
+			break;
+		case 41:											                            // Saracens Checkbox
+			if (IsDlgButtonChecked(hWnd, 41) == BST_CHECKED) AddCiv(L"Saracens");
+			else RemoveCiv(L"Saracens");
+			break;
+		case 42:											                            // Sicilians Checkbox
+			if (IsDlgButtonChecked(hWnd, 42) == BST_CHECKED) AddCiv(L"Sicilians");
+			else RemoveCiv(L"Sicilians");
+			break;
+		case 43:											                            // Slavs Checkbox
+			if (IsDlgButtonChecked(hWnd, 43) == BST_CHECKED) AddCiv(L"Slavs");
+			else RemoveCiv(L"Slavs");
+			break;
+		case 44:											                            // Spanish Checkbox
+			if (IsDlgButtonChecked(hWnd, 44) == BST_CHECKED) AddCiv(L"Spanish");
+			else RemoveCiv(L"Spanish");
+			break;
+		case 45:											                            // Tatars Checkbox
+			if (IsDlgButtonChecked(hWnd, 45) == BST_CHECKED) AddCiv(L"Tatars");
+			else RemoveCiv(L"Tatars");
+			break;
+		case 46:											                            // Teutons Checkbox
+			if (IsDlgButtonChecked(hWnd, 46) == BST_CHECKED) AddCiv(L"Teutons");
+			else RemoveCiv(L"Teutons");
+			break;
+		case 47:											                            // Turks Checkbox
+			if (IsDlgButtonChecked(hWnd, 47) == BST_CHECKED) AddCiv(L"Turks");
+			else RemoveCiv(L"Turks");
+			break;
+		case 48:											                            // Vietnamese Checkbox
+			if (IsDlgButtonChecked(hWnd, 48) == BST_CHECKED) AddCiv(L"Vietnamese");
+			else RemoveCiv(L"Vietnamese");
+			break;
+		case 49:											                            // Vikings Checkbox
+			if (IsDlgButtonChecked(hWnd, 49) == BST_CHECKED) AddCiv(L"Vikings");
+			else RemoveCiv(L"Vikings");
+			break;
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
         }
@@ -811,28 +1083,35 @@ void ResetProgram()
         SetWindowText(textfield_log, log_text.c_str());
     }
 
+    if (custom_civ_pool) {
+        custom_max_civs = 0;
+        for (int i = 0; i < MAX_CIVS; i++) {
+            if (GetCivStatus(civ_index[i])) {
+                civs.push_back(civ_index[i]);
+                custom_max_civs++;
+            }
+        }
+    }
+
+
+    else {
+        civs = { L"Armenians", L"Aztecs", L"Bengalis", L"Berbers", L"Bohemians", L"Britons",
+                L"Bulgarians", L"Burgundians", L"Burmese", L"Byzantines", L"Celts", L"Chinese", 
+                L"Cumans", L"Dravidians", L"Ethiopians", L"Franks", L"Georgians", L"Goths", L"Gurjaras",
+                L"Hindustanis", L"Huns", L"Incas", L"Italians", L"Japanese", L"Khmer", L"Koreans", 
+                L"Lithuanians", L"Magyars", L"Malay", L"Malians", L"Mayans", L"Mongols", L"Persians",
+                L"Poles", L"Portuguese", L"Romans", L"Saracens", L"Sicilians", L"Slavs", L"Spanish", 
+                L"Tatars", L"Teutons", L"Turks", L"Vietnamese", L"Vikings" };
+    }
+	
     
 
-	civs = { L"Armenians", L"Aztecs", L"Bengalis", L"Berbers", L"Bohemians", L"Britons",
-        L"Bulgarians", L"Burgundians", L"Burmese", L"Byzantines", L"Celts", L"Chinese", 
-        L"Cumans", L"Dravidians", L"Ethiopians", L"Franks", L"Georgians", L"Goths", L"Gurjaras",
-        L"Hindustanis", L"Huns", L"Incas", L"Italians", L"Japanese", L"Khmer", L"Koreans", 
-        L"Lithuanians", L"Magyars", L"Malay", L"Malians", L"Mayans", L"Mongols", L"Persians",
-        L"Poles", L"Portuguese", L"Romans", L"Saracens", L"Sicilians", L"Slavs", L"Spanish", 
-        L"Tatars", L"Teutons", L"Turks", L"Vietnamese", L"Vikings" };
-    /*
-    if (custom_civ_pool) {
-        for (const auto &civ : civs) { // removes civ from civs if status returns false
-			if (!GetCivStatus(&civ)) {
-				civs.erase(std::remove(civs.begin(), civs.end(), civ), civs.end());
-			}
-        }
-    }*/
+
 
 	current_civ = L"Random";
     iterator = 0;
 
-    SetWindowText(label_corner, (L"0/" + std::to_wstring(MAX_CIVS)).c_str());     // resets remaining civs label
+    SetWindowText(label_corner, (L"0/" + std::to_wstring(custom_max_civs)).c_str());     // resets remaining civs label
     SetWindowText(label_centre, L"?");                                      // resets drawn civ label
     SendMessageW(civ_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_random);
 	if (jingles_enabled) PlayJingle(current_civ);
@@ -842,10 +1121,20 @@ void ResetProgram()
 
 void DrawCiv()
 {
-	if (size(civs) == 0) ResetProgram();        // if all civs have been drawn, reset progrma and civ vector
+
+    if (custom_max_civs == 0) {
+        if (ui_sounds_enabled) PlaySound(L"error_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+		//MessageBox(NULL, L"Please enable at least one civilisation.", L"Error", MB_OK | MB_ICONERROR);
+        SetWindowTextA(label_centre, "Empty pool!");
+        return;        // if no civs are selected, return
+    }
+
+    if (civs.empty() || iterator == custom_max_civs || iterator == 0) ResetProgram();        // if all civs have been drawn, reset program and civ vector
+
+	if (iterator == 0) void AddBlankLineToLog(); // adds blank line to log before first civ is drawn
 
     std::random_device rd;      // seeding random number
-	std::mt19937 mt(rd());      // with Mersenne Twister
+	std::mt19937 mt(rd());      // with Mersenne Twister 
 
 	std::shuffle(civs.begin(), civs.end(), mt); // shuffling civs vector
 	current_civ = civs.back();		// draws last element
@@ -856,7 +1145,7 @@ void DrawCiv()
     iterator++;
 
     // Update the labels
-    label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(MAX_CIVS);
+    label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
     SetWindowText(label_corner, label_text.c_str());
     SetWindowTextA(label_centre, civ_name_str.c_str());
 
@@ -866,7 +1155,7 @@ void DrawCiv()
     
    
 
-
+    
     length = GetWindowTextLength(textfield_log);
     log_text.resize(length + 1);
     GetWindowText(textfield_log, &log_text[0], length + 1);
@@ -1070,16 +1359,27 @@ bool VerifiedLegacyCiv(std::wstring civ) {
 }
 
 void AddCiv(std::wstring civ) {
-	civs.push_back(civ);
-    //SetCivStatus(&civ, true);
-	custom_max_civs++;
+
+    if (!GetCivStatus(civ)) {
+        civs.push_back(civ);
+        SetCivStatus(civ, true);
+	    custom_max_civs++;
+        label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
+        SetWindowText(label_corner, label_text.c_str());
+	    if (custom_max_civs == MAX_CIVS) custom_civ_pool = false;
+    }
 }
 
 void RemoveCiv(std::wstring civ) {
-	custom_civ_pool = true;
-	civs.erase(std::remove(civs.begin(), civs.end(), civ), civs.end());
-	//SetCivStatus(&civ, false);
-	custom_max_civs--;
+    if (GetCivStatus(civ)) {
+        if (std::find(civs.begin(), civs.end(), civ) == civs.end()) iterator--;
+        custom_civ_pool = true;
+	    civs.erase(std::remove(civs.begin(), civs.end(), civ), civs.end());
+	    SetCivStatus(civ, false);
+	    custom_max_civs--;
+        label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
+        SetWindowText(label_corner, label_text.c_str());
+    }    
 }
 
 void InitialiseCivs() {
@@ -1099,7 +1399,7 @@ void InitialiseCivs() {
     };
 }
 
-void SetCivStatus(const std::wstring &civ_name, bool status) {
+void SetCivStatus(const std::wstring civ_name, bool status) {
     for (auto &civ : civ_enabled) {
         if (civ.first == civ_name) {
             civ.second = status;
@@ -1108,7 +1408,7 @@ void SetCivStatus(const std::wstring &civ_name, bool status) {
     }
 }
 
-bool GetCivStatus(const std::wstring &civ_name) {
+bool GetCivStatus(const std::wstring civ_name) {
     for (const auto &civ : civ_enabled) {
         if (civ.first == civ_name) {
             return civ.second;
@@ -1118,12 +1418,12 @@ bool GetCivStatus(const std::wstring &civ_name) {
 }
 
 HWND CreateCheckbox(HWND hWnd, HINSTANCE hInstance, int x, int y, int width, int height, int id, LPCWSTR text) {
-    return CreateWindow(
+    HWND checkbox = CreateWindow(
         L"BUTTON",          // Predefined class; Unicode assumed
         text,               // Button text
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, // Styles
         x,                  // x position
-        y+60,                  // y position
+        y+30,                  // y position
         width,              // Button width
         height,             // Button height
         hWnd,               // Parent window
@@ -1131,6 +1431,9 @@ HWND CreateCheckbox(HWND hWnd, HINSTANCE hInstance, int x, int y, int width, int
         hInstance,          // Instance handle
         NULL                // Pointer not needed
     );
+    SendMessage(checkbox, BM_SETCHECK, BST_CHECKED, 0);
+
+    return checkbox;
 }
 
 void ShowCustomPoolCheckboxes() {
@@ -1146,5 +1449,62 @@ void HideCustomPoolCheckboxes() {
 }
 
 void EnableAll() {
-
+	custom_civ_pool = false;
+    for (int i = 0; i < 45; i++) {
+        SendMessage(civ_checkbox[i], BM_SETCHECK, BST_CHECKED, 0);
+		AddCiv(civ_index[i]);
+    }
 }
+
+void DisableAll() {
+	custom_civ_pool = true;
+    for (int i = 0; i < 45; i++) {
+        SendMessage(civ_checkbox[i], BM_SETCHECK, BST_UNCHECKED, 0);
+		RemoveCiv(civ_index[i]);
+    }
+}
+
+void ShowDrawTab(bool state) {
+    if (state == true) {
+        if (icons_enabled) ShowWindow(civ_icon, SW_SHOW);
+        ShowWindow(button_draw, SW_SHOW);
+	    ShowWindow(button_reset, SW_SHOW);
+	    if (labels_enabled) ShowWindow(label_centre, SW_SHOW);
+	    ShowWindow(label_corner, SW_SHOW);
+	}
+    else if (state == false) {
+        ShowWindow(civ_icon, SW_HIDE);
+        ShowWindow(button_draw, SW_HIDE);
+        ShowWindow(button_reset, SW_HIDE);
+        ShowWindow(label_centre, SW_HIDE);
+        ShowWindow(label_corner, SW_HIDE);
+    }
+	
+}
+
+void ShowLogTab(bool state) {
+    if (state == true) {
+        ShowWindow(textfield_log, SW_SHOW);
+    }
+
+    else if (state == false) {
+        ShowWindow(textfield_log, SW_HIDE);
+    }
+}
+
+void ShowCustomTab(bool state) {
+
+    if (state == true) {
+        ShowCustomPoolCheckboxes();
+	    ShowWindow(button_enableall, SW_SHOW);
+	    ShowWindow(button_disableall, SW_SHOW);
+    }
+
+    else if (state == false) {
+        HideCustomPoolCheckboxes();
+        ShowWindow(button_enableall, SW_HIDE);
+        ShowWindow(button_disableall, SW_HIDE);
+    }
+	
+}
+
