@@ -56,10 +56,11 @@ HBITMAP icon_armenians, icon_aztecs, icon_bengalis, icon_berber, icon_bohemians,
         icon_lithuanians, icon_magyars, icon_malay, icon_malians, icon_mayans,
         icon_mongols, icon_persians, icon_poles, icon_portuguese, icon_romans,
         icon_saracens, icon_sicilians, icon_slavs, icon_spanish, icon_tatars,
-        icon_teutons, icon_turks, icon_vietnamese, icon_vikings;
+        icon_teutons, icon_turks, icon_vietnamese, icon_vikings, icon_default;
 
 int iterator = 0; // Global variable to keep track of the count
 int length = GetWindowTextLength(textfield_log);
+int tab_current = 0;
 std::wstring label_text = std::to_wstring(iterator + 1) + L"/" + std::to_wstring(MAX_CIVS);
 std::wstring log_entry;
 std::wstring log_text;
@@ -128,19 +129,23 @@ void ShowTabComponents(int tabIndex)
 {
     if (tabIndex == 0)
     {
+        tab_current = 0;
         ShowWindow(button_draw, SW_SHOW);
         ShowWindow(label_corner, SW_SHOW);
         ShowWindow(label_centre, SW_SHOW);
 		ShowWindow(textfield_log, SW_HIDE);
 		ShowWindow(button_reset, SW_SHOW);
+        if (icons_enabled) ShowWindow(civ_icon, SW_SHOW);
     }
     else if (tabIndex == 1)
     {
+        tab_current = 1;
         ShowWindow(button_draw, SW_HIDE);
         ShowWindow(label_corner, SW_HIDE);
         ShowWindow(label_centre, SW_HIDE);
 		ShowWindow(button_reset, SW_HIDE);
 		ShowWindow(textfield_log, SW_SHOW);
+        if (icons_enabled) ShowWindow(civ_icon, SW_HIDE);
         
     }
 }
@@ -243,7 +248,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
     // Set the default window size to 400x300
     HWND hWnd = CreateWindowW(window_class, title, WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, 0, 400, 300, nullptr, nullptr, hInstance, nullptr);
+        CW_USEDEFAULT, 0, 400, 350, nullptr, nullptr, hInstance, nullptr);
 
     if (!hWnd)
     {
@@ -359,9 +364,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             NULL);  // Pointer not needed.
 
 
-		SendMessageW(civ_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_armenians);
+		
 
-
+        ShowWindow(civ_icon, SW_HIDE);
 		ShowWindow(textfield_log, SW_HIDE);
 
 
@@ -384,9 +389,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         SetWindowPos(tab, NULL, 0, 0, width, height, SWP_NOZORDER);                                        // tab size anchored to window size
 		SetWindowPos(label_corner, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);                          // remaining civ indicator anchored to bottom right corner 
-        SetWindowPos(label_centre, NULL, (width - 80) / 2, (height - 15) / 2, 100, 15, SWP_NOZORDER);       // drawn civ label anchored to centre
-        SetWindowPos(civ_icon, NULL, (width - 100) / 2, (height - 230) / 2, 104, 104, SWP_NOZORDER);       // drawn civ label anchored to centre
-        SetWindowPos(button_draw, NULL, (width - 100) / 2, (height + 50) / 2, 100, 30, SWP_NOZORDER);   // draw button anchored to centre
+        SetWindowPos(label_centre, NULL, (width - 80) / 2, (height + 35) / 2, 100, 15, SWP_NOZORDER);       // drawn civ label anchored to centre
+        SetWindowPos(civ_icon, NULL, (width - 100) / 2, (height - 180) / 2, 104, 104, SWP_NOZORDER);       // civ icon anchored to centre
+        SetWindowPos(button_draw, NULL, (width - 100) / 2, (height + 100) / 2, 100, 30, SWP_NOZORDER);   // draw button anchored to centre
         SetWindowPos(button_reset, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);                           // reset button anchored to bottom left corner
 		SetWindowPos(textfield_log, NULL, 10, 25, width - 20, height - 50, SWP_NOZORDER);                   // log text field anchored to window size
 
@@ -445,7 +450,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         MINMAXINFO* pmmi = (MINMAXINFO*)lParam;
         pmmi->ptMinTrackSize.x = 400; // Minimum width
-        pmmi->ptMinTrackSize.y = 300; // Minimum height
+        pmmi->ptMinTrackSize.y = 350; // Minimum height
 
     }
         break;
@@ -552,6 +557,7 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     {
     case WM_INITDIALOG:
     {
+        
         HWND hwndHyperlink = GetDlgItem(hDlg, IDC_HYPERLINK);
         oldProc = (WNDPROC)SetWindowLongPtr(hwndHyperlink, GWLP_WNDPROC, (LONG_PTR)HyperlinkProc);
         return(INT_PTR)TRUE;
@@ -588,15 +594,13 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			icons_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX1) == BST_CHECKED;
 
             // Handle the checkbox state as needed
-            if (icons_enabled)
+            if (icons_enabled && tab_current == 0)
             {
-                // Checkbox is checked
-                // Perform actions when the feature is enabled
+                ShowWindow(civ_icon, SW_SHOW);
             }
             else
             {
-                // Checkbox is not checked
-                // Perform actions when the feature is disabled
+                ShowWindow(civ_icon, SW_HIDE);
             }
 
             EndDialog(hDlg, LOWORD(wParam));
@@ -662,6 +666,7 @@ void ResetProgram()
 
     SetWindowText(label_corner, (L"0/" + std::to_wstring(MAX_CIVS)).c_str());     // resets remaining civs label
     SetWindowText(label_centre, L"?");                                      // resets drawn civ label
+    SendMessageW(civ_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_default);
 
 
 }
@@ -685,8 +690,11 @@ void DrawCiv()
     label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(MAX_CIVS);
     SetWindowText(label_corner, label_text.c_str());
     SetWindowTextA(label_centre, civ_name_str.c_str());
-    if (icons_enabled);
-    
+
+    HBITMAP drawn_civ_icon = FetchIcon(civ_name);
+    SendMessageW(civ_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
+   
+
 
     length = GetWindowTextLength(textfield_log);
     log_text.resize(length + 1);
@@ -700,6 +708,7 @@ void DrawCiv()
 
 
     SetWindowText(textfield_log, log_text.c_str());
+    if (tab_current == 1) ShowWindow(civ_icon, SW_HIDE);
 
 }
 
@@ -743,7 +752,7 @@ std::string ConvertToString(const std::wstring& wstr) {
     return str;
 }
 
-void LoadImages() { //TODO: convert image bit depths to 24
+void LoadImages() { 
     icon_armenians = (HBITMAP)LoadImageW(NULL, L"civ_icons\\armenians.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_aztecs = (HBITMAP)LoadImageW(NULL, L"civ_icons\\aztecs.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_bengalis = (HBITMAP)LoadImageW(NULL, L"civ_icons\\bengalis.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -789,6 +798,7 @@ void LoadImages() { //TODO: convert image bit depths to 24
 	icon_turks = (HBITMAP)LoadImageW(NULL, L"civ_icons\\turks.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_vietnamese = (HBITMAP)LoadImageW(NULL, L"civ_icons\\vietnamese.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_vikings = (HBITMAP)LoadImageW(NULL, L"civ_icons\\vikings.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    icon_default = (HBITMAP)LoadImageW(NULL, L"civ_icons\\random.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 }
 
 HBITMAP FetchIcon(std::wstring civ_name) {
