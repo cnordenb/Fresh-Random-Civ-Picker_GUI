@@ -16,6 +16,8 @@
 #define IDC_HYPERLINK                   1002
 #define IDC_CHECKBOX_ICONS				1003
 #define IDC_CHECKBOX_JINGLES			1004
+#define IDC_CHECKBOX_LABELS				1005
+#define IDC_LEGACY_OPTION				1006
 #define ID_FILE_TOGGLECHECK             32771
 #define IDM_GITHUB                      32772
 #define IDM_WEBVERSION                  32773

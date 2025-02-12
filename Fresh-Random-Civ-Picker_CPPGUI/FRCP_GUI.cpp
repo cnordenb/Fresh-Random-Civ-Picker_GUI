@@ -28,7 +28,7 @@
 #define HOTKEY_ID_RETURN 3
 #define HOTKEY_ID_ESC 4
 #define DT_UNDERLINE 0x80000000
-#define MAX_LENGTH 10 // currently longest civ name is 10 characters (portuguese)
+#define MAX_LENGTH 15 
 #define MIN_WIDTH 400
 #define MIN_HEIGHT 300
 #define BUTTON_WIDTH 100
@@ -69,9 +69,13 @@ std::wstring log_entry;
 std::wstring log_text;
 std::wstring hlabel_default;
 std::wstring current_civ = L"Random";
+
 bool mode_dark = false;
 bool icons_enabled = false;
 bool jingles_enabled = false;
+bool labels_enabled = true;
+bool legacy_jingle_enabled = false;
+
 bool accessor_out_of_bounds = false;             // for unit testing
 int times_drawn[MAX_CIVS] = { 0 };               // for unit testing
 HFONT font_underline = NULL;
@@ -90,6 +94,7 @@ void DisableHotkeys(HWND);
 void CreateUnderlineFont();
 void LoadImages();
 void PlayJingle(std::wstring);
+bool VerifiedLegacyCiv(std::wstring);
 std::string ConvertToString(const std::wstring&);
 
 
@@ -138,7 +143,7 @@ void ShowTabComponents(int tabIndex)
         tab_current = 0;
         ShowWindow(button_draw, SW_SHOW);
         ShowWindow(label_corner, SW_SHOW);
-        ShowWindow(label_centre, SW_SHOW);
+        if (labels_enabled) ShowWindow(label_centre, SW_SHOW);
 		ShowWindow(textfield_log, SW_HIDE);
 		ShowWindow(button_reset, SW_SHOW);
         if (icons_enabled) ShowWindow(civ_icon, SW_SHOW);
@@ -506,7 +511,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_EXIT:                                      // "Exit"
             DestroyWindow(hWnd);
             break;
-        case IDM_OPTIONS:
+		case IDM_OPTIONS:								   // "Options"
             DialogBox(instance, MAKEINTRESOURCE(IDD_OPTIONS), hWnd, OptionsDlgProc);
             break;
 		case IDM_TOGGLE_CHECK:                              // "Dark Mode (beta)"
@@ -590,16 +595,30 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
     {
         
         //oldProc = (WNDPROC)SetWindowLongPtr(hwndHyperlink, GWLP_WNDPROC, (LONG_PTR)HyperlinkProc);
+        CheckDlgButton(hDlg, IDC_CHECKBOX_LABELS, labels_enabled ? BST_CHECKED : BST_UNCHECKED);
         CheckDlgButton(hDlg, IDC_CHECKBOX_ICONS, icons_enabled ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(hDlg, IDC_CHECKBOX_JINGLES, jingles_enabled ? BST_CHECKED : BST_UNCHECKED);
+
+        HWND hComboBox = GetDlgItem(hDlg, IDC_LEGACY_OPTION);
+        SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Definitive Edition");
+        SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Legacy");
+        SendMessage(hComboBox, CB_SETCURSEL, legacy_jingle_enabled ? 1 : 0, 0); // Set default selection based on current setting
+
 
         return(INT_PTR)TRUE;
     }
     case WM_COMMAND:
         if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
         {
+			labels_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_LABELS) == BST_CHECKED;
 			icons_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_ICONS) == BST_CHECKED;
 			jingles_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_JINGLES) == BST_CHECKED;
+
+            // Handle the combobox selection
+            HWND hComboBox = GetDlgItem(hDlg, IDC_LEGACY_OPTION);
+            int selectedIndex = SendMessage(hComboBox, CB_GETCURSEL, 0, 0);
+            legacy_jingle_enabled = (selectedIndex == 1);
+
 
             // Handle the checkbox state as needed
             if (icons_enabled && tab_current == 0)
@@ -613,6 +632,10 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 
             // Handle the checkbox state as needed
             if (jingles_enabled) PlayJingle(current_civ);
+
+			if (!labels_enabled) ShowWindow(label_centre, SW_HIDE);
+			else ShowWindow(label_centre, SW_SHOW);
+
             
             
 
@@ -879,16 +902,40 @@ void PlayJingle(std::wstring civ_name) {
 
     std::wstring processed_civ_name = civ_name;
     processed_civ_name[0] = std::tolower(processed_civ_name[0]);
-	std::wstring jingle_path = L"jingles\\" + processed_civ_name + L".wav";
+    std::wstring jingle_path;
+
+    if (legacy_jingle_enabled && VerifiedLegacyCiv(civ_name)) {
+        jingle_path = L"civ_jingles\\legacy\\" + processed_civ_name + L".wav";
+    }
+	else jingle_path = L"civ_jingles\\" + processed_civ_name + L".wav";
 
     
     
     PlaySound(jingle_path.c_str(), NULL, SND_FILENAME | SND_ASYNC);
 
+       
+    
+}
 
-    
-
-	
-    
-    
+bool VerifiedLegacyCiv(std::wstring civ) {
+    if (civ == L"Aztecs" ||
+        civ == L"Britons" ||
+        civ == L"Byzantines" ||
+        civ == L"Celts" ||
+        civ == L"Chinese" ||
+        civ == L"Franks" ||
+        civ == L"Goths" ||
+        civ == L"Huns" ||
+        civ == L"Japanese" ||
+        civ == L"Koreans" ||
+        civ == L"Mayans" ||
+        civ == L"Mongols" ||
+        civ == L"Persians" ||
+        civ == L"Saracens" ||
+        civ == L"Spanish" ||
+        civ == L"Teutons" ||
+        civ == L"Turks" ||
+        civ == L"Vikings" ||
+        civ == L"Random") return true;
+    else return false;
 }
