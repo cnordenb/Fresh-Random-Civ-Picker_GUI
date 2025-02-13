@@ -787,37 +787,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}   
         case WM_NOTIFY:
         {
-            AllocConsole();
-            FILE *fp;
-            freopen_s(&fp, "CONOUT$", "w", stdout);
-            freopen_s(&fp, "CONOUT$", "w", stderr);
-            freopen_s(&fp, "CONIN$", "r", stdin);
+
 
             LPNMHDR pnmhdr = (LPNMHDR)lParam;
             if (pnmhdr->hwndFrom == tab)
             {
-                switch (pnmhdr->code)
-                {
-                case TCN_SELCHANGE:
-                {
+                if (pnmhdr->code == TCN_SELCHANGE) {
                     int tabIndex = TabCtrl_GetCurSel(tab);
                     ShowTabComponents(tabIndex);
                     break;
-                }
-                case TCN_SELCHANGING:
-                {
-                    // Handle tab selection changing if needed
-                    break;
-                }
-                case NM_CUSTOMDRAW:
-					ShowTabComponents(TabCtrl_GetCurSel(tab));
-                default:
-                {
-                    // Debugging output for unexpected codes
-                    std::wcout << L"WM_NOTIFY: hwndFrom = " << pnmhdr->hwndFrom << L", code = " << pnmhdr->code << std::endl;
-                    std::wcout << L"Expected: hwndFrom = " << tab << L", code = " << TCN_SELCHANGE << std::endl;
-                    break;
-                }
                 }
             }
             break;
