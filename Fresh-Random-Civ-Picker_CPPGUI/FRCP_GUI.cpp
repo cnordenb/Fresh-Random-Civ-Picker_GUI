@@ -436,18 +436,11 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-
-    int wmId;
-
-
-        switch (message)
-        {
-
-
+    switch (message)
+    {
         case WM_CREATE:
-
+        {
             LoadImages();
-
             CreateTabs(hWnd);
 
             button_draw = CreateWindow(
@@ -746,10 +739,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             EnableHotkeys(hWnd);
 
             break;
-
-
-
-
+        }
         case WM_SIZE:
         {
             int width = LOWORD(lParam);
@@ -767,34 +757,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         }
         case WM_ACTIVATE: // re-enables hotkeys when window returns to foreground 
-
+        {
             if (wParam == WA_ACTIVE || wParam == WA_CLICKACTIVE) EnableHotkeys(hWnd);
             else if (wParam == WA_INACTIVE) DisableHotkeys(hWnd);
 
             break;
-
-
-
+        }
         case WM_CTLCOLORSTATIC:
         {
-
             HDC hdcStatic = (HDC)wParam;
             SetTextColor(hdcStatic, mode_dark ? RGB(255, 255, 255) : RGB(0, 0, 0));
             SetBkColor(hdcStatic, mode_dark ? RGB(0, 0, 0) : RGB(255, 255, 255));
             return (INT_PTR)(mode_dark ? brush_black : brush_white);
-
-            break;
         }
         case WM_ERASEBKGND:
         {
-
             HDC hdc = (HDC)wParam;
             RECT rect;
             GetClientRect(hWnd, &rect);
             FillRect(hdc, &rect, mode_dark ? brush_black : brush_white);
             return 1;
-
-            break;
         }  
         case WM_CTLCOLORBTN:
         {
@@ -802,19 +784,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SetTextColor(hdcButton, mode_dark ? RGB(255, 255, 255) : RGB(0, 0, 0));
             SetBkColor(hdcButton, mode_dark ? RGB(0, 0, 0) : RGB(255, 255, 255));
             return (INT_PTR)(mode_dark ? brush_black : brush_white);
-
-            break;
 		}   
         case WM_NOTIFY:
         {
+            AllocConsole();
+            FILE *fp;
+            freopen_s(&fp, "CONOUT$", "w", stdout);
+            freopen_s(&fp, "CONOUT$", "w", stderr);
+            freopen_s(&fp, "CONIN$", "r", stdin);
 
             LPNMHDR pnmhdr = (LPNMHDR)lParam;
-            if (pnmhdr->hwndFrom == tab && pnmhdr->code == TCN_SELCHANGE)
+            if (pnmhdr->hwndFrom == tab)
             {
-                int tabIndex = TabCtrl_GetCurSel(tab);
-                ShowTabComponents(tabIndex);
+                switch (pnmhdr->code)
+                {
+                case TCN_SELCHANGE:
+                {
+                    int tabIndex = TabCtrl_GetCurSel(tab);
+                    ShowTabComponents(tabIndex);
+                    break;
+                }
+                case TCN_SELCHANGING:
+                {
+                    // Handle tab selection changing if needed
+                    break;
+                }
+                case NM_CUSTOMDRAW:
+					ShowTabComponents(TabCtrl_GetCurSel(tab));
+                default:
+                {
+                    // Debugging output for unexpected codes
+                    std::wcout << L"WM_NOTIFY: hwndFrom = " << pnmhdr->hwndFrom << L", code = " << pnmhdr->code << std::endl;
+                    std::wcout << L"Expected: hwndFrom = " << tab << L", code = " << TCN_SELCHANGE << std::endl;
+                    break;
+                }
+                }
             }
-
             break;
         }
         case WM_GETMINMAXINFO:                                  // minimum window size
@@ -867,16 +872,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 KillApplication();                // escape for exiting
             }
-
-
+                
+            break;
         }
 
-        break;
-
+        
+        
 
         case WM_COMMAND:                                        // action listener for clicks
         {
-            wmId = LOWORD(wParam);
+            int wmId = LOWORD(wParam);
 
             // Parse the menu selections:     
 
@@ -891,8 +896,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             switch (wmId)
             {
-
-				
             case IDM_ABOUT:                                     // "About"
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 DialogBox(instance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
@@ -1173,7 +1176,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                             RemoveCiv(civ_index[i]);
                         }
                     }
-                }
+                }/*
                 break;
             case IDC_CHECKBOX_ROME:
                 break;
@@ -1192,14 +1195,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case IDC_CHECKBOX_FORGOTTEN:
                 break;
             case IDC_CHECKBOX_AOC:
-                break;
+                break;*/
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
-
-
             }
-            break;
-
+            break;            
+        }
         case WM_PAINT:
         {
         
@@ -1211,14 +1212,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         }
         case WM_DESTROY:
+        {
             KillApplication();
             break;
+        }
         default:
+        {
             return DefWindowProc(hWnd, message, wParam, lParam);
-        }
-
-        return 0;
-        }
+        }            
+    }
+        return 0;       
 
 } 
 
