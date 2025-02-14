@@ -1,9 +1,7 @@
 /*
 TODO
 
-- add ui sounds toggle to options
-- add edition views in custom civ pool: radio buttons for editions + group checkboxes for dlc's
-    - fetch dlc and edition icons
+- implement tooltips
 - add toggleable remaining civs text field to log tab
 - add tech tree link button to draw tab
     - fetch tech tree icon
@@ -98,7 +96,7 @@ HWND khans_icon, dukes_icon, west_icon, india_icon, rome_icon, royals_icon,     
     aoc_icon;
 
 
-HWND autoreset_checkbox;			 // autoreset checkbox
+HWND autoreset_checkbox, autotoggle_checkbox;			 // autoreset checkbox
 
 HWND radiobutton_de, radiobutton_hd, radiobutton_aok;	 // radio buttons
 
@@ -150,12 +148,13 @@ bool legacy_jingle_enabled = false;
 bool ui_sounds_enabled = false;
 bool pool_altered = false;
 bool autoreset_enabled = true;
+bool autotoggle_enabled = true;
 bool reset_state = true;
 
 enum edition {
 	DE,     // Definitive Edition
 	HD,     // HD Edition / (2013)
-	AOC     // The Conquerors
+	AOK     // Age of Kings
 };
 
 enum dlc {
@@ -174,6 +173,8 @@ enum dlc {
     rome    // Return of Rome
 
 };
+
+dlc old_dlc[] = { aok, aoc, forgotten, africans, rajas };
 
 edition edition_state = DE;
 
@@ -234,11 +235,13 @@ void ShowDEDLCCheckboxes(bool);
 void ShowHDDLCCheckboxes(bool);
 void ShowAOCCheckbox(bool);
 
+bool DlcFull(dlc);
 void ToggleDlc(dlc, bool, HWND);
-
 void ValidateDlcToggle(HWND, dlc);
-
 void ValidateAllDlcToggles(HWND);
+
+void CreateTooltips(HWND);
+void AddTooltip(HWND, HWND, LPCWSTR);
 
 
 std::string ConvertToString(const std::wstring&);
@@ -618,7 +621,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				civ_checkbox[i] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), column[i % 5], row[i / 5], 100, 20, i + 5, civ_index[i].c_str());
 			}
 
-            autoreset_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 230, 180, 20, 50, L"Auto-reset upon change");
+            autoreset_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 230, 180, 20, IDC_CHECKBOX_AUTORESET, L"Auto-reset upon change");
+            autotoggle_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 0, 180, 20, IDC_CHECKBOX_AUTOTOGGLE, L"Auto-toggle older civs");
 
             checkbox_royals = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, -96, 160, 20, IDC_CHECKBOX_ROYALS, L"The Mountain Royals");
             checkbox_rome = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, -76, 160, 20, IDC_CHECKBOX_ROME, L"Return of Rome");
@@ -897,26 +901,64 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DisableAll();
 				ValidateAllDlcToggles(hWnd);
                 break;    
-            case 50:											                            // Auto-reset Checkbox
+            case IDC_CHECKBOX_AUTORESET:											                            // Auto-reset Checkbox
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-                if (IsDlgButtonChecked(hWnd, 50) == BST_CHECKED) autoreset_enabled = true;
-                else if (IsDlgButtonChecked(hWnd, 50) == BST_UNCHECKED) autoreset_enabled = false;
+                if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_CHECKED) autoreset_enabled = true;
+                else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_UNCHECKED) autoreset_enabled = false;
+                break;
+            case IDC_CHECKBOX_AUTOTOGGLE:											                            // Auto-reset Checkbox
+                if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTOTOGGLE) == BST_CHECKED) {
+                    autotoggle_enabled = true;
+                    switch (edition_state) {
+                    case DE:
+                        for (int i = 0; i < 5; i++) {
+                            ToggleDlc(old_dlc[i], true, hWnd);
+                        }
+                        break;
+                    case HD:
+                        for (int i = 0; i < 2; i++) {
+                            ToggleDlc(old_dlc[i], true, hWnd);
+						}
+						break;
+                    case AOK:
+                        ToggleDlc(aok, true, hWnd);
+                        break;
+                    }
+                }               
+                else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTOTOGGLE) == BST_UNCHECKED) {
+                    autotoggle_enabled = false;
+                    switch (edition_state) {
+                    case DE:
+                        for (int i = 0; i < 5; i++) {
+                            ToggleDlc(old_dlc[i], false, hWnd);
+                        }
+                        break;
+                    case HD:
+                        for (int i = 0; i < 2; i++) {
+                            ToggleDlc(old_dlc[i], false, hWnd);
+                        }
+                        break;
+                    case AOK:
+				        ToggleDlc(aok, false, hWnd);
+				        break;
+                    }
+			        
+                }
+                    
+                    
                 break;
             case IDC_RADIO_DE:
                 ShowDEDLCCheckboxes(true);
                 ShowHDDLCCheckboxes(false);
                 ShowAOCCheckbox(false);
 
-                for (int i = 0; i < 4; i++) {
-                    switch (i) {
-                    case 0:
-                        if
+                if (autotoggle_enabled) {
+                    for (int i = 0; i < 5; i++) {
+                        ToggleDlc(old_dlc[i], true, hWnd);
                     }
                 }
-                ToggleDlc(rajas, true, hWnd);
-				ToggleDlc(africans, true, hWnd);
-				ToggleDlc(forgotten, true, hWnd);
-				ToggleDlc(aoc, true, hWnd);
+
 
                 SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_de);
                 if (ui_sounds_enabled) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
@@ -930,7 +972,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 ShowHDDLCCheckboxes(true);
                 ShowAOCCheckbox(false);
 
-                if (!DlcFull(aoc)) ToggleDlc(aoc, true, hWnd);
+                if (autotoggle_enabled) {
+                    for (int i = 0; i < 2; i++) {
+                        ToggleDlc(old_dlc[i], true, hWnd);
+                    }
+                }
+                
 
                 SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_hd);
                 if (ui_sounds_enabled) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
@@ -944,9 +991,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 ShowHDDLCCheckboxes(false);
                 ShowAOCCheckbox(true);
 
+                if (autotoggle_enabled) {
+                    ToggleDlc(aok, true, hWnd);
+                }
+                
+
                 SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_aok);
                 if (ui_sounds_enabled) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-                edition_state = AOC;
+                edition_state = AOK;
                 ShowAOCPoolCheckboxes();
                 ValidateAllDlcToggles(hWnd);
 
@@ -1653,15 +1705,15 @@ void EnableAll() {
 	}
 	else if (edition_state == HD) {
 		for (int i = 0; i < MAX_CIVS; i++) {
-			if (GetCivEdition(civ_index[i]) == HD || GetCivEdition(civ_index[i]) == AOC) {
+			if (GetCivEdition(civ_index[i]) == HD || GetCivEdition(civ_index[i]) == AOK) {
 				SendMessage(civ_checkbox[i], BM_SETCHECK, BST_CHECKED, 0);
 				AddCiv(civ_index[i]);
 			}
 		}
 	}
-	else if (edition_state == AOC) {
+	else if (edition_state == AOK) {
 		for (int i = 0; i < MAX_CIVS; i++) {
-			if (GetCivEdition(civ_index[i]) == AOC) {
+			if (GetCivEdition(civ_index[i]) == AOK) {
 				SendMessage(civ_checkbox[i], BM_SETCHECK, BST_CHECKED, 0);
 				AddCiv(civ_index[i]);
 			}
@@ -1716,7 +1768,7 @@ void ShowCustomTab(bool state) {
         ShowWindow(edition_icon, SW_SHOW);
 		if (edition_state == DE) ShowAllPoolCheckboxes();
 		else if (edition_state == HD) ShowHDPoolCheckboxes();
-        else if (edition_state == AOC) ShowAOCPoolCheckboxes();
+        else if (edition_state == AOK) ShowAOCPoolCheckboxes();
        
 	    ShowWindow(button_enableall, SW_SHOW);
 	    ShowWindow(button_disableall, SW_SHOW);		
@@ -1724,6 +1776,7 @@ void ShowCustomTab(bool state) {
 		ShowWindow(radiobutton_hd, SW_SHOW);
         ShowWindow(radiobutton_aok, SW_SHOW);
         ShowWindow(autoreset_checkbox, SW_SHOW);
+        ShowWindow(autotoggle_checkbox, SW_SHOW);
 		ShowWindow(edition_icon, SW_SHOW);
 
         if (edition_state == DE) {
@@ -1732,11 +1785,9 @@ void ShowCustomTab(bool state) {
 		else if (edition_state == HD) {
 			ShowHDDLCCheckboxes(true);
         }
-        else if (edition_state == AOC) {
+        else if (edition_state == AOK) {
             ShowAOCCheckbox(true);
         }
-
-
     }
 
     else if (state == false) {
@@ -1748,6 +1799,7 @@ void ShowCustomTab(bool state) {
 		ShowWindow(radiobutton_hd, SW_HIDE);
 		ShowWindow(radiobutton_aok, SW_HIDE);
         ShowWindow(autoreset_checkbox, SW_HIDE);
+		ShowWindow(autotoggle_checkbox, SW_HIDE);
 		ShowDEDLCCheckboxes(false);
     }
 	
@@ -1756,7 +1808,7 @@ void ShowCustomTab(bool state) {
 
 void ShowHDPoolCheckboxes() {
     for (int i = 0; i < MAX_CIVS; i++) {
-        if (GetCivEdition(civ_index[i]) == HD || GetCivEdition(civ_index[i]) == AOC) {
+        if (GetCivEdition(civ_index[i]) == HD || GetCivEdition(civ_index[i]) == AOK) {
             ShowWindow(civ_checkbox[i], SW_SHOW);
         }
         else {
@@ -1770,7 +1822,7 @@ void ShowHDPoolCheckboxes() {
 
 void ShowAOCPoolCheckboxes() {
     for (int i = 0; i < MAX_CIVS; i++) {
-        if (GetCivEdition(civ_index[i]) == AOC) {
+        if (GetCivEdition(civ_index[i]) == AOK) {
             ShowWindow(civ_checkbox[i], SW_SHOW);
 		}
         else {
@@ -1803,18 +1855,18 @@ dlc GetCivDLC(const std::wstring &civ_name) {
 
 void InitialiseCivEditions() {
 	civ_edition = {
-		{L"Armenians", DE}, {L"Aztecs", AOC}, {L"Bengalis", DE}, {L"Berbers", HD},
-		{L"Bohemians", DE}, {L"Britons", AOC}, {L"Bulgarians", DE}, {L"Burgundians", DE},
-		{L"Burmese", HD}, {L"Byzantines", AOC}, {L"Celts", AOC}, {L"Chinese", AOC},
-		{L"Cumans", DE}, {L"Dravidians", DE}, {L"Ethiopians", HD}, {L"Franks", AOC},
-		{L"Georgians", DE}, {L"Goths", AOC}, {L"Gurjaras", DE}, {L"Hindustanis", HD},
-		{L"Huns", AOC}, {L"Incas", HD}, {L"Italians", HD}, {L"Japanese", AOC},
-		{L"Khmer", HD}, {L"Koreans", AOC}, {L"Lithuanians", DE}, {L"Magyars", HD},
-		{L"Malay", HD}, {L"Malians", HD}, {L"Mayans", AOC}, {L"Mongols", AOC},
-		{L"Persians", AOC}, {L"Poles", DE}, {L"Portuguese", HD}, {L"Romans", DE},
-		{L"Saracens", AOC}, {L"Sicilians", DE}, {L"Slavs", HD}, {L"Spanish", AOC},
-		{L"Tatars", DE}, {L"Teutons", AOC}, {L"Turks", AOC}, {L"Vietnamese", HD},
-		{L"Vikings", AOC}
+		{L"Armenians", DE}, {L"Aztecs", AOK}, {L"Bengalis", DE}, {L"Berbers", HD},
+		{L"Bohemians", DE}, {L"Britons", AOK}, {L"Bulgarians", DE}, {L"Burgundians", DE},
+		{L"Burmese", HD}, {L"Byzantines", AOK}, {L"Celts", AOK}, {L"Chinese", AOK},
+		{L"Cumans", DE}, {L"Dravidians", DE}, {L"Ethiopians", HD}, {L"Franks", AOK},
+		{L"Georgians", DE}, {L"Goths", AOK}, {L"Gurjaras", DE}, {L"Hindustanis", HD},
+		{L"Huns", AOK}, {L"Incas", HD}, {L"Italians", HD}, {L"Japanese", AOK},
+		{L"Khmer", HD}, {L"Koreans", AOK}, {L"Lithuanians", DE}, {L"Magyars", HD},
+		{L"Malay", HD}, {L"Malians", HD}, {L"Mayans", AOK}, {L"Mongols", AOK},
+		{L"Persians", AOK}, {L"Poles", DE}, {L"Portuguese", HD}, {L"Romans", DE},
+		{L"Saracens", AOK}, {L"Sicilians", DE}, {L"Slavs", HD}, {L"Spanish", AOK},
+		{L"Tatars", DE}, {L"Teutons", AOK}, {L"Turks", AOK}, {L"Vietnamese", HD},
+		{L"Vikings", AOK}
 	};
 }
 
