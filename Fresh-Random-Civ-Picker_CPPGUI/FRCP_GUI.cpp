@@ -7,7 +7,7 @@ TODO
     - fetch tech tree icon
 - add hotkeys for option toggles
 - implement ini file for persistent settings
-- implement log file for persistent states
+- implement log file for persistent log and civ states
 
 
 */
