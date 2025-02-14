@@ -234,6 +234,11 @@ void ShowDEDLCCheckboxes(bool);
 void ShowHDDLCCheckboxes(bool);
 void ShowAOCCheckbox(bool);
 
+void ToggleDlc(dlc, bool, HWND);
+
+void ValidateDlcToggle(HWND, dlc);
+
+void ValidateAllDlcToggles(HWND);
 
 
 std::string ConvertToString(const std::wstring&);
@@ -328,6 +333,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     CreateUnderlineFont();
 	InitialiseCivStates();
     InitialiseCivEditions();
+	InitialiseCivDLCs();
     ResetProgram();
 
 
@@ -602,62 +608,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             CheckRadioButton(hWnd, IDC_RADIO_DE, IDC_RADIO_AOK, IDC_RADIO_DE);
 
+            // defined spot coordinates for the 45 individual civ checkboxes in custom tab
+			int row[] = { 30, 50, 70, 90, 110, 130, 150, 170, 190 };
+			int column[] = { 10, 112, 214, 316, 418 };
 
-
-            // row 1
-            civ_checkbox[0] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 30, 100, 20, 5, L"Armenians");
-            civ_checkbox[1] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 112, 30, 100, 20, 6, L"Aztecs");
-            civ_checkbox[2] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 214, 30, 100, 20, 7, L"Bengalis");
-            civ_checkbox[3] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 316, 30, 100, 20, 8, L"Berbers");
-            civ_checkbox[4] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 418, 30, 100, 20, 9, L"Bohemians");
-            // row 2
-            civ_checkbox[5] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 50, 100, 20, 10, L"Britons");
-            civ_checkbox[6] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 112, 50, 100, 20, 11, L"Bulgarians");
-            civ_checkbox[7] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 214, 50, 100, 20, 12, L"Burgundians");
-            civ_checkbox[8] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 316, 50, 100, 20, 13, L"Burmese");
-            civ_checkbox[9] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 418, 50, 100, 20, 14, L"Byzantines");
-            // row 3
-            civ_checkbox[10] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 70, 100, 20, 15, L"Celts");
-            civ_checkbox[11] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 112, 70, 100, 20, 16, L"Chinese");
-            civ_checkbox[12] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 214, 70, 100, 20, 17, L"Cumans");
-            civ_checkbox[13] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 316, 70, 100, 20, 18, L"Dravidians");
-            civ_checkbox[14] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 418, 70, 100, 20, 19, L"Ethiopians");
-            // row 4
-            civ_checkbox[15] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 90, 100, 20, 20, L"Franks");
-            civ_checkbox[16] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 112, 90, 100, 20, 21, L"Georgians");
-            civ_checkbox[17] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 214, 90, 100, 20, 22, L"Goths");
-            civ_checkbox[18] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 316, 90, 100, 20, 23, L"Gurjaras");
-            civ_checkbox[19] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 418, 90, 100, 20, 24, L"Huns");
-            // row 5
-            civ_checkbox[20] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 110, 100, 20, 25, L"Incas");
-            civ_checkbox[21] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 112, 110, 100, 20, 26, L"Hindustanis");
-            civ_checkbox[22] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 214, 110, 100, 20, 27, L"Italians");
-            civ_checkbox[23] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 316, 110, 100, 20, 28, L"Japanese");
-            civ_checkbox[24] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 418, 110, 100, 20, 29, L"Khmer");
-            // row 6
-            civ_checkbox[25] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 130, 100, 20, 30, L"Koreans");
-            civ_checkbox[26] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 112, 130, 100, 20, 31, L"Lithuanians");
-            civ_checkbox[27] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 214, 130, 100, 20, 32, L"Magyars");
-            civ_checkbox[28] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 316, 130, 100, 20, 33, L"Malay");
-            civ_checkbox[29] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 418, 130, 100, 20, 34, L"Malians");
-            // row 7
-            civ_checkbox[30] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 150, 100, 20, 35, L"Mayans");
-            civ_checkbox[31] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 112, 150, 100, 20, 36, L"Mongols");
-            civ_checkbox[32] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 214, 150, 100, 20, 37, L"Persians");
-            civ_checkbox[33] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 316, 150, 100, 20, 38, L"Poles");
-            civ_checkbox[34] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 418, 150, 100, 20, 39, L"Portuguese");
-            // row 8
-            civ_checkbox[35] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 170, 100, 20, 40, L"Romans");
-            civ_checkbox[36] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 112, 170, 100, 20, 41, L"Saracens");
-            civ_checkbox[37] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 214, 170, 100, 20, 42, L"Sicilians");
-            civ_checkbox[38] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 316, 170, 100, 20, 43, L"Slavs");
-            civ_checkbox[39] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 418, 170, 100, 20, 44, L"Spanish");
-            // row 9
-            civ_checkbox[40] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 190, 100, 20, 45, L"Tatars");
-            civ_checkbox[41] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 112, 190, 100, 20, 46, L"Teutons");
-            civ_checkbox[42] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 214, 190, 100, 20, 47, L"Turks");
-            civ_checkbox[43] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 316, 190, 100, 20, 48, L"Vietnamese");
-            civ_checkbox[44] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 418, 190, 100, 20, 49, L"Vikings");
+            // creating individual civ checkboxes for custom tab
+			for (int i = 0; i < MAX_CIVS; i++)
+			{
+				civ_checkbox[i] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), column[i % 5], row[i / 5], 100, 20, i + 5, civ_index[i].c_str());
+			}
 
             autoreset_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 230, 180, 20, 50, L"Auto-reset upon change");
 
@@ -865,12 +824,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 
+            // individual civ checkboxes in custom tab
             if (wmId >= 5 && wmId <= 49) {
+
+                if (IsDlgButtonChecked(hWnd, wmId) == BST_CHECKED) AddCiv(civ_index[wmId-5]);
+                else RemoveCiv(civ_index[wmId - 5]);
+                ValidateDlcToggle(hWnd, GetCivDLC(civ_index[wmId - 5]));
+				
+
+            }
+
+
+            // all checkboxes in custom tab
+            if (wmId > 4 && wmId < 50 || wmId > 53 && wmId < 64)
+            {
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 pool_altered = true;
-
                 if (autoreset_enabled) ResetProgram();
             }
+                
 
             switch (wmId)
             {
@@ -918,191 +890,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case 3:                                             // "Enable All"
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 EnableAll();
+				ValidateAllDlcToggles(hWnd);
                 break;
             case 4:                                             // "Disable All"
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 DisableAll();
-                break;
-            case 5:											                                // Armenians Checkbox
-                if (IsDlgButtonChecked(hWnd, 5) == BST_CHECKED) AddCiv(L"Armenians");
-                else RemoveCiv(L"Armenians");
-                break;
-            case 6:											                                // Aztecs Checkbox
-                if (IsDlgButtonChecked(hWnd, 6) == BST_CHECKED) AddCiv(L"Aztecs");
-                else RemoveCiv(L"Aztecs");
-                break;
-            case 7:											                                // Bengalis Checkbox
-                if (IsDlgButtonChecked(hWnd, 7) == BST_CHECKED) AddCiv(L"Bengalis");
-                else RemoveCiv(L"Bengalis");
-                break;
-            case 8:											                                // Berbers Checkbox
-                if (IsDlgButtonChecked(hWnd, 8) == BST_CHECKED) AddCiv(L"Berbers");
-                else RemoveCiv(L"Berbers");
-                break;
-            case 9:											                                // Bohemians Checkbox
-                if (IsDlgButtonChecked(hWnd, 9) == BST_CHECKED) AddCiv(L"Bohemians");
-                else RemoveCiv(L"Bohemians");
-                break;
-            case 10:											                            // Britons Checkbox
-                if (IsDlgButtonChecked(hWnd, 10) == BST_CHECKED) AddCiv(L"Britons");
-                else RemoveCiv(L"Britons");
-                break;
-            case 11:											                            // Bulgarians Checkbox
-                if (IsDlgButtonChecked(hWnd, 11) == BST_CHECKED) AddCiv(L"Bulgarians");
-                else RemoveCiv(L"Bulgarians");
-                break;
-            case 12:											                            // Burgundians Checkbox
-                if (IsDlgButtonChecked(hWnd, 12) == BST_CHECKED) AddCiv(L"Burgundians");
-                else RemoveCiv(L"Burgundians");
-                break;
-            case 13:											                            // Burmese Checkbox
-                if (IsDlgButtonChecked(hWnd, 13) == BST_CHECKED) AddCiv(L"Burmese");
-                else RemoveCiv(L"Burmese");
-                break;
-            case 14:											                            // Byzantines Checkbox
-                if (IsDlgButtonChecked(hWnd, 14) == BST_CHECKED) AddCiv(L"Byzantines");
-                else RemoveCiv(L"Byzantines");
-                break;
-            case 15:											                            // Celts Checkbox
-                if (IsDlgButtonChecked(hWnd, 15) == BST_CHECKED) AddCiv(L"Celts");
-                else RemoveCiv(L"Celts");
-                break;
-            case 16:											                            // Chinese Checkbox
-                if (IsDlgButtonChecked(hWnd, 16) == BST_CHECKED) AddCiv(L"Chinese");
-                else RemoveCiv(L"Chinese");
-                break;
-            case 17:											                            // Cumans Checkbox
-                if (IsDlgButtonChecked(hWnd, 17) == BST_CHECKED) AddCiv(L"Cumans");
-                else RemoveCiv(L"Cumans");
-                break;
-            case 18:											                            // Dravidians Checkbox
-                if (IsDlgButtonChecked(hWnd, 18) == BST_CHECKED) AddCiv(L"Dravidians");
-                else RemoveCiv(L"Dravidians");
-                break;
-            case 19:											                            // Ethiopians Checkbox
-                if (IsDlgButtonChecked(hWnd, 19) == BST_CHECKED) AddCiv(L"Ethiopians");
-                else RemoveCiv(L"Ethiopians");
-                break;
-            case 20:											                            // Franks Checkbox
-                if (IsDlgButtonChecked(hWnd, 20) == BST_CHECKED) AddCiv(L"Franks");
-                else RemoveCiv(L"Franks");
-                break;
-            case 21:											                            // Georgians Checkbox
-                if (IsDlgButtonChecked(hWnd, 21) == BST_CHECKED) AddCiv(L"Georgians");
-                else RemoveCiv(L"Georgians");
-                break;
-            case 22:											                            // Goths Checkbox
-                if (IsDlgButtonChecked(hWnd, 22) == BST_CHECKED) AddCiv(L"Goths");
-                else RemoveCiv(L"Goths");
-                break;
-            case 23:											                            // Gurjaras Checkbox
-                if (IsDlgButtonChecked(hWnd, 23) == BST_CHECKED) AddCiv(L"Gurjaras");
-                else RemoveCiv(L"Gurjaras");
-                break;
-            case 24:											                            // Huns Checkbox
-                if (IsDlgButtonChecked(hWnd, 24) == BST_CHECKED) AddCiv(L"Huns");
-                else RemoveCiv(L"Huns");
-                break;
-            case 25:											                            // Incas Checkbox
-                if (IsDlgButtonChecked(hWnd, 25) == BST_CHECKED) AddCiv(L"Incas");
-                else RemoveCiv(L"Incas");
-                break;
-            case 26:											                            // Hindustanis Checkbox
-                if (IsDlgButtonChecked(hWnd, 26) == BST_CHECKED) AddCiv(L"Hindustanis");
-                else RemoveCiv(L"Hindustanis");
-                break;
-            case 27:											                            // Italians Checkbox
-                if (IsDlgButtonChecked(hWnd, 27) == BST_CHECKED) AddCiv(L"Italians");
-                else RemoveCiv(L"Italians");
-                break;
-            case 28:											                            // Japanese Checkbox
-                if (IsDlgButtonChecked(hWnd, 28) == BST_CHECKED) AddCiv(L"Japanese");
-                else RemoveCiv(L"Japanese");
-                break;
-            case 29:											                            // Khmer Checkbox
-                if (IsDlgButtonChecked(hWnd, 29) == BST_CHECKED) AddCiv(L"Khmer");
-                else RemoveCiv(L"Khmer");
-                break;
-            case 30:											                            // Koreans Checkbox
-                if (IsDlgButtonChecked(hWnd, 30) == BST_CHECKED) AddCiv(L"Koreans");
-                else RemoveCiv(L"Koreans");
-                break;
-            case 31:											                            // Lithuanians Checkbox
-                if (IsDlgButtonChecked(hWnd, 31) == BST_CHECKED) AddCiv(L"Lithuanians");
-                else RemoveCiv(L"Lithuanians");
-                break;
-            case 32:											                            // Magyars Checkbox
-                if (IsDlgButtonChecked(hWnd, 32) == BST_CHECKED) AddCiv(L"Magyars");
-                else RemoveCiv(L"Magyars");
-                break;
-            case 33:											                            // Malay Checkbox
-                if (IsDlgButtonChecked(hWnd, 33) == BST_CHECKED) AddCiv(L"Malay");
-                else RemoveCiv(L"Malay");
-                break;
-            case 34:											                            // Malians Checkbox
-                if (IsDlgButtonChecked(hWnd, 34) == BST_CHECKED) AddCiv(L"Malians");
-                else RemoveCiv(L"Malians");
-                break;
-            case 35:											                            // Mayans Checkbox
-                if (IsDlgButtonChecked(hWnd, 35) == BST_CHECKED) AddCiv(L"Mayans");
-                else RemoveCiv(L"Mayans");
-                break;
-            case 36:											                            // Mongols Checkbox
-                if (IsDlgButtonChecked(hWnd, 36) == BST_CHECKED) AddCiv(L"Mongols");
-                else RemoveCiv(L"Mongols");
-                break;
-            case 37:											                            // Persians Checkbox
-                if (IsDlgButtonChecked(hWnd, 37) == BST_CHECKED) AddCiv(L"Persians");
-                else RemoveCiv(L"Persians");
-                break;
-            case 38:											                            // Poles Checkbox
-                if (IsDlgButtonChecked(hWnd, 38) == BST_CHECKED) AddCiv(L"Poles");
-                else RemoveCiv(L"Poles");
-                break;
-            case 39:											                            // Portuguese Checkbox
-                if (IsDlgButtonChecked(hWnd, 39) == BST_CHECKED) AddCiv(L"Portuguese");
-                else RemoveCiv(L"Portuguese");
-                break;
-            case 40:											                            // Romans Checkbox
-                if (IsDlgButtonChecked(hWnd, 40) == BST_CHECKED) AddCiv(L"Romans");
-                else RemoveCiv(L"Romans");
-                break;
-            case 41:											                            // Saracens Checkbox
-                if (IsDlgButtonChecked(hWnd, 41) == BST_CHECKED) AddCiv(L"Saracens");
-                else RemoveCiv(L"Saracens");
-                break;
-            case 42:											                            // Sicilians Checkbox
-                if (IsDlgButtonChecked(hWnd, 42) == BST_CHECKED) AddCiv(L"Sicilians");
-                else RemoveCiv(L"Sicilians");
-                break;
-            case 43:											                            // Slavs Checkbox
-                if (IsDlgButtonChecked(hWnd, 43) == BST_CHECKED) AddCiv(L"Slavs");
-                else RemoveCiv(L"Slavs");
-                break;
-            case 44:											                            // Spanish Checkbox
-                if (IsDlgButtonChecked(hWnd, 44) == BST_CHECKED) AddCiv(L"Spanish");
-                else RemoveCiv(L"Spanish");
-                break;
-            case 45:											                            // Tatars Checkbox
-                if (IsDlgButtonChecked(hWnd, 45) == BST_CHECKED) AddCiv(L"Tatars");
-                else RemoveCiv(L"Tatars");
-                break;
-            case 46:											                            // Teutons Checkbox
-                if (IsDlgButtonChecked(hWnd, 46) == BST_CHECKED) AddCiv(L"Teutons");
-                else RemoveCiv(L"Teutons");
-                break;
-            case 47:											                            // Turks Checkbox
-                if (IsDlgButtonChecked(hWnd, 47) == BST_CHECKED) AddCiv(L"Turks");
-                else RemoveCiv(L"Turks");
-                break;
-            case 48:											                            // Vietnamese Checkbox
-                if (IsDlgButtonChecked(hWnd, 48) == BST_CHECKED) AddCiv(L"Vietnamese");
-                else RemoveCiv(L"Vietnamese");
-                break;
-            case 49:											                            // Vikings Checkbox
-                if (IsDlgButtonChecked(hWnd, 49) == BST_CHECKED) AddCiv(L"Vikings");
-                else RemoveCiv(L"Vikings");
-                break;
+				ValidateAllDlcToggles(hWnd);
+                break;    
             case 50:											                            // Auto-reset Checkbox
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 if (IsDlgButtonChecked(hWnd, 50) == BST_CHECKED) autoreset_enabled = true;
@@ -1113,20 +907,37 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 ShowHDDLCCheckboxes(false);
                 ShowAOCCheckbox(false);
 
+                for (int i = 0; i < 4; i++) {
+                    switch (i) {
+                    case 0:
+                        if
+                    }
+                }
+                ToggleDlc(rajas, true, hWnd);
+				ToggleDlc(africans, true, hWnd);
+				ToggleDlc(forgotten, true, hWnd);
+				ToggleDlc(aoc, true, hWnd);
+
                 SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_de);
                 if (ui_sounds_enabled) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 edition_state = DE;
-                ShowAllPoolCheckboxes();
+                ShowAllPoolCheckboxes();                
+				ValidateAllDlcToggles(hWnd);
+
                 break;
             case IDC_RADIO_HD:
                 ShowDEDLCCheckboxes(false);
                 ShowHDDLCCheckboxes(true);
                 ShowAOCCheckbox(false);
 
+                if (!DlcFull(aoc)) ToggleDlc(aoc, true, hWnd);
+
                 SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_hd);
                 if (ui_sounds_enabled) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 edition_state = HD;
                 ShowHDPoolCheckboxes();
+                ValidateAllDlcToggles(hWnd);
+
                 break;
             case IDC_RADIO_AOK:
                 ShowDEDLCCheckboxes(false);
@@ -1137,43 +948,90 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (ui_sounds_enabled) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 edition_state = AOC;
                 ShowAOCPoolCheckboxes();
+                ValidateAllDlcToggles(hWnd);
+
                 break;
             case IDC_CHECKBOX_ROYALS:
+                
                 if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_ROYALS) == BST_CHECKED) {
-                    for (int i = 0; i < MAX_CIVS; i++) {
-                        if (GetCivDLC(civ_index[i]) == royals) {
-                            CheckDlgButton(hWnd, i + 5, BST_CHECKED);
-                            AddCiv(civ_index[i]);
-                        }
-                    }
+                    ToggleDlc(royals, true, hWnd);
                 }
                 else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_ROYALS) == BST_UNCHECKED) {
-                    for (int i = 0; i < MAX_CIVS; i++) {
-                        if (GetCivDLC(civ_index[i]) == royals) {
-                            CheckDlgButton(hWnd, i + 5, BST_UNCHECKED);
-                            RemoveCiv(civ_index[i]);
-                        }
-                    }
-                }/*
+                    ToggleDlc(royals, false, hWnd);
+                }
                 break;
             case IDC_CHECKBOX_ROME:
+				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_ROME) == BST_CHECKED) {
+					ToggleDlc(rome, true, hWnd);
+				}
+				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_ROME) == BST_UNCHECKED) {
+					ToggleDlc(rome, false, hWnd);
+				}
                 break;
             case IDC_CHECKBOX_INDIA:
+				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_INDIA) == BST_CHECKED) {
+					ToggleDlc(india, true, hWnd);
+				}
+				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_INDIA) == BST_UNCHECKED) {
+					ToggleDlc(india, false, hWnd);
+				}
                 break;
             case IDC_CHECKBOX_DUKES:
+				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_DUKES) == BST_CHECKED) {
+					ToggleDlc(dukes, true, hWnd);
+				}
+				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_DUKES) == BST_UNCHECKED) {
+					ToggleDlc(dukes, false, hWnd);
+				}
                 break;
             case IDC_CHECKBOX_WEST:
+				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_WEST) == BST_CHECKED) {
+					ToggleDlc(west, true, hWnd);
+				}
+				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_WEST) == BST_UNCHECKED) {
+					ToggleDlc(west, false, hWnd);
+				}
                 break;
             case IDC_CHECKBOX_KHANS:
+				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_KHANS) == BST_CHECKED) {
+					ToggleDlc(khans, true, hWnd);
+				}
+				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_KHANS) == BST_UNCHECKED) {
+					ToggleDlc(khans, false, hWnd);
+				}
                 break;
             case IDC_CHECKBOX_RAJAS:
+				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_RAJAS) == BST_CHECKED) {
+					ToggleDlc(rajas, true, hWnd);
+				}
+				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_RAJAS) == BST_UNCHECKED) {
+					ToggleDlc(rajas, false, hWnd);
+				}
                 break;
             case IDC_CHECKBOX_AFRICANS:
+				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AFRICANS) == BST_CHECKED) {
+					ToggleDlc(africans, true, hWnd);
+				}
+				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AFRICANS) == BST_UNCHECKED) {
+					ToggleDlc(africans, false, hWnd);
+				}
                 break;
             case IDC_CHECKBOX_FORGOTTEN:
+				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_FORGOTTEN) == BST_CHECKED) {
+					ToggleDlc(forgotten, true, hWnd);
+				}
+				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_FORGOTTEN) == BST_UNCHECKED) {
+					ToggleDlc(forgotten, false, hWnd);
+				}
                 break;
             case IDC_CHECKBOX_AOC:
-                break;*/
+				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AOC) == BST_CHECKED) {
+					ToggleDlc(aoc, true, hWnd);
+				}
+				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AOC) == BST_UNCHECKED) {
+					ToggleDlc(aoc, false, hWnd);
+				}
+                break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
@@ -1934,7 +1792,7 @@ edition GetCivEdition(const std::wstring& civ_name) {
 }
 
 dlc GetCivDLC(const std::wstring &civ_name) {
-	for (const auto &civ : civ_dlc) {
+	for (const auto& civ : civ_dlc) {
 		if (civ.first == civ_name) {
 			return civ.second;
 		}
@@ -1968,12 +1826,12 @@ void InitialiseCivDLCs() {
 		{L"Armenians", royals}, {L"Aztecs", aoc}, {L"Bengalis", india}, {L"Berbers", africans},
 		{L"Bohemians", dukes}, {L"Britons", aok}, {L"Bulgarians", khans}, {L"Burgundians", west},
 		{L"Burmese", rajas}, {L"Byzantines", aok}, {L"Celts", aok}, {L"Chinese", aok},
-		{L"Cumans", khans}, {L"Dravidians", india}, {L"Ethiopians", forgotten}, {L"Franks", aok},
+		{L"Cumans", khans}, {L"Dravidians", india}, {L"Ethiopians", africans}, {L"Franks", aok},
 		{L"Georgians", royals}, {L"Goths", aok}, {L"Gurjaras", india}, {L"Hindustanis", forgotten},
 		{L"Huns", aoc}, {L"Incas", forgotten}, {L"Italians", forgotten}, {L"Japanese", aok},
 		{L"Khmer", rajas}, {L"Koreans", aoc}, {L"Lithuanians", khans}, {L"Magyars", forgotten},
 		{L"Malay", rajas}, {L"Malians", africans}, {L"Mayans", aoc}, {L"Mongols", aok},
-		{L"Persians", aok}, {L"Poles", dukes}, {L"Portuguese", forgotten}, {L"Romans", rome},
+		{L"Persians", aok}, {L"Poles", dukes}, {L"Portuguese", africans}, {L"Romans", rome},
 		{L"Saracens", aok}, {L"Sicilians", west}, {L"Slavs", forgotten}, {L"Spanish", aoc},
 		{L"Tatars", khans}, {L"Teutons", aok}, {L"Turks", aok}, {L"Vietnamese", rajas},
 		{L"Vikings", aok}
@@ -2046,4 +1904,153 @@ void ShowAOCCheckbox(bool aok_state) {
 
 		ShowWindow(aoc_icon, SW_HIDE);
 	}
+}
+
+void ToggleDlc(dlc civ_dlc, bool toggle_state, HWND hWnd) {
+    if (toggle_state) {
+        for (int i = 0; i < MAX_CIVS; i++) {
+            if (GetCivDLC(civ_index[i]) == civ_dlc) {
+                CheckDlgButton(hWnd, i + 5, BST_CHECKED);
+                AddCiv(civ_index[i]);
+            }
+        }
+    }
+    else {
+        for (int i = 0; i < MAX_CIVS; i++) {
+            if (GetCivDLC(civ_index[i]) == civ_dlc) {
+                CheckDlgButton(hWnd, i + 5, BST_UNCHECKED);
+                RemoveCiv(civ_index[i]);
+            }
+        }
+    }
+}
+
+bool DlcFull(dlc civ_dlc) {
+	int count = 0;
+	for (int i = 0; i < MAX_CIVS; i++) {
+		if (GetCivStatus(civ_index[i]) && GetCivDLC(civ_index[i]) == civ_dlc) {
+			count++;
+		}
+	}
+
+    if (count == 1 && civ_dlc == rome) return true;
+
+    if (count == 3 && civ_dlc == india) return true;
+
+    if (count == 2) {
+        switch (civ_dlc) {
+        case royals:
+            return true;
+		case dukes:
+            return true;
+        case west:
+            return true;
+        }
+    }
+
+    if (count == 4) {
+        switch (civ_dlc) {
+        case khans:
+            return true;
+        case rajas:
+            return true;
+        case africans:
+            return true;
+        }
+    }
+
+    if (count == 5) {
+        switch (civ_dlc) {
+        case forgotten:
+            return true;
+        case aoc:
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void ValidateDlcToggle(HWND hWnD, dlc civ_dlc) {
+	if (DlcFull(civ_dlc)) {
+        switch (civ_dlc) {
+        case khans:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_KHANS, BST_CHECKED);
+            break;
+        case dukes:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_DUKES, BST_CHECKED);
+            break;
+        case west:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_WEST, BST_CHECKED);
+            break;
+        case india:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_INDIA, BST_CHECKED);
+            break;
+        case rome:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_ROME, BST_CHECKED);
+            break;
+        case royals:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_ROYALS, BST_CHECKED);
+            break;
+        case forgotten:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_FORGOTTEN, BST_CHECKED);
+            break;
+        case africans:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_AFRICANS, BST_CHECKED);
+            break;
+        case rajas:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_RAJAS, BST_CHECKED);
+            break;
+        case aoc:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_AOC, BST_CHECKED);
+            break;
+        }
+	}
+	else {
+        switch (civ_dlc) {
+        case khans:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_KHANS, BST_UNCHECKED);
+            break;
+        case dukes:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_DUKES, BST_UNCHECKED);
+            break;
+        case west:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_WEST, BST_UNCHECKED);
+            break;
+        case india:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_INDIA, BST_UNCHECKED);
+            break;
+        case rome:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_ROME, BST_UNCHECKED);
+            break;
+        case royals:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_ROYALS, BST_UNCHECKED);
+            break;
+        case forgotten:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_FORGOTTEN, BST_UNCHECKED);
+            break;
+        case africans:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_AFRICANS, BST_UNCHECKED);
+            break;
+        case rajas:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_RAJAS, BST_UNCHECKED);
+            break;
+        case aoc:
+            CheckDlgButton(hWnD, IDC_CHECKBOX_AOC, BST_UNCHECKED);
+            break;
+        }
+	}
+}
+
+void ValidateAllDlcToggles(HWND hWnd) {
+	ValidateDlcToggle(hWnd, khans);
+	ValidateDlcToggle(hWnd, dukes);
+	ValidateDlcToggle(hWnd, west);
+	ValidateDlcToggle(hWnd, india);
+	ValidateDlcToggle(hWnd, rome);
+	ValidateDlcToggle(hWnd, royals);
+	ValidateDlcToggle(hWnd, forgotten);
+	ValidateDlcToggle(hWnd, africans);
+	ValidateDlcToggle(hWnd, rajas);
+	ValidateDlcToggle(hWnd, aoc);
 }
