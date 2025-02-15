@@ -42,6 +42,9 @@ TODO
 #define HOTKEY_ID_SPACE 2
 #define HOTKEY_ID_RETURN 3
 #define HOTKEY_ID_ESC 4
+#define HOTKEY_ID_Z 5
+#define HOTKEY_ID_X 6
+#define HOTKEY_ID_C 7
 #define DT_UNDERLINE 0x80000000
 #define MAX_LENGTH 15 
 #define MIN_WIDTH 400
@@ -67,6 +70,7 @@ HWND textfield_log;				 // textfield for log tab
 
 HWND civ_icon, edition_icon;						// icons
 
+
 HWND checkbox_armenians, checkbox_aztecs, checkbox_bengalis, checkbox_berbers, checkbox_bohemians,       // checkboxes for custom civ pool tab
 checkbox_britons, checkbox_bulgarians, checkbox_burgundians, checkbox_burmese, checkbox_byzantines,
 checkbox_celts, checkbox_chinese, checkbox_cumans, checkbox_dravidians, checkbox_ethiopians,
@@ -76,6 +80,7 @@ checkbox_lithuanians, checkbox_magyars, checkbox_malay, checkbox_malians, checkb
 checkbox_mongols, checkbox_persians, checkbox_poles, checkbox_portuguese, checkbox_romans,
 checkbox_saracens, checkbox_sicilians, checkbox_slavs, checkbox_spanish, checkbox_tatars,
 checkbox_teutons, checkbox_turks, checkbox_vietnamese, checkbox_vikings;
+
 
 HWND civ_checkbox[] = { checkbox_armenians, checkbox_aztecs, checkbox_bengalis, checkbox_berbers, checkbox_bohemians,       // array of checkboxes
                         checkbox_britons, checkbox_bulgarians, checkbox_burgundians, checkbox_burmese, checkbox_byzantines,
@@ -112,6 +117,16 @@ icon_lithuanians, icon_magyars, icon_malay, icon_malians, icon_mayans,
 icon_mongols, icon_persians, icon_poles, icon_portuguese, icon_romans,
 icon_saracens, icon_sicilians, icon_slavs, icon_spanish, icon_tatars,
 icon_teutons, icon_turks, icon_vietnamese, icon_vikings, icon_random;
+
+HBITMAP civ_icon_array[] = { icon_armenians, icon_aztecs, icon_bengalis, icon_berber, icon_bohemians,	                        // civ icons
+                    icon_britons, icon_bulgarians, icon_burgundians, icon_burmese, icon_byzantines,
+                    icon_celts, icon_chinese, icon_cumans, icon_dravidians, icon_ethiopians,
+                    icon_franks, icon_georgians, icon_goths, icon_gurjaras, icon_huns, icon_incas,
+                    icon_hindustanis, icon_italians, icon_japanese, icon_khmer, icon_koreans,
+                    icon_lithuanians, icon_magyars, icon_malay, icon_malians, icon_mayans,
+                    icon_mongols, icon_persians, icon_poles, icon_portuguese, icon_romans,
+                    icon_saracens, icon_sicilians, icon_slavs, icon_spanish, icon_tatars,
+                    icon_teutons, icon_turks, icon_vietnamese, icon_vikings, icon_random };
 
 HBITMAP icon_de, icon_hd, icon_aok;	                                                            // edition icons
 
@@ -445,6 +460,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    static HWND hwndTooltip;
+
     switch (message)
     {
         case WM_CREATE:
@@ -609,6 +626,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
 
+
+ 
             CheckRadioButton(hWnd, IDC_RADIO_DE, IDC_RADIO_AOK, IDC_RADIO_DE);
 
             // defined spot coordinates for the 45 individual civ checkboxes in custom tab
@@ -699,6 +718,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             brush_black = CreateSolidBrush(RGB(0, 0, 0));
             brush_white = CreateSolidBrush(RGB(255, 255, 255));
 
+            CreateTooltips(hWnd);
+
             EnableHotkeys(hWnd);
 
             break;
@@ -761,8 +782,67 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     break;
                 }
             }
+            else if (pnmhdr->code == TTN_SHOW)
+            {
+                // Get the tooltip info
+                LPNMTTDISPINFO lpttd = (LPNMTTDISPINFO)lParam;
+
+                // Get the cursor position
+                POINT pt;
+                GetCursorPos(&pt);
+
+                // Set the tooltip position
+                SendMessage(pnmhdr->hwndFrom, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y + 10));
+                return TRUE;
+            }
             break;
         }
+
+        case WM_MOUSEMOVE:
+        {
+            if (hwndTooltip)
+            {
+                // Get the cursor position
+                POINT pt;
+                GetCursorPos(&pt);
+
+                // Convert screen coordinates to client coordinates
+                ScreenToClient(hWnd, &pt);
+
+                // Check if the cursor is over the button
+                RECT rect;
+                if (GetWindowRect(button_draw, &rect))
+                {
+                    ScreenToClient(hWnd, (LPPOINT)&rect.left);
+                    ScreenToClient(hWnd, (LPPOINT)&rect.right);
+
+                    if (PtInRect(&rect, pt))
+                    {
+                        // Set the tooltip position
+                        ClientToScreen(hWnd, &pt);
+                        SendMessage(hwndTooltip, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y + 10));
+
+                        // Activate the tooltip
+                        TOOLINFO toolInfo = { 0 };
+                        toolInfo.cbSize = sizeof(toolInfo);
+                        toolInfo.hwnd = hWnd;
+                        toolInfo.uId = (UINT_PTR)button_draw;
+                        SendMessage(hwndTooltip, TTM_TRACKACTIVATE, TRUE, (LPARAM)&toolInfo);
+                    }
+                    else
+                    {
+                        // Deactivate the tooltip
+                        TOOLINFO toolInfo = { 0 };
+                        toolInfo.cbSize = sizeof(toolInfo);
+                        toolInfo.hwnd = hWnd;
+                        toolInfo.uId = (UINT_PTR)button_draw;
+                        SendMessage(hwndTooltip, TTM_TRACKACTIVATE, FALSE, (LPARAM)&toolInfo);
+                    }
+                }
+            }
+            break;
+        }
+
         case WM_GETMINMAXINFO:                                  // minimum window size
         {
             MINMAXINFO *pmmi = (MINMAXINFO *)lParam;
@@ -776,12 +856,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case WM_HOTKEY:
         {
 
+            
+
             if (GetForegroundWindow() != hWnd)  // disables hotkeys if window is not in foreground
             {
                 DisableHotkeys(hWnd);
                 break;
             }
             else EnableHotkeys(hWnd);
+
+            if (wParam == HOTKEY_ID_ESC) {
+                if (ui_sounds_enabled) {
+                    PlaySound(L"exit.wav", NULL, SND_FILENAME | SND_ASYNC);
+                    Sleep(200);
+                }
+
+                KillApplication();                // escape for exiting
+            }
+
+            if (wParam == HOTKEY_ID_SPACE) {
+                DrawCiv();           // space for drawing civ
+
+            }
 
             if (wParam == HOTKEY_ID_TAB)                        // tab for switching tabs
             {
@@ -793,10 +889,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 ShowTabComponents(newTabIndex);
             }
 
-            if (wParam == HOTKEY_ID_SPACE) {
-                DrawCiv();           // space for drawing civ
-
-            }
+            
 
 
             if (wParam == HOTKEY_ID_RETURN) {
@@ -805,14 +898,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
 
 
-            if (wParam == HOTKEY_ID_ESC) {
-                if (ui_sounds_enabled) {
-                    PlaySound(L"exit.wav", NULL, SND_FILENAME | SND_ASYNC);
-                    Sleep(200);
-                }
+            if (wParam == HOTKEY_ID_Z) {
 
-                KillApplication();                // escape for exiting
             }
+
+
+            
                 
             break;
         }
@@ -1400,6 +1491,9 @@ void EnableHotkeys(HWND hWnd)
 	RegisterHotKey(hWnd, HOTKEY_ID_SPACE, 0, VK_SPACE);
 	RegisterHotKey(hWnd, HOTKEY_ID_RETURN, 0, VK_RETURN);
 	RegisterHotKey(hWnd, HOTKEY_ID_ESC, 0, VK_ESCAPE);
+    //RegisterHotKey(hWnd, HOTKEY_ID_Z, 0, );
+
+
 }
 
 void DisableHotkeys(HWND hWnd)
@@ -1435,6 +1529,24 @@ std::string ConvertToString(const std::wstring& wstr) {
 }
 
 void LoadImages() { 
+
+
+    /*                                  // can't get this to work yet, some icons disappear
+    std::wstring bmp_parsed_civname;
+    std::wstring icon_path;
+
+
+    for (int i = 0; i < MAX_CIVS; i++) {
+        bmp_parsed_civname = civ_index[i];
+        bmp_parsed_civname[0] = std::tolower(bmp_parsed_civname[0]);
+
+        icon_path = L"civ_icons\\" + bmp_parsed_civname + L".bmp";
+
+        civ_icon_array[i] = (HBITMAP)LoadImageW(NULL, icon_path.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    }
+*/
+
+    
     icon_armenians = (HBITMAP)LoadImageW(NULL, L"civ_icons\\armenians.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_aztecs = (HBITMAP)LoadImageW(NULL, L"civ_icons\\aztecs.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_bengalis = (HBITMAP)LoadImageW(NULL, L"civ_icons\\bengalis.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -1480,6 +1592,9 @@ void LoadImages() {
 	icon_turks = (HBITMAP)LoadImageW(NULL, L"civ_icons\\turks.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_vietnamese = (HBITMAP)LoadImageW(NULL, L"civ_icons\\vietnamese.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_vikings = (HBITMAP)LoadImageW(NULL, L"civ_icons\\vikings.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    
+    
+    
     icon_random = (HBITMAP)LoadImageW(NULL, L"civ_icons\\random.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
 	icon_de = (HBITMAP)LoadImageW(NULL, L"edition_icons\\aoe2de.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -1499,6 +1614,18 @@ void LoadImages() {
 }
 
 HBITMAP FetchIcon(std::wstring civ_name) {
+
+
+
+                                        // can't get this to work yet, some icons disappear
+    /*
+    for (int i = 0; i < MAX_CIVS; i++) {
+        if (civ_name == civ_index[i]) {
+            return civ_icon_array[i];
+        }
+    }*/
+        
+
 	if (civ_name == L"Armenians") return icon_armenians;
 	if (civ_name == L"Aztecs") return icon_aztecs;
 	if (civ_name == L"Bengalis") return icon_bengalis;
@@ -1544,6 +1671,8 @@ HBITMAP FetchIcon(std::wstring civ_name) {
 	if (civ_name == L"Turks") return icon_turks;
 	if (civ_name == L"Vietnamese") return icon_vietnamese;
 	if (civ_name == L"Vikings") return icon_vikings;
+
+    
 }
 
 void PlayJingle(std::wstring civ_name) {
@@ -2105,4 +2234,34 @@ void ValidateAllDlcToggles(HWND hWnd) {
 	ValidateDlcToggle(hWnd, africans);
 	ValidateDlcToggle(hWnd, rajas);
 	ValidateDlcToggle(hWnd, aoc);
+}
+
+void AddTooltip(HWND hwndTool, HWND hwndTip, LPCWSTR pszText)
+{
+    TOOLINFO toolInfo = { 0 };
+    toolInfo.cbSize = sizeof(toolInfo);
+    toolInfo.hwnd = hwndTool;
+    toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS || TTF_TRACK;
+    toolInfo.uId = (UINT_PTR)hwndTool;
+    toolInfo.lpszText = (LPWSTR)pszText;
+    SendMessage(hwndTip, TTM_ADDTOOL, 0, (LPARAM)&toolInfo);
+}
+
+void CreateTooltips(HWND hWnd)
+{
+    // Create the tooltip window
+    HWND hwndTooltip = CreateWindowEx(0, TOOLTIPS_CLASS, NULL,
+        WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX,
+        CW_USEDEFAULT, CW_USEDEFAULT,
+        CW_USEDEFAULT, CW_USEDEFAULT,
+        hWnd, NULL, instance, NULL);
+
+    // Set the maximum width for the tooltip window
+    SendMessage(hwndTooltip, TTM_SETMAXTIPWIDTH, 0, 300);
+
+    // Add tooltips for buttons
+    AddTooltip(button_draw, hwndTooltip, L"Draw a random civilization");
+    AddTooltip(button_reset, hwndTooltip, L"Reset the program");
+    AddTooltip(button_enableall, hwndTooltip, L"Enable all civilizations");
+    AddTooltip(button_disableall, hwndTooltip, L"Disable all civilizations");
 }
