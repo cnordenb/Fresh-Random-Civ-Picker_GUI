@@ -34,6 +34,8 @@
 #define IDC_CHECKBOX_AFRICANS			61
 #define IDC_CHECKBOX_FORGOTTEN			62
 #define IDC_CHECKBOX_AOC				63
+#define IDC_CHECKBOX_REMAINLOG			65
+#define IDC_BUTTON_CLEARLOG				66
 #define ID_FILE_TOGGLECHECK             32771
 #define IDM_GITHUB                      32772
 #define IDM_WEBVERSION                  32773
