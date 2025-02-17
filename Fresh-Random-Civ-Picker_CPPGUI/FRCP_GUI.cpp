@@ -255,7 +255,7 @@ void ShowDEDLCCheckboxes(bool);
 void ShowHDDLCCheckboxes(bool);
 void ShowAOCCheckbox(bool);
 
-void UpdateDrawnLog(bool);
+void UpdateDrawnLog(bool, bool);
 void UpdateRemainingLog();
 
 bool DlcFull(dlc);
@@ -363,7 +363,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	InitialiseCivStates();
     InitialiseCivEditions();
 	InitialiseCivDLCs();
-    ResetProgram();
 
 
     // Initialize global strings
@@ -818,7 +817,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SetWindowPos(drawn_log, NULL, 10, 60, width - (width / 2) - 60, height - 25, SWP_NOZORDER);                   // log text field anchored to window size
 			SetWindowPos(label_remainingcount, NULL, (width / 2) + 60, 25, 130, 15, SWP_NOZORDER);                           // drawn civ label anchored to top right corner
 			SetWindowPos(checkbox_showremainlog, NULL, (width / 2) + 190, 25, 60, 15, SWP_NOZORDER);                           // drawn civ label anchored to top right corner
-            SetWindowPos(remaining_log, NULL, (width / 2) + 60, 60, width - (width / 2) - 50, height - 25, SWP_NOZORDER);                   // log text field anchored to window size
+            SetWindowPos(remaining_log, NULL, (width / 2) + 60, 60, width - (width / 2) - 60, height - 25, SWP_NOZORDER);                   // log text field anchored to window size
 
             break;
         }
@@ -1061,10 +1060,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             // auto-reset
             if (autoreset_enabled) {
-				if (wmId > 4 && wmId < 50 || wmId > 53 && wmId < 64) ResetProgram();
+				if (wmId > 4 && wmId < 50 || wmId > 50 && wmId < 64) ResetProgram();
             }
-
-
 
             switch (wmId)
             {
@@ -1133,8 +1130,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 }
                 break;
             case IDC_CHECKBOX_AUTORESET:										                            // Auto-reset Checkbox
-                if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_REMAINLOG) == BST_CHECKED) autoreset_enabled = true;
-                else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_REMAINLOG) == BST_UNCHECKED) autoreset_enabled = false;
+                if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_CHECKED) autoreset_enabled = true;
+                else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_UNCHECKED) autoreset_enabled = false;
                 break;
             case IDC_CHECKBOX_AUTOTOGGLE:											                            // Auto-reset Checkbox
                 
@@ -1198,7 +1195,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     }
                 }
 
-				if (autoreset_enabled) ResetProgram();
 
                 break;
             case IDC_RADIO_HD:
@@ -1219,7 +1215,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 ShowHDPoolCheckboxes();
                 ValidateAllDlcToggles(hWnd);
 
-                if (autoreset_enabled) ResetProgram();
+
 
                 break;
             case IDC_RADIO_AOK:
@@ -1238,7 +1234,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 ShowAOCPoolCheckboxes();
                 ValidateAllDlcToggles(hWnd);
 
-                if (autoreset_enabled) ResetProgram();
+
 
                 break;
             case IDC_CHECKBOX_ROYALS:
@@ -1325,7 +1321,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
-            break;            
+            break;
+            
         }
         case WM_PAINT:
         {
@@ -1515,11 +1512,12 @@ LRESULT CALLBACK HyperlinkProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 void ResetProgram()
 { 
+    if (custom_max_civs < MAX_CIVS) custom_civ_pool = true;
 
     current_civ = L"Random";
     iterator = 0;
 
-	UpdateDrawnLog(false);
+	UpdateDrawnLog(false, true);
    
 
     if (custom_civ_pool) {
@@ -1565,8 +1563,7 @@ void DrawCiv()
     
     if (custom_max_civs == 0) {
         if (ui_sounds_enabled) PlaySound(L"error_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-		//MessageBox(NULL, L"Please enable at least one civilisation.", L"Error", MB_OK | MB_ICONERROR);
-        SetWindowTextA(label_centre, "Empty pool!");
+		SetWindowTextA(label_centre, "Empty pool!");
         return;        // if no civs are selected, return
     }
 
@@ -1596,7 +1593,7 @@ void DrawCiv()
 
    
 
-    UpdateDrawnLog(true);
+    UpdateDrawnLog(true, false);
     UpdateRemainingLog();
 
 
@@ -1865,6 +1862,8 @@ void AddCiv(std::wstring civ) {
         label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
         SetWindowText(label_corner, label_text.c_str());
 	    if (custom_max_civs == MAX_CIVS) custom_civ_pool = false;
+        UpdateRemainingLog();
+        UpdateDrawnLog(false, false);
     }
 }
 
@@ -1877,6 +1876,8 @@ void RemoveCiv(std::wstring civ) {
 	    custom_max_civs--;
         label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
         SetWindowText(label_corner, label_text.c_str());
+        UpdateRemainingLog();
+		UpdateDrawnLog(false, false);
     }    
 }
 
@@ -2428,7 +2429,7 @@ void CreateTooltips(HWND hWnd)
     AddTooltip(button_disableall, hwndTooltip, L"Disable all civilizations");
 }
 
-void UpdateDrawnLog(bool drawn) {
+void UpdateDrawnLog(bool drawn, bool blankline_wanted) {
 
     
     if (drawn) {
@@ -2443,7 +2444,7 @@ void UpdateDrawnLog(bool drawn) {
     }
 
     else {
-        if (!reset_state) {
+        if (!reset_state && blankline_wanted) {
             if (pool_altered || iterator >= 0)                       // adds blank line to log before next iteration of civ drawing
             {
                 drawnlog_length = GetWindowTextLength(drawn_log);
@@ -2479,7 +2480,6 @@ void UpdateRemainingLog() {
     }
 
 	std::wstring remain_label = L"Remaining: " + std::to_wstring(custom_max_civs - iterator) + L"/" + std::to_wstring(custom_max_civs);
-
     SetWindowText(remaining_log, remaininglog_text.c_str());
 	SetWindowText(label_remainingcount, remain_label.c_str());
 }
