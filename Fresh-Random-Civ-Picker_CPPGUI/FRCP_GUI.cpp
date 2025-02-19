@@ -26,6 +26,9 @@ TODO
 #include <strsafe.h>
 #include <gdiplus.h>
 #include <mmsystem.h>
+#include <map>
+
+
 
 
 #pragma comment(lib, "winmm.lib")
@@ -52,7 +55,7 @@ TODO
 #define BUTTON_WIDTH 100
 #define BUTTON_HEIGHT 30
 
-
+std::map<HWND, WNDPROC> originalButtonProcs;
 // Global Variables
 PAINTSTRUCT paint_struct;
 HDC device_handling_context;
@@ -60,6 +63,7 @@ RECT rectangle_struct;
 HINSTANCE instance;                                // current instance
 WCHAR title[MAX_LOADSTRING];                  // The title bar text
 WCHAR window_class[MAX_LOADSTRING];            // the main window class name
+HWND hwndTooltip;
 
 HWND label_corner, label_centre, label_drawncount, label_remainingcount;    // labels
 
@@ -106,6 +110,7 @@ HWND khans_icon, dukes_icon, west_icon, india_icon, rome_icon, royals_icon,     
 HWND autoreset_checkbox, autotoggle_checkbox;			 // autoreset checkbox
 
 HWND radiobutton_de, radiobutton_hd, radiobutton_aok;	 // radio buttons
+
 
 HBRUSH brush_white;
 HBRUSH brush_black;
@@ -285,6 +290,8 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    OptionsDlgProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK    HyperlinkProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK    ButtonProc(HWND, UINT, WPARAM, LPARAM);
+void SubclassButton(HWND);
 
 
 // Function to create tabs
@@ -473,14 +480,15 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    static HWND hwndTooltip;
-
+   
     switch (message)
     {
         case WM_CREATE:
         {
             LoadImages();
             CreateTabs(hWnd);
+            CreateTooltips(hWnd);
+
 
             button_draw = CreateWindow(
                 L"BUTTON",  // Predefined class; Unicode assumed 
@@ -520,7 +528,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_BUTTON_TECHTREE,       
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
-            SendMessageW(button_techtree, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_techtree);
+            SendMessageW(button_techtree, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_techtree);            
             
             label_corner = CreateWindow(
                 L"STATIC",  // Predefined class; Unicode assumed
@@ -629,7 +637,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             button_clearlog = CreateWindow(
                 L"BUTTON",  // Predefined class; Unicode assumed 
-                L"Clear",      // Button text 
+                L"Clear Log",      // Button text 
                 WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
 				0,         // WM_SIZE will set x position
 				0,         // WM_SIZE will set y position
@@ -704,6 +712,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_RADIO_AOK,       // No menu.
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
+
+            // Subclass the buttons
+			SubclassButton(button_draw);
+			SubclassButton(button_reset);
+			SubclassButton(button_clearlog);
+
 
 
 			checkbox_showremainlog = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 230, 180, 20, IDC_CHECKBOX_REMAINLOG, L"Show");
@@ -800,7 +814,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             brush_black = CreateSolidBrush(RGB(0, 0, 0));
             brush_white = CreateSolidBrush(RGB(255, 255, 255));
 
-            CreateTooltips(hWnd);
 
             EnableHotkeys(hWnd);
 
@@ -908,35 +921,70 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 // Convert screen coordinates to client coordinates
                 ScreenToClient(hWnd, &pt);
 
-                // Check if the cursor is over the button
+                // Check if the cursor is over any button and update the tooltip accordingly
                 RECT rect;
+                TOOLINFO toolInfo = { 0 };
+                toolInfo.cbSize = sizeof(toolInfo);
+                toolInfo.hwnd = hWnd;
+                toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS | TTF_TRACK;
+
+                bool tooltipActivated = false;
+
+                // Check if the cursor is over the draw button
                 if (GetWindowRect(button_draw, &rect))
                 {
-                    ScreenToClient(hWnd, (LPPOINT)&rect.left);
-                    ScreenToClient(hWnd, (LPPOINT)&rect.right);
-
+                    MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
                     if (PtInRect(&rect, pt))
                     {
-                        // Set the tooltip position
+                        toolInfo.uId = (UINT_PTR)button_draw;
+                        std::wstring wstr = L"Draw a random civilization";
+                        toolInfo.lpszText = (LPWSTR)wstr.c_str();
+                        SendMessage(hwndTooltip, TTM_UPDATETIPTEXT, 0, (LPARAM)&toolInfo);
                         ClientToScreen(hWnd, &pt);
                         SendMessage(hwndTooltip, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y + 10));
-
-                        // Activate the tooltip
-                        TOOLINFO toolInfo = { 0 };
-                        toolInfo.cbSize = sizeof(toolInfo);
-                        toolInfo.hwnd = hWnd;
-                        toolInfo.uId = (UINT_PTR)button_draw;
                         SendMessage(hwndTooltip, TTM_TRACKACTIVATE, TRUE, (LPARAM)&toolInfo);
+                        tooltipActivated = true;
                     }
-                    else
+                }
+
+                // Check if the cursor is over the reset button
+                if (GetWindowRect(button_reset, &rect))
+                {
+                    MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
+                    if (PtInRect(&rect, pt))
                     {
-                        // Deactivate the tooltip
-                        TOOLINFO toolInfo = { 0 };
-                        toolInfo.cbSize = sizeof(toolInfo);
-                        toolInfo.hwnd = hWnd;
-                        toolInfo.uId = (UINT_PTR)button_draw;
-                        SendMessage(hwndTooltip, TTM_TRACKACTIVATE, FALSE, (LPARAM)&toolInfo);
+                        toolInfo.uId = (UINT_PTR)button_reset;
+                        std::wstring wstr = L"Reset the program";
+                        toolInfo.lpszText = (LPWSTR)wstr.c_str();
+                        SendMessage(hwndTooltip, TTM_UPDATETIPTEXT, 0, (LPARAM)&toolInfo);
+                        ClientToScreen(hWnd, &pt);
+                        SendMessage(hwndTooltip, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y + 10));
+                        SendMessage(hwndTooltip, TTM_TRACKACTIVATE, TRUE, (LPARAM)&toolInfo);
+                        tooltipActivated = true;
                     }
+                }
+
+                // Check if the cursor is over the tech tree button
+                if (GetWindowRect(button_techtree, &rect))
+                {
+                    MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
+                    if (PtInRect(&rect, pt))
+                    {
+                        toolInfo.uId = (UINT_PTR)button_techtree;
+                        std::wstring wstr = L"Open the tech tree for the drawn civilization";
+                        toolInfo.lpszText = (LPWSTR)wstr.c_str();
+                        SendMessage(hwndTooltip, TTM_UPDATETIPTEXT, 0, (LPARAM)&toolInfo);
+                        ClientToScreen(hWnd, &pt);
+                        SendMessage(hwndTooltip, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y + 10));
+                        SendMessage(hwndTooltip, TTM_TRACKACTIVATE, TRUE, (LPARAM)&toolInfo);
+                        tooltipActivated = true;
+                    }
+                }
+
+                // Deactivate the tooltip if the cursor is not over any button
+                if (!tooltipActivated)
+                {
+                    SendMessage(hwndTooltip, TTM_TRACKACTIVATE, FALSE, (LPARAM)&toolInfo);
                 }
             }
             break;
@@ -1361,6 +1409,43 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;       
 
 } 
+
+LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    if (uMsg == WM_NCCREATE)
+    {
+        // Store the original window procedure
+        originalButtonProcs[hwnd] = (WNDPROC)GetWindowLongPtr(hwnd, GWLP_WNDPROC);
+
+        
+    }
+
+    switch (uMsg)
+    {
+    case WM_SIZE:
+		SendMessage(hwnd, WM_SIZE, wParam, lParam);
+        break;
+    case WM_MOUSEMOVE:
+        // Forward the WM_MOUSEMOVE message to the parent window
+        SendMessage(GetParent(hwnd), WM_MOUSEMOVE, wParam, lParam);
+        break;
+
+    default:
+        return CallWindowProc(originalButtonProcs[hwnd], hwnd, uMsg, wParam, lParam);
+    }
+
+
+
+    return 0;
+    // Call the original window procedure for default processing
+    
+}
+
+void SubclassButton(HWND button)
+{
+    // Store the original window procedure
+    originalButtonProcs[button] = (WNDPROC)SetWindowLongPtr(button, GWLP_WNDPROC, (LONG_PTR)ButtonProc);
+}
 
 INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -2430,7 +2515,7 @@ void AddTooltip(HWND hwndTool, HWND hwndTip, LPCWSTR pszText)
 void CreateTooltips(HWND hWnd)
 {
     // Create the tooltip window
-    HWND hwndTooltip = CreateWindowEx(0, TOOLTIPS_CLASS, NULL,
+    hwndTooltip = CreateWindowEx(0, TOOLTIPS_CLASS, NULL,
         WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX,
         CW_USEDEFAULT, CW_USEDEFAULT,
         CW_USEDEFAULT, CW_USEDEFAULT,
@@ -2444,6 +2529,7 @@ void CreateTooltips(HWND hWnd)
     AddTooltip(button_reset, hwndTooltip, L"Reset the program");
     AddTooltip(button_enableall, hwndTooltip, L"Enable all civilizations");
     AddTooltip(button_disableall, hwndTooltip, L"Disable all civilizations");
+	AddTooltip(button_techtree, hwndTooltip, L"Open the tech tree for the drawn civilization");
 }
 
 void UpdateDrawnLog(bool drawn, bool blankline_wanted) {
@@ -2454,7 +2540,7 @@ void UpdateDrawnLog(bool drawn, bool blankline_wanted) {
         drawnlog_text.resize(drawnlog_length + 1);
         GetWindowText(drawn_log, &drawnlog_text[0], drawnlog_length + 1);
         drawnlog_text.pop_back(); // Remove the null terminator
-        log_entry = std::wstring(current_civ.begin(), current_civ.end()) + L"\r\n";
+        log_entry = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs) + L" - " + std::wstring(current_civ.begin(), current_civ.end()) + L"\r\n";
         drawnlog_text = log_entry + drawnlog_text;
         if (iterator == custom_max_civs) drawnlog_text += L"\r\n";
         SetWindowText(drawn_log, drawnlog_text.c_str());
