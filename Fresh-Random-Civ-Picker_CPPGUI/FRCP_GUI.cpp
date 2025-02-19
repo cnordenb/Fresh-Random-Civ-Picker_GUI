@@ -63,7 +63,7 @@ WCHAR window_class[MAX_LOADSTRING];            // the main window class name
 
 HWND label_corner, label_centre, label_drawncount, label_remainingcount;    // labels
 
-HWND button_draw, button_reset, button_enableall, button_disableall, button_clearlog;	    // buttons
+HWND button_draw, button_reset, button_enableall, button_disableall, button_clearlog, button_techtree;	    // buttons
 
 HWND drawn_log, remaining_log;				 // textfield for log tab
 
@@ -135,6 +135,8 @@ HBITMAP icon_de, icon_hd, icon_aok;	                                            
 HBITMAP icon_khans, icon_dukes, icon_west, icon_india, icon_rome, icon_royals,                      // dlc icons
             icon_forgotten, icon_africans, icon_rajas,
             icon_aoc;
+
+HBITMAP icon_techtree;                                                                             // tech tree button icon
         
 
 int iterator = 0; // Global variable to keep track of the count
@@ -241,6 +243,7 @@ void HideCustomPoolCheckboxes();
 void ShowHDPoolCheckboxes();
 void ShowAOCPoolCheckboxes();
 void DLCToggles(edition);
+void OpenTechTree();
 
 edition GetCivEdition(const std::wstring&);
 dlc GetCivDLC(const std::wstring&);
@@ -488,7 +491,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 BUTTON_WIDTH,
                 BUTTON_HEIGHT,
                 hWnd,       // Parent window
-                (HMENU)1,       // No menu.
+                (HMENU)IDC_BUTTON_DRAW,       
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
 
@@ -501,10 +504,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 BUTTON_WIDTH,
                 BUTTON_HEIGHT,
                 hWnd,       // Parent window
-                (HMENU)2,       // No menu.
+                (HMENU)IDC_BUTTON_RESET,       
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
 
+            button_techtree = CreateWindow(
+                L"BUTTON",  // Predefined class; Unicode assumed 
+                L"",      // Button text 
+                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP,  // Styles 
+                0,         // position deferred to wm_size
+                0,         
+                60,
+                60,
+                hWnd,       // Parent window
+                (HMENU)IDC_BUTTON_TECHTREE,       
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                NULL);      // Pointer not needed.
+            SendMessageW(button_techtree, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_techtree);
+            
             label_corner = CreateWindow(
                 L"STATIC",  // Predefined class; Unicode assumed
                 L"",  // Label text from variable..
@@ -632,7 +649,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 BUTTON_WIDTH,
                 BUTTON_HEIGHT,
                 hWnd,       // Parent window
-                (HMENU)3,       // No menu.
+                (HMENU)IDC_BUTTON_ENABLEALL,       // No menu.
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
 
@@ -645,7 +662,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 BUTTON_WIDTH,
                 BUTTON_HEIGHT,
                 hWnd,       // Parent window
-                (HMENU)4,       // No menu.
+                (HMENU)IDC_BUTTON_DISABLEALL,       // No menu.
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
 
@@ -734,7 +751,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             aoc_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
 
-
             SendMessage(royals_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_royals);
             SendMessage(rome_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_rome);
             SendMessage(india_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_india);
@@ -796,6 +812,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             int height = HIWORD(lParam);
 
             SetWindowPos(button_draw, NULL, (width - 100) / 2, (height + 100) / 2, 100, 30, SWP_NOZORDER);   // draw button anchored to centre
+            SetWindowPos(button_techtree, NULL, width - 150, height - 120, 60, 60, SWP_NOZORDER);   // draw button anchored to centre
 
 
             if (current_tab == 0) {
@@ -814,10 +831,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			
             SetWindowPos(label_drawncount, NULL, 10, 25, 90, 15, SWP_NOZORDER);                           // drawn civ label anchored to top left corner
 			SetWindowPos(button_clearlog, NULL, 110, 25, 100, 30, SWP_NOZORDER);                           // clear log button anchored to top left corner
-            SetWindowPos(drawn_log, NULL, 10, 60, width - (width / 2) - 60, height - 25, SWP_NOZORDER);                   // log text field anchored to window size
+            SetWindowPos(drawn_log, NULL, 10, 60, width - (width / 2) - 60, height - 25, SWP_NOZORDER);        // log text field anchored to window size
+            
 			SetWindowPos(label_remainingcount, NULL, (width / 2) + 60, 25, 130, 15, SWP_NOZORDER);                           // drawn civ label anchored to top right corner
 			SetWindowPos(checkbox_showremainlog, NULL, (width / 2) + 190, 25, 60, 15, SWP_NOZORDER);                           // drawn civ label anchored to top right corner
-            SetWindowPos(remaining_log, NULL, (width / 2) + 60, 60, width - (width / 2) - 60, height - 25, SWP_NOZORDER);                   // log text field anchored to window size
+            SetWindowPos(remaining_log, NULL, (width / 2) + 60, 60, width - (width / 2) - 65, height - 25, SWP_NOZORDER);                   // log text field anchored to window size
 
             break;
         }
@@ -947,10 +965,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             else EnableHotkeys(hWnd);
 
             if (wParam == HOTKEY_ID_ESC) {
-                if (ui_sounds_enabled) {
-                    PlaySound(L"exit.wav", NULL, SND_FILENAME | SND_ASYNC);
-                    Sleep(200);
-                }
+                
 
                 KillApplication();                // escape for exiting
             }
@@ -1052,7 +1067,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			// button sounds in tab views
             if (ui_sounds_enabled) {
-                if (wmId > 2 && wmId < 66) {
+                if (wmId > 2 && wmId < 68) {
 					if (wmId > 50 && wmId < 54) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
 					else PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 }
@@ -1098,26 +1113,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 ShellExecute(0, 0, L"https://cnordenb.github.io/Fresh-Random-Civ-Picker_web/", 0, 0, SW_SHOW);
                 break;
-            case 1:                                             // "Draw"     
+            case IDC_BUTTON_DRAW:                                             // "Draw"     
                 if (ui_sounds_enabled && !jingles_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 DrawCiv();
                 break;
-            case 2:                                             // "Reset"
+            case IDC_BUTTON_RESET:                                             // "Reset"
                 if (ui_sounds_enabled && !jingles_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 ResetProgram();
                 break;
-            case 3:                                             // "Enable All"
+            case IDC_BUTTON_ENABLEALL:                                             // "Enable All"
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 EnableAll();
                 ValidateAllDlcToggles(hWnd);
                 break;
-            case 4:                                             // "Disable All"
+            case IDC_BUTTON_DISABLEALL:                                             // "Disable All"
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 DisableAll();
                 ValidateAllDlcToggles(hWnd);
                 break;
 			case IDC_BUTTON_CLEARLOG:                           // "Clear"
 				SetWindowText(drawn_log, L"");
+                break;
+            case IDC_BUTTON_TECHTREE:
+                OpenTechTree();
                 break;
             case IDC_CHECKBOX_REMAINLOG:                        // "Show Remaining Civs Log"
                 if (!remainlog_enabled) {
@@ -1210,7 +1228,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 
 
                 SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_hd);
-                if (ui_sounds_enabled) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                
                 edition_state = HD;
                 ShowHDPoolCheckboxes();
                 ValidateAllDlcToggles(hWnd);
@@ -1229,14 +1247,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 
 
                 SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_aok);
-                if (ui_sounds_enabled) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 edition_state = AOK;
                 ShowAOCPoolCheckboxes();
                 ValidateAllDlcToggles(hWnd);
-
-
-
-                break;
+                break;            
             case IDC_CHECKBOX_ROYALS:
                 
                 if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_ROYALS) == BST_CHECKED) {
@@ -1726,7 +1740,7 @@ void LoadImages() {
 	icon_turks = (HBITMAP)LoadImageW(NULL, L"civ_icons\\turks.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_vietnamese = (HBITMAP)LoadImageW(NULL, L"civ_icons\\vietnamese.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_vikings = (HBITMAP)LoadImageW(NULL, L"civ_icons\\vikings.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    
+    icon_techtree = (HBITMAP)LoadImageW(NULL, L"civ_icons\\techtree.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     
     
     icon_random = (HBITMAP)LoadImageW(NULL, L"civ_icons\\random.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -1745,6 +1759,7 @@ void LoadImages() {
 	icon_rome = (HBITMAP)LoadImageW(NULL, L"dlc_icons\\rome.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_royals = (HBITMAP)LoadImageW(NULL, L"dlc_icons\\royals.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_west = (HBITMAP)LoadImageW(NULL, L"dlc_icons\\west.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    	
 }
 
 HBITMAP FetchIcon(std::wstring civ_name) {
@@ -2011,6 +2026,7 @@ void ShowDrawTab(bool state, HWND hWnd) {
 	    ShowWindow(button_reset, SW_SHOW);
 	    if (labels_enabled) ShowWindow(label_centre, SW_SHOW);
 	    ShowWindow(label_corner, SW_SHOW);
+		ShowWindow(button_techtree, SW_SHOW);
 	}
     else if (state == false) {
         ShowWindow(civ_icon, SW_HIDE);
@@ -2019,6 +2035,7 @@ void ShowDrawTab(bool state, HWND hWnd) {
         SetWindowPos(button_reset, NULL, (width - 100) / 2, height - 40, 100, 30, SWP_NOZORDER);
         ShowWindow(label_centre, SW_HIDE);
         ShowWindow(label_corner, SW_HIDE);
+		ShowWindow(button_techtree, SW_HIDE);
     }
 	
 }
@@ -2494,4 +2511,10 @@ int GetWindowHeight(HWND hWnd) {
     RECT rect;
     GetClientRect(hWnd, &rect);
     return rect.bottom - rect.top;
+}
+
+void OpenTechTree() {
+    std::wstring techtree_path = L"https://aoe2techtree.net/#";
+    if (current_civ != L"Random") techtree_path += current_civ;
+	ShellExecute(NULL, L"open", techtree_path.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }

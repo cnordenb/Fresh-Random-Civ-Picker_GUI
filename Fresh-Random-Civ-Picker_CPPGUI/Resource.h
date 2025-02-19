@@ -36,6 +36,11 @@
 #define IDC_CHECKBOX_AOC				63
 #define IDC_CHECKBOX_REMAINLOG			65
 #define IDC_BUTTON_CLEARLOG				66
+#define IDC_BUTTON_DRAW					1
+#define IDC_BUTTON_RESET				2
+#define IDC_BUTTON_ENABLEALL			3
+#define IDC_BUTTON_DISABLEALL			4
+#define IDC_BUTTON_TECHTREE				67
 #define ID_FILE_TOGGLECHECK             32771
 #define IDM_GITHUB                      32772
 #define IDM_WEBVERSION                  32773
