@@ -266,7 +266,7 @@ void ShowAOCCheckbox(bool);
 void UpdateDrawnLog(bool, bool);
 void UpdateRemainingLog();
 
-bool DlcFull(dlc);
+bool DlcEmpty(dlc);
 void ToggleDlc(dlc, bool, HWND);
 void ValidateDlcToggle(HWND, dlc);
 void ValidateAllDlcToggles(HWND);
@@ -2369,7 +2369,7 @@ void ToggleDlc(dlc civ_dlc, bool toggle_state, HWND hWnd) {
     SetWindowText(remaining_log, remaininglog_text.c_str());
 }
 
-bool DlcFull(dlc civ_dlc) {
+bool DlcEmpty(dlc civ_dlc) {
 	int count = 0;
 	for (int i = 0; i < MAX_CIVS; i++) {
 		if (GetCivStatus(civ_index[i]) && GetCivDLC(civ_index[i]) == civ_dlc) {
@@ -2377,46 +2377,12 @@ bool DlcFull(dlc civ_dlc) {
 		}
 	}
 
-    if (count == 1 && civ_dlc == rome) return true;
-
-    if (count == 3 && civ_dlc == india) return true;
-
-    if (count == 2) {
-        switch (civ_dlc) {
-        case royals:
-            return true;
-		case dukes:
-            return true;
-        case west:
-            return true;
-        }
-    }
-
-    if (count == 4) {
-        switch (civ_dlc) {
-        case khans:
-            return true;
-        case rajas:
-            return true;
-        case africans:
-            return true;
-        }
-    }
-
-    if (count == 5) {
-        switch (civ_dlc) {
-        case forgotten:
-            return true;
-        case aoc:
-            return true;
-        }
-    }
-
-    return false;
+	if (count == 0) return true;
+	else return false;
 }
 
 void ValidateDlcToggle(HWND hWnD, dlc civ_dlc) {
-	if (DlcFull(civ_dlc)) {
+	if (!DlcEmpty(civ_dlc)) {
         switch (civ_dlc) {
         case khans:
             CheckDlgButton(hWnD, IDC_CHECKBOX_KHANS, BST_CHECKED);
