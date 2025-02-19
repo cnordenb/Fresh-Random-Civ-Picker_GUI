@@ -717,6 +717,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			SubclassButton(button_draw);
 			SubclassButton(button_reset);
 			SubclassButton(button_clearlog);
+            SubclassButton(button_techtree);
 
 
 
@@ -844,11 +845,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			
             SetWindowPos(label_drawncount, NULL, 10, 25, 90, 15, SWP_NOZORDER);                           // drawn civ label anchored to top left corner
 			SetWindowPos(button_clearlog, NULL, 110, 25, 100, 30, SWP_NOZORDER);                           // clear log button anchored to top left corner
-            SetWindowPos(drawn_log, NULL, 10, 60, width - (width / 2) - 60, height - 25, SWP_NOZORDER);        // log text field anchored to window size
+            SetWindowPos(drawn_log, NULL, 10, 60, width - (width / 2) - 60, height - 70, SWP_NOZORDER);        // log text field anchored to window size
             
 			SetWindowPos(label_remainingcount, NULL, (width / 2) + 60, 25, 130, 15, SWP_NOZORDER);                           // drawn civ label anchored to top right corner
 			SetWindowPos(checkbox_showremainlog, NULL, (width / 2) + 190, 25, 60, 15, SWP_NOZORDER);                           // drawn civ label anchored to top right corner
-            SetWindowPos(remaining_log, NULL, (width / 2) + 60, 60, width - (width / 2) - 65, height - 25, SWP_NOZORDER);                   // log text field anchored to window size
+            SetWindowPos(remaining_log, NULL, (width / 2) + 60, 60, width - (width / 2) - 65, height - 70, SWP_NOZORDER);                   // log text field anchored to window size
 
             break;
         }
@@ -912,8 +913,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case WM_MOUSEMOVE:
         {
+			
             if (hwndTooltip)
             {
+                
                 // Get the cursor position
                 POINT pt;
                 GetCursorPos(&pt);
@@ -932,10 +935,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 // Check if the cursor is over the draw button
                 if (GetWindowRect(button_draw, &rect))
-                {
+                {                    
                     MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
                     if (PtInRect(&rect, pt))
                     {
+                        //MessageBox(NULL, L"PtInRect(&rect, pt)!", L"Mouse move", MB_OK);
                         toolInfo.uId = (UINT_PTR)button_draw;
                         std::wstring wstr = L"Draw a random civilization";
                         toolInfo.lpszText = (LPWSTR)wstr.c_str();
@@ -1429,7 +1433,10 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         // Forward the WM_MOUSEMOVE message to the parent window
         SendMessage(GetParent(hwnd), WM_MOUSEMOVE, wParam, lParam);
         break;
-
+    case WM_SETCURSOR:
+        // Set the cursor to a hand cursor when the mouse is over the button
+        SetCursor(LoadCursor(NULL, IDC_HAND));
+        return TRUE;
     default:
         return CallWindowProc(originalButtonProcs[hwnd], hwnd, uMsg, wParam, lParam);
     }
@@ -2495,7 +2502,7 @@ void CreateTooltips(HWND hWnd)
     AddTooltip(button_reset, hwndTooltip, L"Reset the program");
     AddTooltip(button_enableall, hwndTooltip, L"Enable all civilizations");
     AddTooltip(button_disableall, hwndTooltip, L"Disable all civilizations");
-	AddTooltip(button_techtree, hwndTooltip, L"Open the tech tree for the drawn civilization");
+    AddTooltip(button_techtree, hwndTooltip, L"Open the tech tree for the drawn civilization");
 }
 
 void UpdateDrawnLog(bool drawn, bool blankline_wanted) {
