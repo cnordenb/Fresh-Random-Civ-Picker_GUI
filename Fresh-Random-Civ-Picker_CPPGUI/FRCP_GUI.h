@@ -47,6 +47,12 @@
 #define MIN_HEIGHT 300
 #define BUTTON_WIDTH 100
 #define BUTTON_HEIGHT 30
+#define TOOLTIP_DRAW 0
+#define TOOLTIP_RESET 1
+#define TOOLTIP_CLEAR 2
+#define TOOLTIP_ENABLEALL 3
+#define TOOLTIP_DISABLEALL 4
+#define TOOLTIP_TECHTREE 5
 
 std::map<HWND, WNDPROC> originalButtonProcs;
 // Global Variables
@@ -269,8 +275,13 @@ void AddTooltip(HWND, HWND, LPCWSTR);
 
 void ActivateTooltip(HWND, TOOLINFO *, POINT);
 
-HWND hwndTooltip;
-HWND tooltip2;
+
+
+HWND hwndTooltip[6];
+int hwnd_length = sizeof(hwndTooltip) / sizeof(hwndTooltip[0]);
+
+void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText);
+
 
 LPCWSTR StringCleaner(const std::wstring &);
 
