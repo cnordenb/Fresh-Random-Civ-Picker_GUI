@@ -173,7 +173,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
     // Set the default window size to 400x300
     HWND hWnd = CreateWindowW(window_class, title, WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, 0, 550, 440, nullptr, nullptr, hInstance, nullptr);
+        CW_USEDEFAULT, 0, MIN_WIDTH, MIN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
 
     if (!hWnd)
     {
@@ -267,7 +267,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_BUTTON_DRAW,       
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
-            AddTooltip(button_draw, hwndTooltip[TOOLTIP_DRAW], StringCleaner(L"Draw a fresh random civilisation"));
+            AddTooltip(button_draw, hwndTooltip[TOOLTIP_DRAW], StringCleaner(L"Draw a fresh random civilisation\nHotkey: Space"));
 
 
             button_reset = CreateWindow(
@@ -282,7 +282,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_BUTTON_RESET,       
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
-            AddTooltip(button_reset, hwndTooltip[TOOLTIP_RESET], StringCleaner(L"Resets the pool of drawn civs and renders all enabled civs available"));
+            AddTooltip(button_reset, hwndTooltip[TOOLTIP_RESET], StringCleaner(L"Resets the pool of drawn civs and renders all enabled civs available\nHotkey: Enter"));
 
 
             button_techtree = CreateWindow(
@@ -311,7 +311,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 tab,  // Parent window
                 NULL,  // No menu.
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);  // Pointer not needed.
+                NULL);  // Pointer not needed
 
             label_centre = CreateWindow(
                 L"STATIC",  // Predefined class; Unicode assumed
@@ -492,18 +492,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			SubclassButton(button_reset);
 			SubclassButton(button_clearlog);
             SubclassButton(button_techtree);
-
+			
 			SubclassButton(button_enableall);
 			SubclassButton(button_disableall);
-	
+
 
 
 
 
 			checkbox_showremainlog = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 230, 180, 20, IDC_CHECKBOX_REMAINLOG, L"Show");
+			AddTooltip(checkbox_showremainlog, hwndTooltip[TOOLTIP_REMAININGTOGGLE], StringCleaner(L"Toggle the display of the remaining civs log"));
             CheckDlgButton(hWnd, IDC_CHECKBOX_REMAINLOG, remainlog_enabled ? BST_CHECKED : BST_UNCHECKED);
 
  
+            SubclassButton(checkbox_showremainlog);
+
             CheckRadioButton(hWnd, IDC_RADIO_DE, IDC_RADIO_AOK, IDC_RADIO_DE);
 
             // defined spot coordinates for the 45 individual civ checkboxes in custom tab
@@ -789,6 +792,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					}
 				}
 
+				// Check if the cursor is over the corner label
+				if (GetWindowRect(checkbox_showremainlog, &rect))
+				{
+					MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
+					if (PtInRect(&rect, pt))
+					{
+						toolInfo.uId = (UINT_PTR)checkbox_showremainlog;
+						ActivateTooltip(hwndTooltip[TOOLTIP_REMAININGTOGGLE], &toolInfo, pt);
+						tooltipActivated = true;
+					}
+				}
+
+
+
+
+
                 
                 // Deactivate the tooltip if the cursor is not over any button
                 if (!tooltipActivated)
@@ -806,8 +825,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case WM_GETMINMAXINFO:                                  // minimum window size
         {
             MINMAXINFO *pmmi = (MINMAXINFO *)lParam;
-            pmmi->ptMinTrackSize.x = 550; // Minimum width
-            pmmi->ptMinTrackSize.y = 440; // Minimum height
+            pmmi->ptMinTrackSize.x = MIN_WIDTH; // Minimum width
+            pmmi->ptMinTrackSize.y = MIN_HEIGHT; // Minimum height
             break;
         }
 
@@ -1218,10 +1237,10 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     switch (uMsg)
     {    
 
-
+        /*
     case WM_SIZE:
 		SendMessage(hwnd, WM_SIZE, wParam, lParam);
-        break;
+        break;*/
 
 
     case WM_MOUSEMOVE:
@@ -1320,11 +1339,22 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 }
             }
 
+            if (GetWindowRect(checkbox_showremainlog, &rect))
+            {
+                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
+                if (PtInRect(&rect, pt))
+                {
+                    toolInfo.uId = (UINT_PTR)checkbox_showremainlog;
+                    ActivateTooltip(hwndTooltip[TOOLTIP_REMAININGTOGGLE], &toolInfo, pt);
+                }
+
+            }
+
+
 
 
         }
 
-        //MessageBox(hwnd, L"MESSAGE BOX!", L"Message box", MB_OK);
 
         // Forward the WM_MOUSEMOVE message to the parent window
         SendMessage(GetParent(hwnd), WM_MOUSEMOVE, wParam, lParam);
@@ -1347,11 +1377,13 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     
 }
 
+
 void SubclassButton(HWND button)
 {
     // Store the original window procedure
     originalButtonProcs[button] = (WNDPROC)SetWindowLongPtr(button, GWLP_WNDPROC, (LONG_PTR)ButtonProc);
 }
+
 
 INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {

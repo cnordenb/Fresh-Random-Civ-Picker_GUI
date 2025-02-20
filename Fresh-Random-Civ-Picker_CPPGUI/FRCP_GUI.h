@@ -43,8 +43,10 @@
 #define HOTKEY_ID_V 8
 #define DT_UNDERLINE 0x80000000
 #define MAX_LENGTH 15 
-#define MIN_WIDTH 400
-#define MIN_HEIGHT 300
+
+#define MIN_WIDTH 550
+#define MIN_HEIGHT 440
+
 #define BUTTON_WIDTH 100
 #define BUTTON_HEIGHT 30
 #define TOOLTIP_DRAW 0
@@ -53,8 +55,10 @@
 #define TOOLTIP_ENABLEALL 3
 #define TOOLTIP_DISABLEALL 4
 #define TOOLTIP_TECHTREE 5
+#define TOOLTIP_REMAININGTOGGLE 6
 
 std::map<HWND, WNDPROC> originalButtonProcs;
+
 // Global Variables
 PAINTSTRUCT paint_struct;
 HDC device_handling_context;
@@ -277,7 +281,7 @@ void ActivateTooltip(HWND, TOOLINFO *, POINT);
 
 
 
-HWND hwndTooltip[6];
+HWND hwndTooltip[7];
 int hwnd_length = sizeof(hwndTooltip) / sizeof(hwndTooltip[0]);
 
 void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText);
@@ -290,6 +294,7 @@ bool tooltipActive = false;
 
 
 void SubclassButton(HWND);
+
 
 int GetWindowWidth(HWND);
 int GetWindowHeight(HWND);
@@ -308,4 +313,3 @@ INT_PTR CALLBACK    AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    OptionsDlgProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK    HyperlinkProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK    ButtonProc(HWND, UINT, WPARAM, LPARAM);
-
