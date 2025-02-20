@@ -236,11 +236,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SendMessage(hwndTooltip, TTM_SETMAXTIPWIDTH, 0, 300);
 
 
-            // Create a simple tooltip for testing
-            CreateSimpleTooltip(hWnd);
 
-
-            
+           
 
             LoadImages();
             CreateTabs(hWnd);
@@ -259,9 +256,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_BUTTON_DRAW,       
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
-            std::wstring unacceptable_string = L"Draw a random civilization";
+            std::wstring unacceptable_string = L"Draw a fresh random civilisation";
             LPCWSTR acceptable_string = const_cast<LPCWSTR>(unacceptable_string.c_str());
             AddTooltip(button_draw, hwndTooltip, acceptable_string);
+
 
             button_reset = CreateWindow(
                 L"BUTTON",  // Predefined class; Unicode assumed 
@@ -701,12 +699,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
                     if (PtInRect(&rect, pt))
                     {
+
                         toolInfo.uId = (UINT_PTR)button_draw;
-                        std::wstring unacceptable_string = L"Draw a random civilization";
-                        LPWSTR acceptable_string = const_cast<LPWSTR>(unacceptable_string.c_str());
-                        toolInfo.lpszText = acceptable_string;
+
                         ActivateTooltip(hwndTooltip, &toolInfo, pt);
                         tooltipActivated = true;
+
                     }
                 }
 
@@ -739,7 +737,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         tooltipActivated = true;
                     }
                 }
-
+                
                 // Deactivate the tooltip if the cursor is not over any button
                 if (!tooltipActivated)
                 {
@@ -1173,10 +1171,77 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_MOUSEMOVE:
     {
 
+        if (hwndTooltip)
+        {
+            // Get the cursor position
+            POINT pt;
+            GetCursorPos(&pt);
+
+            // Convert screen coordinates to client coordinates
+            ScreenToClient(hwnd, &pt);
+
+            // Check if the cursor is over any button and update the tooltip accordingly
+            RECT rect;
+            TOOLINFO toolInfo = { 0 };
+            toolInfo.cbSize = sizeof(toolInfo);
+            toolInfo.hwnd = hwnd;
+            toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS | TTF_TRACK;
+
+
+
+            // Check if the cursor is over the draw button
+            if (GetWindowRect(button_draw, &rect))
+            {
+                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
+                if (PtInRect(&rect, pt))
+                {                    
+
+                    toolInfo.uId = (UINT_PTR)button_draw;
+
+                    ActivateTooltip(hwndTooltip, &toolInfo, pt);
+
+                    
+                }
+                
+            }
+
+            // Check if the cursor is over the reset button
+            if (GetWindowRect(button_reset, &rect))
+            {
+                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
+                if (PtInRect(&rect, pt))
+                {
+                    toolInfo.uId = (UINT_PTR)button_reset;
+                    std::wstring unacceptable_string = L"Reset the program";
+                    LPWSTR acceptable_string = const_cast<LPWSTR>(unacceptable_string.c_str());
+                    toolInfo.lpszText = acceptable_string;
+                    ActivateTooltip(hwndTooltip, &toolInfo, pt);
+
+                }
+            }
+
+            // Check if the cursor is over the tech tree button
+            if (GetWindowRect(button_techtree, &rect))
+            {
+                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
+                if (PtInRect(&rect, pt))
+                {
+                    toolInfo.uId = (UINT_PTR)button_techtree;
+                    std::wstring unacceptable_string = L"Open the tech tree for the drawn civilization";
+                    LPWSTR acceptable_string = const_cast<LPWSTR>(unacceptable_string.c_str());
+                    toolInfo.lpszText = acceptable_string;
+                    ActivateTooltip(hwndTooltip, &toolInfo, pt);
+
+                }
+            }
+
+        }
+
         //MessageBox(hwnd, L"MESSAGE BOX!", L"Message box", MB_OK);
 
         // Forward the WM_MOUSEMOVE message to the parent window
         SendMessage(GetParent(hwnd), WM_MOUSEMOVE, wParam, lParam);
+
         break;
     }
         
@@ -2318,42 +2383,22 @@ void AddTooltip(HWND hwndTool, HWND hwndTip, LPCWSTR pszText)
     }
 }
 
+
 void ActivateTooltip(HWND hwndTip, TOOLINFO *toolInfo, POINT pt)
 {
+    bool activate = true;
+	//MessageBox(NULL, L"Activating tooltip", L"Info", MB_OK);
     ClientToScreen(hwndTip, &pt);
-    SendMessage(hwndTip, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y + 10));
+
+    if (!activate) {
+        SendMessage(hwndTip, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y + 10));
+        activate = false;
+    }
+    
+
+
     if (!SendMessage(hwndTip, TTM_TRACKACTIVATE, TRUE, (LPARAM)toolInfo)) {
         OutputDebugString(L"Failed to activate tooltip\n");
     }
 }
 
-void CreateSimpleTooltip(HWND hwnd)
-{
-    HWND hwndTT = CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS, NULL,
-        WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
-        0, 0, 0, 0, hwnd, NULL, instance, NULL);
-
-    if (!hwndTT) {
-        MessageBox(hwnd, L"Failed to create simple tooltip window.", L"Error", MB_OK | MB_ICONERROR);
-        return;
-    }
-
-    TOOLINFO ti = { 0 };
-    ti.cbSize = sizeof(TOOLINFO);
-    ti.uFlags = TTF_SUBCLASS;
-    ti.hwnd = hwnd;
-    ti.hinst = instance;
-    ti.uId = 0;
-    std::wstring unacceptable_string = L"Simple Tooltip";
-	LPWSTR acceptable_string = const_cast<LPWSTR>(unacceptable_string.c_str());
-    ti.lpszText = acceptable_string;
-    GetClientRect(hwnd, &ti.rect);
-
-    SendMessage(hwndTT, TTM_ADDTOOL, 0, (LPARAM)&ti);
-
-
-    if (!SendMessage(hwndTT, TTM_ADDTOOL, 0, (LPARAM)&ti)) {
-        MessageBox(NULL, L"Failed to add simple tooltip", L"Error", MB_OK);
-        OutputDebugString(L"Failed to add tooltip\n");
-    }
-}

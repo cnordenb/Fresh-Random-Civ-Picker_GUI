@@ -26,6 +26,8 @@
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "comctl32.lib")
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+
 
 
 #define IDM_TOGGLE_CHECK 32771
@@ -264,9 +266,15 @@ void ValidateDlcToggle(HWND, dlc);
 void ValidateAllDlcToggles(HWND);
 
 void AddTooltip(HWND, HWND, LPCWSTR);
+
 void ActivateTooltip(HWND, TOOLINFO *, POINT);
+
 HWND hwndTooltip;
-void CreateSimpleTooltip(HWND);
+
+
+HWND lastTooltipControl = NULL;
+bool tooltipActive = false;
+
 
 void SubclassButton(HWND);
 
