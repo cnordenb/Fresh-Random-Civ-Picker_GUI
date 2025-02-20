@@ -38,6 +38,8 @@ void CreateTabs(HWND hWnd)
 
     tie.pszText = const_cast<LPWSTR>(L"Civ Pool");
     TabCtrl_InsertItem(tab, 2, &tie);
+
+    
 }
 
 // Function to show/hide components based on the selected tab
@@ -180,7 +182,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
-
+    
     return TRUE;
 }
 
@@ -207,9 +209,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Initialize common controls
             INITCOMMONCONTROLSEX iccex;
             iccex.dwSize = sizeof(INITCOMMONCONTROLSEX);
-            iccex.dwICC = ICC_WIN95_CLASSES;
+            iccex.dwICC = ICC_WIN95_CLASSES | ICC_BAR_CLASSES | ICC_COOL_CLASSES | ICC_TREEVIEW_CLASSES;
             InitCommonControlsEx(&iccex);
 
+            if (!InitCommonControlsEx(&iccex)) {
+                MessageBox(hWnd, L"Failed to initialize common controls.", L"Error", MB_OK | MB_ICONERROR);
+                return -1; // Return -1 to indicate failure
+            }
+            
             // Create the tooltip window
             hwndTooltip = CreateWindowEx(0, TOOLTIPS_CLASS, NULL,
                 WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX,
@@ -217,6 +224,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 CW_USEDEFAULT, CW_USEDEFAULT,
                 hWnd, NULL, instance, NULL);
 
+
+
+            
             if (!hwndTooltip) {
                 MessageBox(hWnd, L"Failed to create tooltip window.", L"Error", MB_OK | MB_ICONERROR);
                 return -1; // Return -1 to indicate failure
@@ -224,6 +234,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             // Set the maximum width for the tooltip window
             SendMessage(hwndTooltip, TTM_SETMAXTIPWIDTH, 0, 300);
+
+
+            // Create a simple tooltip for testing
+            CreateSimpleTooltip(hWnd);
 
 
             
@@ -245,7 +259,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_BUTTON_DRAW,       
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
-            AddTooltip(button_draw, hwndTooltip, L"Draw a random civilization");
+            std::wstring unacceptable_string = L"Draw a random civilization";
+            LPCWSTR acceptable_string = const_cast<LPCWSTR>(unacceptable_string.c_str());
+            AddTooltip(button_draw, hwndTooltip, acceptable_string);
 
             button_reset = CreateWindow(
                 L"BUTTON",  // Predefined class; Unicode assumed 
@@ -562,7 +578,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             EnableHotkeys(hWnd);
 
-            CreateTooltip(hWnd);
+
+            
             break;
         }
         case WM_SIZE:
@@ -640,7 +657,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     break;
                 }
             }
-            else if (pnmhdr->code == TTN_SHOW)
+
+            if (pnmhdr->code == TTN_SHOW)
             {
                 // Get the tooltip info
                 LPNMTTDISPINFO lpttd = (LPNMTTDISPINFO)lParam;
@@ -653,6 +671,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 SendMessage(pnmhdr->hwndFrom, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y + 10));
                 return TRUE;
             }
+
             break;
         }
 
@@ -1135,6 +1154,7 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     if (uMsg == WM_NCCREATE)
     {
+        
         // Store the original window procedure
         originalButtonProcs[hwnd] = (WNDPROC)GetWindowLongPtr(hwnd, GWLP_WNDPROC);
 
@@ -1143,6 +1163,7 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     switch (uMsg)
     {    
+
 
     case WM_SIZE:
 		SendMessage(hwnd, WM_SIZE, wParam, lParam);
@@ -2258,53 +2279,41 @@ void OpenTechTree() {
 	ShellExecute(NULL, L"open", techtree_path.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 
-void CreateTooltip(HWND hwnd) {
-
-    INITCOMMONCONTROLSEX iccex;
-    HWND hwndTT;
-
-    TOOLINFO ti;
-    //char tooltip[30] = "A main window";
-    std::wstring tooltip = L"A main window";
-    RECT rect;
-
-    iccex.dwICC = ICC_WIN95_CLASSES;
-    iccex.dwSize = sizeof(INITCOMMONCONTROLSEX);
-    InitCommonControlsEx(&iccex);
-
-    hwndTT = CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS, NULL,
-        WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
-        0, 0, 0, 0, hwnd, NULL, NULL, NULL);
-
-    SetWindowPos(hwndTT, HWND_TOPMOST, 0, 0, 0, 0,
-        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-
-    GetClientRect(hwnd, &rect);
-
-    ti.cbSize = sizeof(TOOLINFO);
-    ti.uFlags = TTF_SUBCLASS;
-    ti.hwnd = hwnd;
-    ti.hinst = NULL;
-    ti.uId = 0;
-	LPWSTR tooltip_pass = const_cast<LPWSTR>(tooltip.c_str());
-    ti.lpszText = tooltip_pass;
-    ti.rect.left = rect.left;
-    ti.rect.top = rect.top;
-    ti.rect.right = rect.right;
-    ti.rect.bottom = rect.bottom;
-
-    SendMessage(hwndTT, TTM_ADDTOOL, 0, (LPARAM)(LPTOOLINFO)&ti);
-}
 
 void AddTooltip(HWND hwndTool, HWND hwndTip, LPCWSTR pszText)
 {
+
+    if (!hwndTool || !hwndTip) {
+        MessageBox(NULL, L"Invalid handle(s) provided to AddTooltip", L"Error", MB_OK | MB_ICONERROR);
+        return;
+    }
+
     TOOLINFO toolInfo = { 0 };
     toolInfo.cbSize = sizeof(toolInfo);
     toolInfo.hwnd = hwndTool;
     toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS | TTF_TRACK;
     toolInfo.uId = (UINT_PTR)hwndTool;
     toolInfo.lpszText = (LPWSTR)pszText;
+    toolInfo.rect.left = 0;
+    toolInfo.rect.top = 0;
+    toolInfo.rect.right = 0;
+    toolInfo.rect.bottom = 0;
+
+    /*
+    // debug message boxes
+	MessageBox(NULL, L"Adding tooltip: ", L"Info", MB_OK);
+    MessageBox(NULL, L"  hwndTool: ", L"Info", MB_OK);
+    MessageBox(NULL, std::to_wstring((UINT_PTR)hwndTool).c_str(), L"Info", MB_OK);
+	MessageBox(NULL, L"  hwndTip: ", L"Info", MB_OK);
+	MessageBox(NULL, std::to_wstring((UINT_PTR)hwndTip).c_str(), L"Info", MB_OK);
+	MessageBox(NULL, L"  pszText: ", L"Info", MB_OK);
+	MessageBox(NULL, pszText, L"Info", MB_OK);
+    */
+
+
+
     if (!SendMessage(hwndTip, TTM_ADDTOOL, 0, (LPARAM)&toolInfo)) {
+		MessageBox(NULL, L"Failed to add tooltip", L"Error", MB_OK);
         OutputDebugString(L"Failed to add tooltip\n");
     }
 }
@@ -2315,5 +2324,36 @@ void ActivateTooltip(HWND hwndTip, TOOLINFO *toolInfo, POINT pt)
     SendMessage(hwndTip, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y + 10));
     if (!SendMessage(hwndTip, TTM_TRACKACTIVATE, TRUE, (LPARAM)toolInfo)) {
         OutputDebugString(L"Failed to activate tooltip\n");
+    }
+}
+
+void CreateSimpleTooltip(HWND hwnd)
+{
+    HWND hwndTT = CreateWindowEx(WS_EX_TOPMOST, TOOLTIPS_CLASS, NULL,
+        WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP,
+        0, 0, 0, 0, hwnd, NULL, instance, NULL);
+
+    if (!hwndTT) {
+        MessageBox(hwnd, L"Failed to create simple tooltip window.", L"Error", MB_OK | MB_ICONERROR);
+        return;
+    }
+
+    TOOLINFO ti = { 0 };
+    ti.cbSize = sizeof(TOOLINFO);
+    ti.uFlags = TTF_SUBCLASS;
+    ti.hwnd = hwnd;
+    ti.hinst = instance;
+    ti.uId = 0;
+    std::wstring unacceptable_string = L"Simple Tooltip";
+	LPWSTR acceptable_string = const_cast<LPWSTR>(unacceptable_string.c_str());
+    ti.lpszText = acceptable_string;
+    GetClientRect(hwnd, &ti.rect);
+
+    SendMessage(hwndTT, TTM_ADDTOOL, 0, (LPARAM)&ti);
+
+
+    if (!SendMessage(hwndTT, TTM_ADDTOOL, 0, (LPARAM)&ti)) {
+        MessageBox(NULL, L"Failed to add simple tooltip", L"Error", MB_OK);
+        OutputDebugString(L"Failed to add tooltip\n");
     }
 }

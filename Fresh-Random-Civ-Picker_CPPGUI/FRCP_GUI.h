@@ -263,10 +263,10 @@ void ToggleDlc(dlc, bool, HWND);
 void ValidateDlcToggle(HWND, dlc);
 void ValidateAllDlcToggles(HWND);
 
-void CreateTooltip(HWND);
 void AddTooltip(HWND, HWND, LPCWSTR);
 void ActivateTooltip(HWND, TOOLINFO *, POINT);
 HWND hwndTooltip;
+void CreateSimpleTooltip(HWND);
 
 void SubclassButton(HWND);
 
