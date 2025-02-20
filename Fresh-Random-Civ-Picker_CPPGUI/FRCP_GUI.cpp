@@ -224,6 +224,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 CW_USEDEFAULT, CW_USEDEFAULT,
                 hWnd, NULL, instance, NULL);
 
+            tooltip2 = CreateWindowEx(0, TOOLTIPS_CLASS, NULL,
+                WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX,
+                CW_USEDEFAULT, CW_USEDEFAULT,
+                CW_USEDEFAULT, CW_USEDEFAULT,
+                hWnd, NULL, instance, NULL);
+
 
 
             
@@ -234,6 +240,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             // Set the maximum width for the tooltip window
             SendMessage(hwndTooltip, TTM_SETMAXTIPWIDTH, 0, 300);
+            SendMessage(tooltip2, TTM_SETMAXTIPWIDTH, 0, 300);
 
 
 
@@ -256,9 +263,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_BUTTON_DRAW,       
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
-            std::wstring unacceptable_string = L"Draw a fresh random civilisation";
-            LPCWSTR acceptable_string = const_cast<LPCWSTR>(unacceptable_string.c_str());
-            AddTooltip(button_draw, hwndTooltip, acceptable_string);
+            AddTooltip(button_draw, hwndTooltip, StringCleaner(L"Draw a fresh random civilisation"));
 
 
             button_reset = CreateWindow(
@@ -2391,3 +2396,8 @@ void ActivateTooltip(HWND hwndTip, TOOLINFO *toolInfo, POINT pt)
     }
 }
 
+LPCWSTR StringCleaner(const std::wstring &dirty_string)
+{
+	LPCWSTR clean_string = const_cast<LPCWSTR>(dirty_string.c_str());
+    return clean_string;
+}

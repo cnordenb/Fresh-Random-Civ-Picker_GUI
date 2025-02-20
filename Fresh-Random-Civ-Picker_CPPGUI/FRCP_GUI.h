@@ -270,7 +270,9 @@ void AddTooltip(HWND, HWND, LPCWSTR);
 void ActivateTooltip(HWND, TOOLINFO *, POINT);
 
 HWND hwndTooltip;
+HWND tooltip2;
 
+LPCWSTR StringCleaner(const std::wstring &);
 
 HWND lastTooltipControl = NULL;
 bool tooltipActive = false;
