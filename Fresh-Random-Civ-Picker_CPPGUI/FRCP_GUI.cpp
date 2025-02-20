@@ -2364,17 +2364,6 @@ void AddTooltip(HWND hwndTool, HWND hwndTip, LPCWSTR pszText)
     toolInfo.rect.right = 0;
     toolInfo.rect.bottom = 0;
 
-    /*
-    // debug message boxes
-	MessageBox(NULL, L"Adding tooltip: ", L"Info", MB_OK);
-    MessageBox(NULL, L"  hwndTool: ", L"Info", MB_OK);
-    MessageBox(NULL, std::to_wstring((UINT_PTR)hwndTool).c_str(), L"Info", MB_OK);
-	MessageBox(NULL, L"  hwndTip: ", L"Info", MB_OK);
-	MessageBox(NULL, std::to_wstring((UINT_PTR)hwndTip).c_str(), L"Info", MB_OK);
-	MessageBox(NULL, L"  pszText: ", L"Info", MB_OK);
-	MessageBox(NULL, pszText, L"Info", MB_OK);
-    */
-
 
 
     if (!SendMessage(hwndTip, TTM_ADDTOOL, 0, (LPARAM)&toolInfo)) {
@@ -2386,15 +2375,15 @@ void AddTooltip(HWND hwndTool, HWND hwndTip, LPCWSTR pszText)
 
 void ActivateTooltip(HWND hwndTip, TOOLINFO *toolInfo, POINT pt)
 {
-    bool activate = true;
-	//MessageBox(NULL, L"Activating tooltip", L"Info", MB_OK);
-    ClientToScreen(hwndTip, &pt);
 
-    if (!activate) {
-        SendMessage(hwndTip, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y + 10));
-        activate = false;
-    }
-    
+
+
+    // Convert client coordinates to screen coordinates
+    ClientToScreen(toolInfo->hwnd, &pt);
+
+    // Set the tooltip position to be next to the mouse cursor
+    SendMessage(hwndTip, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y + 20));
+
 
 
     if (!SendMessage(hwndTip, TTM_TRACKACTIVATE, TRUE, (LPARAM)toolInfo)) {
