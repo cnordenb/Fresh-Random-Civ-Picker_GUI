@@ -733,9 +733,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     if (PtInRect(&rect, pt))
                     {
                         toolInfo.uId = (UINT_PTR)button_reset;
-                        std::wstring unacceptable_string = L"Reset the program";
-                        LPWSTR acceptable_string = const_cast<LPWSTR>(unacceptable_string.c_str());
-						toolInfo.lpszText = acceptable_string;
                         ActivateTooltip(hwndTooltip[TOOLTIP_RESET], &toolInfo, pt);
                         tooltipActivated = true;
                     }
@@ -748,10 +745,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     if (PtInRect(&rect, pt))
                     {
                         toolInfo.uId = (UINT_PTR)button_techtree;
-                        std::wstring unacceptable_string = L"Open the tech tree for the drawn civilization";
-						LPWSTR acceptable_string = const_cast<LPWSTR>(unacceptable_string.c_str());
-                        toolInfo.lpszText = acceptable_string;
                         ActivateTooltip(hwndTooltip[TOOLTIP_TECHTREE], &toolInfo, pt);
+                        tooltipActivated = true;
+                    }
+                }
+
+                // Check if the cursor is over the clear button
+                if (GetWindowRect(button_clearlog, &rect))
+                {
+                    MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
+                    if (PtInRect(&rect, pt))
+                    {
+                        toolInfo.uId = (UINT_PTR)button_techtree;
+                        ActivateTooltip(hwndTooltip[TOOLTIP_CLEAR], &toolInfo, pt);
                         tooltipActivated = true;
                     }
                 }
@@ -763,9 +769,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     if (PtInRect(&rect, pt))
                     {
                         toolInfo.uId = (UINT_PTR)button_enableall;
-                        std::wstring unacceptable_string = L"Open the tech tree for the drawn civilization";
-                        LPWSTR acceptable_string = const_cast<LPWSTR>(unacceptable_string.c_str());
-                        toolInfo.lpszText = acceptable_string;
                         ActivateTooltip(hwndTooltip[TOOLTIP_ENABLEALL], &toolInfo, pt);
                         tooltipActivated = true;
                     }
@@ -1249,9 +1252,6 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 if (PtInRect(&rect, pt))
                 {
                     toolInfo.uId = (UINT_PTR)button_reset;
-                    std::wstring unacceptable_string = L"Reset the program";
-                    LPWSTR acceptable_string = const_cast<LPWSTR>(unacceptable_string.c_str());
-                    toolInfo.lpszText = acceptable_string;
                     ActivateTooltip(hwndTooltip[TOOLTIP_RESET], &toolInfo, pt);
 
                 }
@@ -1264,24 +1264,30 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 if (PtInRect(&rect, pt))
                 {
                     toolInfo.uId = (UINT_PTR)button_techtree;
-                    std::wstring unacceptable_string = L"Open the tech tree for the drawn civilization";
-                    LPWSTR acceptable_string = const_cast<LPWSTR>(unacceptable_string.c_str());
-                    toolInfo.lpszText = acceptable_string;
                     ActivateTooltip(hwndTooltip[TOOLTIP_TECHTREE], &toolInfo, pt);
 
                 }
             }
 
-            // Check if the cursor is over the tech tree button
+            // Check if the cursor is over the clear log button
+            if (GetWindowRect(button_clearlog, &rect))
+            {
+                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
+                if (PtInRect(&rect, pt))
+                {
+                    toolInfo.uId = (UINT_PTR)button_clearlog;
+                    ActivateTooltip(hwndTooltip[TOOLTIP_CLEAR], &toolInfo, pt);
+
+                }
+            }
+
+            // Check if the cursor is over the enable all button
             if (GetWindowRect(button_enableall, &rect))
             {
                 MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
                 if (PtInRect(&rect, pt))
                 {
                     toolInfo.uId = (UINT_PTR)button_enableall;
-                    std::wstring unacceptable_string = L"Open the tech tree for the drawn civilization";
-                    LPWSTR acceptable_string = const_cast<LPWSTR>(unacceptable_string.c_str());
-                    toolInfo.lpszText = acceptable_string;
                     ActivateTooltip(hwndTooltip[TOOLTIP_ENABLEALL], &toolInfo, pt);
 
                 }
