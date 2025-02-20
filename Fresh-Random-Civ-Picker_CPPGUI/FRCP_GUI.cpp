@@ -494,6 +494,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SubclassButton(button_techtree);
 
 			SubclassButton(button_enableall);
+			SubclassButton(button_disableall);
+	
+
 
 
 
@@ -773,6 +776,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         tooltipActivated = true;
                     }
                 }
+
+				// Check if the cursor is over the disable all button
+				if (GetWindowRect(button_disableall, &rect))
+				{
+					MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
+					if (PtInRect(&rect, pt))
+					{
+						toolInfo.uId = (UINT_PTR)button_disableall;
+						ActivateTooltip(hwndTooltip[TOOLTIP_DISABLEALL], &toolInfo, pt);
+						tooltipActivated = true;
+					}
+				}
+
                 
                 // Deactivate the tooltip if the cursor is not over any button
                 if (!tooltipActivated)
@@ -1292,6 +1308,19 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
                 }
             }
+
+			// Check if the cursor is over the disable all button
+            if (GetWindowRect(button_disableall, &rect))
+            {
+                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
+                if (PtInRect(&rect, pt))
+                {
+                    toolInfo.uId = (UINT_PTR)button_disableall;
+                    ActivateTooltip(hwndTooltip[TOOLTIP_DISABLEALL], &toolInfo, pt);
+                }
+            }
+
+
 
         }
 
