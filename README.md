@@ -19,3 +19,6 @@ Planned future features (work in progress):
   - Options menu to toggle off or on individual features
   - Custom civ pool tab to give the user the ability to customise the exact civ pool they want
   - Tech tree button
+
+
+Age of Empires II © Microsoft Corporation. Fresh Random Civ Picker was created under Microsoft's "Game Content Usage Rules" using assets from Age of Empires II: Age of Kings, Age of Empires II: HD Edition, and Age of Empires II: Definitive Edition, and it is not endorsed by or affiliated with Microsoft. https://www.xbox.com/en-us/developers/rules
