@@ -33,6 +33,7 @@
 #define IDM_TOGGLE_CHECK 32771
 #define MAX_CIVS 45
 #define MAX_LOADSTRING 100
+
 #define HOTKEY_ID_TAB 1
 #define HOTKEY_ID_SPACE 2
 #define HOTKEY_ID_RETURN 3
@@ -41,6 +42,7 @@
 #define HOTKEY_ID_X 6
 #define HOTKEY_ID_C 7
 #define HOTKEY_ID_V 8
+#define HOTKEY_ID_T 9
 #define DT_UNDERLINE 0x80000000
 #define MAX_LENGTH 15 
 
@@ -49,13 +51,17 @@
 
 #define BUTTON_WIDTH 100
 #define BUTTON_HEIGHT 30
-#define TOOLTIP_DRAW 0
-#define TOOLTIP_RESET 1
-#define TOOLTIP_CLEAR 2
-#define TOOLTIP_ENABLEALL 3
-#define TOOLTIP_DISABLEALL 4
-#define TOOLTIP_TECHTREE 5
-#define TOOLTIP_REMAININGTOGGLE 6
+
+#define TOOLTIP_DRAW                0
+#define TOOLTIP_RESET               1
+#define TOOLTIP_CLEAR               2
+#define TOOLTIP_ENABLEALL           3
+#define TOOLTIP_DISABLEALL          4
+#define TOOLTIP_TECHTREE            5
+#define TOOLTIP_REMAININGTOGGLE     6
+#define TOOLTIP_DE                  7
+#define TOOLTIP_HD                  8
+#define TOOLTIP_AOK                 9
 
 std::map<HWND, WNDPROC> originalButtonProcs;
 
@@ -281,7 +287,7 @@ void ActivateTooltip(HWND, TOOLINFO *, POINT);
 
 
 
-HWND hwndTooltip[7];
+HWND hwndTooltip[10];
 int hwnd_length = sizeof(hwndTooltip) / sizeof(hwndTooltip[0]);
 
 void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText);

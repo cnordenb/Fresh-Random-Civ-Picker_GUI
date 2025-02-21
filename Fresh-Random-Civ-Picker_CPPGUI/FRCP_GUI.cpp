@@ -267,7 +267,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_BUTTON_DRAW,       
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
-            AddTooltip(button_draw, hwndTooltip[TOOLTIP_DRAW], StringCleaner(L"Draw a fresh random civilisation\nHotkey: Space"));
+            AddTooltip(button_draw, hwndTooltip[TOOLTIP_DRAW], StringCleaner(L"Draws a fresh random civilisation\nHotkey: Space"));
 
 
             button_reset = CreateWindow(
@@ -460,6 +460,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_RADIO_DE,       // No menu.
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
+			AddTooltip(radiobutton_de, hwndTooltip[TOOLTIP_DE], StringCleaner(L"Selects the Definitive Edition (2019) civilisation pool"));
 
             radiobutton_hd = CreateWindow(
                 L"BUTTON",  // Predefined class; Unicode assumed 
@@ -473,6 +474,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_RADIO_HD,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);
+			AddTooltip(radiobutton_hd, hwndTooltip[TOOLTIP_HD], StringCleaner(L"Selects the HD Edition (2013) civilisation pool"));
 
             radiobutton_aok = CreateWindow(
                 L"BUTTON",  // Predefined class; Unicode assumed
@@ -486,6 +488,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_RADIO_AOK,       // No menu.
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
+			AddTooltip(radiobutton_aok, hwndTooltip[TOOLTIP_AOK], StringCleaner(L"Selects the Age of Kings (1999) civilisation pool"));
 
             // Subclass the buttons
 			SubclassButton(button_draw);
@@ -496,12 +499,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			SubclassButton(button_enableall);
 			SubclassButton(button_disableall);
 
+            SubclassButton(radiobutton_de);
+			SubclassButton(radiobutton_hd);
+			SubclassButton(radiobutton_aok);
+
 
 
 
 
 			checkbox_showremainlog = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 230, 180, 20, IDC_CHECKBOX_REMAINLOG, L"Show");
-			AddTooltip(checkbox_showremainlog, hwndTooltip[TOOLTIP_REMAININGTOGGLE], StringCleaner(L"Toggle the display of the remaining civs log"));
+			AddTooltip(checkbox_showremainlog, hwndTooltip[TOOLTIP_REMAININGTOGGLE], StringCleaner(L"Toggles the display of the remaining civs log"));
             CheckDlgButton(hWnd, IDC_CHECKBOX_REMAINLOG, remainlog_enabled ? BST_CHECKED : BST_UNCHECKED);
 
  
@@ -804,6 +811,41 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					}
 				}
 
+                // Check if the cursor is over the DE radio button
+				if (GetWindowRect(radiobutton_de, &rect))
+				{
+					MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
+					if (PtInRect(&rect, pt))
+					{
+						toolInfo.uId = (UINT_PTR)radiobutton_de;
+						ActivateTooltip(hwndTooltip[TOOLTIP_DE], &toolInfo, pt);
+						tooltipActivated = true;
+					}
+				}
+
+				// Check if the cursor is over the HD radio button
+				if (GetWindowRect(radiobutton_hd, &rect))
+				{
+					MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
+					if (PtInRect(&rect, pt))
+					{
+						toolInfo.uId = (UINT_PTR)radiobutton_hd;
+						ActivateTooltip(hwndTooltip[TOOLTIP_HD], &toolInfo, pt);
+						tooltipActivated = true;
+					}
+				}
+
+				// Check if the cursor is over the AOK radio button
+				if (GetWindowRect(radiobutton_aok, &rect))
+				{
+					MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
+					if (PtInRect(&rect, pt))
+					{
+						toolInfo.uId = (UINT_PTR)radiobutton_aok;
+						ActivateTooltip(hwndTooltip[TOOLTIP_AOK], &toolInfo, pt);
+						tooltipActivated = true;
+					}
+				}
 
 
 
@@ -1339,6 +1381,7 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 }
             }
 
+            // Check if the cursor is over the show remaining log checkbox
             if (GetWindowRect(checkbox_showremainlog, &rect))
             {
                 MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
@@ -1350,7 +1393,38 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             }
 
+            // Check if the cursor is over the DE radio button
+			if (GetWindowRect(radiobutton_de, &rect))
+			{
+				MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
+				if (PtInRect(&rect, pt))
+				{
+					toolInfo.uId = (UINT_PTR)radiobutton_de;
+					ActivateTooltip(hwndTooltip[TOOLTIP_DE], &toolInfo, pt);
+				}
+			}
 
+			// Check if the cursor is over the HD radio button
+            if (GetWindowRect(radiobutton_hd, &rect))
+            {
+                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
+                if (PtInRect(&rect, pt))
+                {
+                    toolInfo.uId = (UINT_PTR)radiobutton_hd;
+                    ActivateTooltip(hwndTooltip[TOOLTIP_HD], &toolInfo, pt);
+                }
+            }
+
+			// Check if the cursor is over the AOK radio button
+            if (GetWindowRect(radiobutton_aok, &rect))
+            {
+                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
+                if (PtInRect(&rect, pt))
+                {
+                    toolInfo.uId = (UINT_PTR)radiobutton_aok;
+                    ActivateTooltip(hwndTooltip[TOOLTIP_AOK], &toolInfo, pt);
+                }
+            }
 
 
         }
