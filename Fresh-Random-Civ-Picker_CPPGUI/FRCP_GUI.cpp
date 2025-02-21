@@ -298,7 +298,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
             SendMessageW(button_techtree, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_techtree);  
-            AddTooltip(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree"));
+            AddTooltip(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
             
             label_corner = CreateWindow(
                 L"STATIC",  // Predefined class; Unicode assumed
@@ -417,7 +417,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_BUTTON_CLEARLOG,       
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
-            AddTooltip(button_clearlog, hwndTooltip[TOOLTIP_CLEAR], StringCleaner(L"Clears the log of previously drawn civs"));
+            AddTooltip(button_clearlog, hwndTooltip[TOOLTIP_CLEAR], StringCleaner(L"Clears the log of previously drawn civs\nHotkey: Q"));
 
             button_enableall = CreateWindow(
                 L"BUTTON",  // Predefined class; Unicode assumed 
@@ -431,7 +431,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_BUTTON_ENABLEALL,       // No menu.
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
-            AddTooltip(button_enableall, hwndTooltip[TOOLTIP_ENABLEALL], StringCleaner(L"Enables all civilisations so that they are made available in the pool of civilisations for drawing"));
+            AddTooltip(button_enableall, hwndTooltip[TOOLTIP_ENABLEALL], StringCleaner(L"Enables all civilisations so that they are made available in the pool of civilisations for drawing\nHotkey: Space"));
 
             button_disableall = CreateWindow(
                 L"BUTTON",  // Predefined class; Unicode assumed 
@@ -445,7 +445,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_BUTTON_DISABLEALL,       // No menu.
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
-            AddTooltip(button_disableall, hwndTooltip[TOOLTIP_DISABLEALL], StringCleaner(L"Disables all civilisations so that they are removed from the pool of civilisations for drawing"));
+            AddTooltip(button_disableall, hwndTooltip[TOOLTIP_DISABLEALL], StringCleaner(L"Disables all civilisations so that they are removed from the pool of civilisations for drawing\nHotkey: Enter"));
 
 
             radiobutton_de = CreateWindow(
@@ -460,7 +460,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_RADIO_DE,       // No menu.
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
-			AddTooltip(radiobutton_de, hwndTooltip[TOOLTIP_DE], StringCleaner(L"Selects the Definitive Edition (2019) civilisation pool"));
+			AddTooltip(radiobutton_de, hwndTooltip[TOOLTIP_DE], StringCleaner(L"Selects the Definitive Edition (2019) civilisation pool\nHotkey: Q"));
 
             radiobutton_hd = CreateWindow(
                 L"BUTTON",  // Predefined class; Unicode assumed 
@@ -474,7 +474,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_RADIO_HD,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);
-			AddTooltip(radiobutton_hd, hwndTooltip[TOOLTIP_HD], StringCleaner(L"Selects the HD Edition (2013) civilisation pool"));
+			AddTooltip(radiobutton_hd, hwndTooltip[TOOLTIP_HD], StringCleaner(L"Selects the HD Edition (2013) civilisation pool\nHotkey: W"));
 
             radiobutton_aok = CreateWindow(
                 L"BUTTON",  // Predefined class; Unicode assumed
@@ -488,7 +488,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_RADIO_AOK,       // No menu.
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
-			AddTooltip(radiobutton_aok, hwndTooltip[TOOLTIP_AOK], StringCleaner(L"Selects the Age of Kings (1999) civilisation pool"));
+			AddTooltip(radiobutton_aok, hwndTooltip[TOOLTIP_AOK], StringCleaner(L"Selects the Age of Kings (1999) civilisation pool\nHotkey: E"));
 
             // Subclass the buttons
 			SubclassButton(button_draw);
@@ -889,6 +889,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (wParam == HOTKEY_ID_SPACE) DrawCiv();           // space for drawing civ
                 if (wParam == HOTKEY_ID_RETURN) ResetProgram();            // return for resetting
             }
+            else if (current_tab == 2) {
+                if (wParam == HOTKEY_ID_SPACE) EnableAll(hWnd);           
+                if (wParam == HOTKEY_ID_RETURN) DisableAll(hWnd);
+                if (wParam == HOTKEY_ID_Q) SetEditionState(hWnd, DE);
+                if (wParam == HOTKEY_ID_W) SetEditionState(hWnd, HD);
+				if (wParam == HOTKEY_ID_E) SetEditionState(hWnd, AOK);
+            }
+
+            if (current_tab == 1)
+            {
+                if (wParam == HOTKEY_ID_Q)
+                {
+                    SetWindowText(drawn_log, L"");
+                    if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                }                
+            }
+
 
             if (wParam == HOTKEY_ID_TAB)                        // tab for switching tabs
             {
@@ -899,6 +916,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 TabCtrl_SetCurSel(tab, newTabIndex);
                 ShowTabComponents(newTabIndex, hWnd);
             }
+
+            if (wParam == HOTKEY_ID_1)
+            {
+                TabCtrl_SetCurSel(tab, 0);
+				ShowTabComponents(0, hWnd);
+            }
+
+			if (wParam == HOTKEY_ID_2)
+			{
+                TabCtrl_SetCurSel(tab, 1);
+				ShowTabComponents(1, hWnd);
+			}
+
+			if (wParam == HOTKEY_ID_3)
+			{
+                TabCtrl_SetCurSel(tab, 2);
+				ShowTabComponents(2, hWnd);
+			}
 
             if (wParam == HOTKEY_ID_Z) {
                 if (labels_enabled) {
@@ -940,6 +975,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					ui_sounds_enabled = true;
 				}
 			}             
+
+            if (wParam == HOTKEY_ID_T)
+            {
+                if (current_tab == 0)
+                {
+					if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                    OpenTechTree();
+                }
+            }                    
+
             break;
         }    
 
@@ -1024,15 +1069,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (ui_sounds_enabled && !jingles_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 ResetProgram();
                 break;
-            case IDC_BUTTON_ENABLEALL:                                             // "Enable All"
-                if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-                EnableAll();
-                ValidateAllDlcToggles(hWnd);
+            case IDC_BUTTON_ENABLEALL:                                             // "Enable All"                
+                EnableAll(hWnd);
                 break;
             case IDC_BUTTON_DISABLEALL:                                             // "Disable All"
-                if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-                DisableAll();
-                ValidateAllDlcToggles(hWnd);
+                DisableAll(hWnd);
                 break;
 			case IDC_BUTTON_CLEARLOG:                           // "Clear"
 				SetWindowText(drawn_log, L"");
@@ -1097,62 +1138,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     
                 break;
             case IDC_RADIO_DE:
-                ShowDEDLCCheckboxes(true);
-                ShowHDDLCCheckboxes(false);
-                ShowAOCCheckbox(false);
-
-                
-
-
-                SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_de);
-                
-                edition_state = DE;
-                ShowAllPoolCheckboxes();                
-				ValidateAllDlcToggles(hWnd);
-
-                if (autotoggle_enabled) {
-                    for (int i = 0; i < 5; i++) {
-                        ToggleDlc(old_dlc[i], true, hWnd);
-                    }
-                }
-
-
+                SetEditionState(hWnd, DE);
                 break;
             case IDC_RADIO_HD:
-                ShowDEDLCCheckboxes(false);
-                ShowHDDLCCheckboxes(true);
-                ShowAOCCheckbox(false);
-
-                if (autotoggle_enabled) {
-                    for (int i = 0; i < 2; i++) {
-                        ToggleDlc(old_dlc[i], true, hWnd);
-                    }
-                }
-                
-
-                SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_hd);
-                
-                edition_state = HD;
-                ShowHDPoolCheckboxes();
-                ValidateAllDlcToggles(hWnd);
-
-
-
+                SetEditionState(hWnd, HD);
                 break;
             case IDC_RADIO_AOK:
-                ShowDEDLCCheckboxes(false);
-                ShowHDDLCCheckboxes(false);
-                ShowAOCCheckbox(true);
-
-                if (autotoggle_enabled) {
-                    ToggleDlc(aok, true, hWnd);
-                }
-                
-
-                SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_aok);
-                edition_state = AOK;
-                ShowAOCPoolCheckboxes();
-                ValidateAllDlcToggles(hWnd);
+                SetEditionState(hWnd, AOK);
                 break;            
             case IDC_CHECKBOX_ROYALS:
                 
@@ -1658,6 +1650,7 @@ void ResetProgram()
     reset_state = true;
 
 	UpdateRemainingLog();
+    UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
 
 
 }
@@ -1711,7 +1704,7 @@ void DrawCiv()
 
     if (jingles_enabled) PlayJingle(current_civ);
     
-	UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ));
+	UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
 
     
 }
@@ -1726,8 +1719,13 @@ void EnableHotkeys(HWND hWnd)
 	RegisterHotKey(hWnd, HOTKEY_ID_X, 0, 0x58);
 	RegisterHotKey(hWnd, HOTKEY_ID_C, 0, 0x43);
 	RegisterHotKey(hWnd, HOTKEY_ID_V, 0, 0x56);
-
-
+	RegisterHotKey(hWnd, HOTKEY_ID_T, 0, 0x54);
+	RegisterHotKey(hWnd, HOTKEY_ID_1, 0, 0x31);
+	RegisterHotKey(hWnd, HOTKEY_ID_2, 0, 0x32);
+	RegisterHotKey(hWnd, HOTKEY_ID_3, 0, 0x33);
+	RegisterHotKey(hWnd, HOTKEY_ID_Q, 0, 0x51);
+	RegisterHotKey(hWnd, HOTKEY_ID_W, 0, 0x57);
+	RegisterHotKey(hWnd, HOTKEY_ID_E, 0, 0x45);
 }
 
 void DisableHotkeys(HWND hWnd)
@@ -1740,7 +1738,13 @@ void DisableHotkeys(HWND hWnd)
 	UnregisterHotKey(hWnd, HOTKEY_ID_X);
 	UnregisterHotKey(hWnd, HOTKEY_ID_C);
 	UnregisterHotKey(hWnd, HOTKEY_ID_V);
-
+	UnregisterHotKey(hWnd, HOTKEY_ID_T);
+	UnregisterHotKey(hWnd, HOTKEY_ID_1);
+	UnregisterHotKey(hWnd, HOTKEY_ID_2);
+	UnregisterHotKey(hWnd, HOTKEY_ID_3);
+	UnregisterHotKey(hWnd, HOTKEY_ID_Q);
+	UnregisterHotKey(hWnd, HOTKEY_ID_W);
+	UnregisterHotKey(hWnd, HOTKEY_ID_E);
 }
 
 void KillApplication()
@@ -2065,7 +2069,8 @@ void HideCustomPoolCheckboxes() {
     ShowWindow(checkbox_aoc, SW_HIDE);
 }
 
-void EnableAll() {
+void EnableAll(HWND hWnd) {
+    if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
     pool_altered = true;
 	custom_civ_pool = false;
 
@@ -2094,9 +2099,11 @@ void EnableAll() {
 
     
     if (autoreset_enabled) ResetProgram();
+    ValidateAllDlcToggles(hWnd);
 }
 
-void DisableAll() {
+void DisableAll(HWND hWnd) {
+    if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
     pool_altered = true;
 	custom_civ_pool = true;
     for (int i = 0; i < MAX_CIVS; i++) {
@@ -2104,6 +2111,7 @@ void DisableAll() {
 		RemoveCiv(civ_index[i]);
     }
     if (autoreset_enabled) ResetProgram();
+    ValidateAllDlcToggles(hWnd);
 }
 
 void ShowDrawTab(bool state, HWND hWnd) {
@@ -2607,3 +2615,78 @@ void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText)
     // Update the tooltip text
     SendMessage(hwndTip, TTM_UPDATETIPTEXT, 0, (LPARAM)&toolInfo);
 }
+
+void SetEditionState(HWND hWnd, edition edition)
+{
+    switch (edition)
+    {
+        case DE:
+        {
+            ShowDEDLCCheckboxes(true);
+            ShowHDDLCCheckboxes(false);
+            ShowAOCCheckbox(false);
+            SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_de);
+            edition_state = DE;
+            ShowAllPoolCheckboxes();
+            ValidateAllDlcToggles(hWnd);
+            if (autotoggle_enabled)
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    ToggleDlc(old_dlc[i], true, hWnd);
+                }
+            }
+            if ((SendMessage(radiobutton_de, BM_GETCHECK, 0, 0)) != BST_CHECKED)
+            {
+                SendMessage(radiobutton_de, BM_SETCHECK, BST_CHECKED, 0);
+                SendMessage(radiobutton_hd, BM_SETCHECK, BST_UNCHECKED, 0);
+                SendMessage(radiobutton_aok, BM_SETCHECK, BST_UNCHECKED, 0);
+            }
+            return;
+        }
+        case HD:
+        {
+            ShowDEDLCCheckboxes(false);
+            ShowHDDLCCheckboxes(true);
+            ShowAOCCheckbox(false);
+            if (autotoggle_enabled) {
+                for (int i = 0; i < 2; i++) {
+                    ToggleDlc(old_dlc[i], true, hWnd);
+                }
+            }
+            SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_hd);
+            edition_state = HD;
+            ShowHDPoolCheckboxes();
+            ValidateAllDlcToggles(hWnd);
+            if ((SendMessage(radiobutton_hd, BM_GETCHECK, 0, 0)) != BST_CHECKED)
+            {
+				SendMessage(radiobutton_hd, BM_SETCHECK, BST_CHECKED, 0);
+				SendMessage(radiobutton_de, BM_SETCHECK, BST_UNCHECKED, 0);
+				SendMessage(radiobutton_aok, BM_SETCHECK, BST_UNCHECKED, 0);
+            }
+            return;
+        }
+        case AOK:
+        {
+            ShowDEDLCCheckboxes(false);
+            ShowHDDLCCheckboxes(false);
+            ShowAOCCheckbox(true);
+            if (autotoggle_enabled) {
+                ToggleDlc(aok, true, hWnd);
+            }
+            SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_aok);
+            edition_state = AOK;
+            ShowAOCPoolCheckboxes();
+            ValidateAllDlcToggles(hWnd);
+            if ((SendMessage(radiobutton_aok, BM_GETCHECK, 0, 0)) != BST_CHECKED)
+            {
+                SendMessage(radiobutton_de, BM_SETCHECK, BST_UNCHECKED, 0);
+                SendMessage(radiobutton_hd, BM_SETCHECK, BST_UNCHECKED, 0);
+                SendMessage(radiobutton_aok, BM_SETCHECK, BST_CHECKED, 0);
+            }
+            return;
+        }
+    }
+        
+}
+        

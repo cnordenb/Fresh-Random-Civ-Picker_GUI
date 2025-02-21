@@ -43,6 +43,13 @@
 #define HOTKEY_ID_C 7
 #define HOTKEY_ID_V 8
 #define HOTKEY_ID_T 9
+#define HOTKEY_ID_1 10
+#define HOTKEY_ID_2 11
+#define HOTKEY_ID_3 12
+#define HOTKEY_ID_Q 13
+#define HOTKEY_ID_W 14
+#define HOTKEY_ID_E 15
+
 #define DT_UNDERLINE 0x80000000
 #define MAX_LENGTH 15 
 
@@ -263,8 +270,10 @@ void OpenTechTree();
 edition GetCivEdition(const std::wstring &);
 dlc GetCivDLC(const std::wstring &);
 
-void EnableAll();
-void DisableAll();
+void SetEditionState(HWND hWnd, edition edition);
+
+void EnableAll(HWND);
+void DisableAll(HWND);
 
 void ShowDrawTab(bool, HWND);
 void ShowLogTab(bool);
