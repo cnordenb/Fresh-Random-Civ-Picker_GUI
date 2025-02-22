@@ -1,6 +1,6 @@
 This is the C++ GUI version of the Fresh Random Civ Picker.
 
-Purpose of Fresh Random Civ Picker: the user can randomly iterate through the entire civ pool without drawing the same civ twice.
+Purpose of Fresh Random Civ Picker: the user can randomly iterate through the entire civ pool or a user-defined civ pool without drawing the same civ twice.
 
 The C++ GUI version: the program has a graphical user interface which is a window. This window contains two tabs. The first tab (titled "Draw"), contains two labels and two buttons. The first label, is centred onto the window and is "?" by default. The second label is anchored to the bottom right corner of the window and is "0/45" by default. The first button is named "Draw" and is positioned just under the first centre label. The second button is named "Reset" and is anchored to the bottom left corner of the window. The second tab (titled Log) contains a text field.
 
