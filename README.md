@@ -12,13 +12,6 @@ This is an application which generates a randomly drawn civilisation name out of
 Why was it created?
 I got the idea to create this application when I was playing the game one day and got to play the same civilisation twice throughout five matches, despite the fact that I picked random every time and the fact that the game has 45 civilisations. This made me feel frustrated and that I was wasting my time. As a full-time student and with other priorities in life I do not have the time to play the game every day. I might only have the opportunity to play five matches in a month. I want to play random civilisations and I also want to minimise the repetition of some factors like the civilisations played. The frustrating experience of having to replay the same civilisation during my precious few five matches in a game that has 45(!) civilisations gave me the motivation to create a solution for this problem. Thus, the idea, work, and birth of this program came to.
 
-Planned future features (work in progress):
-  - Civ icons
-  - Civ jingles
-  - UI sounds for a more immersive user experience
-  - Options menu to toggle off or on individual features
-  - Custom civ pool tab to give the user the ability to customise the exact civ pool they want
-  - Tech tree button
 
 
 Age of Empires II © Microsoft Corporation. Fresh Random Civ Picker was created under Microsoft's "Game Content Usage Rules" using assets from Age of Empires II: Age of Kings, Age of Empires II: HD Edition, and Age of Empires II: Definitive Edition, and it is not endorsed by or affiliated with Microsoft. https://www.xbox.com/en-us/developers/rules
