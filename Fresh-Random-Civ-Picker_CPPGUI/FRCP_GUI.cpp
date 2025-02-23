@@ -1,13 +1,19 @@
 /*
 TODO
 
-- implement tooltips
+- remove dark mode
+- implement more hotkeys (show, custom civ tab checkboxes)
+- fix radio button sound
+- add tooltip toggle to options
+- add hotkeys list info to options
+- civ info button and page(?)
 - implement ini file for persistent settings
 - implement log file for persistent log and civ states
 
 
 */
 #include "FRCP_GUI.h"
+#include <thread>
 
 
 // Function to create tabs
@@ -78,6 +84,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
+    
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -1015,15 +1022,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			// button sounds in tab views
             if (ui_sounds_enabled) {
-                if (wmId > 2 && wmId < 68) {
-					if (wmId > 50 && wmId < 54) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-					else PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                if (wmId > 2 && wmId < 51 && wmId > 53 && wmId < 68) {
+                    PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 }
             }
 
             // auto-reset
             if (autoreset_enabled) {
-				if (wmId > 4 && wmId < 50 || wmId > 50 && wmId < 64) ResetProgram();
+				if (wmId > 4 && wmId < 50 || wmId > 50 && wmId < 65) ResetProgram();
             }
 
             switch (wmId)
@@ -1702,7 +1708,13 @@ void DrawCiv()
     }
         
 
-    if (jingles_enabled) PlayJingle(current_civ);
+    if (jingles_enabled)
+    {
+        std::thread sound_thread(PlayJingle, current_civ);
+        sound_thread.detach();
+        //PlayJingle(current_civ);
+    }
+        
     
 	UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
 
@@ -2618,6 +2630,7 @@ void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText)
 
 void SetEditionState(HWND hWnd, edition edition)
 {
+    if (ui_sounds_enabled) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
     switch (edition)
     {
         case DE:
