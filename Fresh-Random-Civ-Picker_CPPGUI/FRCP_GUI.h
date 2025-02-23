@@ -49,6 +49,12 @@
 #define HOTKEY_ID_Q 13
 #define HOTKEY_ID_W 14
 #define HOTKEY_ID_E 15
+#define HOTKEY_ID_A 16
+#define HOTKEY_ID_S 17
+#define HOTKEY_ID_D 18
+#define HOTKEY_ID_F 19
+#define HOTKEY_ID_G 20
+#define HOTKEY_ID_H 21
 
 #define DT_UNDERLINE 0x80000000
 #define MAX_LENGTH 15 
@@ -284,6 +290,7 @@ void ShowAOCCheckbox(bool);
 
 void UpdateDrawnLog(bool, bool);
 void UpdateRemainingLog();
+void ToggleRemainLog(bool);
 
 bool DlcEmpty(dlc);
 void ToggleDlc(dlc, bool, HWND);
@@ -313,6 +320,7 @@ void SubclassButton(HWND);
 
 int GetWindowWidth(HWND);
 int GetWindowHeight(HWND);
+
 
 
 std::string ConvertToString(const std::wstring &);
