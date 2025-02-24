@@ -824,6 +824,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             else if (current_tab == 2)
             {
+				if (autoreset_enabled && wParam > 12 && wParam < 22) ResetProgram();
                 if (wParam == HOTKEY_ID_SPACE) EnableAll(hWnd);           
                 if (wParam == HOTKEY_ID_RETURN) DisableAll(hWnd);
                 if (wParam == HOTKEY_ID_Q) SetEditionState(hWnd, DE);
@@ -2674,6 +2675,13 @@ void SaveLog()
         return;
     }
 
+// Save the civilization states
+    outFile << L"CivStates:" << std::endl;
+    for (const auto &civ : civ_enabled)
+    {
+        outFile << civ.first << L" " << (civ.second ? L"1" : L"0") << std::endl;
+    }
+
     // Save the drawn civilisations
     outFile << L"DrawnCivs:" << std::endl;
 	for (int i = 0; i < MAX_CIVS; i++)
@@ -2686,12 +2694,7 @@ void SaveLog()
 	}
 
 
-    // Save the civilization states
-    outFile << L"CivStates:" << std::endl;
-    for (const auto &civ : civ_enabled)
-    {
-        outFile << civ.first << L" " << (civ.second ? L"1" : L"0") << std::endl;
-    }
+    
 
     outFile.close();
 }
@@ -2708,6 +2711,7 @@ void LoadLog(HWND hWnd)
     std::wstring line;
     bool readingDrawnCivs = false;
     bool readingCivStates = false;
+    InitialiseCivs();
 
     while (std::getline(inFile, line))
     {
@@ -2716,7 +2720,6 @@ void LoadLog(HWND hWnd)
 
             readingDrawnCivs = true;
             readingCivStates = false;
-            InitialiseCivs();
             continue;
         }
         else if (line == L"CivStates:")
