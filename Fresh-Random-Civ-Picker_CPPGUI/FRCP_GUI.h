@@ -75,6 +75,16 @@
 #define TOOLTIP_DE                  7
 #define TOOLTIP_HD                  8
 #define TOOLTIP_AOK                 9
+#define TOOLTIP_ROYALS			    10
+#define TOOLTIP_ROME				11
+#define TOOLTIP_INDIA				12
+#define TOOLTIP_DUKES				13
+#define TOOLTIP_WEST				14
+#define TOOLTIP_KHANS				15
+#define TOOLTIP_RAJAS				16
+#define TOOLTIP_AFRICANS			17
+#define TOOLTIP_FORGOTTEN			18
+#define TOOLTIP_AOC				    19
 
 std::map<HWND, WNDPROC> originalButtonProcs;
 
@@ -127,6 +137,8 @@ checkbox_aoc;
 HWND khans_icon, dukes_icon, west_icon, india_icon, rome_icon, royals_icon,     // dlc icons
 forgotten_icon, africans_icon, rajas_icon,
 aoc_icon;
+
+
 
 
 HWND autoreset_checkbox, autotoggle_checkbox;			 // autoreset checkbox
@@ -198,6 +210,7 @@ bool autoreset_enabled = true;
 bool autotoggle_enabled = true;
 bool remainlog_enabled = true;
 bool reset_state = true;
+bool hotkey_pressed = false;
 
 
 
@@ -225,6 +238,8 @@ enum dlc {
 };
 
 dlc old_dlc[] = { aok, aoc, forgotten, africans, rajas };
+
+
 
 edition edition_state = DE;
 
@@ -287,13 +302,16 @@ void ShowCustomTab(bool);
 void ShowDEDLCCheckboxes(bool);
 void ShowHDDLCCheckboxes(bool);
 void ShowAOCCheckbox(bool);
+int GetDlcCheckboxId(dlc);
 
 void UpdateDrawnLog(bool, bool);
 void UpdateRemainingLog();
 void ToggleRemainLog(bool);
 
 bool DlcEmpty(dlc);
-void ToggleDlc(dlc, bool, HWND);
+void ToggleDlc(dlc, HWND);
+void EnableDlc(dlc, HWND);
+void DisableDlc(dlc, HWND);
 void ValidateDlcToggle(HWND, dlc);
 void ValidateAllDlcToggles(HWND);
 
@@ -303,7 +321,7 @@ void ActivateTooltip(HWND, TOOLINFO *, POINT);
 
 
 
-HWND hwndTooltip[10];
+HWND hwndTooltip[20];
 int hwnd_length = sizeof(hwndTooltip) / sizeof(hwndTooltip[0]);
 
 void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText);

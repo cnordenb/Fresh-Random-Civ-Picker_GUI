@@ -549,6 +549,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             checkbox_aoc = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 388, -56, 140, 20, IDC_CHECKBOX_AOC, L"The Conquerors");
 
+			AddTooltip(checkbox_royals, hwndTooltip[TOOLTIP_ROYALS], StringCleaner(L"Toggles The Mountain Royals civilisations\nHotkey: A"));
+			AddTooltip(checkbox_rome, hwndTooltip[TOOLTIP_ROME], StringCleaner(L"Toggles Return of Rome civilisations\nHotkey: S"));
+			AddTooltip(checkbox_india, hwndTooltip[TOOLTIP_INDIA], StringCleaner(L"Toggles Dynasties of India civilisations\nHotkey: D"));
+			AddTooltip(checkbox_dukes, hwndTooltip[TOOLTIP_DUKES], StringCleaner(L"Toggles Dawn of the Dukes civilisations\nHotkey: F"));
+			AddTooltip(checkbox_west, hwndTooltip[TOOLTIP_WEST], StringCleaner(L"Toggles Lords of the West civilisations\nHotkey: G"));
+			AddTooltip(checkbox_khans, hwndTooltip[TOOLTIP_KHANS], StringCleaner(L"Toggles The Last Khans civilisations\nHotkey: H"));
+
+			AddTooltip(checkbox_rajas, hwndTooltip[TOOLTIP_RAJAS], StringCleaner(L"Toggles Rise of Rajas civilisations\nHotkey: A"));
+			AddTooltip(checkbox_africans, hwndTooltip[TOOLTIP_AFRICANS], StringCleaner(L"Toggles African Kingdoms civilisations\nHotkey: S"));
+			AddTooltip(checkbox_forgotten, hwndTooltip[TOOLTIP_FORGOTTEN], StringCleaner(L"Toggles The Forgotten civilisations\nHotkey: D"));
+
+			AddTooltip(checkbox_aoc, hwndTooltip[TOOLTIP_AOC], StringCleaner(L"Toggles The Conquerors civilisations\nHotkey: A"));
+
+            SubclassButton(checkbox_royals);
+			SubclassButton(checkbox_rome);
+			SubclassButton(checkbox_india);
+			SubclassButton(checkbox_dukes);
+			SubclassButton(checkbox_west);
+			SubclassButton(checkbox_khans);
+
+			SubclassButton(checkbox_rajas);
+			SubclassButton(checkbox_africans);
+			SubclassButton(checkbox_forgotten);
+
+			SubclassButton(checkbox_aoc);
+
             royals_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
             rome_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
             india_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
@@ -602,7 +628,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             ShowDrawTab(true, hWnd);
 
 
-
+            
 
 
 
@@ -731,131 +757,35 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 bool tooltipActivated = false;
 
-                // Check if the cursor is over the draw button
-                if (GetWindowRect(button_draw, &rect))
-                {
-                    MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
-                    if (PtInRect(&rect, pt))
-                    {
+                
 
-                        toolInfo.uId = (UINT_PTR)button_draw;
+                HWND button[] = { button_draw, button_reset, button_techtree, button_clearlog,
+                                    button_enableall, button_disableall, checkbox_showremainlog,
+                                    radiobutton_de, radiobutton_hd, radiobutton_aok, checkbox_royals,
+                                checkbox_rome, checkbox_india, checkbox_dukes, checkbox_west, checkbox_khans,
+                                checkbox_rajas, checkbox_africans, checkbox_forgotten, checkbox_aoc };
 
-                        ActivateTooltip(hwndTooltip[TOOLTIP_DRAW], &toolInfo, pt);
-                        tooltipActivated = true;
-
-                    }
-                }
-
-                // Check if the cursor is over the reset button
-                if (GetWindowRect(button_reset, &rect))
-                {
-                    MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
-                    if (PtInRect(&rect, pt))
-                    {
-                        toolInfo.uId = (UINT_PTR)button_reset;
-                        ActivateTooltip(hwndTooltip[TOOLTIP_RESET], &toolInfo, pt);
-                        tooltipActivated = true;
-                    }
-                }
-
-                // Check if the cursor is over the tech tree button
-                if (GetWindowRect(button_techtree, &rect))
-                {
-                    MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
-                    if (PtInRect(&rect, pt))
-                    {
-                        toolInfo.uId = (UINT_PTR)button_techtree;
-                        ActivateTooltip(hwndTooltip[TOOLTIP_TECHTREE], &toolInfo, pt);
-                        tooltipActivated = true;
-                    }
-                }
-
-                // Check if the cursor is over the clear button
-                if (GetWindowRect(button_clearlog, &rect))
-                {
-                    MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
-                    if (PtInRect(&rect, pt))
-                    {
-                        toolInfo.uId = (UINT_PTR)button_techtree;
-                        ActivateTooltip(hwndTooltip[TOOLTIP_CLEAR], &toolInfo, pt);
-                        tooltipActivated = true;
-                    }
-                }
-
-                // Check if the cursor is over the enable all button
-                if (GetWindowRect(button_enableall, &rect))
-                {
-                    MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
-                    if (PtInRect(&rect, pt))
-                    {
-                        toolInfo.uId = (UINT_PTR)button_enableall;
-                        ActivateTooltip(hwndTooltip[TOOLTIP_ENABLEALL], &toolInfo, pt);
-                        tooltipActivated = true;
-                    }
-                }
-
-				// Check if the cursor is over the disable all button
-				if (GetWindowRect(button_disableall, &rect))
+                int tooltip_id[] = { TOOLTIP_DRAW, TOOLTIP_RESET, TOOLTIP_TECHTREE, TOOLTIP_CLEAR,
+                                        TOOLTIP_ENABLEALL, TOOLTIP_DISABLEALL, TOOLTIP_REMAININGTOGGLE,
+                                        TOOLTIP_DE, TOOLTIP_HD, TOOLTIP_AOK, TOOLTIP_ROYALS, TOOLTIP_ROME,
+                                    TOOLTIP_INDIA, TOOLTIP_DUKES, TOOLTIP_WEST, TOOLTIP_KHANS,
+                                    TOOLTIP_RAJAS, TOOLTIP_AFRICANS, TOOLTIP_FORGOTTEN, TOOLTIP_AOC };
+                
+				for (int i = 0; i < sizeof(button) / sizeof(button[0]); i++)
 				{
-					MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
-					if (PtInRect(&rect, pt))
+					if (GetWindowRect(button[i], &rect))
 					{
-						toolInfo.uId = (UINT_PTR)button_disableall;
-						ActivateTooltip(hwndTooltip[TOOLTIP_DISABLEALL], &toolInfo, pt);
-						tooltipActivated = true;
-					}
+						MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
+						if (PtInRect(&rect, pt))
+						{
+							toolInfo.uId = (UINT_PTR)button[i];
+							ActivateTooltip(hwndTooltip[tooltip_id[i]], &toolInfo, pt);
+							tooltipActivated = true;
+						}
+                        else SendMessage(hwndTooltip[tooltip_id[i]], TTM_TRACKACTIVATE, FALSE, (LPARAM)&toolInfo);
+					}                    
 				}
-
-				// Check if the cursor is over the corner label
-				if (GetWindowRect(checkbox_showremainlog, &rect))
-				{
-					MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
-					if (PtInRect(&rect, pt))
-					{
-						toolInfo.uId = (UINT_PTR)checkbox_showremainlog;
-						ActivateTooltip(hwndTooltip[TOOLTIP_REMAININGTOGGLE], &toolInfo, pt);
-						tooltipActivated = true;
-					}
-				}
-
-                // Check if the cursor is over the DE radio button
-				if (GetWindowRect(radiobutton_de, &rect))
-				{
-					MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
-					if (PtInRect(&rect, pt))
-					{
-						toolInfo.uId = (UINT_PTR)radiobutton_de;
-						ActivateTooltip(hwndTooltip[TOOLTIP_DE], &toolInfo, pt);
-						tooltipActivated = true;
-					}
-				}
-
-				// Check if the cursor is over the HD radio button
-				if (GetWindowRect(radiobutton_hd, &rect))
-				{
-					MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
-					if (PtInRect(&rect, pt))
-					{
-						toolInfo.uId = (UINT_PTR)radiobutton_hd;
-						ActivateTooltip(hwndTooltip[TOOLTIP_HD], &toolInfo, pt);
-						tooltipActivated = true;
-					}
-				}
-
-				// Check if the cursor is over the AOK radio button
-				if (GetWindowRect(radiobutton_aok, &rect))
-				{
-					MapWindowPoints(HWND_DESKTOP, hWnd, (LPPOINT)&rect, 2);
-					if (PtInRect(&rect, pt))
-					{
-						toolInfo.uId = (UINT_PTR)radiobutton_aok;
-						ActivateTooltip(hwndTooltip[TOOLTIP_AOK], &toolInfo, pt);
-						tooltipActivated = true;
-					}
-				}
-
-
-
+                
 
                 
                 // Deactivate the tooltip if the cursor is not over any button
@@ -881,6 +811,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case WM_HOTKEY:
         {          
+
+            hotkey_pressed = true;
+
             if (GetForegroundWindow() != hWnd)  // disables hotkeys if window is not in foreground
             {
                 DisableHotkeys(hWnd);
@@ -903,26 +836,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (wParam == HOTKEY_ID_Q) SetEditionState(hWnd, DE);
                 if (wParam == HOTKEY_ID_W) SetEditionState(hWnd, HD);
 				if (wParam == HOTKEY_ID_E) SetEditionState(hWnd, AOK);
-                /*
+                
                 if (edition_state == DE)
                 {
-					if (wParam == HOTKEY_ID_A) ToggleDLC(hWnd, ROYALS);
-					if (wParam == HOTKEY_ID_S) ToggleDLC(hWnd, ROME);
-					if (wParam == HOTKEY_ID_D) ToggleDLC(hWnd, INDIA);
-					if (wParam == HOTKEY_ID_F) ToggleDLC(hWnd, DUKES);
-					if (wParam == HOTKEY_ID_G) ToggleDLC(hWnd, WEST);
-					if (wParam == HOTKEY_ID_H) ToggleDLC(hWnd, KHANS);
+					if (wParam == HOTKEY_ID_A) ToggleDlc(royals, hWnd);
+					if (wParam == HOTKEY_ID_S) ToggleDlc(rome, hWnd);
+					if (wParam == HOTKEY_ID_D) ToggleDlc(india, hWnd);
+					if (wParam == HOTKEY_ID_F) ToggleDlc(dukes, hWnd);
+					if (wParam == HOTKEY_ID_G) ToggleDlc(west, hWnd);
+					if (wParam == HOTKEY_ID_H) ToggleDlc(khans, hWnd);
 				}
 				else if (edition_state == HD)
 				{
-					if (wParam == HOTKEY_ID_A) ToggleDLC(hWnd, RAJAS);
-					if (wParam == HOTKEY_ID_S) ToggleDLC(hWnd, AFRICANS);
-					if (wParam == HOTKEY_ID_D) ToggleDLC(hWnd, FORGOTTEN);
+					if (wParam == HOTKEY_ID_A) ToggleDlc(rajas, hWnd);
+					if (wParam == HOTKEY_ID_S) ToggleDlc(africans, hWnd);
+					if (wParam == HOTKEY_ID_D) ToggleDlc(forgotten, hWnd);
 				}
                 else if (edition_state == AOK)
                 {
-                    if (wParam == HOTKEY_ID_A) ToggleDLC(hWnd, AOC);
-                }*/
+                    if (wParam == HOTKEY_ID_A) ToggleDlc(aoc, hWnd);
+                }
 
             }
 
@@ -1023,6 +956,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case WM_COMMAND:                                        // action listener for clicks
         {
+            hotkey_pressed = false;
+
             int wmId = LOWORD(wParam);
 
 
@@ -1128,16 +1063,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     switch (edition_state) {
                     case DE:
                         for (int i = 0; i < 5; i++) {
-                            ToggleDlc(old_dlc[i], true, hWnd);
+                            EnableDlc(old_dlc[i], hWnd);
                         }
                         break;
                     case HD:
                         for (int i = 0; i < 2; i++) {
-                            ToggleDlc(old_dlc[i], true, hWnd);
+                            EnableDlc(old_dlc[i], hWnd);
 						}
 						break;
                     case AOK:
-                        ToggleDlc(aok, true, hWnd);
+                        EnableDlc(aok, hWnd);
                         break;
                     }
                 }               
@@ -1146,16 +1081,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     switch (edition_state) {
                     case DE:
                         for (int i = 0; i < 5; i++) {
-                            ToggleDlc(old_dlc[i], false, hWnd);
+                            DisableDlc(old_dlc[i], hWnd);
                         }
                         break;
                     case HD:
                         for (int i = 0; i < 2; i++) {
-                            ToggleDlc(old_dlc[i], false, hWnd);
+                            DisableDlc(old_dlc[i], hWnd);
                         }
                         break;
                     case AOK:
-				        ToggleDlc(aok, false, hWnd);
+				        DisableDlc(aok, hWnd);
 				        break;
                     }
 			        
@@ -1173,85 +1108,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 SetEditionState(hWnd, AOK);
                 break;            
             case IDC_CHECKBOX_ROYALS:
-                
-                if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_ROYALS) == BST_CHECKED) {
-                    ToggleDlc(royals, true, hWnd);
-                }
-                else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_ROYALS) == BST_UNCHECKED) {
-                    ToggleDlc(royals, false, hWnd);
-                }
+                ToggleDlc(royals, hWnd);
                 break;
-            case IDC_CHECKBOX_ROME:
-				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_ROME) == BST_CHECKED) {
-					ToggleDlc(rome, true, hWnd);
-				}
-				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_ROME) == BST_UNCHECKED) {
-					ToggleDlc(rome, false, hWnd);
-				}
-                break;
+			case IDC_CHECKBOX_ROME:
+				ToggleDlc(rome, hWnd);
+				break;
             case IDC_CHECKBOX_INDIA:
-				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_INDIA) == BST_CHECKED) {
-					ToggleDlc(india, true, hWnd);
-				}
-				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_INDIA) == BST_UNCHECKED) {
-					ToggleDlc(india, false, hWnd);
-				}
+				ToggleDlc(india, hWnd);
                 break;
             case IDC_CHECKBOX_DUKES:
-				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_DUKES) == BST_CHECKED) {
-					ToggleDlc(dukes, true, hWnd);
-				}
-				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_DUKES) == BST_UNCHECKED) {
-					ToggleDlc(dukes, false, hWnd);
-				}
+				ToggleDlc(dukes, hWnd);
                 break;
             case IDC_CHECKBOX_WEST:
-				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_WEST) == BST_CHECKED) {
-					ToggleDlc(west, true, hWnd);
-				}
-				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_WEST) == BST_UNCHECKED) {
-					ToggleDlc(west, false, hWnd);
-				}
+				ToggleDlc(west, hWnd);
                 break;
             case IDC_CHECKBOX_KHANS:
-				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_KHANS) == BST_CHECKED) {
-					ToggleDlc(khans, true, hWnd);
-				}
-				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_KHANS) == BST_UNCHECKED) {
-					ToggleDlc(khans, false, hWnd);
-				}
+				ToggleDlc(khans, hWnd);
                 break;
             case IDC_CHECKBOX_RAJAS:
-				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_RAJAS) == BST_CHECKED) {
-					ToggleDlc(rajas, true, hWnd);
-				}
-				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_RAJAS) == BST_UNCHECKED) {
-					ToggleDlc(rajas, false, hWnd);
-				}
+				ToggleDlc(rajas, hWnd);
                 break;
             case IDC_CHECKBOX_AFRICANS:
-				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AFRICANS) == BST_CHECKED) {
-					ToggleDlc(africans, true, hWnd);
-				}
-				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AFRICANS) == BST_UNCHECKED) {
-					ToggleDlc(africans, false, hWnd);
-				}
+				ToggleDlc(africans, hWnd);
                 break;
             case IDC_CHECKBOX_FORGOTTEN:
-				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_FORGOTTEN) == BST_CHECKED) {
-					ToggleDlc(forgotten, true, hWnd);
-				}
-				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_FORGOTTEN) == BST_UNCHECKED) {
-					ToggleDlc(forgotten, false, hWnd);
-				}
+				ToggleDlc(forgotten, hWnd);
                 break;
             case IDC_CHECKBOX_AOC:
-				if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AOC) == BST_CHECKED) {
-					ToggleDlc(aoc, true, hWnd);
-				}
-				else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AOC) == BST_UNCHECKED) {
-					ToggleDlc(aoc, false, hWnd);
-				}
+				ToggleDlc(aoc, hWnd);
                 break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
@@ -1322,127 +1206,32 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             toolInfo.hwnd = hwnd;
             toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS | TTF_TRACK;
 
+            
+            HWND button[] = { button_draw, button_reset, button_techtree, button_clearlog,
+                                button_enableall, button_disableall, checkbox_showremainlog,
+                                radiobutton_de, radiobutton_hd, radiobutton_aok, checkbox_royals,
+                            checkbox_rome, checkbox_india, checkbox_dukes, checkbox_west, checkbox_khans,
+                            checkbox_rajas, checkbox_africans, checkbox_forgotten, checkbox_aoc };
 
+            int tooltip_id[] = { TOOLTIP_DRAW, TOOLTIP_RESET, TOOLTIP_TECHTREE, TOOLTIP_CLEAR,
+                                    TOOLTIP_ENABLEALL, TOOLTIP_DISABLEALL, TOOLTIP_REMAININGTOGGLE,
+                                    TOOLTIP_DE, TOOLTIP_HD, TOOLTIP_AOK, TOOLTIP_ROYALS, TOOLTIP_ROME,
+                                TOOLTIP_INDIA, TOOLTIP_DUKES, TOOLTIP_WEST, TOOLTIP_KHANS,
+                                TOOLTIP_RAJAS, TOOLTIP_AFRICANS, TOOLTIP_FORGOTTEN, TOOLTIP_AOC};
 
-            // Check if the cursor is over the draw button
-            if (GetWindowRect(button_draw, &rect))
-            {
-                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
-                if (PtInRect(&rect, pt))
-                {                    
-
-                    toolInfo.uId = (UINT_PTR)button_draw;
-
-                    ActivateTooltip(hwndTooltip[TOOLTIP_DRAW], &toolInfo, pt);
-
-                    
-                }
-                
-            }
-
-            // Check if the cursor is over the reset button
-            if (GetWindowRect(button_reset, &rect))
-            {
-                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
-                if (PtInRect(&rect, pt))
-                {
-                    toolInfo.uId = (UINT_PTR)button_reset;
-                    ActivateTooltip(hwndTooltip[TOOLTIP_RESET], &toolInfo, pt);
-
-                }
-            }
-
-            // Check if the cursor is over the tech tree button
-            if (GetWindowRect(button_techtree, &rect))
-            {
-                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
-                if (PtInRect(&rect, pt))
-                {
-                    toolInfo.uId = (UINT_PTR)button_techtree;
-                    ActivateTooltip(hwndTooltip[TOOLTIP_TECHTREE], &toolInfo, pt);
-
-                }
-            }
-
-            // Check if the cursor is over the clear log button
-            if (GetWindowRect(button_clearlog, &rect))
-            {
-                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
-                if (PtInRect(&rect, pt))
-                {
-                    toolInfo.uId = (UINT_PTR)button_clearlog;
-                    ActivateTooltip(hwndTooltip[TOOLTIP_CLEAR], &toolInfo, pt);
-
-                }
-            }
-
-            // Check if the cursor is over the enable all button
-            if (GetWindowRect(button_enableall, &rect))
-            {
-                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
-                if (PtInRect(&rect, pt))
-                {
-                    toolInfo.uId = (UINT_PTR)button_enableall;
-                    ActivateTooltip(hwndTooltip[TOOLTIP_ENABLEALL], &toolInfo, pt);
-
-                }
-            }
-
-			// Check if the cursor is over the disable all button
-            if (GetWindowRect(button_disableall, &rect))
-            {
-                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
-                if (PtInRect(&rect, pt))
-                {
-                    toolInfo.uId = (UINT_PTR)button_disableall;
-                    ActivateTooltip(hwndTooltip[TOOLTIP_DISABLEALL], &toolInfo, pt);
-                }
-            }
-
-            // Check if the cursor is over the show remaining log checkbox
-            if (GetWindowRect(checkbox_showremainlog, &rect))
-            {
-                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
-                if (PtInRect(&rect, pt))
-                {
-                    toolInfo.uId = (UINT_PTR)checkbox_showremainlog;
-                    ActivateTooltip(hwndTooltip[TOOLTIP_REMAININGTOGGLE], &toolInfo, pt);
-                }
-
-            }
-
-            // Check if the cursor is over the DE radio button
-			if (GetWindowRect(radiobutton_de, &rect))
+            for (int i = 0; i < sizeof(button) / sizeof(button[0]); i++)
 			{
-				MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
-				if (PtInRect(&rect, pt))
+				if (GetWindowRect(button[i], &rect))
 				{
-					toolInfo.uId = (UINT_PTR)radiobutton_de;
-					ActivateTooltip(hwndTooltip[TOOLTIP_DE], &toolInfo, pt);
+					MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
+					if (PtInRect(&rect, pt))
+					{
+						toolInfo.uId = (UINT_PTR)button[i];
+						ActivateTooltip(hwndTooltip[tooltip_id[i]], &toolInfo, pt);
+					}
 				}
 			}
 
-			// Check if the cursor is over the HD radio button
-            if (GetWindowRect(radiobutton_hd, &rect))
-            {
-                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
-                if (PtInRect(&rect, pt))
-                {
-                    toolInfo.uId = (UINT_PTR)radiobutton_hd;
-                    ActivateTooltip(hwndTooltip[TOOLTIP_HD], &toolInfo, pt);
-                }
-            }
-
-			// Check if the cursor is over the AOK radio button
-            if (GetWindowRect(radiobutton_aok, &rect))
-            {
-                MapWindowPoints(HWND_DESKTOP, hwnd, (LPPOINT)&rect, 2);
-                if (PtInRect(&rect, pt))
-                {
-                    toolInfo.uId = (UINT_PTR)radiobutton_aok;
-                    ActivateTooltip(hwndTooltip[TOOLTIP_AOK], &toolInfo, pt);
-                }
-            }
 
 
         }
@@ -2378,8 +2167,23 @@ void ShowAOCCheckbox(bool aok_state) {
 	}
 }
 
-void ToggleDlc(dlc civ_dlc, bool toggle_state, HWND hWnd) {
-    if (toggle_state) {
+void ToggleDlc(dlc civ_dlc, HWND hWnd)
+{
+
+	int check_id = GetDlcCheckboxId(civ_dlc);
+
+
+    if (hotkey_pressed)
+    {
+		if (IsDlgButtonChecked(hWnd, check_id) == BST_CHECKED) {
+			CheckDlgButton(hWnd, check_id, BST_UNCHECKED);
+		}
+		else {
+			CheckDlgButton(hWnd, check_id, BST_CHECKED);
+		}
+    }
+
+    if (IsDlgButtonChecked(hWnd, check_id) == BST_CHECKED) {
         for (int i = 0; i < MAX_CIVS; i++) {
             if (GetCivDLC(civ_index[i]) == civ_dlc) {
                 CheckDlgButton(hWnd, i + 5, BST_CHECKED);
@@ -2400,6 +2204,26 @@ void ToggleDlc(dlc civ_dlc, bool toggle_state, HWND hWnd) {
         remaininglog_text += civ + L"\r\n";
     }
     SetWindowText(remaining_log, remaininglog_text.c_str());
+}
+
+void EnableDlc(dlc civ_dlc, HWND hWnd)
+{
+    for (int i = 0; i < MAX_CIVS; i++) {
+        if (GetCivDLC(civ_index[i]) == civ_dlc) {
+            CheckDlgButton(hWnd, i + 5, BST_CHECKED);
+            AddCiv(civ_index[i]);
+        }
+    }
+}
+
+void DisableDlc(dlc civ_dlc, HWND hWnd)
+{
+    for (int i = 0; i < MAX_CIVS; i++) {
+        if (GetCivDLC(civ_index[i]) == civ_dlc) {
+            CheckDlgButton(hWnd, i + 5, BST_UNCHECKED);
+            RemoveCiv(civ_index[i]);
+        }
+    }
 }
 
 bool DlcEmpty(dlc civ_dlc) {
@@ -2571,7 +2395,6 @@ void OpenTechTree() {
 	ShellExecute(NULL, L"open", techtree_path.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 
-
 void AddTooltip(HWND hwndTool, HWND hwndTip, LPCWSTR pszText)
 {
 
@@ -2598,7 +2421,6 @@ void AddTooltip(HWND hwndTool, HWND hwndTip, LPCWSTR pszText)
         OutputDebugString(L"Failed to add tooltip\n");
     }
 }
-
 
 void ActivateTooltip(HWND hwndTip, TOOLINFO *toolInfo, POINT pt)
 {
@@ -2660,7 +2482,7 @@ void SetEditionState(HWND hWnd, edition edition)
             {
                 for (int i = 0; i < 5; i++)
                 {
-                    ToggleDlc(old_dlc[i], true, hWnd);
+                    EnableDlc(old_dlc[i], hWnd);
                 }
             }
             if ((SendMessage(radiobutton_de, BM_GETCHECK, 0, 0)) != BST_CHECKED)
@@ -2678,7 +2500,7 @@ void SetEditionState(HWND hWnd, edition edition)
             ShowAOCCheckbox(false);
             if (autotoggle_enabled) {
                 for (int i = 0; i < 2; i++) {
-                    ToggleDlc(old_dlc[i], true, hWnd);
+                    EnableDlc(old_dlc[i], hWnd);
                 }
             }
             SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_hd);
@@ -2699,7 +2521,7 @@ void SetEditionState(HWND hWnd, edition edition)
             ShowHDDLCCheckboxes(false);
             ShowAOCCheckbox(true);
             if (autotoggle_enabled) {
-                ToggleDlc(aok, true, hWnd);
+                EnableDlc(aok, hWnd);
             }
             SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_aok);
             edition_state = AOK;
@@ -2756,4 +2578,31 @@ void ToggleRemainLog(bool hotkey)
 	}
 
     if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+}
+
+int GetDlcCheckboxId(dlc dlc)
+{
+    switch (dlc)
+    {
+    case royals:
+		return IDC_CHECKBOX_ROYALS;
+	case khans:
+		return IDC_CHECKBOX_KHANS;
+	case dukes:
+		return IDC_CHECKBOX_DUKES;
+	case west:
+		return IDC_CHECKBOX_WEST;
+	case india:
+		return IDC_CHECKBOX_INDIA;
+	case rome:
+		return IDC_CHECKBOX_ROME;
+	case forgotten:
+		return IDC_CHECKBOX_FORGOTTEN;
+	case africans:
+		return IDC_CHECKBOX_AFRICANS;
+	case rajas:
+		return IDC_CHECKBOX_RAJAS;
+	case aoc:
+		return IDC_CHECKBOX_AOC;
+    }
 }
