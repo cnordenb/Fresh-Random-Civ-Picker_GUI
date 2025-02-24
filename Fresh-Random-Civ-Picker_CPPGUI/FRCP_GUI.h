@@ -18,6 +18,8 @@
 #include <gdiplus.h>
 #include <mmsystem.h>
 #include <map>
+#include <thread>
+
 
 
 
@@ -55,6 +57,8 @@
 #define HOTKEY_ID_F 19
 #define HOTKEY_ID_G 20
 #define HOTKEY_ID_H 21
+#define HOTKEY_ID_R 22
+#define HOTKEY_ID_Y 23
 
 #define DT_UNDERLINE 0x80000000
 #define MAX_LENGTH 15 
@@ -85,6 +89,8 @@
 #define TOOLTIP_AFRICANS			17
 #define TOOLTIP_FORGOTTEN			18
 #define TOOLTIP_AOC				    19
+#define TOOLTIP_AUTOTOGGLE  	    20
+#define TOOLTIP_AUTORESET  	        21
 
 std::map<HWND, WNDPROC> originalButtonProcs;
 
@@ -205,12 +211,14 @@ bool jingles_enabled = false;
 bool labels_enabled = true;
 bool legacy_jingle_enabled = false;
 bool ui_sounds_enabled = false;
+bool tooltips_enabled = true;
 bool pool_altered = false;
 bool autoreset_enabled = true;
 bool autotoggle_enabled = true;
 bool remainlog_enabled = true;
 bool reset_state = true;
 bool hotkey_pressed = false;
+
 
 
 
@@ -306,7 +314,7 @@ int GetDlcCheckboxId(dlc);
 
 void UpdateDrawnLog(bool, bool);
 void UpdateRemainingLog();
-void ToggleRemainLog(bool);
+void ToggleRemainLog();
 
 bool DlcEmpty(dlc);
 void ToggleDlc(dlc, HWND);
@@ -314,6 +322,8 @@ void EnableDlc(dlc, HWND);
 void DisableDlc(dlc, HWND);
 void ValidateDlcToggle(HWND, dlc);
 void ValidateAllDlcToggles(HWND);
+void ToggleAutoToggle(HWND);
+void ToggleAutoReset(HWND);
 
 void AddTooltip(HWND, HWND, LPCWSTR);
 
@@ -321,7 +331,7 @@ void ActivateTooltip(HWND, TOOLINFO *, POINT);
 
 
 
-HWND hwndTooltip[20];
+HWND hwndTooltip[22];
 int hwnd_length = sizeof(hwndTooltip) / sizeof(hwndTooltip[0]);
 
 void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText);

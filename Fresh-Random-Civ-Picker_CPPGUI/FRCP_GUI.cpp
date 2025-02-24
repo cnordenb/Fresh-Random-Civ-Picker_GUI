@@ -13,7 +13,8 @@ TODO
 
 */
 #include "FRCP_GUI.h"
-#include <thread>
+
+
 
 
 // Function to create tabs
@@ -536,6 +537,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             autoreset_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 230, 180, 20, IDC_CHECKBOX_AUTORESET, L"Auto-reset upon change");
             autotoggle_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 0, 180, 20, IDC_CHECKBOX_AUTOTOGGLE, L"Auto-toggle older civs");
 
+			AddTooltip(autoreset_checkbox, hwndTooltip[TOOLTIP_AUTORESET], StringCleaner(L"Automatically resets the pool of drawn civs when the civilisation pool is changed\nHotkey: T"));
+			AddTooltip(autotoggle_checkbox, hwndTooltip[TOOLTIP_AUTOTOGGLE], StringCleaner(L"Toggles older civs as well as the automatic enabling of older civ when switching between Editions\nHotkey: R"));
+
+			SubclassButton(autoreset_checkbox);
+			SubclassButton(autotoggle_checkbox);
+
             checkbox_royals = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, -96, 160, 20, IDC_CHECKBOX_ROYALS, L"The Mountain Royals");
             checkbox_rome = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, -76, 160, 20, IDC_CHECKBOX_ROME, L"Return of Rome");
             checkbox_india = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, -56, 160, 20, IDC_CHECKBOX_INDIA, L"Dynasties of India");
@@ -549,18 +556,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             checkbox_aoc = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 388, -56, 140, 20, IDC_CHECKBOX_AOC, L"The Conquerors");
 
-			AddTooltip(checkbox_royals, hwndTooltip[TOOLTIP_ROYALS], StringCleaner(L"Toggles The Mountain Royals civilisations\nHotkey: A"));
-			AddTooltip(checkbox_rome, hwndTooltip[TOOLTIP_ROME], StringCleaner(L"Toggles Return of Rome civilisations\nHotkey: S"));
-			AddTooltip(checkbox_india, hwndTooltip[TOOLTIP_INDIA], StringCleaner(L"Toggles Dynasties of India civilisations\nHotkey: D"));
-			AddTooltip(checkbox_dukes, hwndTooltip[TOOLTIP_DUKES], StringCleaner(L"Toggles Dawn of the Dukes civilisations\nHotkey: F"));
-			AddTooltip(checkbox_west, hwndTooltip[TOOLTIP_WEST], StringCleaner(L"Toggles Lords of the West civilisations\nHotkey: G"));
-			AddTooltip(checkbox_khans, hwndTooltip[TOOLTIP_KHANS], StringCleaner(L"Toggles The Last Khans civilisations\nHotkey: H"));
+			AddTooltip(checkbox_royals, hwndTooltip[TOOLTIP_ROYALS], StringCleaner(L"Toggles The Mountain Royals civilisations\n(Armenians, Georgians)\nHotkey: A"));
+			AddTooltip(checkbox_rome, hwndTooltip[TOOLTIP_ROME], StringCleaner(L"Toggles Return of Rome civilisation\n(Romans)\nHotkey: S"));
+			AddTooltip(checkbox_india, hwndTooltip[TOOLTIP_INDIA], StringCleaner(L"Toggles Dynasties of India civilisations\n(Bengalis, Dravidians, Gurjaras)\nHotkey: D"));
+			AddTooltip(checkbox_dukes, hwndTooltip[TOOLTIP_DUKES], StringCleaner(L"Toggles Dawn of the Dukes civilisations\n(Bohemians, Poles)\nHotkey: F"));
+			AddTooltip(checkbox_west, hwndTooltip[TOOLTIP_WEST], StringCleaner(L"Toggles Lords of the West civilisations\n(Burgundians, Sicilians)\nHotkey: G"));
+			AddTooltip(checkbox_khans, hwndTooltip[TOOLTIP_KHANS], StringCleaner(L"Toggles The Last Khans civilisations\n(Bulgarians, Cumans, Lithuanians, Tatars)\nHotkey: H"));
 
-			AddTooltip(checkbox_rajas, hwndTooltip[TOOLTIP_RAJAS], StringCleaner(L"Toggles Rise of Rajas civilisations\nHotkey: A"));
-			AddTooltip(checkbox_africans, hwndTooltip[TOOLTIP_AFRICANS], StringCleaner(L"Toggles African Kingdoms civilisations\nHotkey: S"));
-			AddTooltip(checkbox_forgotten, hwndTooltip[TOOLTIP_FORGOTTEN], StringCleaner(L"Toggles The Forgotten civilisations\nHotkey: D"));
+			AddTooltip(checkbox_rajas, hwndTooltip[TOOLTIP_RAJAS], StringCleaner(L"Toggles Rise of Rajas civilisations\n(Burmese, Khmer, Malay, Vietnamese)\nHotkey: A"));
+			AddTooltip(checkbox_africans, hwndTooltip[TOOLTIP_AFRICANS], StringCleaner(L"Toggles African Kingdoms civilisations\n(Berbers, Ethiopians, Malians, Portuguese)\nHotkey: S"));
+			AddTooltip(checkbox_forgotten, hwndTooltip[TOOLTIP_FORGOTTEN], StringCleaner(L"Toggles The Forgotten civilisations\n(Incas, Hindustanis, Italians, Magyars, Slavs)\nHotkey: D"));
 
-			AddTooltip(checkbox_aoc, hwndTooltip[TOOLTIP_AOC], StringCleaner(L"Toggles The Conquerors civilisations\nHotkey: A"));
+			AddTooltip(checkbox_aoc, hwndTooltip[TOOLTIP_AOC], StringCleaner(L"Toggles The Conquerors civilisations\n(Aztecs, Huns, Koreans, Mayans, Spanish)\nHotkey: A"));
 
             SubclassButton(checkbox_royals);
 			SubclassButton(checkbox_rome);
@@ -739,6 +746,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case WM_MOUSEMOVE:
         {
+            if (!tooltips_enabled) break;
             if (hwndTooltip)
             {
                 // Get the cursor position
@@ -757,19 +765,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 bool tooltipActivated = false;
 
-                
 
                 HWND button[] = { button_draw, button_reset, button_techtree, button_clearlog,
                                     button_enableall, button_disableall, checkbox_showremainlog,
                                     radiobutton_de, radiobutton_hd, radiobutton_aok, checkbox_royals,
                                 checkbox_rome, checkbox_india, checkbox_dukes, checkbox_west, checkbox_khans,
-                                checkbox_rajas, checkbox_africans, checkbox_forgotten, checkbox_aoc };
+                                checkbox_rajas, checkbox_africans, checkbox_forgotten, checkbox_aoc,
+                                autotoggle_checkbox, autoreset_checkbox };
 
                 int tooltip_id[] = { TOOLTIP_DRAW, TOOLTIP_RESET, TOOLTIP_TECHTREE, TOOLTIP_CLEAR,
                                         TOOLTIP_ENABLEALL, TOOLTIP_DISABLEALL, TOOLTIP_REMAININGTOGGLE,
                                         TOOLTIP_DE, TOOLTIP_HD, TOOLTIP_AOK, TOOLTIP_ROYALS, TOOLTIP_ROME,
                                     TOOLTIP_INDIA, TOOLTIP_DUKES, TOOLTIP_WEST, TOOLTIP_KHANS,
-                                    TOOLTIP_RAJAS, TOOLTIP_AFRICANS, TOOLTIP_FORGOTTEN, TOOLTIP_AOC };
+                                    TOOLTIP_RAJAS, TOOLTIP_AFRICANS, TOOLTIP_FORGOTTEN, TOOLTIP_AOC,
+                                    TOOLTIP_AUTOTOGGLE, TOOLTIP_AUTORESET };
                 
 				for (int i = 0; i < sizeof(button) / sizeof(button[0]); i++)
 				{
@@ -836,6 +845,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (wParam == HOTKEY_ID_Q) SetEditionState(hWnd, DE);
                 if (wParam == HOTKEY_ID_W) SetEditionState(hWnd, HD);
 				if (wParam == HOTKEY_ID_E) SetEditionState(hWnd, AOK);
+                if (wParam == HOTKEY_ID_R) ToggleAutoToggle(hWnd);
+                if (wParam == HOTKEY_ID_T) ToggleAutoReset(hWnd);
                 
                 if (edition_state == DE)
                 {
@@ -868,7 +879,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 }
 				if (wParam == HOTKEY_ID_W)
 				{
-                    ToggleRemainLog(true);
+                    ToggleRemainLog();
 				}
             }
 
@@ -1050,53 +1061,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 OpenTechTree();
                 break;
             case IDC_CHECKBOX_REMAINLOG:                        // "Show Remaining Civs Log"
-                ToggleRemainLog(false);
+                ToggleRemainLog();
                 break;
             case IDC_CHECKBOX_AUTORESET:										                            // Auto-reset Checkbox
-                if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_CHECKED) autoreset_enabled = true;
-                else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_UNCHECKED) autoreset_enabled = false;
+                ToggleAutoReset(hWnd);
                 break;
             case IDC_CHECKBOX_AUTOTOGGLE:											                            // Auto-reset Checkbox
-                
-                if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTOTOGGLE) == BST_CHECKED) {
-                    autotoggle_enabled = true;
-                    switch (edition_state) {
-                    case DE:
-                        for (int i = 0; i < 5; i++) {
-                            EnableDlc(old_dlc[i], hWnd);
-                        }
-                        break;
-                    case HD:
-                        for (int i = 0; i < 2; i++) {
-                            EnableDlc(old_dlc[i], hWnd);
-						}
-						break;
-                    case AOK:
-                        EnableDlc(aok, hWnd);
-                        break;
-                    }
-                }               
-                else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTOTOGGLE) == BST_UNCHECKED) {
-                    autotoggle_enabled = false;
-                    switch (edition_state) {
-                    case DE:
-                        for (int i = 0; i < 5; i++) {
-                            DisableDlc(old_dlc[i], hWnd);
-                        }
-                        break;
-                    case HD:
-                        for (int i = 0; i < 2; i++) {
-                            DisableDlc(old_dlc[i], hWnd);
-                        }
-                        break;
-                    case AOK:
-				        DisableDlc(aok, hWnd);
-				        break;
-                    }
-			        
-                }
-                    
-                    
+                ToggleAutoToggle(hWnd);
                 break;
             case IDC_RADIO_DE:
                 SetEditionState(hWnd, DE);
@@ -1189,6 +1160,7 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_MOUSEMOVE:
     {
+        if (!tooltips_enabled) break;
 
         if (hwndTooltip)
         {
@@ -1211,13 +1183,15 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                                 button_enableall, button_disableall, checkbox_showremainlog,
                                 radiobutton_de, radiobutton_hd, radiobutton_aok, checkbox_royals,
                             checkbox_rome, checkbox_india, checkbox_dukes, checkbox_west, checkbox_khans,
-                            checkbox_rajas, checkbox_africans, checkbox_forgotten, checkbox_aoc };
+                            checkbox_rajas, checkbox_africans, checkbox_forgotten, checkbox_aoc,
+                            autotoggle_checkbox, autoreset_checkbox };
 
             int tooltip_id[] = { TOOLTIP_DRAW, TOOLTIP_RESET, TOOLTIP_TECHTREE, TOOLTIP_CLEAR,
                                     TOOLTIP_ENABLEALL, TOOLTIP_DISABLEALL, TOOLTIP_REMAININGTOGGLE,
                                     TOOLTIP_DE, TOOLTIP_HD, TOOLTIP_AOK, TOOLTIP_ROYALS, TOOLTIP_ROME,
                                 TOOLTIP_INDIA, TOOLTIP_DUKES, TOOLTIP_WEST, TOOLTIP_KHANS,
-                                TOOLTIP_RAJAS, TOOLTIP_AFRICANS, TOOLTIP_FORGOTTEN, TOOLTIP_AOC};
+                                TOOLTIP_RAJAS, TOOLTIP_AFRICANS, TOOLTIP_FORGOTTEN, TOOLTIP_AOC,
+                                TOOLTIP_AUTOTOGGLE, TOOLTIP_AUTORESET};
 
             for (int i = 0; i < sizeof(button) / sizeof(button[0]); i++)
 			{
@@ -1303,6 +1277,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
         CheckDlgButton(hDlg, IDC_CHECKBOX_ICONS, icons_enabled ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(hDlg, IDC_CHECKBOX_JINGLES, jingles_enabled ? BST_CHECKED : BST_UNCHECKED);
         CheckDlgButton(hDlg, IDC_CHECKBOX_SOUNDS, ui_sounds_enabled ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(hDlg, IDC_CHECKBOX_TOOLTIPS, tooltips_enabled ? BST_CHECKED : BST_UNCHECKED);
 
         HWND hComboBox = GetDlgItem(hDlg, IDC_LEGACY_OPTION);
         SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Definitive Edition");
@@ -1336,7 +1311,8 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		ui_sounds_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_SOUNDS) == BST_CHECKED;
 		labels_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_LABELS) == BST_CHECKED;
 		icons_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_ICONS) == BST_CHECKED;
-		jingles_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_JINGLES) == BST_CHECKED;
+        jingles_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_JINGLES) == BST_CHECKED;
+        tooltips_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_TOOLTIPS) == BST_CHECKED;
 
         // Handle the combobox selection
         HWND hComboBox = GetDlgItem(hDlg, IDC_LEGACY_OPTION);
@@ -1422,15 +1398,17 @@ LRESULT CALLBACK HyperlinkProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
+
+
 void ResetProgram()
-{ 
+{
     if (custom_max_civs < MAX_CIVS) custom_civ_pool = true;
 
     current_civ = L"Random";
     iterator = 0;
 
-	UpdateDrawnLog(false, true);
-   
+    UpdateDrawnLog(false, true);
+
 
     if (custom_civ_pool) {
         civs.clear();
@@ -1447,24 +1425,24 @@ void ResetProgram()
 
     else {
         civs = { L"Armenians", L"Aztecs", L"Bengalis", L"Berbers", L"Bohemians", L"Britons",
-                L"Bulgarians", L"Burgundians", L"Burmese", L"Byzantines", L"Celts", L"Chinese", 
+                L"Bulgarians", L"Burgundians", L"Burmese", L"Byzantines", L"Celts", L"Chinese",
                 L"Cumans", L"Dravidians", L"Ethiopians", L"Franks", L"Georgians", L"Goths", L"Gurjaras",
-                L"Hindustanis", L"Huns", L"Incas", L"Italians", L"Japanese", L"Khmer", L"Koreans", 
+                L"Hindustanis", L"Huns", L"Incas", L"Italians", L"Japanese", L"Khmer", L"Koreans",
                 L"Lithuanians", L"Magyars", L"Malay", L"Malians", L"Mayans", L"Mongols", L"Persians",
-                L"Poles", L"Portuguese", L"Romans", L"Saracens", L"Sicilians", L"Slavs", L"Spanish", 
+                L"Poles", L"Portuguese", L"Romans", L"Saracens", L"Sicilians", L"Slavs", L"Spanish",
                 L"Tatars", L"Teutons", L"Turks", L"Vietnamese", L"Vikings" };
     }
-	
-    
+
+
 
     SetWindowText(label_corner, (L"0/" + std::to_wstring(custom_max_civs)).c_str());     // resets remaining civs label
     SetWindowText(label_centre, L"?");                                      // resets drawn civ label
     SendMessageW(civ_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_random);
-	if (jingles_enabled && !pool_altered) PlayJingle(current_civ);
+    if (jingles_enabled && !pool_altered) PlayJingle(current_civ);
     pool_altered = false;
     reset_state = true;
 
-	UpdateRemainingLog();
+    UpdateRemainingLog();
     UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
 
 
@@ -1473,10 +1451,10 @@ void ResetProgram()
 void DrawCiv()
 {
     reset_state = false;
-    
+
     if (custom_max_civs == 0) {
         if (ui_sounds_enabled) PlaySound(L"error_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-		SetWindowTextA(label_centre, "Empty pool!");
+        SetWindowTextA(label_centre, "Empty pool!");
         return;        // if no civs are selected, return
     }
 
@@ -1485,11 +1463,11 @@ void DrawCiv()
 
 
     std::random_device rd;      // seeding random number
-	std::mt19937 mt(rd());      // with Mersenne Twister 
+    std::mt19937 mt(rd());      // with Mersenne Twister 
 
-	std::shuffle(civs.begin(), civs.end(), mt); // shuffling civs vector
-	current_civ = civs.back();		// draws last element
-	civs.pop_back();							// removes last element from pool
+    std::shuffle(civs.begin(), civs.end(), mt); // shuffling civs vector
+    current_civ = civs.back();		// draws last element
+    civs.pop_back();							// removes last element from pool
 
     std::string civ_name_str = ConvertToString(current_civ);
 
@@ -1504,7 +1482,7 @@ void DrawCiv()
     HBITMAP drawn_civ_icon = FetchIcon(current_civ);
     SendMessageW(civ_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
 
-   
+
 
     UpdateDrawnLog(true, false);
     UpdateRemainingLog();
@@ -1515,7 +1493,7 @@ void DrawCiv()
         ShowWindow(civ_icon, SW_HIDE);
         ShowWindow(label_centre, SW_HIDE);
     }
-        
+
 
     if (jingles_enabled)
     {/*
@@ -1523,11 +1501,11 @@ void DrawCiv()
         sound_thread.detach();*/
         PlayJingle(current_civ);
     }
-        
-    
-	UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
 
-    
+
+    UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
+
+
 }
 
 void EnableHotkeys(HWND hWnd)
@@ -1553,11 +1531,13 @@ void EnableHotkeys(HWND hWnd)
 	RegisterHotKey(hWnd, HOTKEY_ID_F, 0, 0x46);
 	RegisterHotKey(hWnd, HOTKEY_ID_G, 0, 0x47);
 	RegisterHotKey(hWnd, HOTKEY_ID_H, 0, 0x48);
+	RegisterHotKey(hWnd, HOTKEY_ID_R, 0, 0x52);
+	RegisterHotKey(hWnd, HOTKEY_ID_T, 0, 0x54);
 }
 
 void DisableHotkeys(HWND hWnd)
 {
-	for (int i = 1; i < 22; i++) {
+	for (int i = 1; i < 24; i++) {
 		UnregisterHotKey(hWnd, i);
 	}
 }
@@ -2539,13 +2519,13 @@ void SetEditionState(HWND hWnd, edition edition)
         
 }
        
-void ToggleRemainLog(bool hotkey)
+void ToggleRemainLog()
 {	
     if (remainlog_enabled)
     {
         ShowWindow(remaining_log, SW_HIDE);
         remainlog_enabled = false;
-        if (hotkey)
+        if (hotkey_pressed)
         {
             if ((SendMessage(checkbox_showremainlog, BM_GETCHECK, 0, 0)) != BST_UNCHECKED)
             {
@@ -2558,12 +2538,13 @@ void ToggleRemainLog(bool hotkey)
         }
         
     }
+
 	else
 	{
 		ShowWindow(remaining_log, SW_SHOW);
 		remainlog_enabled = true;
 
-        if (hotkey)
+        if (hotkey_pressed)
         {
             if ((SendMessage(checkbox_showremainlog, BM_GETCHECK, 0, 0)) != BST_CHECKED)
             {
@@ -2605,4 +2586,79 @@ int GetDlcCheckboxId(dlc dlc)
 	case aoc:
 		return IDC_CHECKBOX_AOC;
     }
+}
+
+void ToggleAutoToggle(HWND hWnd)
+{
+
+    if (hotkey_pressed)
+    {
+        if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTOTOGGLE) == BST_CHECKED)
+        {
+			CheckDlgButton(hWnd, IDC_CHECKBOX_AUTOTOGGLE, BST_UNCHECKED);
+		}
+        else
+        {
+            CheckDlgButton(hWnd, IDC_CHECKBOX_AUTOTOGGLE, BST_CHECKED);
+        }
+    }
+
+    if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTOTOGGLE) == BST_CHECKED) {
+        autotoggle_enabled = true;
+        switch (edition_state) {
+        case DE:
+            for (int i = 0; i < 5; i++) {
+                EnableDlc(old_dlc[i], hWnd);
+            }
+            break;
+        case HD:
+            for (int i = 0; i < 2; i++) {
+                EnableDlc(old_dlc[i], hWnd);
+            }
+            break;
+        case AOK:
+            EnableDlc(aok, hWnd);
+            break;
+        }
+    }
+    else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTOTOGGLE) == BST_UNCHECKED) {
+        autotoggle_enabled = false;
+        switch (edition_state) {
+        case DE:
+            for (int i = 0; i < 5; i++) {
+                DisableDlc(old_dlc[i], hWnd);
+            }
+            break;
+        case HD:
+            for (int i = 0; i < 2; i++) {
+                DisableDlc(old_dlc[i], hWnd);
+            }
+            break;
+        case AOK:
+            DisableDlc(aok, hWnd);
+            break;
+        }
+
+    }
+
+
+}
+
+void ToggleAutoReset(HWND hWnd)
+{
+
+	if (hotkey_pressed)
+	{
+		if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_CHECKED)
+		{
+			CheckDlgButton(hWnd, IDC_CHECKBOX_AUTORESET, BST_UNCHECKED);
+		}
+		else
+		{
+			CheckDlgButton(hWnd, IDC_CHECKBOX_AUTORESET, BST_CHECKED);
+		}
+	}
+
+    if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_CHECKED) autoreset_enabled = true;
+    else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_UNCHECKED) autoreset_enabled = false;
 }
