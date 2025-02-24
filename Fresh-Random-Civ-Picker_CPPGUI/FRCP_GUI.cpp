@@ -2,9 +2,6 @@
 TODO
 
 - remove dark mode
-- implement more hotkeys (show, custom civ tab checkboxes)
-- fix radio button sound
-- add tooltip toggle to options
 - add hotkeys list info to options
 - civ info button and page(?)
 - implement ini file for persistent settings
@@ -691,28 +688,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             break;
         }
-        case WM_CTLCOLORSTATIC:
-        {
-            HDC hdcStatic = (HDC)wParam;
-            SetTextColor(hdcStatic, mode_dark ? RGB(255, 255, 255) : RGB(0, 0, 0));
-            SetBkColor(hdcStatic, mode_dark ? RGB(0, 0, 0) : RGB(255, 255, 255));
-            return (INT_PTR)(mode_dark ? brush_black : brush_white);
-        }
-        case WM_ERASEBKGND:
-        {
-            HDC hdc = (HDC)wParam;
-            RECT rect;
-            GetClientRect(hWnd, &rect);
-            FillRect(hdc, &rect, mode_dark ? brush_black : brush_white);
-            return 1;
-        }  
-        case WM_CTLCOLORBTN:
-        {
-            HDC hdcButton = (HDC)wParam;
-            SetTextColor(hdcButton, mode_dark ? RGB(255, 255, 255) : RGB(0, 0, 0));
-            SetBkColor(hdcButton, mode_dark ? RGB(0, 0, 0) : RGB(255, 255, 255));
-            return (INT_PTR)(mode_dark ? brush_black : brush_white);
-		}   
         case WM_NOTIFY:
         {
 
@@ -987,14 +962,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
             // pool altered state
-            if (wmId > 4 && wmId < 50 || wmId > 53 && wmId < 64 || autotoggle_enabled && wmId > 50 && wmId < 54)
+            if (wmId > 4 && wmId < 50 || wmId > 53 && wmId < 65 || autotoggle_enabled && wmId > 50 && wmId < 54)
             {
                 pool_altered = true;
             }
 
 			// button sounds in tab views
             if (ui_sounds_enabled) {
-                if (wmId > 2 && wmId < 51 && wmId > 53 && wmId < 68) {
+                if (wmId > 2 && wmId < 51 || wmId > 53 && wmId < 68) {
                     PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 }
             }
@@ -1018,18 +993,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case IDM_OPTIONS:								   // "Options"
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 DialogBox(instance, MAKEINTRESOURCE(IDD_OPTIONS), hWnd, OptionsDlgProc);
-                break;
-            case IDM_TOGGLE_CHECK:                              // "Dark Mode (beta)"
-
-
-                mode_dark = !mode_dark;
-                CheckMenuItem(GetMenu(hWnd), IDM_TOGGLE_CHECK, mode_dark ? MF_CHECKED : MF_UNCHECKED);
-                InvalidateRect(hWnd, NULL, TRUE);
-                EnumChildWindows(hWnd, [](HWND hwnd, LPARAM lParam) -> BOOL {
-                    InvalidateRect(hwnd, NULL, TRUE);
-                    return TRUE;
-                    }, 0);
-
                 break;
             case IDM_GITHUB:                                    // "GitHub"
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);

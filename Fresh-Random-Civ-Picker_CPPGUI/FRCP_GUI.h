@@ -32,7 +32,6 @@
 
 
 
-#define IDM_TOGGLE_CHECK 32771
 #define MAX_CIVS 45
 #define MAX_LOADSTRING 100
 
@@ -205,7 +204,6 @@ std::wstring civ_index[] = { L"Armenians", L"Aztecs", L"Bengalis", L"Berbers", L
                             L"Saracens", L"Sicilians", L"Slavs", L"Spanish", L"Tatars",
                             L"Teutons", L"Turks", L"Vietnamese", L"Vikings" };
 
-bool mode_dark = false;
 bool icons_enabled = true;
 bool jingles_enabled = false;
 bool labels_enabled = true;
