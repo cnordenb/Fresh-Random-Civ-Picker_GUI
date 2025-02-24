@@ -1246,6 +1246,9 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
         CheckDlgButton(hDlg, IDC_CHECKBOX_SOUNDS, ui_sounds_enabled ? BST_CHECKED : BST_UNCHECKED);
         CheckDlgButton(hDlg, IDC_CHECKBOX_TOOLTIPS, tooltips_enabled ? BST_CHECKED : BST_UNCHECKED);
 
+		if (persistent_logging) CheckRadioButton(hDlg, IDC_RADIO_LOGGING, IDC_RADIO_STARTRESET, IDC_RADIO_LOGGING);
+		else CheckRadioButton(hDlg, IDC_RADIO_LOGGING, IDC_RADIO_STARTRESET, IDC_RADIO_STARTRESET);
+
         HWND hComboBox = GetDlgItem(hDlg, IDC_LEGACY_OPTION);
         SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Definitive Edition");
         SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Legacy");
@@ -1313,6 +1316,12 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
                     PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 }
                 break;
+			case IDC_RADIO_LOGGING:
+				persistent_logging = true;
+                break;
+			case IDC_RADIO_STARTRESET:
+				persistent_logging = false;
+				break;
             }
         }
 
@@ -2638,6 +2647,7 @@ void ToggleAutoReset(HWND hWnd)
 
 void SaveSettings()
 {
+    WritePrivateProfileString(L"Settings", L"PersistentLogging", persistent_logging ? L"1" : L"0", INI_FILE_PATH);
     WritePrivateProfileString(L"Settings", L"UISoundsEnabled", ui_sounds_enabled ? L"1" : L"0", INI_FILE_PATH);
     WritePrivateProfileString(L"Settings", L"LabelsEnabled", labels_enabled ? L"1" : L"0", INI_FILE_PATH);
     WritePrivateProfileString(L"Settings", L"IconsEnabled", icons_enabled ? L"1" : L"0", INI_FILE_PATH);
@@ -2653,6 +2663,7 @@ void SaveSettings()
 void LoadSettings()
 {
     // Load boolean settings
+	persistent_logging = GetPrivateProfileInt(L"Settings", L"PersistentLogging", 1, INI_FILE_PATH);
     ui_sounds_enabled = GetPrivateProfileInt(L"Settings", L"UISoundsEnabled", 1, INI_FILE_PATH);
     labels_enabled = GetPrivateProfileInt(L"Settings", L"LabelsEnabled", 1, INI_FILE_PATH);
     icons_enabled = GetPrivateProfileInt(L"Settings", L"IconsEnabled", 1, INI_FILE_PATH);
@@ -2714,7 +2725,7 @@ void SaveLog()
 void LoadLog(HWND hWnd)
 {
     std::wifstream inFile(LOG_FILE_PATH);
-    if (!inFile)
+    if (!inFile || !persistent_logging)
     {
         ResetProgram();
         startup = false;
