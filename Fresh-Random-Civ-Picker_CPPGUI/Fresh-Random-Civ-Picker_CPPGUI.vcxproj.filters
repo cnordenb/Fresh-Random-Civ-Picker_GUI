@@ -8030,6 +8030,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="formatting_notes.md" />
+    <None Include="settings.ini" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="civ_icons">

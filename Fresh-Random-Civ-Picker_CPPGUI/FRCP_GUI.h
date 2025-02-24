@@ -91,6 +91,8 @@
 #define TOOLTIP_AUTOTOGGLE  	    20
 #define TOOLTIP_AUTORESET  	        21
 
+wchar_t INI_FILE_PATH[MAX_PATH];
+
 std::map<HWND, WNDPROC> originalButtonProcs;
 
 // Global Variables
@@ -270,6 +272,9 @@ void ResetProgram();
 void DrawCiv();
 void KillApplication();
 
+void SaveSettings();
+void LoadSettings();
+
 void EnableHotkeys(HWND);
 void DisableHotkeys(HWND);
 
@@ -352,7 +357,7 @@ int GetWindowHeight(HWND);
 std::string ConvertToString(const std::wstring &);
 HWND CreateCheckbox(HWND hWnd, HINSTANCE hInstance, int x, int y, int width, int height, int id, LPCWSTR text);
 
-
+void GenerateIniFilePath();
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);

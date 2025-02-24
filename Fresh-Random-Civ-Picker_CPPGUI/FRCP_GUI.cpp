@@ -1,10 +1,8 @@
 /*
 TODO
 
-- remove dark mode
 - add hotkeys list info to options
 - civ info button and page(?)
-- implement ini file for persistent settings
 - implement log file for persistent log and civ states
 
 
@@ -86,6 +84,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
+    GenerateIniFilePath();
+    LoadSettings();
+
     // Initialize GDI+
     Gdiplus::GdiplusStartupInput gdiplusStartupInput;
     ULONG_PTR gdiplusToken;
@@ -128,6 +129,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
     DeleteObject(font_underline);
+
+    SaveSettings();
 
     return (int) msg.wParam;
 }
@@ -985,10 +988,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 DialogBox(instance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
                 break;
-            case IDM_EXIT:                                      // "Exit"
-                if (ui_sounds_enabled) PlaySound(L"exit.wav", NULL, SND_FILENAME | SND_ASYNC);
-                Sleep(200);
-                DestroyWindow(hWnd);
+            case IDM_EXIT:                                     // "Exit"
+                KillApplication();
                 break;
             case IDM_OPTIONS:								   // "Options"
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
@@ -1115,10 +1116,7 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     switch (uMsg)
     {    
 
-        /*
-    case WM_SIZE:
-		SendMessage(hwnd, WM_SIZE, wParam, lParam);
-        break;*/
+
 
 
     case WM_MOUSEMOVE:
@@ -1303,6 +1301,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
             case IDC_CHECKBOX_ICONS:
             case IDC_CHECKBOX_JINGLES:
             case IDC_CHECKBOX_SOUNDS:
+            case IDC_CHECKBOX_TOOLTIPS:
                 if (ui_sounds_enabled)
                 {
                     PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
@@ -1506,7 +1505,7 @@ void DisableHotkeys(HWND hWnd)
 }
 
 void KillApplication()
-{
+{    
     DeleteObject(brush_white);
     DeleteObject(brush_black);
     PostQuitMessage(0);
@@ -2624,4 +2623,62 @@ void ToggleAutoReset(HWND hWnd)
 
     if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_CHECKED) autoreset_enabled = true;
     else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_UNCHECKED) autoreset_enabled = false;
+}
+
+void SaveSettings()
+{
+    if (!WritePrivateProfileString(L"Settings", L"UISoundsEnabled", ui_sounds_enabled ? L"1" : L"0", INI_FILE_PATH))
+        MessageBox(NULL, L"Failed to write UISoundsEnabled", L"Error", MB_OK | MB_ICONERROR);
+    if (!WritePrivateProfileString(L"Settings", L"LabelsEnabled", labels_enabled ? L"1" : L"0", INI_FILE_PATH))
+        MessageBox(NULL, L"Failed to write LabelsEnabled", L"Error", MB_OK | MB_ICONERROR);
+    if (!WritePrivateProfileString(L"Settings", L"IconsEnabled", icons_enabled ? L"1" : L"0", INI_FILE_PATH))
+        MessageBox(NULL, L"Failed to write IconsEnabled", L"Error", MB_OK | MB_ICONERROR);
+    if (!WritePrivateProfileString(L"Settings", L"JinglesEnabled", jingles_enabled ? L"1" : L"0", INI_FILE_PATH))
+        MessageBox(NULL, L"Failed to write JinglesEnabled", L"Error", MB_OK | MB_ICONERROR);
+    if (!WritePrivateProfileString(L"Settings", L"TooltipsEnabled", tooltips_enabled ? L"1" : L"0", INI_FILE_PATH))
+        MessageBox(NULL, L"Failed to write TooltipsEnabled", L"Error", MB_OK | MB_ICONERROR);
+    if (!WritePrivateProfileString(L"Settings", L"RemainLogEnabled", remainlog_enabled ? L"1" : L"0", INI_FILE_PATH))
+        MessageBox(NULL, L"Failed to write RemainLogEnabled", L"Error", MB_OK | MB_ICONERROR);
+    if (!WritePrivateProfileString(L"Settings", L"AutoResetEnabled", autoreset_enabled ? L"1" : L"0", INI_FILE_PATH))
+        MessageBox(NULL, L"Failed to write AutoResetEnabled", L"Error", MB_OK | MB_ICONERROR);
+    if (!WritePrivateProfileString(L"Settings", L"AutoToggleEnabled", autotoggle_enabled ? L"1" : L"0", INI_FILE_PATH))
+        MessageBox(NULL, L"Failed to write AutoToggleEnabled", L"Error", MB_OK | MB_ICONERROR);
+    if (!WritePrivateProfileString(L"Settings", L"LegacyJingleEnabled", legacy_jingle_enabled ? L"1" : L"0", INI_FILE_PATH))
+        MessageBox(NULL, L"Failed to write LegacyJingleEnabled", L"Error", MB_OK | MB_ICONERROR);
+
+}
+
+void LoadSettings()
+{
+    // Load boolean settings
+    ui_sounds_enabled = GetPrivateProfileInt(L"Settings", L"UISoundsEnabled", 1, INI_FILE_PATH);
+    labels_enabled = GetPrivateProfileInt(L"Settings", L"LabelsEnabled", 1, INI_FILE_PATH);
+    icons_enabled = GetPrivateProfileInt(L"Settings", L"IconsEnabled", 1, INI_FILE_PATH);
+    jingles_enabled = GetPrivateProfileInt(L"Settings", L"JinglesEnabled", 1, INI_FILE_PATH);
+    tooltips_enabled = GetPrivateProfileInt(L"Settings", L"TooltipsEnabled", 1, INI_FILE_PATH);
+    remainlog_enabled = GetPrivateProfileInt(L"Settings", L"RemainLogEnabled", 1, INI_FILE_PATH);
+    autoreset_enabled = GetPrivateProfileInt(L"Settings", L"AutoResetEnabled", 0, INI_FILE_PATH);
+    autotoggle_enabled = GetPrivateProfileInt(L"Settings", L"AutoToggleEnabled", 0, INI_FILE_PATH);
+    legacy_jingle_enabled = GetPrivateProfileInt(L"Settings", L"LegacyJingleEnabled", 0, INI_FILE_PATH);
+
+}
+
+void GenerateIniFilePath()
+{
+    // Get the path of the executable
+    wchar_t exePath[MAX_PATH];
+    GetModuleFileName(NULL, exePath, MAX_PATH);
+
+    // Remove the executable name from the path
+    wchar_t *lastSlash = wcsrchr(exePath, L'\\');
+    if (lastSlash != NULL)
+    {
+        *lastSlash = L'\0';
+    }
+
+    // Append "settings.ini" to the path
+    wcscat_s(exePath, MAX_PATH, L"\\settings.ini");
+
+    // Copy the result to the global INI_FILE_PATH variable
+    wcscpy_s(INI_FILE_PATH, exePath);
 }
