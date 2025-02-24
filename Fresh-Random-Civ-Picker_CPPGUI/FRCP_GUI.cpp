@@ -1,13 +1,19 @@
 /*
 TODO
 
-- implement tooltips
+- remove dark mode
+- implement more hotkeys (show, custom civ tab checkboxes)
+- fix radio button sound
+- add tooltip toggle to options
+- add hotkeys list info to options
+- civ info button and page(?)
 - implement ini file for persistent settings
 - implement log file for persistent log and civ states
 
 
 */
 #include "FRCP_GUI.h"
+#include <thread>
 
 
 // Function to create tabs
@@ -78,6 +84,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
+    
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -508,7 +515,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 			checkbox_showremainlog = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 230, 180, 20, IDC_CHECKBOX_REMAINLOG, L"Show");
-			AddTooltip(checkbox_showremainlog, hwndTooltip[TOOLTIP_REMAININGTOGGLE], StringCleaner(L"Toggles the display of the remaining civs log"));
+			AddTooltip(checkbox_showremainlog, hwndTooltip[TOOLTIP_REMAININGTOGGLE], StringCleaner(L"Toggles the display of the remaining civs log\nHotkey: W"));
             CheckDlgButton(hWnd, IDC_CHECKBOX_REMAINLOG, remainlog_enabled ? BST_CHECKED : BST_UNCHECKED);
 
  
@@ -889,12 +896,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (wParam == HOTKEY_ID_SPACE) DrawCiv();           // space for drawing civ
                 if (wParam == HOTKEY_ID_RETURN) ResetProgram();            // return for resetting
             }
-            else if (current_tab == 2) {
+            else if (current_tab == 2)
+            {
                 if (wParam == HOTKEY_ID_SPACE) EnableAll(hWnd);           
                 if (wParam == HOTKEY_ID_RETURN) DisableAll(hWnd);
                 if (wParam == HOTKEY_ID_Q) SetEditionState(hWnd, DE);
                 if (wParam == HOTKEY_ID_W) SetEditionState(hWnd, HD);
 				if (wParam == HOTKEY_ID_E) SetEditionState(hWnd, AOK);
+                /*
+                if (edition_state == DE)
+                {
+					if (wParam == HOTKEY_ID_A) ToggleDLC(hWnd, ROYALS);
+					if (wParam == HOTKEY_ID_S) ToggleDLC(hWnd, ROME);
+					if (wParam == HOTKEY_ID_D) ToggleDLC(hWnd, INDIA);
+					if (wParam == HOTKEY_ID_F) ToggleDLC(hWnd, DUKES);
+					if (wParam == HOTKEY_ID_G) ToggleDLC(hWnd, WEST);
+					if (wParam == HOTKEY_ID_H) ToggleDLC(hWnd, KHANS);
+				}
+				else if (edition_state == HD)
+				{
+					if (wParam == HOTKEY_ID_A) ToggleDLC(hWnd, RAJAS);
+					if (wParam == HOTKEY_ID_S) ToggleDLC(hWnd, AFRICANS);
+					if (wParam == HOTKEY_ID_D) ToggleDLC(hWnd, FORGOTTEN);
+				}
+                else if (edition_state == AOK)
+                {
+                    if (wParam == HOTKEY_ID_A) ToggleDLC(hWnd, AOC);
+                }*/
+
             }
 
             if (current_tab == 1)
@@ -903,7 +932,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 {
                     SetWindowText(drawn_log, L"");
                     if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-                }                
+                }
+				if (wParam == HOTKEY_ID_W)
+				{
+                    ToggleRemainLog(true);
+				}
             }
 
 
@@ -1015,9 +1048,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			// button sounds in tab views
             if (ui_sounds_enabled) {
-                if (wmId > 2 && wmId < 68) {
-					if (wmId > 50 && wmId < 54) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-					else PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                if (wmId > 2 && wmId < 51 && wmId > 53 && wmId < 68) {
+                    PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 }
             }
 
@@ -1077,19 +1109,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
 			case IDC_BUTTON_CLEARLOG:                           // "Clear"
 				SetWindowText(drawn_log, L"");
+                if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 break;
             case IDC_BUTTON_TECHTREE:
                 OpenTechTree();
                 break;
             case IDC_CHECKBOX_REMAINLOG:                        // "Show Remaining Civs Log"
-                if (!remainlog_enabled) {
-                    remainlog_enabled = true;
-                    ShowWindow(remaining_log, SW_SHOW);
-                }
-                else {
-					remainlog_enabled = false;
-					ShowWindow(remaining_log, SW_HIDE);
-                }
+                ToggleRemainLog(false);
                 break;
             case IDC_CHECKBOX_AUTORESET:										                            // Auto-reset Checkbox
                 if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_CHECKED) autoreset_enabled = true;
@@ -1702,7 +1728,13 @@ void DrawCiv()
     }
         
 
-    if (jingles_enabled) PlayJingle(current_civ);
+    if (jingles_enabled)
+    {/*
+        std::thread sound_thread(PlayJingle, current_civ);
+        sound_thread.detach();*/
+        PlayJingle(current_civ);
+    }
+        
     
 	UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
 
@@ -1726,25 +1758,19 @@ void EnableHotkeys(HWND hWnd)
 	RegisterHotKey(hWnd, HOTKEY_ID_Q, 0, 0x51);
 	RegisterHotKey(hWnd, HOTKEY_ID_W, 0, 0x57);
 	RegisterHotKey(hWnd, HOTKEY_ID_E, 0, 0x45);
+	RegisterHotKey(hWnd, HOTKEY_ID_A, 0, 0x41);
+	RegisterHotKey(hWnd, HOTKEY_ID_S, 0, 0x53);
+	RegisterHotKey(hWnd, HOTKEY_ID_D, 0, 0x44);
+	RegisterHotKey(hWnd, HOTKEY_ID_F, 0, 0x46);
+	RegisterHotKey(hWnd, HOTKEY_ID_G, 0, 0x47);
+	RegisterHotKey(hWnd, HOTKEY_ID_H, 0, 0x48);
 }
 
 void DisableHotkeys(HWND hWnd)
 {
-	UnregisterHotKey(hWnd, HOTKEY_ID_TAB);
-	UnregisterHotKey(hWnd, HOTKEY_ID_SPACE);
-	UnregisterHotKey(hWnd, HOTKEY_ID_RETURN);
-	UnregisterHotKey(hWnd, HOTKEY_ID_ESC);
-    UnregisterHotKey(hWnd, HOTKEY_ID_Z);
-	UnregisterHotKey(hWnd, HOTKEY_ID_X);
-	UnregisterHotKey(hWnd, HOTKEY_ID_C);
-	UnregisterHotKey(hWnd, HOTKEY_ID_V);
-	UnregisterHotKey(hWnd, HOTKEY_ID_T);
-	UnregisterHotKey(hWnd, HOTKEY_ID_1);
-	UnregisterHotKey(hWnd, HOTKEY_ID_2);
-	UnregisterHotKey(hWnd, HOTKEY_ID_3);
-	UnregisterHotKey(hWnd, HOTKEY_ID_Q);
-	UnregisterHotKey(hWnd, HOTKEY_ID_W);
-	UnregisterHotKey(hWnd, HOTKEY_ID_E);
+	for (int i = 1; i < 22; i++) {
+		UnregisterHotKey(hWnd, i);
+	}
 }
 
 void KillApplication()
@@ -2618,6 +2644,7 @@ void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText)
 
 void SetEditionState(HWND hWnd, edition edition)
 {
+    if (ui_sounds_enabled) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
     switch (edition)
     {
         case DE:
@@ -2689,4 +2716,44 @@ void SetEditionState(HWND hWnd, edition edition)
     }
         
 }
+       
+void ToggleRemainLog(bool hotkey)
+{	
+    if (remainlog_enabled)
+    {
+        ShowWindow(remaining_log, SW_HIDE);
+        remainlog_enabled = false;
+        if (hotkey)
+        {
+            if ((SendMessage(checkbox_showremainlog, BM_GETCHECK, 0, 0)) != BST_UNCHECKED)
+            {
+                SendMessage(checkbox_showremainlog, BM_SETCHECK, BST_UNCHECKED, 0);
+            }
+            else
+            {
+                SendMessage(checkbox_showremainlog, BM_SETCHECK, BST_CHECKED, 0);
+            }
+        }
         
+    }
+	else
+	{
+		ShowWindow(remaining_log, SW_SHOW);
+		remainlog_enabled = true;
+
+        if (hotkey)
+        {
+            if ((SendMessage(checkbox_showremainlog, BM_GETCHECK, 0, 0)) != BST_CHECKED)
+            {
+                SendMessage(checkbox_showremainlog, BM_SETCHECK, BST_CHECKED, 0);
+            }
+            else
+            {
+                SendMessage(checkbox_showremainlog, BM_SETCHECK, BST_UNCHECKED, 0);
+            }
+        }
+        
+	}
+
+    if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+}
