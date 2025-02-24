@@ -84,8 +84,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    GenerateIniFilePath();
+    GenerateFilePaths();
     LoadSettings();
+    
 
     // Initialize GDI+
     Gdiplus::GdiplusStartupInput gdiplusStartupInput;
@@ -130,6 +131,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     DeleteObject(font_underline);
 
+    SaveLog();
     SaveSettings();
 
     return (int) msg.wParam;
@@ -534,6 +536,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				civ_checkbox[i] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), column[i % 5], row[i / 5], 100, 20, i + 5, civ_index[i].c_str());
 			}
 
+
+
             autoreset_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 230, 180, 20, IDC_CHECKBOX_AUTORESET, L"Auto-reset upon change");
             autotoggle_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 0, 180, 20, IDC_CHECKBOX_AUTOTOGGLE, L"Auto-toggle older civs");
 
@@ -634,12 +638,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             ShowCustomTab(false);
             ShowDrawTab(true, hWnd);
 
-
+            
             
 
 
+            LoadLog(hWnd);
+            ValidateAllDlcToggles(hWnd);
 
-            ResetProgram();    // resetter is called in order to enable remaining civ indicator label (hLabel)
+            //ResetProgram();    // resetter is called in order to enable remaining civ indicator label (hLabel)
 
             brush_black = CreateSolidBrush(RGB(0, 0, 0));
             brush_white = CreateSolidBrush(RGB(255, 255, 255));
@@ -1369,7 +1375,7 @@ void ResetProgram()
     current_civ = L"Random";
     iterator = 0;
 
-    UpdateDrawnLog(false, true);
+    UpdateDrawnLog(false, false, true);
 
 
     if (custom_civ_pool) {
@@ -1386,15 +1392,17 @@ void ResetProgram()
 
 
     else {
-        civs = { L"Armenians", L"Aztecs", L"Bengalis", L"Berbers", L"Bohemians", L"Britons",
-                L"Bulgarians", L"Burgundians", L"Burmese", L"Byzantines", L"Celts", L"Chinese",
-                L"Cumans", L"Dravidians", L"Ethiopians", L"Franks", L"Georgians", L"Goths", L"Gurjaras",
-                L"Hindustanis", L"Huns", L"Incas", L"Italians", L"Japanese", L"Khmer", L"Koreans",
-                L"Lithuanians", L"Magyars", L"Malay", L"Malians", L"Mayans", L"Mongols", L"Persians",
-                L"Poles", L"Portuguese", L"Romans", L"Saracens", L"Sicilians", L"Slavs", L"Spanish",
-                L"Tatars", L"Teutons", L"Turks", L"Vietnamese", L"Vikings" };
+        InitialiseCivs();        
     }
 
+
+    
+	for (int i = 0; i < MAX_CIVS; i++)
+    {
+        if (drawn_civs[i] == L"") break;
+		drawn_civs[i] = L"";
+	}
+    
 
 
     SetWindowText(label_corner, (L"0/" + std::to_wstring(custom_max_civs)).c_str());     // resets remaining civs label
@@ -1446,7 +1454,7 @@ void DrawCiv()
 
 
 
-    UpdateDrawnLog(true, false);
+    UpdateDrawnLog(false, true, false);
     UpdateRemainingLog();
 
 
@@ -1729,7 +1737,7 @@ void AddCiv(std::wstring civ) {
         SetWindowText(label_corner, label_text.c_str());
 	    if (custom_max_civs == MAX_CIVS) custom_civ_pool = false;
         UpdateRemainingLog();
-        UpdateDrawnLog(false, false);
+        UpdateDrawnLog(false, false, false);
     }
 }
 
@@ -1743,7 +1751,7 @@ void RemoveCiv(std::wstring civ) {
         label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
         SetWindowText(label_corner, label_text.c_str());
         UpdateRemainingLog();
-		UpdateDrawnLog(false, false);
+		UpdateDrawnLog(false, false, false);
     }    
 }
 
@@ -2264,10 +2272,11 @@ void ValidateAllDlcToggles(HWND hWnd) {
 	ValidateDlcToggle(hWnd, aoc);
 }
 
-void UpdateDrawnLog(bool drawn, bool blankline_wanted) {
+void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted) {
 
     
-    if (drawn) {
+    if (drawn)
+    {
         drawnlog_length = GetWindowTextLength(drawn_log);
         drawnlog_text.resize(drawnlog_length + 1);
         GetWindowText(drawn_log, &drawnlog_text[0], drawnlog_length + 1);
@@ -2276,23 +2285,25 @@ void UpdateDrawnLog(bool drawn, bool blankline_wanted) {
         drawnlog_text = log_entry + drawnlog_text;
         if (iterator == custom_max_civs) drawnlog_text += L"\r\n";
         SetWindowText(drawn_log, drawnlog_text.c_str());
+        drawn_civs[iterator-1] = current_civ;
     }
 
-    else {
-        if (!reset_state && blankline_wanted) {
-            if (pool_altered || iterator >= 0)                       // adds blank line to log before next iteration of civ drawing
-            {
-                drawnlog_length = GetWindowTextLength(drawn_log);
-                drawnlog_text.resize(drawnlog_length + 1);
-                GetWindowText(drawn_log, &drawnlog_text[0], drawnlog_length + 1);
-                drawnlog_text.pop_back();
+    else if (!reset_state && blankline_wanted)
+    {
+        if (pool_altered || iterator >= 0)                       // adds blank line to log before next iteration of civ drawing
+        {
+            drawnlog_length = GetWindowTextLength(drawn_log);
+            drawnlog_text.resize(drawnlog_length + 1);
+            GetWindowText(drawn_log, &drawnlog_text[0], drawnlog_length + 1);
+            drawnlog_text.pop_back();
 
-                drawnlog_text = L"\r\n" + drawnlog_text;
-                SetWindowText(drawn_log, drawnlog_text.c_str());
+            drawnlog_text = L"\r\n" + drawnlog_text;
+            SetWindowText(drawn_log, drawnlog_text.c_str());
 
-            }
-        }
+        }        
     }
+
+
     std::wstring drawn_label = L"Drawn: " + std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
     SetWindowText(label_drawncount, drawn_label.c_str());
 }
@@ -2627,24 +2638,15 @@ void ToggleAutoReset(HWND hWnd)
 
 void SaveSettings()
 {
-    if (!WritePrivateProfileString(L"Settings", L"UISoundsEnabled", ui_sounds_enabled ? L"1" : L"0", INI_FILE_PATH))
-        MessageBox(NULL, L"Failed to write UISoundsEnabled", L"Error", MB_OK | MB_ICONERROR);
-    if (!WritePrivateProfileString(L"Settings", L"LabelsEnabled", labels_enabled ? L"1" : L"0", INI_FILE_PATH))
-        MessageBox(NULL, L"Failed to write LabelsEnabled", L"Error", MB_OK | MB_ICONERROR);
-    if (!WritePrivateProfileString(L"Settings", L"IconsEnabled", icons_enabled ? L"1" : L"0", INI_FILE_PATH))
-        MessageBox(NULL, L"Failed to write IconsEnabled", L"Error", MB_OK | MB_ICONERROR);
-    if (!WritePrivateProfileString(L"Settings", L"JinglesEnabled", jingles_enabled ? L"1" : L"0", INI_FILE_PATH))
-        MessageBox(NULL, L"Failed to write JinglesEnabled", L"Error", MB_OK | MB_ICONERROR);
-    if (!WritePrivateProfileString(L"Settings", L"TooltipsEnabled", tooltips_enabled ? L"1" : L"0", INI_FILE_PATH))
-        MessageBox(NULL, L"Failed to write TooltipsEnabled", L"Error", MB_OK | MB_ICONERROR);
-    if (!WritePrivateProfileString(L"Settings", L"RemainLogEnabled", remainlog_enabled ? L"1" : L"0", INI_FILE_PATH))
-        MessageBox(NULL, L"Failed to write RemainLogEnabled", L"Error", MB_OK | MB_ICONERROR);
-    if (!WritePrivateProfileString(L"Settings", L"AutoResetEnabled", autoreset_enabled ? L"1" : L"0", INI_FILE_PATH))
-        MessageBox(NULL, L"Failed to write AutoResetEnabled", L"Error", MB_OK | MB_ICONERROR);
-    if (!WritePrivateProfileString(L"Settings", L"AutoToggleEnabled", autotoggle_enabled ? L"1" : L"0", INI_FILE_PATH))
-        MessageBox(NULL, L"Failed to write AutoToggleEnabled", L"Error", MB_OK | MB_ICONERROR);
-    if (!WritePrivateProfileString(L"Settings", L"LegacyJingleEnabled", legacy_jingle_enabled ? L"1" : L"0", INI_FILE_PATH))
-        MessageBox(NULL, L"Failed to write LegacyJingleEnabled", L"Error", MB_OK | MB_ICONERROR);
+    WritePrivateProfileString(L"Settings", L"UISoundsEnabled", ui_sounds_enabled ? L"1" : L"0", INI_FILE_PATH);
+    WritePrivateProfileString(L"Settings", L"LabelsEnabled", labels_enabled ? L"1" : L"0", INI_FILE_PATH);
+    WritePrivateProfileString(L"Settings", L"IconsEnabled", icons_enabled ? L"1" : L"0", INI_FILE_PATH);
+    WritePrivateProfileString(L"Settings", L"JinglesEnabled", jingles_enabled ? L"1" : L"0", INI_FILE_PATH);
+    WritePrivateProfileString(L"Settings", L"TooltipsEnabled", tooltips_enabled ? L"1" : L"0", INI_FILE_PATH);
+    WritePrivateProfileString(L"Settings", L"RemainLogEnabled", remainlog_enabled ? L"1" : L"0", INI_FILE_PATH);
+    WritePrivateProfileString(L"Settings", L"AutoResetEnabled", autoreset_enabled ? L"1" : L"0", INI_FILE_PATH);
+    WritePrivateProfileString(L"Settings", L"AutoToggleEnabled", autotoggle_enabled ? L"1" : L"0", INI_FILE_PATH);
+    WritePrivateProfileString(L"Settings", L"LegacyJingleEnabled", legacy_jingle_enabled ? L"1" : L"0", INI_FILE_PATH);
 
 }
 
@@ -2663,22 +2665,180 @@ void LoadSettings()
 
 }
 
-void GenerateIniFilePath()
+void SaveLog()
 {
-    // Get the path of the executable
-    wchar_t exePath[MAX_PATH];
-    GetModuleFileName(NULL, exePath, MAX_PATH);
-
-    // Remove the executable name from the path
-    wchar_t *lastSlash = wcsrchr(exePath, L'\\');
-    if (lastSlash != NULL)
+    std::wofstream outFile(LOG_FILE_PATH);
+    if (!outFile)
     {
-        *lastSlash = L'\0';
+        MessageBox(NULL, L"Failed to open states file for writing", L"Error", MB_OK | MB_ICONERROR);
+        return;
     }
 
-    // Append "settings.ini" to the path
-    wcscat_s(exePath, MAX_PATH, L"\\settings.ini");
+    // Save the drawn civilisations
+    outFile << L"DrawnCivs:" << std::endl;
+	for (int i = 0; i < MAX_CIVS; i++)
+	{
+        if (drawn_civs[i] != L"")
+        {
+            outFile << drawn_civs[i] << std::endl;
+        }
+        else break;
+	}
 
-    // Copy the result to the global INI_FILE_PATH variable
-    wcscpy_s(INI_FILE_PATH, exePath);
+
+    // Save the civilization states
+    outFile << L"CivStates:" << std::endl;
+    for (const auto &civ : civ_enabled)
+    {
+        outFile << civ.first << L" " << (civ.second ? L"1" : L"0") << std::endl;
+    }
+
+    outFile.close();
+}
+
+void LoadLog(HWND hWnd)
+{
+    std::wifstream inFile(LOG_FILE_PATH);
+    if (!inFile)
+    {
+        ResetProgram();
+        return;
+    }
+
+    std::wstring line;
+    bool readingDrawnCivs = false;
+    bool readingCivStates = false;
+
+    while (std::getline(inFile, line))
+    {
+        if (line == L"DrawnCivs:")
+        {
+
+            readingDrawnCivs = true;
+            readingCivStates = false;
+            InitialiseCivs();
+            continue;
+        }
+        else if (line == L"CivStates:")
+        {
+            readingDrawnCivs = false;
+            readingCivStates = true;
+            continue;
+        }
+
+        if (readingDrawnCivs)
+        {
+            civs.erase(std::remove(civs.begin(), civs.end(), line), civs.end());
+            iterator++;
+            current_civ = line;
+            UpdateDrawnLog(true, true, false);
+		}
+
+        else if (readingCivStates)
+        {
+            std::wistringstream iss(line);
+            std::wstring civName;
+            int state;
+            if (iss >> civName >> state)
+            {
+                if (state == 0) {
+                    RemoveCiv(civName);
+					SendMessage(GetCivCheckbox(civName), BM_SETCHECK, BST_UNCHECKED, 0);
+                }
+                    
+                else {
+					SendMessage(GetCivCheckbox(civName), BM_SETCHECK, BST_CHECKED, 0);
+                }				
+            }
+        }
+    }
+
+
+    
+    // Update the labels
+    label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
+    std::wstring remain_text = std::to_wstring(custom_max_civs-iterator) + L"/" + std::to_wstring(custom_max_civs);
+    SetWindowText(label_corner, label_text.c_str());
+    SetWindowText(label_centre, current_civ.c_str());
+
+
+    HBITMAP drawn_civ_icon = FetchIcon(current_civ);
+    SendMessageW(civ_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
+
+
+
+    reset_state = true;
+    UpdateRemainingLog();
+    SetWindowText(label_drawncount, label_text.c_str());
+    SetWindowText(label_remainingcount, remain_text.c_str());
+
+
+
+    if (current_tab != 0) {
+        ShowWindow(civ_icon, SW_HIDE);
+        ShowWindow(label_centre, SW_HIDE);
+    }
+
+
+    if (jingles_enabled)
+    {/*
+        std::thread sound_thread(PlayJingle, current_civ);
+        sound_thread.detach();*/
+        PlayJingle(current_civ);
+    }
+
+
+    // resets remaining civs label
+    inFile.close();
+}
+
+void GenerateFilePaths()
+{
+    // Get the path of the executable
+    wchar_t exePathS[MAX_PATH];
+    wchar_t exePathL[MAX_PATH];
+    GetModuleFileName(NULL, exePathS, MAX_PATH);
+    GetModuleFileName(NULL, exePathL, MAX_PATH);
+
+    // Remove the executable name from the path
+    wchar_t *lastSlashS = wcsrchr(exePathS, L'\\');
+    if (lastSlashS != NULL)
+    {
+        *lastSlashS = L'\0';
+    }
+    wchar_t *lastSlashL = wcsrchr(exePathL, L'\\');
+    if (lastSlashL != NULL)
+    {
+        *lastSlashL = L'\0';
+    }
+
+    wcscat_s(exePathS, MAX_PATH, L"\\settings.ini");
+    wcscat_s(exePathL, MAX_PATH, L"\\log.txt");
+
+
+    wcscpy_s(INI_FILE_PATH, exePathS);
+    wcscpy_s(LOG_FILE_PATH, exePathL);
+}
+
+HWND GetCivCheckbox(const std::wstring &civ_name)
+{
+	for (int i = 0; i < MAX_CIVS; i++)
+	{
+		if (civ_index[i] == civ_name)
+		{
+			return civ_checkbox[i];
+		}
+	}
+	return NULL;
+}
+
+void InitialiseCivs()
+{
+    civs = { L"Armenians", L"Aztecs", L"Bengalis", L"Berbers", L"Bohemians", L"Britons",
+                L"Bulgarians", L"Burgundians", L"Burmese", L"Byzantines", L"Celts", L"Chinese",
+                L"Cumans", L"Dravidians", L"Ethiopians", L"Franks", L"Georgians", L"Goths", L"Gurjaras",
+                L"Hindustanis", L"Huns", L"Incas", L"Italians", L"Japanese", L"Khmer", L"Koreans",
+                L"Lithuanians", L"Magyars", L"Malay", L"Malians", L"Mayans", L"Mongols", L"Persians",
+                L"Poles", L"Portuguese", L"Romans", L"Saracens", L"Sicilians", L"Slavs", L"Spanish",
+                L"Tatars", L"Teutons", L"Turks", L"Vietnamese", L"Vikings" };
 }

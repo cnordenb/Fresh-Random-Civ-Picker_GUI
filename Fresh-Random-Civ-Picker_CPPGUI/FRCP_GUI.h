@@ -6,6 +6,8 @@
 #include "framework.h"
 #include "FRCP_GUI.h"
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <random>
@@ -92,6 +94,7 @@
 #define TOOLTIP_AUTORESET  	        21
 
 wchar_t INI_FILE_PATH[MAX_PATH];
+wchar_t LOG_FILE_PATH[MAX_PATH];
 
 std::map<HWND, WNDPROC> originalButtonProcs;
 
@@ -255,6 +258,7 @@ bool custom_civ_pool = false;
 std::vector<std::pair<std::wstring, bool>> civ_enabled;
 std::vector<std::pair<std::wstring, enum edition>> civ_edition;
 std::vector<std::pair<std::wstring, enum dlc>> civ_dlc;
+std::wstring drawn_civs[MAX_CIVS] = { L"" };
 
 bool accessor_out_of_bounds = false;             // for unit testing
 int times_drawn[MAX_CIVS] = { 0 };               // for unit testing
@@ -275,6 +279,9 @@ void KillApplication();
 void SaveSettings();
 void LoadSettings();
 
+void SaveLog();
+void LoadLog(HWND);
+
 void EnableHotkeys(HWND);
 void DisableHotkeys(HWND);
 
@@ -284,6 +291,7 @@ void LoadImages();
 void PlayJingle(std::wstring);
 bool VerifiedLegacyCiv(std::wstring);
 
+void InitialiseCivs();
 void InitialiseCivStates();
 void InitialiseCivEditions();
 void InitialiseCivDLCs();
@@ -314,8 +322,10 @@ void ShowDEDLCCheckboxes(bool);
 void ShowHDDLCCheckboxes(bool);
 void ShowAOCCheckbox(bool);
 int GetDlcCheckboxId(dlc);
+HWND GetCivCheckbox(const std::wstring &);
 
-void UpdateDrawnLog(bool, bool);
+
+void UpdateDrawnLog(bool, bool, bool);
 void UpdateRemainingLog();
 void ToggleRemainLog();
 
@@ -327,6 +337,7 @@ void ValidateDlcToggle(HWND, dlc);
 void ValidateAllDlcToggles(HWND);
 void ToggleAutoToggle(HWND);
 void ToggleAutoReset(HWND);
+
 
 void AddTooltip(HWND, HWND, LPCWSTR);
 
@@ -357,7 +368,7 @@ int GetWindowHeight(HWND);
 std::string ConvertToString(const std::wstring &);
 HWND CreateCheckbox(HWND hWnd, HINSTANCE hInstance, int x, int y, int width, int height, int id, LPCWSTR text);
 
-void GenerateIniFilePath();
+void GenerateFilePaths();
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
