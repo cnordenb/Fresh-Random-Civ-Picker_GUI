@@ -541,6 +541,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             autoreset_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 230, 180, 20, IDC_CHECKBOX_AUTORESET, L"Auto-reset upon change");
             autotoggle_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 0, 180, 20, IDC_CHECKBOX_AUTOTOGGLE, L"Auto-toggle older civs");
 
+			if (!autoreset_enabled) CheckDlgButton(hWnd, IDC_CHECKBOX_AUTORESET, BST_UNCHECKED);
+			if (!autotoggle_enabled) CheckDlgButton(hWnd, IDC_CHECKBOX_AUTOTOGGLE, BST_UNCHECKED);
+
 			AddTooltip(autoreset_checkbox, hwndTooltip[TOOLTIP_AUTORESET], StringCleaner(L"Automatically resets the pool of drawn civs when the civilisation pool is changed\nHotkey: T"));
 			AddTooltip(autotoggle_checkbox, hwndTooltip[TOOLTIP_AUTOTOGGLE], StringCleaner(L"Toggles older civs as well as the automatic enabling of older civ when switching between Editions\nHotkey: R"));
 
@@ -633,17 +636,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SetWindowPos(edition_icon, NULL, 190, 30, 128, 93, SWP_NOZORDER);
             
 
-			
-            ShowLogTab(false);
-            ShowCustomTab(false);
-            ShowDrawTab(true, hWnd);
-
             
             
 
 
             LoadLog(hWnd);
             ValidateAllDlcToggles(hWnd);
+			ShowTabComponents(0, hWnd);
 
             //ResetProgram();    // resetter is called in order to enable remaining civ indicator label (hLabel)
 
@@ -2432,7 +2431,7 @@ void SetEditionState(HWND hWnd, edition edition)
             edition_state = DE;
             ShowAllPoolCheckboxes();
             ValidateAllDlcToggles(hWnd);
-            if (autotoggle_enabled)
+            if (autotoggle_enabled && !startup)
             {
                 for (int i = 0; i < 5; i++)
                 {
@@ -2452,7 +2451,7 @@ void SetEditionState(HWND hWnd, edition edition)
             ShowDEDLCCheckboxes(false);
             ShowHDDLCCheckboxes(true);
             ShowAOCCheckbox(false);
-            if (autotoggle_enabled) {
+            if (autotoggle_enabled && !startup) {
                 for (int i = 0; i < 2; i++) {
                     EnableDlc(old_dlc[i], hWnd);
                 }
@@ -2474,7 +2473,7 @@ void SetEditionState(HWND hWnd, edition edition)
             ShowDEDLCCheckboxes(false);
             ShowHDDLCCheckboxes(false);
             ShowAOCCheckbox(true);
-            if (autotoggle_enabled) {
+            if (autotoggle_enabled && !startup) {
                 EnableDlc(aok, hWnd);
             }
             SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_aok);
@@ -2693,6 +2692,19 @@ void SaveLog()
         else break;
 	}
 
+    outFile << L"EditionState:" << std::endl;
+    switch (edition_state)
+    {
+	case DE:
+		outFile << L"DE" << std::endl;
+		break;
+	case HD:
+		outFile << L"HD" << std::endl;
+		break;
+	case AOK:
+		outFile << L"AOK" << std::endl;
+		break;
+    }
 
     
 
@@ -2705,39 +2717,41 @@ void LoadLog(HWND hWnd)
     if (!inFile)
     {
         ResetProgram();
+        startup = false;
         return;
     }
 
     std::wstring line;
     bool readingDrawnCivs = false;
     bool readingCivStates = false;
+	bool readingEditionState = false;
     InitialiseCivs();
 
     while (std::getline(inFile, line))
     {
-        if (line == L"DrawnCivs:")
-        {
 
-            readingDrawnCivs = true;
-            readingCivStates = false;
-            continue;
-        }
-        else if (line == L"CivStates:")
+        if (line == L"CivStates:")
         {
-            readingDrawnCivs = false;
             readingCivStates = true;
+            readingDrawnCivs = false;
+			readingEditionState = false;
             continue;
         }
-
-        if (readingDrawnCivs)
+        else if (line == L"DrawnCivs:")
         {
-            civs.erase(std::remove(civs.begin(), civs.end(), line), civs.end());
-            iterator++;
-            current_civ = line;
-            UpdateDrawnLog(true, true, false);
-		}
-
-        else if (readingCivStates)
+            readingCivStates = false;
+            readingDrawnCivs = true;
+			readingEditionState = false;
+            continue;
+        }
+        else if (line == L"EditionState:")
+        {
+            readingCivStates = false;
+            readingDrawnCivs = false;
+            readingEditionState = true;
+            continue;
+        }
+        if (readingCivStates)
         {
             std::wistringstream iss(line);
             std::wstring civName;
@@ -2746,14 +2760,37 @@ void LoadLog(HWND hWnd)
             {
                 if (state == 0) {
                     RemoveCiv(civName);
-					SendMessage(GetCivCheckbox(civName), BM_SETCHECK, BST_UNCHECKED, 0);
+                    SendMessage(GetCivCheckbox(civName), BM_SETCHECK, BST_UNCHECKED, 0);
                 }
-                    
+
                 else {
-					SendMessage(GetCivCheckbox(civName), BM_SETCHECK, BST_CHECKED, 0);
-                }				
+                    SendMessage(GetCivCheckbox(civName), BM_SETCHECK, BST_CHECKED, 0);
+                }
             }
         }
+        else if (readingDrawnCivs)
+        {
+            civs.erase(std::remove(civs.begin(), civs.end(), line), civs.end());
+            iterator++;
+            current_civ = line;
+            UpdateDrawnLog(true, true, false);
+		}
+		else if (readingEditionState)
+		{
+			if (line == L"DE")
+			{
+				SetEditionState(hWnd, DE);
+			}
+			else if (line == L"HD")
+			{
+				SetEditionState(hWnd, HD);
+			}
+			else if (line == L"AOK")
+			{
+				SetEditionState(hWnd, AOK);
+			}
+		}
+        
     }
 
 
@@ -2772,8 +2809,6 @@ void LoadLog(HWND hWnd)
 
     reset_state = true;
     UpdateRemainingLog();
-    SetWindowText(label_drawncount, label_text.c_str());
-    SetWindowText(label_remainingcount, remain_text.c_str());
 
 
 
@@ -2790,7 +2825,7 @@ void LoadLog(HWND hWnd)
         PlayJingle(current_civ);
     }
 
-
+    startup = false;
     // resets remaining civs label
     inFile.close();
 }
