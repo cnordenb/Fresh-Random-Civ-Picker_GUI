@@ -1023,7 +1023,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             // auto-reset
             if (autoreset_enabled) {
-				if (wmId > 4 && wmId < 50 || wmId > 50 && wmId < 64) ResetProgram();
+				if (wmId > 4 && wmId < 50 || wmId > 50 && wmId < 65) ResetProgram();
             }
 
             switch (wmId)
