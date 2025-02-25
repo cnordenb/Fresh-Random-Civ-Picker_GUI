@@ -3,8 +3,6 @@ TODO
 
 - add hotkeys list info to options
 - civ info button and page(?)
-- implement log file for persistent log and civ states
-
 
 */
 #include "FRCP_GUI.h"
@@ -131,7 +129,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     DeleteObject(font_underline);
 
-    SaveLog();
+    if (persistent_logging) SaveLog();
     SaveSettings();
 
     return (int) msg.wParam;
@@ -652,7 +650,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             EnableHotkeys(hWnd);
 
-
+            if (draw_on_startup) DrawCiv();
             
             break;
         }
@@ -1245,6 +1243,8 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		CheckDlgButton(hDlg, IDC_CHECKBOX_JINGLES, jingles_enabled ? BST_CHECKED : BST_UNCHECKED);
         CheckDlgButton(hDlg, IDC_CHECKBOX_SOUNDS, ui_sounds_enabled ? BST_CHECKED : BST_UNCHECKED);
         CheckDlgButton(hDlg, IDC_CHECKBOX_TOOLTIPS, tooltips_enabled ? BST_CHECKED : BST_UNCHECKED);
+		CheckDlgButton(hDlg, IDC_CHECKBOX_STARTDRAW, draw_on_startup ? BST_CHECKED : BST_UNCHECKED);
+
 
 		if (persistent_logging) CheckRadioButton(hDlg, IDC_RADIO_LOGGING, IDC_RADIO_STARTRESET, IDC_RADIO_LOGGING);
 		else CheckRadioButton(hDlg, IDC_RADIO_LOGGING, IDC_RADIO_STARTRESET, IDC_RADIO_STARTRESET);
@@ -1283,6 +1283,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		icons_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_ICONS) == BST_CHECKED;
         jingles_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_JINGLES) == BST_CHECKED;
         tooltips_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_TOOLTIPS) == BST_CHECKED;
+		draw_on_startup = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_STARTDRAW) == BST_CHECKED;
 
         // Handle the combobox selection
         HWND hComboBox = GetDlgItem(hDlg, IDC_LEGACY_OPTION);
@@ -1311,6 +1312,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
             case IDC_CHECKBOX_JINGLES:
             case IDC_CHECKBOX_SOUNDS:
             case IDC_CHECKBOX_TOOLTIPS:
+			case IDC_CHECKBOX_STARTDRAW:
                 if (ui_sounds_enabled)
                 {
                     PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
@@ -1688,6 +1690,7 @@ HBITMAP FetchIcon(std::wstring civ_name) {
 	if (civ_name == L"Turks") return icon_turks;
 	if (civ_name == L"Vietnamese") return icon_vietnamese;
 	if (civ_name == L"Vikings") return icon_vikings;
+	if (civ_name == L"Random") return icon_random;
 
     
 }
@@ -2648,6 +2651,7 @@ void ToggleAutoReset(HWND hWnd)
 void SaveSettings()
 {
     WritePrivateProfileString(L"Settings", L"PersistentLogging", persistent_logging ? L"1" : L"0", INI_FILE_PATH);
+	WritePrivateProfileString(L"Settings", L"DrawOnStartup", draw_on_startup ? L"1" : L"0", INI_FILE_PATH);
     WritePrivateProfileString(L"Settings", L"UISoundsEnabled", ui_sounds_enabled ? L"1" : L"0", INI_FILE_PATH);
     WritePrivateProfileString(L"Settings", L"LabelsEnabled", labels_enabled ? L"1" : L"0", INI_FILE_PATH);
     WritePrivateProfileString(L"Settings", L"IconsEnabled", icons_enabled ? L"1" : L"0", INI_FILE_PATH);
@@ -2664,6 +2668,7 @@ void LoadSettings()
 {
     // Load boolean settings
 	persistent_logging = GetPrivateProfileInt(L"Settings", L"PersistentLogging", 1, INI_FILE_PATH);
+	draw_on_startup = GetPrivateProfileInt(L"Settings", L"DrawOnStartup", 1, INI_FILE_PATH);
     ui_sounds_enabled = GetPrivateProfileInt(L"Settings", L"UISoundsEnabled", 1, INI_FILE_PATH);
     labels_enabled = GetPrivateProfileInt(L"Settings", L"LabelsEnabled", 1, INI_FILE_PATH);
     icons_enabled = GetPrivateProfileInt(L"Settings", L"IconsEnabled", 1, INI_FILE_PATH);
@@ -2805,10 +2810,9 @@ void LoadLog(HWND hWnd)
     }
 
 
-    
     // Update the labels
     label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
-    std::wstring remain_text = std::to_wstring(custom_max_civs-iterator) + L"/" + std::to_wstring(custom_max_civs);
+    std::wstring remain_text = std::to_wstring(custom_max_civs - iterator) + L"/" + std::to_wstring(custom_max_civs);
     SetWindowText(label_corner, label_text.c_str());
     SetWindowText(label_centre, current_civ.c_str());
 
@@ -2821,12 +2825,9 @@ void LoadLog(HWND hWnd)
     reset_state = true;
     UpdateRemainingLog();
 
+    UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
 
 
-    if (current_tab != 0) {
-        ShowWindow(civ_icon, SW_HIDE);
-        ShowWindow(label_centre, SW_HIDE);
-    }
 
 
     if (jingles_enabled)
@@ -2836,8 +2837,9 @@ void LoadLog(HWND hWnd)
         PlayJingle(current_civ);
     }
 
+    
+
     startup = false;
-    // resets remaining civs label
     inFile.close();
 }
 

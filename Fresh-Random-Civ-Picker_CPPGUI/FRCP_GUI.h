@@ -209,7 +209,9 @@ std::wstring civ_index[] = { L"Armenians", L"Aztecs", L"Bengalis", L"Berbers", L
                             L"Saracens", L"Sicilians", L"Slavs", L"Spanish", L"Tatars",
                             L"Teutons", L"Turks", L"Vietnamese", L"Vikings" };
 
+bool startup = true;
 bool persistent_logging = true;
+bool draw_on_startup = false;
 bool icons_enabled = true;
 bool jingles_enabled = false;
 bool labels_enabled = true;
@@ -222,7 +224,7 @@ bool autotoggle_enabled = true;
 bool remainlog_enabled = true;
 bool reset_state = true;
 bool hotkey_pressed = false;
-bool startup = true;
+
 
 
 
