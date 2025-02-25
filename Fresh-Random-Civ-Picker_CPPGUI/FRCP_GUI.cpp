@@ -647,7 +647,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			ShowTabComponents(0, hWnd);
             startup = false;
 
-            //ResetProgram();    // resetter is called in order to enable remaining civ indicator label (hLabel)
+
 
             brush_black = CreateSolidBrush(RGB(0, 0, 0));
             brush_white = CreateSolidBrush(RGB(255, 255, 255));
@@ -656,6 +656,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             EnableHotkeys(hWnd);
 
             if (draw_on_startup) DrawCiv();
+
             
             break;
         }
@@ -2748,8 +2749,7 @@ void LoadLog(HWND hWnd)
     std::wifstream inFile(LOG_FILE_PATH);
     if (!inFile || !persistent_logging)
     {
-        ResetProgram();
-        startup = false;
+        if (!draw_on_startup) ResetProgram();
         return;
     }
 
@@ -2844,14 +2844,6 @@ void LoadLog(HWND hWnd)
     UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
 
 
-
-
-    if (jingles_enabled)
-    {/*
-        std::thread sound_thread(PlayJingle, current_civ);
-        sound_thread.detach();*/
-        PlayJingle(current_civ);
-    }  
 
     
     inFile.close();
