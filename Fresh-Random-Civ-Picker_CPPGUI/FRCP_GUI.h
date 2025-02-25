@@ -59,7 +59,7 @@
 #define HOTKEY_ID_G 20
 #define HOTKEY_ID_H 21
 #define HOTKEY_ID_R 22
-#define HOTKEY_ID_Y 23
+
 
 #define DT_UNDERLINE 0x80000000
 #define MAX_LENGTH 15 
@@ -291,7 +291,8 @@ void DisableHotkeys(HWND);
 void CreateUnderlineFont();
 void LoadImages();
 
-void PlayJingle(std::wstring);
+void MuteSounds();
+void PlayJingle(std::wstring &);
 bool VerifiedLegacyCiv(std::wstring);
 
 void InitialiseCivs();
