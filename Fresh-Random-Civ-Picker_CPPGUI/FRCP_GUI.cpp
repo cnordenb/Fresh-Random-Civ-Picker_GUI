@@ -2686,7 +2686,6 @@ void SaveLog()
     std::wofstream outFile(LOG_FILE_PATH);
     if (!outFile)
     {
-        MessageBox(NULL, L"Failed to open states file for writing", L"Error", MB_OK | MB_ICONERROR);
         return;
     }
 
