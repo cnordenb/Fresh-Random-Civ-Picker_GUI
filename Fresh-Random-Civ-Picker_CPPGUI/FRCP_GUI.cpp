@@ -5,6 +5,7 @@ TODO
 - add hotkeys list info to options
 - civ info button and pages
 - additional resources and links page
+- make subclassed button component graphics react to hover again
 
 */
 #include "FRCP_GUI.h"
