@@ -2,8 +2,6 @@
 TODO
 
 
-- phase out redundant vectors for arrays
-- swap unnecessary arguments by value to arguments by reference
 - add hotkeys list info to options
 - civ info button and page(?)
 
