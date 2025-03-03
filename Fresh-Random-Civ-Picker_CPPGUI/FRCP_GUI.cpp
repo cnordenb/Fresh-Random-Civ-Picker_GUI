@@ -1,9 +1,10 @@
 /*
 TODO
 
-
+- add options button on draw tab
 - add hotkeys list info to options
-- civ info button and page(?)
+- civ info button and pages
+- additional resources and links page
 
 */
 #include "FRCP_GUI.h"
@@ -638,8 +639,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             
 
 
-            LoadLog(hWnd);
-            ValidateAllDlcToggles(hWnd);
+            if (persistent_logging)
+            {
+				LoadLog(hWnd);
+                ValidateAllDlcToggles(hWnd);
+            }
+                
+            
 			ShowTabComponents(0, hWnd);
             startup = false;
 
@@ -652,6 +658,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             EnableHotkeys(hWnd);
 
             if (draw_on_startup) DrawCiv();
+			else if (!persistent_logging) ResetProgram();
 
             
             break;
@@ -1403,7 +1410,8 @@ void ResetProgram()
     UpdateDrawnLog(false, false, true);
 
 
-    if (custom_civ_pool) {
+    if (custom_civ_pool)
+    {
         civs.clear();
         custom_max_civs = 0;
         for (int i = 0; i < MAX_CIVS; i++) {
@@ -1414,9 +1422,8 @@ void ResetProgram()
         }
 
     }
-
-
-    else {
+    else
+    {
         InitialiseCivs();        
     }
 
@@ -2706,11 +2713,8 @@ void SaveLog()
 void LoadLog(HWND hWnd)
 {
     std::wifstream inFile(LOG_FILE_PATH);
-    if (!inFile || !persistent_logging)
-    {
-        if (!draw_on_startup) ResetProgram();
-        return;
-    }
+
+    if (!inFile) return;
 
     std::wstring line;
     bool readingDrawnCivs = false;
