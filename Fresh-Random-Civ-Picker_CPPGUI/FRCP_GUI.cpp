@@ -98,8 +98,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     CreateUnderlineFont();
 	InitialiseCivStates();
-    InitialiseCivEditions();
-	InitialiseCivDLCs();
 
 
     // Initialize global strings
@@ -1786,7 +1784,7 @@ void RemoveCiv(const std::wstring &civ) {
 }
 
 void InitialiseCivStates() {
-    civ_enabled = {
+    std::pair<std::wstring, bool> temp_civ_enabled[MAX_CIVS] = {
         {L"Armenians", true}, {L"Aztecs", true}, {L"Bengalis", true}, {L"Berbers", true},
         {L"Bohemians", true}, {L"Britons", true}, {L"Bulgarians", true}, {L"Burgundians", true},
         {L"Burmese", true}, {L"Byzantines", true}, {L"Celts", true}, {L"Chinese", true},
@@ -1800,6 +1798,7 @@ void InitialiseCivStates() {
         {L"Tatars", true}, {L"Teutons", true}, {L"Turks", true}, {L"Vietnamese", true},
         {L"Vikings", true}
     };
+    std::copy(std::begin(temp_civ_enabled), std::end(temp_civ_enabled), std::begin(civ_enabled));
 }
 
 void SetCivStatus(const std::wstring &civ_name, bool status) {
@@ -2045,39 +2044,6 @@ dlc GetCivDLC(const std::wstring &civ_name) {
 	return aok; // Default if not found
 }
 
-void InitialiseCivEditions() {
-	civ_edition = {
-		{L"Armenians", DE}, {L"Aztecs", AOK}, {L"Bengalis", DE}, {L"Berbers", HD},
-		{L"Bohemians", DE}, {L"Britons", AOK}, {L"Bulgarians", DE}, {L"Burgundians", DE},
-		{L"Burmese", HD}, {L"Byzantines", AOK}, {L"Celts", AOK}, {L"Chinese", AOK},
-		{L"Cumans", DE}, {L"Dravidians", DE}, {L"Ethiopians", HD}, {L"Franks", AOK},
-		{L"Georgians", DE}, {L"Goths", AOK}, {L"Gurjaras", DE}, {L"Hindustanis", HD},
-		{L"Huns", AOK}, {L"Incas", HD}, {L"Italians", HD}, {L"Japanese", AOK},
-		{L"Khmer", HD}, {L"Koreans", AOK}, {L"Lithuanians", DE}, {L"Magyars", HD},
-		{L"Malay", HD}, {L"Malians", HD}, {L"Mayans", AOK}, {L"Mongols", AOK},
-		{L"Persians", AOK}, {L"Poles", DE}, {L"Portuguese", HD}, {L"Romans", DE},
-		{L"Saracens", AOK}, {L"Sicilians", DE}, {L"Slavs", HD}, {L"Spanish", AOK},
-		{L"Tatars", DE}, {L"Teutons", AOK}, {L"Turks", AOK}, {L"Vietnamese", HD},
-		{L"Vikings", AOK}
-	};
-}
-
-void InitialiseCivDLCs() {
-	civ_dlc = {
-		{L"Armenians", royals}, {L"Aztecs", aoc}, {L"Bengalis", india}, {L"Berbers", africans},
-		{L"Bohemians", dukes}, {L"Britons", aok}, {L"Bulgarians", khans}, {L"Burgundians", west},
-		{L"Burmese", rajas}, {L"Byzantines", aok}, {L"Celts", aok}, {L"Chinese", aok},
-		{L"Cumans", khans}, {L"Dravidians", india}, {L"Ethiopians", africans}, {L"Franks", aok},
-		{L"Georgians", royals}, {L"Goths", aok}, {L"Gurjaras", india}, {L"Hindustanis", forgotten},
-		{L"Huns", aoc}, {L"Incas", forgotten}, {L"Italians", forgotten}, {L"Japanese", aok},
-		{L"Khmer", rajas}, {L"Koreans", aoc}, {L"Lithuanians", khans}, {L"Magyars", forgotten},
-		{L"Malay", rajas}, {L"Malians", africans}, {L"Mayans", aoc}, {L"Mongols", aok},
-		{L"Persians", aok}, {L"Poles", dukes}, {L"Portuguese", africans}, {L"Romans", rome},
-		{L"Saracens", aok}, {L"Sicilians", west}, {L"Slavs", forgotten}, {L"Spanish", aoc},
-		{L"Tatars", khans}, {L"Teutons", aok}, {L"Turks", aok}, {L"Vietnamese", rajas},
-		{L"Vikings", aok}
-	};
-}
 
 void ShowDEDLCCheckboxes(bool de_state) {
     if (de_state) {
@@ -2179,11 +2145,6 @@ void ToggleDlc(dlc civ_dlc, HWND hWnd)
             }
         }
     }
-    remaininglog_text.clear();
-    for (const auto& civ : civs) {
-        remaininglog_text += civ + L"\r\n";
-    }
-    SetWindowText(remaining_log, remaininglog_text.c_str());
 }
 
 void EnableDlc(dlc civ_dlc, HWND hWnd)

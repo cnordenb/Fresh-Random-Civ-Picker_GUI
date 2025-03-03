@@ -258,9 +258,40 @@ dlc old_dlc[] = { aok, aoc, forgotten, africans, rajas };
 edition edition_state = DE;
 
 bool custom_civ_pool = false;
-std::vector<std::pair<std::wstring, bool>> civ_enabled;
-std::vector<std::pair<std::wstring, enum edition>> civ_edition;
-std::vector<std::pair<std::wstring, enum dlc>> civ_dlc;
+std::pair<std::wstring, bool> civ_enabled[MAX_CIVS];
+
+std::pair<std::wstring, enum edition> civ_edition[MAX_CIVS] = {
+        {L"Armenians", DE}, {L"Aztecs", AOK}, {L"Bengalis", DE}, {L"Berbers", HD},
+        {L"Bohemians", DE}, {L"Britons", AOK}, {L"Bulgarians", DE}, {L"Burgundians", DE},
+        {L"Burmese", HD}, {L"Byzantines", AOK}, {L"Celts", AOK}, {L"Chinese", AOK},
+        {L"Cumans", DE}, {L"Dravidians", DE}, {L"Ethiopians", HD}, {L"Franks", AOK},
+        {L"Georgians", DE}, {L"Goths", AOK}, {L"Gurjaras", DE}, {L"Hindustanis", HD},
+        {L"Huns", AOK}, {L"Incas", HD}, {L"Italians", HD}, {L"Japanese", AOK},
+        {L"Khmer", HD}, {L"Koreans", AOK}, {L"Lithuanians", DE}, {L"Magyars", HD},
+        {L"Malay", HD}, {L"Malians", HD}, {L"Mayans", AOK}, {L"Mongols", AOK},
+        {L"Persians", AOK}, {L"Poles", DE}, {L"Portuguese", HD}, {L"Romans", DE},
+        {L"Saracens", AOK}, {L"Sicilians", DE}, {L"Slavs", HD}, {L"Spanish", AOK},
+        {L"Tatars", DE}, {L"Teutons", AOK}, {L"Turks", AOK}, {L"Vietnamese", HD},
+        {L"Vikings", AOK}
+};
+
+
+std::pair<std::wstring, enum dlc> civ_dlc[MAX_CIVS] = {
+        {L"Armenians", royals}, {L"Aztecs", aoc}, {L"Bengalis", india}, {L"Berbers", africans},
+        {L"Bohemians", dukes}, {L"Britons", aok}, {L"Bulgarians", khans}, {L"Burgundians", west},
+        {L"Burmese", rajas}, {L"Byzantines", aok}, {L"Celts", aok}, {L"Chinese", aok},
+        {L"Cumans", khans}, {L"Dravidians", india}, {L"Ethiopians", africans}, {L"Franks", aok},
+        {L"Georgians", royals}, {L"Goths", aok}, {L"Gurjaras", india}, {L"Hindustanis", forgotten},
+        {L"Huns", aoc}, {L"Incas", forgotten}, {L"Italians", forgotten}, {L"Japanese", aok},
+        {L"Khmer", rajas}, {L"Koreans", aoc}, {L"Lithuanians", khans}, {L"Magyars", forgotten},
+        {L"Malay", rajas}, {L"Malians", africans}, {L"Mayans", aoc}, {L"Mongols", aok},
+        {L"Persians", aok}, {L"Poles", dukes}, {L"Portuguese", africans}, {L"Romans", rome},
+        {L"Saracens", aok}, {L"Sicilians", west}, {L"Slavs", forgotten}, {L"Spanish", aoc},
+        {L"Tatars", khans}, {L"Teutons", aok}, {L"Turks", aok}, {L"Vietnamese", rajas},
+        {L"Vikings", aok}
+};
+
+
 std::wstring drawn_civs[MAX_CIVS] = { L"" };
 
 bool accessor_out_of_bounds = false;             // for unit testing
@@ -297,8 +328,6 @@ bool VerifiedLegacyCiv(const std::wstring &);
 
 void InitialiseCivs();
 void InitialiseCivStates();
-void InitialiseCivEditions();
-void InitialiseCivDLCs();
 void InitialiseCustomPoolCheckboxes(HWND);
 void AddCiv(const std::wstring &);
 void RemoveCiv(const std::wstring &);
