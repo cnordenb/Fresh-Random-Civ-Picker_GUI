@@ -329,7 +329,7 @@ HWND GetCivCheckbox(const std::wstring &);
 
 
 void UpdateDrawnLog(bool, bool, bool);
-void UpdateRemainingLog();
+void UpdateRemainingLog(bool);
 void ToggleRemainLog();
 
 bool DlcEmpty(dlc);

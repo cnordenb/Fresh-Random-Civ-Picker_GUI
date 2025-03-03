@@ -1,14 +1,15 @@
-FROM gcc:latest
+# Use a minimal Debian image
+FROM debian:latest  
 
-RUN apt-get update && apt-get install -y \
-	cmake \
-	libgtest-dev \
-	&& rm -rf /var/lib/apt/lists/*
+# Install Wine (for running Windows applications on Linux)
+RUN dpkg --add-architecture i386 && apt update && apt install -y wine wine32
 
+# Set working directory in the container
 WORKDIR /app
 
-COPY . /app
+# Copy the compiled Windows executable and assets
+COPY MyProject/Release/your_program.exe ./
+COPY MyProject/assets/ ./assets/
 
-RUN mkdir build && cd build && cmake .. && make
-
-CMD ["./build/Fresh-Random-Civ-Picker_CPPGUI"]
+# Run the application using Wine
+CMD ["wine", "/app/FRCP_.exe"]

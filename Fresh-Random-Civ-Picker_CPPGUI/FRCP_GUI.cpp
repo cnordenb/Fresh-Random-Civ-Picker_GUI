@@ -1423,7 +1423,7 @@ void ResetProgram()
     pool_altered = false;
     reset_state = true;
 
-    UpdateRemainingLog();
+    UpdateRemainingLog(false);
     UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
 
 
@@ -1466,7 +1466,7 @@ void DrawCiv()
 
 
     UpdateDrawnLog(false, true, false);
-    UpdateRemainingLog();
+    UpdateRemainingLog(false);
 
 
 
@@ -1748,7 +1748,7 @@ void AddCiv(std::wstring civ) {
         label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
         SetWindowText(label_corner, label_text.c_str());
 	    if (custom_max_civs == MAX_CIVS) custom_civ_pool = false;
-        UpdateRemainingLog();
+        UpdateRemainingLog(true);
         UpdateDrawnLog(false, false, false);
     }
 }
@@ -1762,7 +1762,7 @@ void RemoveCiv(std::wstring civ) {
 	    custom_max_civs--;
         label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
         SetWindowText(label_corner, label_text.c_str());
-        UpdateRemainingLog();
+        UpdateRemainingLog(true);
 		UpdateDrawnLog(false, false, false);
     }    
 }
@@ -2297,7 +2297,7 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted) {
         drawnlog_text = log_entry + drawnlog_text;
         if (iterator == custom_max_civs) drawnlog_text += L"\r\n";
         SetWindowText(drawn_log, drawnlog_text.c_str());
-        drawn_civs[iterator-1] = current_civ;
+        if (!start_state || start_state && GetCivStatus(current_civ)) drawn_civs[iterator-1] = current_civ;
     }
 
     else if (!reset_state && blankline_wanted)
@@ -2320,9 +2320,9 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted) {
     SetWindowText(label_drawncount, drawn_label.c_str());
 }
 
-void UpdateRemainingLog() {
+void UpdateRemainingLog(bool civ_pool_changed) {
 
-    if (reset_state) {
+    if (reset_state || civ_pool_changed) {
         std::vector<std::wstring> sorted_civs = civs;
         std::sort(sorted_civs.begin(), sorted_civs.end());
         remaininglog_text.clear();
@@ -2786,9 +2786,9 @@ void LoadLog(HWND hWnd)
         else if (readingDrawnCivs)
         {
             civs.erase(std::remove(civs.begin(), civs.end(), line), civs.end());
-            iterator++;
             current_civ = line;
-            UpdateDrawnLog(true, true, false);
+            if (GetCivStatus(current_civ)) iterator++;
+            UpdateDrawnLog(true, true, false);       
 		}
 		else if (readingEditionState)
 		{
@@ -2822,7 +2822,7 @@ void LoadLog(HWND hWnd)
 
 
     reset_state = true;
-    UpdateRemainingLog();
+    UpdateRemainingLog(false);
 
     UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
 
