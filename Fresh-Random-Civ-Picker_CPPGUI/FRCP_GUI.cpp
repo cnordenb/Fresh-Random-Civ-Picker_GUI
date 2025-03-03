@@ -1650,7 +1650,7 @@ void LoadImages() {
     	
 }
 
-HBITMAP FetchIcon(std::wstring civ_name) {
+HBITMAP FetchIcon(const std::wstring &civ_name) {
 
 
 
@@ -1734,7 +1734,7 @@ void PlayJingle(std::wstring &civ_name) {
     
 }
 
-bool VerifiedLegacyCiv(std::wstring civ) {
+bool VerifiedLegacyCiv(const std::wstring &civ) {
     if (civ == L"Aztecs" ||
         civ == L"Britons" ||
         civ == L"Byzantines" ||
@@ -1757,7 +1757,7 @@ bool VerifiedLegacyCiv(std::wstring civ) {
     else return false;
 }
 
-void AddCiv(std::wstring civ) {
+void AddCiv(const std::wstring &civ) {
 
     if (!GetCivStatus(civ)) {
         civs.push_back(civ);
@@ -1771,7 +1771,7 @@ void AddCiv(std::wstring civ) {
     }
 }
 
-void RemoveCiv(std::wstring civ) {
+void RemoveCiv(const std::wstring &civ) {
     if (GetCivStatus(civ)) {
         if (std::find(civs.begin(), civs.end(), civ) == civs.end()) iterator--;
         custom_civ_pool = true;
@@ -1802,7 +1802,7 @@ void InitialiseCivStates() {
     };
 }
 
-void SetCivStatus(const std::wstring civ_name, bool status) {
+void SetCivStatus(const std::wstring &civ_name, bool status) {
     for (auto &civ : civ_enabled) {
         if (civ.first == civ_name) {
             civ.second = status;
@@ -1811,7 +1811,7 @@ void SetCivStatus(const std::wstring civ_name, bool status) {
     }
 }
 
-bool GetCivStatus(const std::wstring civ_name) {
+bool GetCivStatus(const std::wstring &civ_name) {
     for (const auto &civ : civ_enabled) {
         if (civ.first == civ_name) {
             return civ.second;

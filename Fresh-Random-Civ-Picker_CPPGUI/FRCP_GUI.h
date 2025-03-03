@@ -270,7 +270,7 @@ HWND tab;
 std::vector<std::wstring> civs;
 
 // Function declarations
-HBITMAP FetchIcon(std::wstring);
+HBITMAP FetchIcon(const std::wstring &);
 void CreateTabs(HWND);
 void ShowTabComponents(int, HWND);
 
@@ -293,17 +293,17 @@ void LoadImages();
 
 void MuteSounds();
 void PlayJingle(std::wstring &);
-bool VerifiedLegacyCiv(std::wstring);
+bool VerifiedLegacyCiv(const std::wstring &);
 
 void InitialiseCivs();
 void InitialiseCivStates();
 void InitialiseCivEditions();
 void InitialiseCivDLCs();
 void InitialiseCustomPoolCheckboxes(HWND);
-void AddCiv(std::wstring);
-void RemoveCiv(std::wstring);
-void SetCivStatus(const std::wstring, bool);
-bool GetCivStatus(const std::wstring);
+void AddCiv(const std::wstring &);
+void RemoveCiv(const std::wstring &);
+void SetCivStatus(const std::wstring &, bool);
+bool GetCivStatus(const std::wstring &);
 void ShowAllPoolCheckboxes();
 void HideCustomPoolCheckboxes();
 void ShowHDPoolCheckboxes();
