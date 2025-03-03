@@ -1,6 +1,9 @@
 /*
 TODO
 
+
+- phase out redundant vectors for arrays
+- swap unnecessary arguments by value to arguments by reference
 - add hotkeys list info to options
 - civ info button and page(?)
 
@@ -45,7 +48,8 @@ void CreateTabs(HWND hWnd)
 // Function to show/hide components based on the selected tab
 void ShowTabComponents(int tabIndex, HWND hWnd)
 {
-    if (ui_sounds_enabled) PlaySound(L"tab_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+    if (startup && jingles_enabled) PlayJingle(current_civ);
+    else if (ui_sounds_enabled) PlaySound(L"tab_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
     if (tabIndex == 0)
     {
         current_tab = 0;
@@ -641,8 +645,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             LoadLog(hWnd);
             ValidateAllDlcToggles(hWnd);
 			ShowTabComponents(0, hWnd);
+            startup = false;
 
-            //ResetProgram();    // resetter is called in order to enable remaining civ indicator label (hLabel)
+
 
             brush_black = CreateSolidBrush(RGB(0, 0, 0));
             brush_white = CreateSolidBrush(RGB(255, 255, 255));
@@ -651,6 +656,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             EnableHotkeys(hWnd);
 
             if (draw_on_startup) DrawCiv();
+
             
             break;
         }
@@ -830,6 +836,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (wParam == HOTKEY_ID_R) ToggleAutoToggle(hWnd);
                 if (wParam == HOTKEY_ID_T) ToggleAutoReset(hWnd);
                 
+                if (ui_sounds_enabled)
+                {
+                    if (wParam > 15 && wParam < 23 ||
+                        wParam == HOTKEY_ID_T) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                }
+                   
+
                 if (edition_state == DE)
                 {
 					if (wParam == HOTKEY_ID_A) ToggleDlc(royals, hWnd);
@@ -919,6 +932,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (wParam == HOTKEY_ID_C) {
                 if (jingles_enabled) {
                     jingles_enabled = false;
+					MuteSounds();
                 }
                 else {
                     jingles_enabled = true;
@@ -1301,15 +1315,20 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
             ShowWindow(civ_icon, SW_HIDE);
         }
 
-
+        
 
         if (wmEvent == BN_CLICKED)
         {
+            if (wmId == IDC_CHECKBOX_JINGLES)
+            {
+                if (!jingles_enabled) MuteSounds();
+                else PlayJingle(current_civ);
+            }
+                
             switch (wmId)
             {
             case IDC_CHECKBOX_LABELS:
             case IDC_CHECKBOX_ICONS:
-            case IDC_CHECKBOX_JINGLES:
             case IDC_CHECKBOX_SOUNDS:
             case IDC_CHECKBOX_TOOLTIPS:
 			case IDC_CHECKBOX_STARTDRAW:
@@ -1338,7 +1357,6 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
   
         
         if (wmId == IDCANCEL || wmId == IDOK) {
-			if (jingles_enabled) PlayJingle(current_civ);
             EndDialog(hDlg, wmId);
             return(INT_PTR)TRUE;
         }
@@ -1695,7 +1713,7 @@ HBITMAP FetchIcon(std::wstring civ_name) {
     
 }
 
-void PlayJingle(std::wstring civ_name) {
+void PlayJingle(std::wstring &civ_name) {
 
 
 
@@ -2731,8 +2749,7 @@ void LoadLog(HWND hWnd)
     std::wifstream inFile(LOG_FILE_PATH);
     if (!inFile || !persistent_logging)
     {
-        ResetProgram();
-        startup = false;
+        if (!draw_on_startup) ResetProgram();
         return;
     }
 
@@ -2828,17 +2845,7 @@ void LoadLog(HWND hWnd)
 
 
 
-
-    if (jingles_enabled)
-    {/*
-        std::thread sound_thread(PlayJingle, current_civ);
-        sound_thread.detach();*/
-        PlayJingle(current_civ);
-    }
-
     
-
-    startup = false;
     inFile.close();
 }
 
@@ -2891,4 +2898,9 @@ void InitialiseCivs()
                 L"Lithuanians", L"Magyars", L"Malay", L"Malians", L"Mayans", L"Mongols", L"Persians",
                 L"Poles", L"Portuguese", L"Romans", L"Saracens", L"Sicilians", L"Slavs", L"Spanish",
                 L"Tatars", L"Teutons", L"Turks", L"Vietnamese", L"Vikings" };
+}
+
+void MuteSounds()
+{
+    PlaySound(L"mute.wav", NULL, SND_FILENAME | SND_ASYNC);
 }
