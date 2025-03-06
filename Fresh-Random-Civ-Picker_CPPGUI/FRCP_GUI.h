@@ -109,7 +109,7 @@ WCHAR window_class[MAX_LOADSTRING];            // the main window class name
 
 HWND label_corner, label_centre, label_drawncount, label_remainingcount;    // labels
 
-HWND button_draw, button_reset, button_enableall, button_disableall, button_clearlog, button_techtree;	    // buttons
+HWND button_draw, button_reset, button_enableall, button_disableall, button_clearlog, button_techtree, button_options;	    // buttons
 
 HWND drawn_log, remaining_log;				 // textfield for log tab
 

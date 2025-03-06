@@ -298,15 +298,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 L"",      // Button text 
                 WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP,  // Styles 
                 0,         // position deferred to wm_size
-                0,         
+                0,
                 60,
                 60,
                 hWnd,       // Parent window
-                (HMENU)IDC_BUTTON_TECHTREE,       
+                (HMENU)IDC_BUTTON_TECHTREE,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
-            SendMessageW(button_techtree, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_techtree);  
+            SendMessageW(button_techtree, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_techtree);
             AddTooltip(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
+
+            
+            button_options = CreateWindow(
+                L"BUTTON",  // Predefined class; Unicode assumed 
+                L"",      // Button text 
+                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP,  // Styles 
+                50,         // position deferred to wm_size
+                50,
+                60,
+                60,
+                hWnd,       // Parent window
+                (HMENU)IDC_BUTTON_OPTIONS,
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                NULL);      // Pointer not needed.
+            //SendMessageW(button_techtree, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_techtree);
+            //AddTooltip(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
             
             label_corner = CreateWindow(
                 L"STATIC",  // Predefined class; Unicode assumed
@@ -386,32 +402,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);  // Pointer not needed.
 
-            civ_icon = CreateWindowW(
-                L"STATIC",  // Predefined class; Unicode assumed
-                NULL,  // Label text
-                WS_VISIBLE | WS_CHILD | SS_BITMAP,  // Styles
-                0,  // x position (will be set in WM_SIZE)
-                0,  // y position (will be set in WM_SIZE)
-                104,  // Label width
-                104,  // Label height
-                hWnd,  // Parent window
-                NULL,
-                NULL,
-                NULL);  // Pointer not needed.
-
+            civ_icon = CreateWindow(
+                L"BUTTON",  // Predefined class; Unicode assumed 
+                L"",      // Button text 
+                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP,  // Styles 
+                0,         // position deferred to wm_size
+                0,
+                60,
+                60,
+                hWnd,       // Parent window
+                (HMENU)IDC_ICON_CIV,
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                NULL);      // Pointer not needed.
 
             edition_icon = CreateWindowW(
-                L"STATIC",  // Predefined class; Unicode assumed
-                NULL,  // Label text
-                WS_VISIBLE | WS_CHILD | SS_BITMAP,  // Styles
-                200,  // x position (will be set in WM_SIZE)
-                40,  // y position (will be set in WM_SIZE)
-                70,  // Label width
-                51,  // Label height
-                hWnd,  // Parent window
-                NULL,
-                NULL,
-                NULL);  // Pointer not needed.
+                L"BUTTON",  // Predefined class; Unicode assumed 
+                L"",      // Button text 
+                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP,  // Styles 
+                0,         // position deferred to wm_size
+                0,
+                60,
+                60,
+                hWnd,       // Parent window
+                (HMENU)IDC_ICON_EDITION,
+                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+                NULL);      // Pointer not needed.
 
             button_clearlog = CreateWindow(
                 L"BUTTON",  // Predefined class; Unicode assumed 
@@ -537,7 +552,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
             autoreset_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 230, 180, 20, IDC_CHECKBOX_AUTORESET, L"Auto-reset upon change");
-            autotoggle_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 0, 180, 20, IDC_CHECKBOX_AUTOTOGGLE, L"Auto-toggle older civs");
+            autotoggle_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 0, 170, 20, IDC_CHECKBOX_AUTOTOGGLE, L"Auto-toggle older civs");
 
 			if (!autoreset_enabled) CheckDlgButton(hWnd, IDC_CHECKBOX_AUTORESET, BST_UNCHECKED);
 			if (!autotoggle_enabled) CheckDlgButton(hWnd, IDC_CHECKBOX_AUTOTOGGLE, BST_UNCHECKED);
@@ -586,6 +601,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			SubclassButton(checkbox_forgotten);
 
 			SubclassButton(checkbox_aoc);
+
 
             royals_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
             rome_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
@@ -961,10 +977,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             hotkey_pressed = false;
 
-            int wmId = LOWORD(wParam);
-
-
-
+            int wmId = LOWORD(wParam);            
 
 
             // individual civ checkbox civ handlers in custom tab
@@ -1035,6 +1048,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				SetWindowText(drawn_log, L"");
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 break;
+            case IDC_BUTTON_OPTIONS:
+
+                break;
             case IDC_BUTTON_TECHTREE:
                 OpenTechTree();
                 break;
@@ -1085,6 +1101,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case IDC_CHECKBOX_AOC:
 				ToggleDlc(aoc, hWnd);
+                break;
+            case IDC_ICON_CIV:
+                if (jingles_enabled) PlayJingle(current_civ);
+                break;
+            case IDC_ICON_EDITION:
+                switch (edition_state)
+                {
+                case DE:
+                    ShellExecute(NULL, L"open", L"https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/", NULL, NULL, SW_SHOWNORMAL);
+                    break;
+                case HD:
+                    ShellExecute(NULL, L"open", L"https://store.steampowered.com/app/221380/Age_of_Empires_II_Retired/", NULL, NULL, SW_SHOWNORMAL);
+                    break;
+                case AOK:
+                    break;
+                }
                 break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
@@ -1432,7 +1464,7 @@ void ResetProgram()
 
     SetWindowText(label_corner, (L"0/" + std::to_wstring(custom_max_civs)).c_str());     // resets remaining civs label
     SetWindowText(label_centre, L"?");                                      // resets drawn civ label
-    SendMessageW(civ_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_random);
+    SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_random);
     if (jingles_enabled && !pool_altered) PlayJingle(current_civ);
     pool_altered = false;
     reset_state = true;
@@ -1475,7 +1507,7 @@ void DrawCiv()
 
 
     HBITMAP drawn_civ_icon = FetchIcon(current_civ);
-    SendMessageW(civ_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
+    SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
 
 
 
@@ -1917,6 +1949,7 @@ void ShowDrawTab(bool state, HWND hWnd) {
 	    if (labels_enabled) ShowWindow(label_centre, SW_SHOW);
 	    ShowWindow(label_corner, SW_SHOW);
 		ShowWindow(button_techtree, SW_SHOW);
+        ShowWindow(button_options, SW_SHOW);
 	}
     else if (state == false) {
         ShowWindow(civ_icon, SW_HIDE);
@@ -1926,6 +1959,7 @@ void ShowDrawTab(bool state, HWND hWnd) {
         ShowWindow(label_centre, SW_HIDE);
         ShowWindow(label_corner, SW_HIDE);
 		ShowWindow(button_techtree, SW_HIDE);
+        ShowWindow(button_options, SW_HIDE);
     }
 	
 }
@@ -2416,7 +2450,7 @@ void SetEditionState(HWND hWnd, edition edition)
             ShowDEDLCCheckboxes(true);
             ShowHDDLCCheckboxes(false);
             ShowAOCCheckbox(false);
-            SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_de);
+            SendMessageW(edition_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_de);
             edition_state = DE;
             ShowAllPoolCheckboxes();
             ValidateAllDlcToggles(hWnd);
@@ -2445,7 +2479,7 @@ void SetEditionState(HWND hWnd, edition edition)
                     EnableDlc(old_dlc[i], hWnd);
                 }
             }
-            SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_hd);
+            SendMessageW(edition_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_hd);
             edition_state = HD;
             ShowHDPoolCheckboxes();
             ValidateAllDlcToggles(hWnd);
@@ -2465,7 +2499,7 @@ void SetEditionState(HWND hWnd, edition edition)
             if (autotoggle_enabled && !startup) {
                 EnableDlc(aok, hWnd);
             }
-            SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_aok);
+            SendMessageW(edition_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_aok);
             edition_state = AOK;
             ShowAOCPoolCheckboxes();
             ValidateAllDlcToggles(hWnd);
@@ -2793,7 +2827,7 @@ void LoadLog(HWND hWnd)
 
 
     HBITMAP drawn_civ_icon = FetchIcon(current_civ);
-    SendMessageW(civ_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
+    SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
 
 
 

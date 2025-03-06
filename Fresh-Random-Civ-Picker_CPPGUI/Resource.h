@@ -45,6 +45,9 @@
 #define IDC_BUTTON_ENABLEALL			3
 #define IDC_BUTTON_DISABLEALL			4
 #define IDC_BUTTON_TECHTREE				67
+#define IDC_ICON_CIV					68
+#define IDC_ICON_EDITION				69
+#define IDC_BUTTON_OPTIONS				70
 #define IDM_GITHUB                      32772
 #define IDM_WEBVERSION                  32773
 #define IDM_OPTIONS                     32774
