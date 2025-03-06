@@ -210,12 +210,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 
     switch (message)
-    {
-        
-
+    {  
         case WM_CREATE:
         {
-
             // Initialize common controls
             INITCOMMONCONTROLSEX iccex;
             iccex.dwSize = sizeof(INITCOMMONCONTROLSEX);
@@ -226,157 +223,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 MessageBox(hWnd, L"Failed to initialize common controls.", L"Error", MB_OK | MB_ICONERROR);
                 return -1; // Return -1 to indicate failure
             }
-            
-            // Create the tooltip window
-            
-
-            for (int i = 0; i < hwnd_length; i++)
-            {
-                hwndTooltip[i] = CreateWindowEx(0, TOOLTIPS_CLASS, NULL,
-                    WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX,
-                    CW_USEDEFAULT, CW_USEDEFAULT,
-                    CW_USEDEFAULT, CW_USEDEFAULT,
-                    hWnd, NULL, instance, NULL);
-            }
-
-            
-
-
-
-
-            
-            if (!hwndTooltip) {
-                MessageBox(hWnd, L"Failed to create tooltip window.", L"Error", MB_OK | MB_ICONERROR);
-                return -1; // Return -1 to indicate failure
-            }
-
-            for (int i = 0; i < hwnd_length; i++)
-            {
-                SendMessage(hwndTooltip[i], TTM_SETMAXTIPWIDTH, 0, 300);
-            }
-
-
-
-
-           
+              
 
             LoadImages();
-            CreateTabs(hWnd);
-            
+            CreateTabs(hWnd);        
+            CreateImages(hWnd);
+            CreateCheckboxes(hWnd);
+            CreateButtons(hWnd);
+            CreateLabels(hWnd);
 
-
-            button_draw = CreateWindow(
-                L"BUTTON",  // Predefined class; Unicode assumed 
-                L"Draw",      // Button text 
-                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | TTF_TRACK,  // Styles 
-                0,         // x position 
-                0,         // y position 
-                BUTTON_WIDTH,
-                BUTTON_HEIGHT,
-                hWnd,       // Parent window
-                (HMENU)IDC_BUTTON_DRAW,       
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);      // Pointer not needed.
-            AddTooltip(button_draw, hwndTooltip[TOOLTIP_DRAW], StringCleaner(L"Draws a fresh random civilisation\nHotkey: Space"));
-
-
-            button_reset = CreateWindow(
-                L"BUTTON",  // Predefined class; Unicode assumed 
-                L"Reset",      // Button text 
-                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
-                10,         // x position 
-                200,         // y position 
-                BUTTON_WIDTH,
-                BUTTON_HEIGHT,
-                hWnd,       // Parent window
-                (HMENU)IDC_BUTTON_RESET,       
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);      // Pointer not needed.
-            AddTooltip(button_reset, hwndTooltip[TOOLTIP_RESET], StringCleaner(L"Resets the pool of drawn civs and renders all enabled civs available\nHotkey: Enter"));
-
-
-            button_techtree = CreateWindow(
-                L"BUTTON",  // Predefined class; Unicode assumed 
-                L"",      // Button text 
-                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP,  // Styles 
-                0,         // position deferred to wm_size
-                0,
-                60,
-                60,
-                hWnd,       // Parent window
-                (HMENU)IDC_BUTTON_TECHTREE,
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);      // Pointer not needed.
-            SendMessageW(button_techtree, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_techtree);
-            AddTooltip(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
-
-            
-            button_options = CreateWindow(
-                L"BUTTON",  // Predefined class; Unicode assumed 
-                L"",      // Button text 
-                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP,  // Styles 
-                89,
-                85,
-                60,
-                60,
-                hWnd,       // Parent window
-                (HMENU)IDC_BUTTON_OPTIONS,
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);      // Pointer not needed.
-            //SendMessageW(button_techtree, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_techtree);
-            //AddTooltip(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
-            
-            label_corner = CreateWindow(
-                L"STATIC",  // Predefined class; Unicode assumed
-                L"",  // Label text from variable..
-                WS_VISIBLE | WS_CHILD,  // Styles
-                0,  // x position (will be set in WM_SIZE)
-                0,  // y position (will be set in WM_SIZE)
-                30,  // Label width
-                15,  // Label height
-                tab,  // Parent window
-                NULL,  // No menu.
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);  // Pointer not needed
-
-            label_centre = CreateWindow(
-                L"STATIC",  // Predefined class; Unicode assumed
-                L"?",  // Label text
-                WS_VISIBLE | WS_CHILD,  // Styles
-                0,  // x position (will be set in WM_SIZE)
-                0,  // y position (will be set in WM_SIZE)
-                100,  // Label width
-                15,  // Label height
-                hWnd,  // Parent window
-                NULL,  // No menu.
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);  // Pointer not needed.
-
-            label_drawncount = CreateWindow(
-                L"STATIC",  // Predefined class; Unicode assumed
-                L"",  // Label text
-                WS_VISIBLE | WS_CHILD,  // Styles
-                100,  // x position (will be set in WM_SIZE)
-                25,  // y position (will be set in WM_SIZE)
-                100,  // Label width
-                15,  // Label height
-                hWnd,  // Parent window
-                NULL,  // No menu.
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);  // Pointer not needed.
-
-            label_remainingcount = CreateWindow(
-                L"STATIC",  // Predefined class; Unicode assumed
-                L"",  // Label text
-                WS_VISIBLE | WS_CHILD,  // Styles
-                0,  // x position (will be set in WM_SIZE)
-                25,  // y position (will be set in WM_SIZE)
-                100,  // Label width
-                15,  // Label height
-                hWnd,  // Parent window
-                NULL,  // No menu.
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);  // Pointer not needed.
 
             drawn_log = CreateWindow(
                 L"EDIT",  // Predefined class; Unicode assumed
@@ -404,73 +259,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);  // Pointer not needed.
 
-            civ_icon = CreateWindow(
-                L"BUTTON",  // Predefined class; Unicode assumed 
-                L"",      // Button text 
-                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP,  // Styles 
-                0,         // position deferred to wm_size
-                0,
-                60,
-                60,
-                hWnd,       // Parent window
-                (HMENU)IDC_ICON_CIV,
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);      // Pointer not needed.
-
-            edition_icon = CreateWindowW(
-                L"BUTTON",  // Predefined class; Unicode assumed 
-                L"",      // Button text 
-                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP,  // Styles 
-                0,         // position deferred to wm_size
-                0,
-                60,
-                60,
-                hWnd,       // Parent window
-                (HMENU)IDC_ICON_EDITION,
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);      // Pointer not needed.
-
-            button_clearlog = CreateWindow(
-                L"BUTTON",  // Predefined class; Unicode assumed 
-                L"Clear Log",      // Button text 
-                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
-				0,         // WM_SIZE will set x position
-				0,         // WM_SIZE will set y position
-                BUTTON_WIDTH,
-                BUTTON_HEIGHT,
-                hWnd,       // Parent window
-                (HMENU)IDC_BUTTON_CLEARLOG,       
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);      // Pointer not needed.
-            AddTooltip(button_clearlog, hwndTooltip[TOOLTIP_CLEAR], StringCleaner(L"Clears the log of previously drawn civs\nHotkey: Q"));
-
-            button_enableall = CreateWindow(
-                L"BUTTON",  // Predefined class; Unicode assumed 
-                L"Enable All",      // Button text 
-                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
-                10,         // x position 
-                340,         // y position 
-                BUTTON_WIDTH,
-                BUTTON_HEIGHT,
-                hWnd,       // Parent window
-                (HMENU)IDC_BUTTON_ENABLEALL,       // No menu.
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);      // Pointer not needed.
-            AddTooltip(button_enableall, hwndTooltip[TOOLTIP_ENABLEALL], StringCleaner(L"Enables all civilisations so that they are made available in the pool of civilisations for drawing\nHotkey: Space"));
-
-            button_disableall = CreateWindow(
-                L"BUTTON",  // Predefined class; Unicode assumed 
-                L"Disable All",      // Button text 
-                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
-                125,         // x position 
-                340,         // y position 
-                BUTTON_WIDTH,
-                BUTTON_HEIGHT,
-                hWnd,       // Parent window
-                (HMENU)IDC_BUTTON_DISABLEALL,       // No menu.
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);      // Pointer not needed.
-            AddTooltip(button_disableall, hwndTooltip[TOOLTIP_DISABLEALL], StringCleaner(L"Disables all civilisations so that they are removed from the pool of civilisations for drawing\nHotkey: Enter"));
+            
 
 
             radiobutton_de = CreateWindow(
@@ -485,7 +274,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_RADIO_DE,       // No menu.
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
-			AddTooltip(radiobutton_de, hwndTooltip[TOOLTIP_DE], StringCleaner(L"Selects the Definitive Edition (2019) civilisation pool\nHotkey: Q"));
 
             radiobutton_hd = CreateWindow(
                 L"BUTTON",  // Predefined class; Unicode assumed 
@@ -499,7 +287,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_RADIO_HD,
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);
-			AddTooltip(radiobutton_hd, hwndTooltip[TOOLTIP_HD], StringCleaner(L"Selects the HD Edition (2013) civilisation pool\nHotkey: W"));
 
             radiobutton_aok = CreateWindow(
                 L"BUTTON",  // Predefined class; Unicode assumed
@@ -513,170 +300,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 (HMENU)IDC_RADIO_AOK,       // No menu.
                 (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
                 NULL);      // Pointer not needed.
-			AddTooltip(radiobutton_aok, hwndTooltip[TOOLTIP_AOK], StringCleaner(L"Selects the Age of Kings (1999) civilisation pool\nHotkey: E"));
 
             // Subclass the buttons
-			SubclassButton(button_draw);
-			SubclassButton(button_reset);
-			SubclassButton(button_clearlog);
-            SubclassButton(button_techtree);
 			
-			SubclassButton(button_enableall);
-			SubclassButton(button_disableall);
 
-            SubclassButton(radiobutton_de);
-			SubclassButton(radiobutton_hd);
-			SubclassButton(radiobutton_aok);
-
-
-
-
-
-			checkbox_showremainlog = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 230, 180, 20, IDC_CHECKBOX_REMAINLOG, L"Show");
-			AddTooltip(checkbox_showremainlog, hwndTooltip[TOOLTIP_REMAININGTOGGLE], StringCleaner(L"Toggles the display of the remaining civs log\nHotkey: W"));
-            CheckDlgButton(hWnd, IDC_CHECKBOX_REMAINLOG, remainlog_enabled ? BST_CHECKED : BST_UNCHECKED);
 
  
-            SubclassButton(checkbox_showremainlog);
+
 
             CheckRadioButton(hWnd, IDC_RADIO_DE, IDC_RADIO_AOK, IDC_RADIO_DE);
 
-            // defined spot coordinates for the 45 individual civ checkboxes in custom tab
-			int row[] = { 30, 50, 70, 90, 110, 130, 150, 170, 190 };
-			int column[] = { 10, 112, 214, 316, 418 };
 
-            // creating individual civ checkboxes for custom tab
-			for (int i = 0; i < MAX_CIVS; i++)
-			{
-				civ_checkbox[i] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), column[i % 5], row[i / 5], 100, 20, i + 5, civ_index[i].c_str());
-			}
+			
+            SubclassButtons();
+            CreateTooltips(hWnd);
+            AddTooltips();
 
 
-
-            autoreset_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 230, 180, 20, IDC_CHECKBOX_AUTORESET, L"Auto-reset upon change");
-            autotoggle_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 0, 170, 20, IDC_CHECKBOX_AUTOTOGGLE, L"Auto-toggle older civs");
-
-			if (!autoreset_enabled) CheckDlgButton(hWnd, IDC_CHECKBOX_AUTORESET, BST_UNCHECKED);
-			if (!autotoggle_enabled) CheckDlgButton(hWnd, IDC_CHECKBOX_AUTOTOGGLE, BST_UNCHECKED);
-
-			AddTooltip(autoreset_checkbox, hwndTooltip[TOOLTIP_AUTORESET], StringCleaner(L"Automatically resets the pool of drawn civs when the civilisation pool is changed\nHotkey: T"));
-			AddTooltip(autotoggle_checkbox, hwndTooltip[TOOLTIP_AUTOTOGGLE], StringCleaner(L"Toggles older civs as well as the automatic enabling of older civ when switching between Editions\nHotkey: R"));
-
-			SubclassButton(autoreset_checkbox);
-			SubclassButton(autotoggle_checkbox);
-
-            checkbox_royals = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, -96, 160, 20, IDC_CHECKBOX_ROYALS, L"The Mountain Royals");
-            checkbox_rome = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, -76, 160, 20, IDC_CHECKBOX_ROME, L"Return of Rome");
-            checkbox_india = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, -56, 160, 20, IDC_CHECKBOX_INDIA, L"Dynasties of India");
-            checkbox_dukes = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, -36, 160, 20, IDC_CHECKBOX_DUKES, L"Dawn of the Dukes");
-            checkbox_west = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, -16, 160, 20, IDC_CHECKBOX_WEST, L"Lords of the West");
-            checkbox_khans = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, 4, 160, 20, IDC_CHECKBOX_KHANS, L"The Last Khans");
-
-            checkbox_rajas = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 383, -84, 145, 20, IDC_CHECKBOX_RAJAS, L"Rise of Rajas");
-            checkbox_africans = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 383, -51, 145, 20, IDC_CHECKBOX_AFRICANS, L"African Kingdoms");
-            checkbox_forgotten = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 383, -16, 145, 20, IDC_CHECKBOX_FORGOTTEN, L"The Forgotten");
-
-            checkbox_aoc = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 388, -56, 140, 20, IDC_CHECKBOX_AOC, L"The Conquerors");
-
-			AddTooltip(checkbox_royals, hwndTooltip[TOOLTIP_ROYALS], StringCleaner(L"Toggles The Mountain Royals civilisations\n(Armenians, Georgians)\nHotkey: A"));
-			AddTooltip(checkbox_rome, hwndTooltip[TOOLTIP_ROME], StringCleaner(L"Toggles Return of Rome civilisation\n(Romans)\nHotkey: S"));
-			AddTooltip(checkbox_india, hwndTooltip[TOOLTIP_INDIA], StringCleaner(L"Toggles Dynasties of India civilisations\n(Bengalis, Dravidians, Gurjaras)\nHotkey: D"));
-			AddTooltip(checkbox_dukes, hwndTooltip[TOOLTIP_DUKES], StringCleaner(L"Toggles Dawn of the Dukes civilisations\n(Bohemians, Poles)\nHotkey: F"));
-			AddTooltip(checkbox_west, hwndTooltip[TOOLTIP_WEST], StringCleaner(L"Toggles Lords of the West civilisations\n(Burgundians, Sicilians)\nHotkey: G"));
-			AddTooltip(checkbox_khans, hwndTooltip[TOOLTIP_KHANS], StringCleaner(L"Toggles The Last Khans civilisations\n(Bulgarians, Cumans, Lithuanians, Tatars)\nHotkey: H"));
-
-			AddTooltip(checkbox_rajas, hwndTooltip[TOOLTIP_RAJAS], StringCleaner(L"Toggles Rise of Rajas civilisations\n(Burmese, Khmer, Malay, Vietnamese)\nHotkey: A"));
-			AddTooltip(checkbox_africans, hwndTooltip[TOOLTIP_AFRICANS], StringCleaner(L"Toggles African Kingdoms civilisations\n(Berbers, Ethiopians, Malians, Portuguese)\nHotkey: S"));
-			AddTooltip(checkbox_forgotten, hwndTooltip[TOOLTIP_FORGOTTEN], StringCleaner(L"Toggles The Forgotten civilisations\n(Incas, Hindustanis, Italians, Magyars, Slavs)\nHotkey: D"));
-
-			AddTooltip(checkbox_aoc, hwndTooltip[TOOLTIP_AOC], StringCleaner(L"Toggles The Conquerors civilisations\n(Aztecs, Huns, Koreans, Mayans, Spanish)\nHotkey: A"));
-
-            SubclassButton(checkbox_royals);
-			SubclassButton(checkbox_rome);
-			SubclassButton(checkbox_india);
-			SubclassButton(checkbox_dukes);
-			SubclassButton(checkbox_west);
-			SubclassButton(checkbox_khans);
-
-			SubclassButton(checkbox_rajas);
-			SubclassButton(checkbox_africans);
-			SubclassButton(checkbox_forgotten);
-
-			SubclassButton(checkbox_aoc);
-
-
-            royals_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
-            rome_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
-            india_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
-            dukes_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
-            west_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
-            khans_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
-
-            rajas_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
-            africans_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
-            forgotten_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
-
-            aoc_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
-
-            SendMessage(royals_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_royals);
-            SendMessage(rome_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_rome);
-            SendMessage(india_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_india);
-            SendMessage(dukes_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_dukes);
-            SendMessage(west_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_west);
-            SendMessage(khans_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_khans);
-
-            SendMessage(rajas_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_rajas);
-            SendMessage(africans_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_africans);
-            SendMessage(forgotten_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_forgotten);
-
-            SendMessage(aoc_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_aoc);
-
-
-            SetWindowPos(royals_icon, NULL, 345, 25, 18, 18, SWP_NOZORDER);
-            SetWindowPos(rome_icon, NULL, 345, 45, 18, 18, SWP_NOZORDER);
-            SetWindowPos(india_icon, NULL, 345, 65, 18, 18, SWP_NOZORDER);
-            SetWindowPos(dukes_icon, NULL, 345, 85, 18, 18, SWP_NOZORDER);
-            SetWindowPos(west_icon, NULL, 345, 105, 18, 18, SWP_NOZORDER);
-            SetWindowPos(khans_icon, NULL, 345, 125, 18, 18, SWP_NOZORDER);
-
-            SetWindowPos(rajas_icon, NULL, 350, 30, 30, 30, SWP_NOZORDER);
-            SetWindowPos(africans_icon, NULL, 350, 65, 30, 30, SWP_NOZORDER);
-            SetWindowPos(forgotten_icon, NULL, 350, 100, 30, 30, SWP_NOZORDER);
-
-            SetWindowPos(aoc_icon, NULL, 340, 50, 45, 45, SWP_NOZORDER);
-
-
-            SendMessageW(edition_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_de);
-            HideCustomPoolCheckboxes();
-            ShowWindow(civ_icon, SW_HIDE);
-            SetWindowPos(edition_icon, NULL, 190, 30, 128, 93, SWP_NOZORDER);
-            
-
-            
-            
+            SetEditionState(hWnd, DE);   
 
 
             if (persistent_logging)
             {
 				LoadLog(hWnd);
                 ValidateAllDlcToggles(hWnd);
-            }
-                
+            }               
             
 			ShowTabComponents(0, hWnd);
             startup = false;
 
-
-
             brush_black = CreateSolidBrush(RGB(0, 0, 0));
             brush_white = CreateSolidBrush(RGB(255, 255, 255));
-
 
             EnableHotkeys(hWnd);
 
             if (draw_on_startup) DrawCiv();
 			else if (!persistent_logging) ResetProgram();
-
             
             break;
         }
@@ -710,6 +369,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			SetWindowPos(label_remainingcount, NULL, (width / 2) + 60, 25, 130, 15, SWP_NOZORDER);                           // drawn civ label anchored to top right corner
 			SetWindowPos(checkbox_showremainlog, NULL, (width / 2) + 190, 25, 60, 15, SWP_NOZORDER);                           // drawn civ label anchored to top right corner
             SetWindowPos(remaining_log, NULL, (width / 2) + 60, 60, width - (width / 2) - 65, height - 70, SWP_NOZORDER);                   // log text field anchored to window size
+
+            SetWindowPos(royals_icon, NULL, 345, 25, 18, 18, SWP_NOZORDER);
+            SetWindowPos(rome_icon, NULL, 345, 45, 18, 18, SWP_NOZORDER);
+            SetWindowPos(india_icon, NULL, 345, 65, 18, 18, SWP_NOZORDER);
+            SetWindowPos(dukes_icon, NULL, 345, 85, 18, 18, SWP_NOZORDER);
+            SetWindowPos(west_icon, NULL, 345, 105, 18, 18, SWP_NOZORDER);
+            SetWindowPos(khans_icon, NULL, 345, 125, 18, 18, SWP_NOZORDER);
+
+            SetWindowPos(rajas_icon, NULL, 350, 30, 30, 30, SWP_NOZORDER);
+            SetWindowPos(africans_icon, NULL, 350, 65, 30, 30, SWP_NOZORDER);
+            SetWindowPos(forgotten_icon, NULL, 350, 100, 30, 30, SWP_NOZORDER);
+
+            SetWindowPos(aoc_icon, NULL, 340, 50, 45, 45, SWP_NOZORDER);
+
+            SetWindowPos(edition_icon, NULL, 190, 30, 128, 93, SWP_NOZORDER);
+
 
             break;
         }
@@ -982,6 +657,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				}
 			}             
 
+
+            if (hOptionsDlg != NULL)
+            {
+                SendMessage(hOptionsDlg, WM_HOTKEY, wParam, lParam);
+                return 0;
+            }
                           
 
             break;
@@ -2920,30 +2601,226 @@ void OpenHotkeys(HWND hWnd)
 INT_PTR CALLBACK HotkeysDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 {
-    
-    //static WNDPROC oldProc;
-
     switch (message)
     {
-    case WM_INITDIALOG:
-    {
-        return(INT_PTR)TRUE;
-    }
-    case WM_COMMAND:
-    {
-        int wmId = LOWORD(wParam);
-        int wmEvent = HIWORD(wParam);
-
-        if (wmId == IDCANCEL || wmId == IDOK) {
-            EndDialog(hDlg, wmId);
+        case WM_INITDIALOG:
+        {
             return(INT_PTR)TRUE;
         }
-        break;
+        case WM_COMMAND:
+        {
+            int wmId = LOWORD(wParam);
+            int wmEvent = HIWORD(wParam);
 
-    }
+            if (wmId == IDCANCEL || wmId == IDOK) {
+                EndDialog(hDlg, wmId);
+                return(INT_PTR)TRUE;
+            }
+            break;
 
-    }
-
-    
+        }
+    }    
     return (INT_PTR)FALSE;
+}
+
+
+void SubclassButtons()
+{
+    SubclassButton(button_draw);
+    SubclassButton(button_reset);
+    SubclassButton(button_clearlog);
+    SubclassButton(checkbox_showremainlog);
+    SubclassButton(button_techtree);
+
+    SubclassButton(button_enableall);
+    SubclassButton(button_disableall);
+
+    SubclassButton(radiobutton_de);
+    SubclassButton(radiobutton_hd);
+    SubclassButton(radiobutton_aok);
+
+    SubclassButton(autoreset_checkbox);
+    SubclassButton(autotoggle_checkbox);
+
+    SubclassButton(checkbox_royals);
+    SubclassButton(checkbox_rome);
+    SubclassButton(checkbox_india);
+    SubclassButton(checkbox_dukes);
+    SubclassButton(checkbox_west);
+    SubclassButton(checkbox_khans);
+
+    SubclassButton(checkbox_rajas);
+    SubclassButton(checkbox_africans);
+    SubclassButton(checkbox_forgotten);
+
+    SubclassButton(checkbox_aoc);
+}
+
+void CreateTooltips(HWND hWnd)
+{
+    for (int i = 0; i < hwnd_length; i++)
+    {
+        hwndTooltip[i] = CreateWindowEx(0, TOOLTIPS_CLASS, NULL,
+            WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX,
+            CW_USEDEFAULT, CW_USEDEFAULT,
+            CW_USEDEFAULT, CW_USEDEFAULT,
+            hWnd, NULL, instance, NULL);
+    }
+
+    if (!hwndTooltip) {
+        MessageBox(hWnd, L"Failed to create tooltip window.", L"Error", MB_OK | MB_ICONERROR);
+        return;
+    }
+    for (int i = 0; i < hwnd_length; i++)
+    {
+        SendMessage(hwndTooltip[i], TTM_SETMAXTIPWIDTH, 0, 300);
+    }
+}
+
+void AddTooltips()
+{
+    AddTooltip(button_draw, hwndTooltip[TOOLTIP_DRAW], StringCleaner(L"Draws a fresh random civilisation\nHotkey: Space"));
+    AddTooltip(button_reset, hwndTooltip[TOOLTIP_RESET], StringCleaner(L"Resets the pool of drawn civs and renders all enabled civs available\nHotkey: Enter"));
+    //AddTooltip(button_options, hwndTooltip[TOOLTIP_OPTIONS], StringCleaner(L"Opens options\nHotkey: Q"));
+    AddTooltip(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
+    AddTooltip(button_clearlog, hwndTooltip[TOOLTIP_CLEAR], StringCleaner(L"Clears the log of previously drawn civs\nHotkey: Q"));
+    AddTooltip(button_enableall, hwndTooltip[TOOLTIP_ENABLEALL], StringCleaner(L"Enables all civilisations so that they are made available in the pool of civilisations for drawing\nHotkey: Space"));
+    AddTooltip(button_disableall, hwndTooltip[TOOLTIP_DISABLEALL], StringCleaner(L"Disables all civilisations so that they are removed from the pool of civilisations for drawing\nHotkey: Enter"));
+    AddTooltip(radiobutton_de, hwndTooltip[TOOLTIP_DE], StringCleaner(L"Selects the Definitive Edition (2019) civilisation pool\nHotkey: Q"));
+    AddTooltip(radiobutton_hd, hwndTooltip[TOOLTIP_HD], StringCleaner(L"Selects the HD Edition (2013) civilisation pool\nHotkey: W"));
+    AddTooltip(radiobutton_aok, hwndTooltip[TOOLTIP_AOK], StringCleaner(L"Selects the Age of Kings (1999) civilisation pool\nHotkey: E"));
+    AddTooltip(checkbox_showremainlog, hwndTooltip[TOOLTIP_REMAININGTOGGLE], StringCleaner(L"Toggles the display of the remaining civs log\nHotkey: W"));
+
+    AddTooltip(checkbox_royals, hwndTooltip[TOOLTIP_ROYALS], StringCleaner(L"Toggles The Mountain Royals civilisations\n(Armenians, Georgians)\nHotkey: A"));
+    AddTooltip(checkbox_rome, hwndTooltip[TOOLTIP_ROME], StringCleaner(L"Toggles Return of Rome civilisation\n(Romans)\nHotkey: S"));
+    AddTooltip(checkbox_india, hwndTooltip[TOOLTIP_INDIA], StringCleaner(L"Toggles Dynasties of India civilisations\n(Bengalis, Dravidians, Gurjaras)\nHotkey: D"));
+    AddTooltip(checkbox_dukes, hwndTooltip[TOOLTIP_DUKES], StringCleaner(L"Toggles Dawn of the Dukes civilisations\n(Bohemians, Poles)\nHotkey: F"));
+    AddTooltip(checkbox_west, hwndTooltip[TOOLTIP_WEST], StringCleaner(L"Toggles Lords of the West civilisations\n(Burgundians, Sicilians)\nHotkey: G"));
+    AddTooltip(checkbox_khans, hwndTooltip[TOOLTIP_KHANS], StringCleaner(L"Toggles The Last Khans civilisations\n(Bulgarians, Cumans, Lithuanians, Tatars)\nHotkey: H"));
+
+    AddTooltip(checkbox_rajas, hwndTooltip[TOOLTIP_RAJAS], StringCleaner(L"Toggles Rise of Rajas civilisations\n(Burmese, Khmer, Malay, Vietnamese)\nHotkey: A"));
+    AddTooltip(checkbox_africans, hwndTooltip[TOOLTIP_AFRICANS], StringCleaner(L"Toggles African Kingdoms civilisations\n(Berbers, Ethiopians, Malians, Portuguese)\nHotkey: S"));
+    AddTooltip(checkbox_forgotten, hwndTooltip[TOOLTIP_FORGOTTEN], StringCleaner(L"Toggles The Forgotten civilisations\n(Incas, Hindustanis, Italians, Magyars, Slavs)\nHotkey: D"));
+
+    AddTooltip(checkbox_aoc, hwndTooltip[TOOLTIP_AOC], StringCleaner(L"Toggles The Conquerors civilisations\n(Aztecs, Huns, Koreans, Mayans, Spanish)\nHotkey: A"));
+
+}
+
+void CreateCheckboxes(HWND hWnd)
+{
+    checkbox_showremainlog = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 230, 180, 20, IDC_CHECKBOX_REMAINLOG, L"Show");
+    CheckDlgButton(hWnd, IDC_CHECKBOX_REMAINLOG, remainlog_enabled ? BST_CHECKED : BST_UNCHECKED);
+
+    int row[] = { 30, 50, 70, 90, 110, 130, 150, 170, 190 };
+    int column[] = { 10, 112, 214, 316, 418 };
+
+    for (int i = 0; i < MAX_CIVS; i++)
+    {
+        civ_checkbox[i] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), column[i % 5], row[i / 5], 100, 20, i + 5, civ_index[i].c_str());
+    }
+
+
+
+    autoreset_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 230, 180, 20, IDC_CHECKBOX_AUTORESET, L"Auto-reset upon change");
+    autotoggle_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 0, 170, 20, IDC_CHECKBOX_AUTOTOGGLE, L"Auto-toggle older civs");
+
+    if (!autoreset_enabled) CheckDlgButton(hWnd, IDC_CHECKBOX_AUTORESET, BST_UNCHECKED);
+    if (!autotoggle_enabled) CheckDlgButton(hWnd, IDC_CHECKBOX_AUTOTOGGLE, BST_UNCHECKED);
+
+
+    checkbox_royals = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, -96, 160, 20, IDC_CHECKBOX_ROYALS, L"The Mountain Royals");
+    checkbox_rome = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, -76, 160, 20, IDC_CHECKBOX_ROME, L"Return of Rome");
+    checkbox_india = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, -56, 160, 20, IDC_CHECKBOX_INDIA, L"Dynasties of India");
+    checkbox_dukes = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, -36, 160, 20, IDC_CHECKBOX_DUKES, L"Dawn of the Dukes");
+    checkbox_west = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, -16, 160, 20, IDC_CHECKBOX_WEST, L"Lords of the West");
+    checkbox_khans = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, 4, 160, 20, IDC_CHECKBOX_KHANS, L"The Last Khans");
+
+    checkbox_rajas = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 383, -84, 145, 20, IDC_CHECKBOX_RAJAS, L"Rise of Rajas");
+    checkbox_africans = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 383, -51, 145, 20, IDC_CHECKBOX_AFRICANS, L"African Kingdoms");
+    checkbox_forgotten = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 383, -16, 145, 20, IDC_CHECKBOX_FORGOTTEN, L"The Forgotten");
+
+    checkbox_aoc = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 388, -56, 140, 20, IDC_CHECKBOX_AOC, L"The Conquerors");
+}
+
+void CreateImages(HWND hWnd)
+{
+    civ_icon = CreateWindow(L"BUTTON", L"", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP, 0, 0, 60, 60, hWnd, (HMENU)IDC_ICON_CIV, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+
+    edition_icon = CreateWindowW(L"BUTTON", L"", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP, 0, 0, 60, 60, hWnd, (HMENU)IDC_ICON_EDITION, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+
+    royals_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
+    rome_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
+    india_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
+    dukes_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
+    west_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
+    khans_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
+
+    rajas_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
+    africans_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
+    forgotten_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
+
+    aoc_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
+
+    SendMessage(royals_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_royals);
+    SendMessage(rome_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_rome);
+    SendMessage(india_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_india);
+    SendMessage(dukes_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_dukes);
+    SendMessage(west_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_west);
+    SendMessage(khans_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_khans);
+
+    SendMessage(rajas_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_rajas);
+    SendMessage(africans_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_africans);
+    SendMessage(forgotten_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_forgotten);
+
+    SendMessage(aoc_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_aoc);
+}
+
+void CreateButtons(HWND hWnd)
+{
+    button_draw = CreateWindow(L"BUTTON", L"Draw", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | TTF_TRACK, 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_DRAW, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+
+    button_reset = CreateWindow(L"BUTTON", L"Reset", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 200, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_RESET, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+
+    button_techtree = CreateWindow(L"BUTTON", L"", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP, 0, 0, 60, 60, hWnd, (HMENU)IDC_BUTTON_TECHTREE, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    SendMessageW(button_techtree, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_techtree);
+
+    button_options = CreateWindow(L"BUTTON", L"", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP, 89, 85, 60, 60, hWnd, (HMENU)IDC_BUTTON_OPTIONS, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    //SendMessageW(button_techtree, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_techtree); 
+
+    button_clearlog = CreateWindow(L"BUTTON", L"Clear Log", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_CLEARLOG, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+
+    button_enableall = CreateWindow(L"BUTTON", L"Enable All", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 340, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_ENABLEALL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+
+    button_disableall = CreateWindow(L"BUTTON", L"Disable All", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 125, 340, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_DISABLEALL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+}
+
+void CreateLabels(HWND hWnd)
+{
+
+    label_corner = CreateWindow(
+        L"STATIC",  // Predefined class; Unicode assumed
+        L"",  // Label text from variable..
+        WS_VISIBLE | WS_CHILD,  // Styles
+        0,  // x position (will be set in WM_SIZE)
+        0,  // y position (will be set in WM_SIZE)
+        30,  // Label width
+        15,  // Label height
+        tab,  // Parent window
+        NULL,  // No menu.
+        (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
+        NULL);  // Pointer not needed
+
+    label_centre = CreateWindow(
+        L"STATIC",  // Predefined class; Unicode assumed
+        L"?",  // Label text
+        WS_VISIBLE | WS_CHILD,  // Styles
+        0,  // x position (will be set in WM_SIZE)
+        0,  // y position (will be set in WM_SIZE)
+        100,  // Label width
+        15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+
+    label_drawncount = CreateWindow(L"STATIC", L"", WS_VISIBLE | WS_CHILD, 100, 25, 100, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+
+    label_remainingcount = CreateWindow(
+        L"STATIC", L"", WS_VISIBLE | WS_CHILD, 0, 25, 100, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
 }

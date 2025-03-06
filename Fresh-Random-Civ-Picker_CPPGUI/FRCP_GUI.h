@@ -118,6 +118,8 @@ HWND civ_icon, edition_icon;						// icons
 
 HWND checkbox_showremainlog;
 
+HWND hOptionsDlg = NULL;
+
 
 HWND checkbox_armenians, checkbox_aztecs, checkbox_bengalis, checkbox_berbers, checkbox_bohemians,       // checkboxes for custom civ pool tab
 checkbox_britons, checkbox_bulgarians, checkbox_burgundians, checkbox_burmese, checkbox_byzantines,
@@ -341,6 +343,15 @@ void DLCToggles(edition);
 void OpenTechTree();
 void OpenOptions(HWND);
 void OpenHotkeys(HWND);
+
+void CreateCheckboxes(HWND);
+void CreateImages(HWND);
+void CreateButtons(HWND);
+void CreateLabels(HWND);
+
+void SubclassButtons();
+void AddTooltips();
+void CreateTooltips(HWND);
 
 edition GetCivEdition(const std::wstring &);
 dlc GetCivDLC(const std::wstring &);
