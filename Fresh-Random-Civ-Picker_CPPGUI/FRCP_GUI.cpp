@@ -315,8 +315,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 L"BUTTON",  // Predefined class; Unicode assumed 
                 L"",      // Button text 
                 WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP,  // Styles 
-                50,         // position deferred to wm_size
-                50,
+                89,
+                85,
                 60,
                 60,
                 hWnd,       // Parent window
@@ -841,6 +841,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 KillApplication();                // escape for exiting
             }            
 
+            if (current_tab == 0)
+            {
+                if (wParam == HOTKEY_ID_Q)
+                {
+                    OpenOptions(hWnd);
+                }
+                if (wParam == HOTKEY_ID_T)
+                {
+                    if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                    OpenTechTree();                    
+                }
+            }
+
             if (current_tab != 2) {
                 if (wParam == HOTKEY_ID_SPACE) DrawCiv();           // space for drawing civ
                 if (wParam == HOTKEY_ID_RETURN) ResetProgram();            // return for resetting
@@ -969,14 +982,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				}
 			}             
 
-            if (wParam == HOTKEY_ID_T)
-            {
-                if (current_tab == 0)
-                {
-					if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-                    OpenTechTree();
-                }
-            }                    
+                          
 
             break;
         }    
@@ -1057,7 +1063,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 break;
             case IDC_BUTTON_OPTIONS:
-
+                OpenOptions(hWnd);
                 break;
             case IDC_BUTTON_TECHTREE:
                 OpenTechTree();
@@ -1162,17 +1168,11 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         
         // Store the original window procedure
-        originalButtonProcs[hwnd] = (WNDPROC)GetWindowLongPtr(hwnd, GWLP_WNDPROC);
-
-        
+        originalButtonProcs[hwnd] = (WNDPROC)GetWindowLongPtr(hwnd, GWLP_WNDPROC);        
     }
 
     switch (uMsg)
     {    
-
-
-
-
     case WM_MOUSEMOVE:
     {
         if (!tooltips_enabled) break;
@@ -1307,7 +1307,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 
         return(INT_PTR)TRUE;
     }
-    case WM_COMMAND:
+        case WM_COMMAND:
     {
         int wmId = LOWORD(wParam);
         int wmEvent = HIWORD(wParam);
@@ -2901,4 +2901,138 @@ void InitialiseCivs()
 void MuteSounds()
 {
     PlaySound(L"mute.wav", NULL, SND_FILENAME | SND_ASYNC);
+}
+
+void OpenOptions(HWND hWnd)
+{
+    DialogBox(instance, MAKEINTRESOURCE(IDD_OPTIONS), hWnd, OptionsDlgProc);
+    if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+}
+
+
+
+INT_PTR CALLBACK HotkeysDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+
+{
+    /*
+    //static WNDPROC oldProc;
+
+    switch (message)
+    {
+    case WM_INITDIALOG:
+    {
+
+        //oldProc = (WNDPROC)SetWindowLongPtr(hwndHyperlink, GWLP_WNDPROC, (LONG_PTR)HyperlinkProc);
+        CheckDlgButton(hDlg, IDC_CHECKBOX_LABELS, labels_enabled ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(hDlg, IDC_CHECKBOX_ICONS, icons_enabled ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(hDlg, IDC_CHECKBOX_JINGLES, jingles_enabled ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(hDlg, IDC_CHECKBOX_SOUNDS, ui_sounds_enabled ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(hDlg, IDC_CHECKBOX_TOOLTIPS, tooltips_enabled ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(hDlg, IDC_CHECKBOX_STARTDRAW, draw_on_startup ? BST_CHECKED : BST_UNCHECKED);
+
+
+        if (persistent_logging) CheckRadioButton(hDlg, IDC_RADIO_LOGGING, IDC_RADIO_STARTRESET, IDC_RADIO_LOGGING);
+        else CheckRadioButton(hDlg, IDC_RADIO_LOGGING, IDC_RADIO_STARTRESET, IDC_RADIO_STARTRESET);
+
+        HWND hComboBox = GetDlgItem(hDlg, IDC_LEGACY_OPTION);
+        SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Definitive Edition");
+        SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Legacy");
+        SendMessage(hComboBox, CB_SETCURSEL, legacy_jingle_enabled ? 1 : 0, 0); // Set default selection based on current setting
+
+
+        return(INT_PTR)TRUE;
+    }
+    case WM_COMMAND:
+    {
+        int wmId = LOWORD(wParam);
+        int wmEvent = HIWORD(wParam);
+
+
+        if (ui_sounds_enabled && IDC_LEGACY_OPTION) {
+            switch (wmEvent)
+            {
+            case CBN_DROPDOWN:
+                // Handle dropdown open event
+                PlaySound(L"hover_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                break;
+
+            case CBN_SELCHANGE:
+                // Handle selection change event
+                PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                break;
+            }
+        }
+
+        ui_sounds_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_SOUNDS) == BST_CHECKED;
+        labels_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_LABELS) == BST_CHECKED;
+        icons_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_ICONS) == BST_CHECKED;
+        jingles_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_JINGLES) == BST_CHECKED;
+        tooltips_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_TOOLTIPS) == BST_CHECKED;
+        draw_on_startup = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_STARTDRAW) == BST_CHECKED;
+
+        // Handle the combobox selection
+        HWND hComboBox = GetDlgItem(hDlg, IDC_LEGACY_OPTION);
+        int selectedIndex = SendMessage(hComboBox, CB_GETCURSEL, 0, 0);
+        legacy_jingle_enabled = (selectedIndex == 1);
+
+
+        // Handle the checkbox state as needed
+        if (icons_enabled && current_tab == 0)
+        {
+            ShowWindow(civ_icon, SW_SHOW);
+        }
+        else
+        {
+            ShowWindow(civ_icon, SW_HIDE);
+        }
+
+
+
+        if (wmEvent == BN_CLICKED)
+        {
+            if (wmId == IDC_CHECKBOX_JINGLES)
+            {
+                if (!jingles_enabled) MuteSounds();
+                else PlayJingle(current_civ);
+            }
+
+            switch (wmId)
+            {
+            case IDC_CHECKBOX_LABELS:
+            case IDC_CHECKBOX_ICONS:
+            case IDC_CHECKBOX_SOUNDS:
+            case IDC_CHECKBOX_TOOLTIPS:
+            case IDC_CHECKBOX_STARTDRAW:
+                if (ui_sounds_enabled)
+                {
+                    PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                }
+                break;
+            case IDC_RADIO_LOGGING:
+                persistent_logging = true;
+                break;
+            case IDC_RADIO_STARTRESET:
+                persistent_logging = false;
+                break;
+            }
+        }
+        if (!labels_enabled) ShowWindow(label_centre, SW_HIDE);
+        else if (current_tab == 0) ShowWindow(label_centre, SW_SHOW);
+
+        if (wmId == IDCANCEL || wmId == IDOK) {
+            EndDialog(hDlg, wmId);
+            return(INT_PTR)TRUE;
+        }
+
+
+
+
+        break;
+
+    }
+
+    }
+
+    */
+    return (INT_PTR)FALSE;
 }

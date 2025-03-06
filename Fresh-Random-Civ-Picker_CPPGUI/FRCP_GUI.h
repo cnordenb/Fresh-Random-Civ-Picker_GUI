@@ -339,6 +339,7 @@ void ShowHDPoolCheckboxes();
 void ShowAOCPoolCheckboxes();
 void DLCToggles(edition);
 void OpenTechTree();
+void OpenOptions(HWND);
 
 edition GetCivEdition(const std::wstring &);
 dlc GetCivDLC(const std::wstring &);
@@ -409,5 +410,6 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    OptionsDlgProc(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    HotkeysDlgProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK    HyperlinkProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK    ButtonProc(HWND, UINT, WPARAM, LPARAM);
