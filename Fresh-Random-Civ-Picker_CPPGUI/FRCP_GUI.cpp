@@ -208,135 +208,40 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-
     switch (message)
     {  
         case WM_CREATE:
         {
-            // Initialize common controls
             INITCOMMONCONTROLSEX iccex;
             iccex.dwSize = sizeof(INITCOMMONCONTROLSEX);
             iccex.dwICC = ICC_WIN95_CLASSES | ICC_BAR_CLASSES | ICC_COOL_CLASSES | ICC_TREEVIEW_CLASSES;
             InitCommonControlsEx(&iccex);
-
             if (!InitCommonControlsEx(&iccex)) {
                 MessageBox(hWnd, L"Failed to initialize common controls.", L"Error", MB_OK | MB_ICONERROR);
-                return -1; // Return -1 to indicate failure
+                return -1;
             }
-              
-
             LoadImages();
             CreateTabs(hWnd);        
             CreateImages(hWnd);
             CreateCheckboxes(hWnd);
             CreateButtons(hWnd);
             CreateLabels(hWnd);
-
-
-            drawn_log = CreateWindow(
-                L"EDIT",  // Predefined class; Unicode assumed
-                L"",  // Label text
-                WS_VISIBLE | WS_CHILD | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY,  // Styles
-                10,  // x position (will be set in WM_SIZE)
-                25,  // y position (will be set in WM_SIZE)
-                350,  // Label width
-                200,  // Label height
-                tab,  // Parent window
-                NULL,  // No menu.
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);  // Pointer not needed.
-
-            remaining_log = CreateWindow(
-                L"EDIT",  // Predefined class; Unicode assumed
-                L"",  // Label text
-                WS_VISIBLE | WS_CHILD | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY,  // Styles
-                10,  // x position (will be set in WM_SIZE)
-                25,  // y position (will be set in WM_SIZE)
-                350,  // Label width
-                200,  // Label height
-                tab,  // Parent window
-                NULL,  // No menu.
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);  // Pointer not needed.
-
-            
-
-
-            radiobutton_de = CreateWindow(
-                L"BUTTON",  // Predefined class; Unicode assumed 
-                L"Definitive Edition (2019)",      // Button text 
-                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,  // Styles 
-                10,         // x position 
-                30,         // y position 
-                175,         // Button width
-                20,         // Button height
-                hWnd,       // Parent window
-                (HMENU)IDC_RADIO_DE,       // No menu.
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);      // Pointer not needed.
-
-            radiobutton_hd = CreateWindow(
-                L"BUTTON",  // Predefined class; Unicode assumed 
-                L"HD Edition (2013)",      // Button text 
-                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,  // Styles 
-                10,         // x position 
-                60,         // y position 
-                175,         // Button width
-                20,         // Button height
-                hWnd,
-                (HMENU)IDC_RADIO_HD,
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);
-
-            radiobutton_aok = CreateWindow(
-                L"BUTTON",  // Predefined class; Unicode assumed
-                L"Age of Kings (1999)",      // Button text
-                WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,  // Styles
-                10,         // x position
-                90,         // y position
-                175,         // Button width
-                20,         // Button height
-                hWnd,       // Parent window
-                (HMENU)IDC_RADIO_AOK,       // No menu.
-                (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-                NULL);      // Pointer not needed.
-
-            // Subclass the buttons
-			
-
-
- 
-
-
-            CheckRadioButton(hWnd, IDC_RADIO_DE, IDC_RADIO_AOK, IDC_RADIO_DE);
-
-
-			
+            CreateTextfields(hWnd);
+            CreateRadiobuttons(hWnd);			
             SubclassButtons();
             CreateTooltips(hWnd);
             AddTooltips();
-
-
             SetEditionState(hWnd, DE);   
-
-
             if (persistent_logging)
             {
 				LoadLog(hWnd);
                 ValidateAllDlcToggles(hWnd);
-            }               
-            
+            }           
 			ShowTabComponents(0, hWnd);
             startup = false;
-
-            brush_black = CreateSolidBrush(RGB(0, 0, 0));
-            brush_white = CreateSolidBrush(RGB(255, 255, 255));
-
             EnableHotkeys(hWnd);
-
             if (draw_on_startup) DrawCiv();
-			else if (!persistent_logging) ResetProgram();
-            
+			else if (!persistent_logging) ResetProgram();            
             break;
         }
         case WM_SIZE:
@@ -392,7 +297,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             if (wParam == WA_ACTIVE || wParam == WA_CLICKACTIVE) EnableHotkeys(hWnd);
             else if (wParam == WA_INACTIVE) DisableHotkeys(hWnd);
-
             break;
         }
         case WM_NOTIFY:
@@ -422,7 +326,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 SendMessage(pnmhdr->hwndFrom, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y + 10));
                 return TRUE;
             }
-
             break;
         }
 
@@ -446,7 +349,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS | TTF_TRACK;
 
                 bool tooltipActivated = false;
-
 
                 HWND button[] = { button_draw, button_reset, button_techtree, button_clearlog,
                                     button_enableall, button_disableall, checkbox_showremainlog,
@@ -475,9 +377,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						}
                         else SendMessage(hwndTooltip[tooltip_id[i]], TTM_TRACKACTIVATE, FALSE, (LPARAM)&toolInfo);
 					}                    
-				}
-                
-
+				}             
                 
                 // Deactivate the tooltip if the cursor is not over any button
                 if (!tooltipActivated)
@@ -491,7 +391,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             break;
         }
-
         case WM_GETMINMAXINFO:                                  // minimum window size
         {
             MINMAXINFO *pmmi = (MINMAXINFO *)lParam;
@@ -499,12 +398,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             pmmi->ptMinTrackSize.y = MIN_HEIGHT; // Minimum height
             break;
         }
-
         case WM_HOTKEY:
-        {          
-
+        {     
             hotkey_pressed = true;
-
             if (GetForegroundWindow() != hWnd)  // disables hotkeys if window is not in foreground
             {
                 DisableHotkeys(hWnd);
@@ -663,19 +559,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 SendMessage(hOptionsDlg, WM_HOTKEY, wParam, lParam);
                 return 0;
             }
-                          
-
             break;
         }    
-
-        case WM_COMMAND:                                        // action listener for clicks
+        case WM_COMMAND:                                     
         {
             hotkey_pressed = false;
 
             int wmId = LOWORD(wParam);            
 
 
-            // individual civ checkbox civ handlers in custom tab
             if (wmId >= 5 && wmId <= 49) {
 
                 if (IsDlgButtonChecked(hWnd, wmId) == BST_CHECKED) AddCiv(civ_index[wmId-5]);
@@ -822,16 +714,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
             
         }
-        case WM_PAINT:
-        {
-        
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-
-            EndPaint(hWnd, &ps);
-        
-            break;
-        }
         case WM_DESTROY:
         {
             KillApplication();
@@ -849,8 +731,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     if (uMsg == WM_NCCREATE)
-    {
-        
+    {        
         // Store the original window procedure
         originalButtonProcs[hwnd] = (WNDPROC)GetWindowLongPtr(hwnd, GWLP_WNDPROC);        
     }
@@ -1260,8 +1141,6 @@ void DisableHotkeys(HWND hWnd)
 
 void KillApplication()
 {    
-    DeleteObject(brush_white);
-    DeleteObject(brush_black);
     PostQuitMessage(0);
 }
 
@@ -2719,8 +2598,6 @@ void CreateCheckboxes(HWND hWnd)
         civ_checkbox[i] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), column[i % 5], row[i / 5], 100, 20, i + 5, civ_index[i].c_str());
     }
 
-
-
     autoreset_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 230, 180, 20, IDC_CHECKBOX_AUTORESET, L"Auto-reset upon change");
     autotoggle_checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 0, 170, 20, IDC_CHECKBOX_AUTOTOGGLE, L"Auto-toggle older civs");
 
@@ -2778,49 +2655,35 @@ void CreateImages(HWND hWnd)
 void CreateButtons(HWND hWnd)
 {
     button_draw = CreateWindow(L"BUTTON", L"Draw", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | TTF_TRACK, 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_DRAW, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-
     button_reset = CreateWindow(L"BUTTON", L"Reset", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 200, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_RESET, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-
     button_techtree = CreateWindow(L"BUTTON", L"", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP, 0, 0, 60, 60, hWnd, (HMENU)IDC_BUTTON_TECHTREE, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     SendMessageW(button_techtree, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_techtree);
-
     button_options = CreateWindow(L"BUTTON", L"", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP, 89, 85, 60, 60, hWnd, (HMENU)IDC_BUTTON_OPTIONS, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     //SendMessageW(button_techtree, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_techtree); 
-
     button_clearlog = CreateWindow(L"BUTTON", L"Clear Log", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_CLEARLOG, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-
     button_enableall = CreateWindow(L"BUTTON", L"Enable All", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 340, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_ENABLEALL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-
     button_disableall = CreateWindow(L"BUTTON", L"Disable All", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 125, 340, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_DISABLEALL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
 }
 
 void CreateLabels(HWND hWnd)
 {
-
-    label_corner = CreateWindow(
-        L"STATIC",  // Predefined class; Unicode assumed
-        L"",  // Label text from variable..
-        WS_VISIBLE | WS_CHILD,  // Styles
-        0,  // x position (will be set in WM_SIZE)
-        0,  // y position (will be set in WM_SIZE)
-        30,  // Label width
-        15,  // Label height
-        tab,  // Parent window
-        NULL,  // No menu.
-        (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE),
-        NULL);  // Pointer not needed
-
-    label_centre = CreateWindow(
-        L"STATIC",  // Predefined class; Unicode assumed
-        L"?",  // Label text
-        WS_VISIBLE | WS_CHILD,  // Styles
-        0,  // x position (will be set in WM_SIZE)
-        0,  // y position (will be set in WM_SIZE)
-        100,  // Label width
-        15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-
+    label_corner = CreateWindow(L"STATIC", L"", WS_VISIBLE | WS_CHILD, 0, 0, 30, 15, tab, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    label_centre = CreateWindow(L"STATIC", L"?", WS_VISIBLE | WS_CHILD, 0, 0, 100, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     label_drawncount = CreateWindow(L"STATIC", L"", WS_VISIBLE | WS_CHILD, 100, 25, 100, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-
     label_remainingcount = CreateWindow(
         L"STATIC", L"", WS_VISIBLE | WS_CHILD, 0, 25, 100, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+}
+
+void CreateTextfields(HWND hWnd)
+{
+    drawn_log = CreateWindow(L"EDIT", L"", WS_VISIBLE | WS_CHILD | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY, 10, 25, 350, 200, tab, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    remaining_log = CreateWindow(L"EDIT", L"", WS_VISIBLE | WS_CHILD | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY, 10, 25, 350, 200, tab, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+}
+
+void CreateRadiobuttons(HWND hWnd)
+{
+    radiobutton_de = CreateWindow(L"BUTTON", L"Definitive Edition (2019)", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, 10, 30, 175, 20, hWnd, (HMENU)IDC_RADIO_DE, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    radiobutton_hd = CreateWindow(L"BUTTON", L"HD Edition (2013)", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, 10, 60, 175, 20, hWnd, (HMENU)IDC_RADIO_HD, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    radiobutton_aok = CreateWindow(L"BUTTON", L"Age of Kings (1999)", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, 10, 90, 175, 20, hWnd, (HMENU)IDC_RADIO_AOK, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    CheckRadioButton(hWnd, IDC_RADIO_DE, IDC_RADIO_AOK, IDC_RADIO_DE);
 }

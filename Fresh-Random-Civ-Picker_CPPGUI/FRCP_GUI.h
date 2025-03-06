@@ -348,6 +348,8 @@ void CreateCheckboxes(HWND);
 void CreateImages(HWND);
 void CreateButtons(HWND);
 void CreateLabels(HWND);
+void CreateTextfields(HWND);
+void CreateRadiobuttons(HWND);
 
 void SubclassButtons();
 void AddTooltips();
