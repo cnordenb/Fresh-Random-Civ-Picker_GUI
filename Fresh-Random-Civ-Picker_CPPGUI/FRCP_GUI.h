@@ -340,6 +340,7 @@ void ShowAOCPoolCheckboxes();
 void DLCToggles(edition);
 void OpenTechTree();
 void OpenOptions(HWND);
+void OpenHotkeys(HWND);
 
 edition GetCivEdition(const std::wstring &);
 dlc GetCivDLC(const std::wstring &);
