@@ -1,7 +1,6 @@
 # Fresh Random Civ Picker
 
 **This is the C++ GUI version of the Fresh Random Civ Picker.**
-
 ![](https://i.imgur.com/oOKWLFw.gif)
 
 ## Purpose
