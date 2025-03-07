@@ -92,6 +92,9 @@
 #define TOOLTIP_AOC				    19
 #define TOOLTIP_AUTOTOGGLE  	    20
 #define TOOLTIP_AUTORESET  	        21
+#define TOOLTIP_OPTIONS             22
+
+
 
 wchar_t INI_FILE_PATH[MAX_PATH];
 wchar_t LOG_FILE_PATH[MAX_PATH];
@@ -153,9 +156,10 @@ aoc_icon;
 
 
 
-HWND autoreset_checkbox, autotoggle_checkbox;			 // autoreset checkbox
+HWND checkbox_autoreset, checkbox_autotoggle;			 // autoreset checkbox
 
 HWND radiobutton_de, radiobutton_hd, radiobutton_aok;	 // radio buttons
+
 
 
 HBRUSH brush_white;
@@ -220,7 +224,6 @@ bool labels_enabled = true;
 bool legacy_jingle_enabled = false;
 bool ui_sounds_enabled = false;
 bool tooltips_enabled = true;
-bool pool_altered = false;
 bool autoreset_enabled = true;
 bool autotoggle_enabled = true;
 bool remainlog_enabled = true;
@@ -393,7 +396,7 @@ void ActivateTooltip(HWND, TOOLINFO *, POINT);
 
 
 
-HWND hwndTooltip[22];
+HWND hwndTooltip[23];
 int hwnd_length = sizeof(hwndTooltip) / sizeof(hwndTooltip[0]);
 
 void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText);
