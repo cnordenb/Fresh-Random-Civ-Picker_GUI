@@ -264,9 +264,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             SetWindowPos(tab, NULL, 0, 0, width, height, SWP_NOZORDER);                                        // tab size anchored to window size
             SetWindowPos(label_corner, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);                          // remaining civ indicator anchored to bottom right corner 
-            SetWindowPos(label_centre, NULL, (width - 80) / 2, (height + 35) / 2, 100, 15, SWP_NOZORDER);       // drawn civ label anchored to centre
+            SetWindowPos(label_centre, NULL, (width - 80) / 2, (height + 35) / 2, 90, 15, SWP_NOZORDER);       // drawn civ label anchored to centre
             SetWindowPos(civ_icon, NULL, (width - 100) / 2, (height - 180) / 2, 104, 104, SWP_NOZORDER);       // civ icon anchored to centre
-
 			
             SetWindowPos(label_drawncount, NULL, 10, 25, 90, 15, SWP_NOZORDER);                           // drawn civ label anchored to top left corner
 			SetWindowPos(button_clearlog, NULL, 110, 25, 100, 30, SWP_NOZORDER);                           // clear log button anchored to top left corner
@@ -425,7 +424,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             else EnableHotkeys(hWnd);
 
             if (wParam == HOTKEY_ID_ESC) {              
-                KillApplication();                // escape for exiting
+                PostQuitMessage(0);               // escape for exiting
             }            
 
             if (wParam == HOTKEY_ID_F1) {
@@ -617,7 +616,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DialogBox(instance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
                 break;
             case IDM_EXIT:                                     // "Exit"
-                KillApplication();
+                PostQuitMessage(0);
                 break;
             case IDM_OPTIONS:								   // "Options"
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
@@ -719,6 +718,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     ShellExecute(NULL, L"open", L"https://store.steampowered.com/app/221380/Age_of_Empires_II_Retired/", NULL, NULL, SW_SHOWNORMAL);
                     break;
                 case AOK:
+					MessageBox(hWnd, L"The original Age of Kings is not available on Steam. It is included in both HD and Definitive editions.", L"Age of Kings", MB_OK | MB_ICONINFORMATION);
                     break;
                 }
                 break;
@@ -730,7 +730,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         case WM_DESTROY:
         {
-            KillApplication();
+            PostQuitMessage(0);
             break;
         }
         default:
@@ -1099,11 +1099,11 @@ void DrawCiv()
     UpdateRemainingLog(false);
 
 
-
-    if (current_tab != 0) {
+    /*
+    if (current_tab == 2) {
         ShowWindow(civ_icon, SW_HIDE);
         ShowWindow(label_centre, SW_HIDE);
-    }
+    }*/
 
 
     if (jingles_enabled)
@@ -1152,11 +1152,6 @@ void DisableHotkeys(HWND hWnd)
 	for (int i = 1; i < 25; i++) {
 		UnregisterHotKey(hWnd, i);
 	}
-}
-
-void KillApplication()
-{    
-    PostQuitMessage(0);
 }
 
 void CreateUnderlineFont()
@@ -1524,20 +1519,20 @@ void ShowDrawTab(bool state, HWND hWnd) {
     int height = GetWindowHeight(hWnd);
     int width = GetWindowWidth(hWnd);
     if (state == true) {
-        if (icons_enabled) ShowWindow(civ_icon, SW_SHOW);
         ShowWindow(button_draw, SW_SHOW);
         SetWindowPos(button_reset, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);
 	    ShowWindow(button_reset, SW_SHOW);
 	    if (labels_enabled) ShowWindow(label_centre, SW_SHOW);
+        if (icons_enabled) ShowWindow(civ_icon, SW_SHOW);
 	    ShowWindow(label_corner, SW_SHOW);
 		ShowWindow(button_techtree, SW_SHOW);
 	}
     else if (state == false) {
-        ShowWindow(civ_icon, SW_HIDE);
         ShowWindow(button_draw, SW_HIDE);
         ShowWindow(button_reset, SW_HIDE);
         SetWindowPos(button_reset, NULL, (width - 100) / 2, height - 40, 100, 30, SWP_NOZORDER);
         ShowWindow(label_centre, SW_HIDE);
+        ShowWindow(civ_icon, SW_HIDE);
         ShowWindow(label_corner, SW_HIDE);
 		ShowWindow(button_techtree, SW_HIDE);
     }
@@ -1548,6 +1543,8 @@ void ShowLogTab(bool state) {
     if (state == true) {
         ShowWindow(button_draw, SW_SHOW);
         ShowWindow(button_reset, SW_SHOW);
+        if (labels_enabled) ShowWindow(label_centre, SW_SHOW);
+        if (icons_enabled) ShowWindow(civ_icon, SW_SHOW);
 		ShowWindow(label_drawncount, SW_SHOW);
 		ShowWindow(button_clearlog, SW_SHOW);
         ShowWindow(drawn_log, SW_SHOW);
@@ -1565,6 +1562,8 @@ void ShowLogTab(bool state) {
         ShowWindow(remaining_log, SW_HIDE);
         ShowWindow(button_draw, SW_HIDE);
         ShowWindow(button_reset, SW_HIDE);
+        ShowWindow(label_centre, SW_HIDE);
+        ShowWindow(civ_icon, SW_HIDE);
     }
 }
 
@@ -2490,12 +2489,20 @@ void OpenHotkeys(HWND hWnd)
 
 
 INT_PTR CALLBACK HotkeysDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-
 {
     switch (message)
     {
         case WM_INITDIALOG:
         {
+            // Create the bold font
+            CreateBoldFont();
+
+            // Apply the bold font to specific controls
+            SendMessage(GetDlgItem(hDlg, IDC_STATIC_GLOBAL_HOTKEYS), WM_SETFONT, (WPARAM)hBoldFont, TRUE);
+            SendMessage(GetDlgItem(hDlg, IDC_STATIC_DRAW_CIV_HOTKEYS), WM_SETFONT, (WPARAM)hBoldFont, TRUE);
+            SendMessage(GetDlgItem(hDlg, IDC_STATIC_LOG_TAB_HOTKEYS), WM_SETFONT, (WPARAM)hBoldFont, TRUE);
+            SendMessage(GetDlgItem(hDlg, IDC_STATIC_CIV_POOL_HOTKEYS), WM_SETFONT, (WPARAM)hBoldFont, TRUE);
+
             return(INT_PTR)TRUE;
         }
         case WM_COMMAND:
@@ -2689,7 +2696,7 @@ void CreateButtons(HWND hWnd)
 void CreateLabels(HWND hWnd)
 {
     label_corner = CreateWindow(L"STATIC", L"", WS_VISIBLE | WS_CHILD, 0, 0, 30, 15, tab, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-    label_centre = CreateWindow(L"STATIC", L"?", WS_VISIBLE | WS_CHILD, 0, 0, 100, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    label_centre = CreateWindow(L"STATIC", L"?", WS_VISIBLE | WS_CHILD, 0, 0, 90, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     label_drawncount = CreateWindow(L"STATIC", L"", WS_VISIBLE | WS_CHILD, 100, 25, 100, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     label_remainingcount = CreateWindow(
         L"STATIC", L"", WS_VISIBLE | WS_CHILD, 0, 25, 100, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
@@ -2716,3 +2723,13 @@ void DeactivateTooltips(TTTOOLINFOW toolinfo)
         SendMessage(hwndTooltip[i], TTM_TRACKACTIVATE, FALSE, (LPARAM)&toolinfo);
     }
 }
+
+void CreateBoldFont()
+{
+    LOGFONT lf;
+    HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+    GetObject(hFont, sizeof(LOGFONT), &lf);
+    lf.lfWeight = FW_BOLD;
+    hBoldFont = CreateFontIndirect(&lf);
+}
+

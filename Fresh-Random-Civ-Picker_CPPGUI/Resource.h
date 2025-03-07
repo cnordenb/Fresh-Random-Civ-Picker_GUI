@@ -55,6 +55,11 @@
 #define IDM_WEBVERSION                  32773
 #define IDM_OPTIONS                     32774
 #define IDC_STATIC                      -1
+#define IDC_STATIC_GLOBAL_HOTKEYS		-2
+#define IDC_STATIC_DRAW_CIV_HOTKEYS		-3
+#define IDC_STATIC_LOG_TAB_HOTKEYS		-4
+#define IDC_STATIC_CIV_POOL_HOTKEYS		-5
+
 
 // Next default values for new objects
 // 

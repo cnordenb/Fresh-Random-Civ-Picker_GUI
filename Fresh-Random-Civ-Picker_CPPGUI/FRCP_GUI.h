@@ -161,6 +161,8 @@ HWND checkbox_autoreset, checkbox_autotoggle;			 // autoreset checkbox
 
 HWND radiobutton_de, radiobutton_hd, radiobutton_aok;	 // radio buttons
 
+HFONT hBoldFont;
+
 
 
 HBRUSH brush_white;
@@ -307,6 +309,7 @@ HWND tab;
 std::vector<std::wstring> civs;
 
 // Function declarations
+void CreateBoldFont();
 HBITMAP FetchIcon(const std::wstring &);
 void CreateTabs(HWND);
 void ShowTabComponents(int, HWND);
@@ -314,7 +317,6 @@ void ShowTabComponents(int, HWND);
 void ResetProgram();
 
 void DrawCiv();
-void KillApplication();
 
 void SaveSettings();
 void LoadSettings();
