@@ -11,8 +11,6 @@ TODO
 #include "FRCP_GUI.h"
 
 
-
-
 // Function to create tabs
 void CreateTabs(HWND hWnd)
 {
@@ -40,9 +38,7 @@ void CreateTabs(HWND hWnd)
     TabCtrl_InsertItem(tab, 1, &tie);
 
     tie.pszText = const_cast<LPWSTR>(L"Civ Pool");
-    TabCtrl_InsertItem(tab, 2, &tie);
-
-    
+    TabCtrl_InsertItem(tab, 2, &tie);    
 }
 
 // Function to show/hide components based on the selected tab
@@ -136,8 +132,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     return (int) msg.wParam;
 }
-
-
 
 //
 //  FUNCTION: MyRegisterClass()
@@ -301,8 +295,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         case WM_NOTIFY:
         {
-
-
             LPNMHDR pnmhdr = (LPNMHDR)lParam;
             if (pnmhdr->hwndFrom == tab)
             {
@@ -372,7 +364,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                                     TOOLTIP_INDIA, TOOLTIP_DUKES, TOOLTIP_WEST, TOOLTIP_KHANS,
                                     TOOLTIP_RAJAS, TOOLTIP_AFRICANS, TOOLTIP_FORGOTTEN, TOOLTIP_AOC,
                                     TOOLTIP_AUTOTOGGLE, TOOLTIP_AUTORESET };
-
                 
 				for (int i = 0; i < sizeof(button) / sizeof(button[0]); i++)
 				{
@@ -395,7 +386,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     DeactivateTooltips(toolInfo);
 
                 }
-
 
                 // Request WM_MOUSELEAVE notification
                 TRACKMOUSEEVENT tme;
@@ -463,8 +453,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 {
                     if (wParam > 15 && wParam < 23 ||
                         wParam == HOTKEY_ID_T) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-                }
-                   
+                }                   
 
                 if (edition_state == DE)
                 {
@@ -485,7 +474,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 {
                     if (wParam == HOTKEY_ID_A) ToggleDlc(aoc, hWnd);
                 }
-
             }
 
             if (current_tab == 1)
@@ -500,7 +488,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     ToggleRemainLog();
 				}
             }
-
 
             if (wParam == HOTKEY_ID_TAB)                        // tab for switching tabs
             {
@@ -572,7 +559,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				}
 			}             
 
-
             if (hOptionsDlg != NULL)
             {
                 SendMessage(hOptionsDlg, WM_HOTKEY, wParam, lParam);
@@ -591,12 +577,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 if (IsDlgButtonChecked(hWnd, wmId) == BST_CHECKED) AddCiv(civ_index[wmId-5]);
                 else RemoveCiv(civ_index[wmId - 5]);
-                ValidateDlcToggle(hWnd, GetCivDLC(civ_index[wmId - 5]));
-				
+                ValidateDlcToggle(hWnd, GetCivDLC(civ_index[wmId - 5]));			
 
             }         
-
-
 			// button sounds in tab views
             if (ui_sounds_enabled) {
                 if (wmId > 2 && wmId < 51 || wmId > 53 && wmId < 68) {
@@ -738,8 +721,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             return DefWindowProc(hWnd, message, wParam, lParam);
         }            
     }
-        return 0;       
-
+    return 0;       
 } 
 
 LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -786,8 +768,6 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                                 TOOLTIP_RAJAS, TOOLTIP_AFRICANS, TOOLTIP_FORGOTTEN, TOOLTIP_AOC,
                                 TOOLTIP_AUTOTOGGLE, TOOLTIP_AUTORESET };
 
-
-
             for (int i = 0; i < sizeof(button) / sizeof(button[0]); i++)
 			{
 				if (GetWindowRect(button[i], &rect))
@@ -800,11 +780,7 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					}
 				}
 			}
-
-
-
         }
-
 
         // Forward the WM_MOUSEMOVE message to the parent window
         SendMessage(GetParent(hwnd), WM_MOUSEMOVE, wParam, lParam);
@@ -820,20 +796,15 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         return CallWindowProc(originalButtonProcs[hwnd], hwnd, uMsg, wParam, lParam);
     }
 
-
-
     return 0;
-    // Call the original window procedure for default processing
-    
+    // Call the original window procedure for default processing    
 }
-
 
 void SubclassButton(HWND button)
 {
     // Store the original window procedure
     originalButtonProcs[button] = (WNDPROC)SetWindowLongPtr(button, GWLP_WNDPROC, (LONG_PTR)ButtonProc);
 }
-
 
 INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -865,8 +836,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
     switch (message)
     {
     case WM_INITDIALOG:
-    {
-        
+    {        
         //oldProc = (WNDPROC)SetWindowLongPtr(hwndHyperlink, GWLP_WNDPROC, (LONG_PTR)HyperlinkProc);
         CheckDlgButton(hDlg, IDC_CHECKBOX_LABELS, labels_enabled ? BST_CHECKED : BST_UNCHECKED);
         CheckDlgButton(hDlg, IDC_CHECKBOX_ICONS, icons_enabled ? BST_CHECKED : BST_UNCHECKED);
@@ -875,7 +845,6 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
         CheckDlgButton(hDlg, IDC_CHECKBOX_TOOLTIPS, tooltips_enabled ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(hDlg, IDC_CHECKBOX_STARTDRAW, draw_on_startup ? BST_CHECKED : BST_UNCHECKED);
 
-
 		if (persistent_logging) CheckRadioButton(hDlg, IDC_RADIO_LOGGING, IDC_RADIO_STARTRESET, IDC_RADIO_LOGGING);
 		else CheckRadioButton(hDlg, IDC_RADIO_LOGGING, IDC_RADIO_STARTRESET, IDC_RADIO_STARTRESET);
 
@@ -883,7 +852,6 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
         SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Definitive Edition");
         SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Legacy");
         SendMessage(hComboBox, CB_SETCURSEL, legacy_jingle_enabled ? 1 : 0, 0); // Set default selection based on current setting
-
 
         return(INT_PTR)TRUE;
     }
@@ -934,9 +902,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
         else
         {
             ShowWindow(civ_icon, SW_HIDE);
-        }
-
-        
+        }        
 
         if (wmEvent == BN_CLICKED)
         {
@@ -970,7 +936,6 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
             }
         }
 
-
 		if (!labels_enabled) ShowWindow(label_centre, SW_HIDE);
 		else if (current_tab == 0) ShowWindow(label_centre, SW_SHOW); 
         
@@ -985,8 +950,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 }
 
 LRESULT CALLBACK HyperlinkProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    
+{    
     switch (msg)
     {
     case WM_PAINT:    
@@ -1008,8 +972,6 @@ LRESULT CALLBACK HyperlinkProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-
-
 void ResetProgram()
 {
     if (custom_max_civs < MAX_CIVS) custom_civ_pool = true;
@@ -1018,7 +980,6 @@ void ResetProgram()
     iterator = 0;
 
     UpdateDrawnLog(false, false, true);
-
 
     if (custom_civ_pool)
     {
@@ -1036,16 +997,12 @@ void ResetProgram()
     {
         InitialiseCivs();        
     }
-
-
     
 	for (int i = 0; i < MAX_CIVS; i++)
     {
         if (drawn_civs[i] == L"") break;
 		drawn_civs[i] = L"";
 	}
-    
-
 
     SetWindowText(label_corner, (L"0/" + std::to_wstring(custom_max_civs)).c_str());     // resets remaining civs label
     SetWindowText(label_centre, L"?");                                      // resets drawn civ label
@@ -1055,8 +1012,6 @@ void ResetProgram()
 
     UpdateRemainingLog(false);
     UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
-
-
 }
 
 void DrawCiv()
@@ -1070,8 +1025,6 @@ void DrawCiv()
     }
 
     if (civs.empty() || iterator == custom_max_civs || iterator == 0) ResetProgram();        // if all civs have been drawn, reset program and civ vector
-
-
 
     std::random_device rd;      // seeding random number
     std::mt19937 mt(rd());      // with Mersenne Twister 
@@ -1235,8 +1188,7 @@ void LoadImages() {
 	icon_vietnamese = (HBITMAP)LoadImageW(NULL, L"civ_icons\\vietnamese.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_vikings = (HBITMAP)LoadImageW(NULL, L"civ_icons\\vikings.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     icon_techtree = (HBITMAP)LoadImageW(NULL, L"civ_icons\\techtree.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	icon_options = (HBITMAP)LoadImageW(NULL, L"civ_icons\\options.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    
+	icon_options = (HBITMAP)LoadImageW(NULL, L"civ_icons\\options.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);    
     
     icon_random = (HBITMAP)LoadImageW(NULL, L"civ_icons\\random.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
@@ -1253,8 +1205,7 @@ void LoadImages() {
 	icon_rajas = (HBITMAP)LoadImageW(NULL, L"dlc_icons\\rajas.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_rome = (HBITMAP)LoadImageW(NULL, L"dlc_icons\\rome.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_royals = (HBITMAP)LoadImageW(NULL, L"dlc_icons\\royals.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	icon_west = (HBITMAP)LoadImageW(NULL, L"dlc_icons\\west.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    	
+	icon_west = (HBITMAP)LoadImageW(NULL, L"dlc_icons\\west.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);    	
 }
 
 HBITMAP FetchIcon(const std::wstring &civ_name) {
@@ -1315,14 +1266,10 @@ HBITMAP FetchIcon(const std::wstring &civ_name) {
 	if (civ_name == L"Turks") return icon_turks;
 	if (civ_name == L"Vietnamese") return icon_vietnamese;
 	if (civ_name == L"Vikings") return icon_vikings;
-	if (civ_name == L"Random") return icon_random;
-
-    
+	if (civ_name == L"Random") return icon_random;    
 }
 
 void PlayJingle(std::wstring &civ_name) {
-
-
 
     std::wstring processed_civ_name = civ_name;
     processed_civ_name[0] = std::tolower(processed_civ_name[0]);
@@ -1331,13 +1278,9 @@ void PlayJingle(std::wstring &civ_name) {
     if (legacy_jingle_enabled && VerifiedLegacyCiv(civ_name)) {
         jingle_path = L"civ_jingles\\legacy\\" + processed_civ_name + L".wav";
     }
-	else jingle_path = L"civ_jingles\\" + processed_civ_name + L".wav";
-
+	else jingle_path = L"civ_jingles\\" + processed_civ_name + L".wav";    
     
-    
-    PlaySound(jingle_path.c_str(), NULL, SND_FILENAME | SND_ASYNC);
-
-       
+    PlaySound(jingle_path.c_str(), NULL, SND_FILENAME | SND_ASYNC);      
     
 }
 
@@ -1458,7 +1401,6 @@ void ShowAllPoolCheckboxes() {
 		ShowWindow(checkbox_india, SW_SHOW);
 		ShowWindow(checkbox_rome, SW_SHOW);
 		ShowWindow(checkbox_royals, SW_SHOW);
-
     }
 }
 
@@ -1498,7 +1440,6 @@ void EnableAll(HWND hWnd) {
 			}
 		}
 	}
-
     
     if (autoreset_enabled) ResetProgram();
     ValidateAllDlcToggles(hWnd);
@@ -1606,8 +1547,7 @@ void ShowCustomTab(bool state) {
         ShowWindow(checkbox_autoreset, SW_HIDE);
 		ShowWindow(checkbox_autotoggle, SW_HIDE);
 		ShowDEDLCCheckboxes(false);
-    }
-	
+    }	
 }
 
 void ShowHDPoolCheckboxes() {
@@ -1655,7 +1595,6 @@ dlc GetCivDLC(const std::wstring &civ_name) {
 	return aok; // Default if not found
 }
 
-
 void ShowDEDLCCheckboxes(bool de_state) {
     if (de_state) {
         ShowWindow(checkbox_khans, SW_SHOW);
@@ -1686,8 +1625,7 @@ void ShowDEDLCCheckboxes(bool de_state) {
 		ShowWindow(india_icon, SW_HIDE);
 		ShowWindow(rome_icon, SW_HIDE);
 		ShowWindow(royals_icon, SW_HIDE);
-	}
-	
+	}	
 }
 
 void ShowHDDLCCheckboxes(bool hd_state) {
@@ -1905,7 +1843,6 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted) {
         }        
     }
 
-
     std::wstring drawn_label = L"Drawn: " + std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
     SetWindowText(label_drawncount, drawn_label.c_str());
 }
@@ -1952,7 +1889,6 @@ void OpenTechTree() {
 
 void AddTooltip(HWND hwndTool, HWND hwndTip, LPCWSTR pszText)
 {
-
     if (!hwndTool || !hwndTip) {
         MessageBox(NULL, L"Invalid handle(s) provided to AddTooltip", L"Error", MB_OK | MB_ICONERROR);
         return;
@@ -1969,8 +1905,6 @@ void AddTooltip(HWND hwndTool, HWND hwndTip, LPCWSTR pszText)
     toolInfo.rect.right = 0;
     toolInfo.rect.bottom = 0;
 
-
-
     if (!SendMessage(hwndTip, TTM_ADDTOOL, 0, (LPARAM)&toolInfo)) {
 		MessageBox(NULL, L"Failed to add tooltip", L"Error", MB_OK);
         OutputDebugString(L"Failed to add tooltip\n");
@@ -1979,16 +1913,11 @@ void AddTooltip(HWND hwndTool, HWND hwndTip, LPCWSTR pszText)
 
 void ActivateTooltip(HWND hwndTip, TOOLINFO *toolInfo, POINT pt)
 {
-
-
-
     // Convert client coordinates to screen coordinates
     ClientToScreen(toolInfo->hwnd, &pt);
 
     // Set the tooltip position to be next to the mouse cursor
     SendMessage(hwndTip, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y + 20));
-
-
 
     if (!SendMessage(hwndTip, TTM_TRACKACTIVATE, TRUE, (LPARAM)toolInfo)) {
         OutputDebugString(L"Failed to activate tooltip\n");
@@ -2213,15 +2142,11 @@ void ToggleAutoToggle(HWND hWnd)
             DisableDlc(aok, hWnd);
             break;
         }
-
     }
-
-
 }
 
 void ToggleAutoReset(HWND hWnd)
 {
-
 	if (hotkey_pressed)
 	{
 		if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_CHECKED)
@@ -2309,9 +2234,7 @@ void SaveLog()
 	case AOK:
 		outFile << L"AOK" << std::endl;
 		break;
-    }
-
-    
+    }   
 
     outFile.close();
 }
@@ -2330,7 +2253,6 @@ void LoadLog(HWND hWnd)
 
     while (std::getline(inFile, line))
     {
-
         if (line == L"CivStates:")
         {
             readingCivStates = true;
@@ -2390,10 +2312,8 @@ void LoadLog(HWND hWnd)
 			{
 				SetEditionState(hWnd, AOK);
 			}
-		}
-        
+		}        
     }
-
 
     // Update the labels
     label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
@@ -2405,15 +2325,10 @@ void LoadLog(HWND hWnd)
     HBITMAP drawn_civ_icon = FetchIcon(current_civ);
     SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
 
-
-
     reset_state = true;
     UpdateRemainingLog(false);
 
     UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
-
-
-
     
     inFile.close();
 }
@@ -2486,8 +2401,6 @@ void OpenHotkeys(HWND hWnd)
 	DialogBox(instance, MAKEINTRESOURCE(IDD_HOTKEYS), hWnd, HotkeysDlgProc);	
 }
 
-
-
 INT_PTR CALLBACK HotkeysDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
@@ -2515,12 +2428,10 @@ INT_PTR CALLBACK HotkeysDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
                 return(INT_PTR)TRUE;
             }
             break;
-
         }
     }    
     return (INT_PTR)FALSE;
 }
-
 
 void SubclassButtons()
 {
@@ -2608,10 +2519,7 @@ void AddTooltips()
     AddTooltip(checkbox_forgotten, hwndTooltip[TOOLTIP_FORGOTTEN], StringCleaner(L"Toggles The Forgotten civilisations\n(Incas, Hindustanis, Italians, Magyars, Slavs)\nHotkey: D"));
 
     AddTooltip(checkbox_aoc, hwndTooltip[TOOLTIP_AOC], StringCleaner(L"Toggles The Conquerors civilisations\n(Aztecs, Huns, Koreans, Mayans, Spanish)\nHotkey: A"));
-
 }
-
-
 
 void CreateCheckboxes(HWND hWnd)
 {
@@ -2732,4 +2640,3 @@ void CreateBoldFont()
     lf.lfWeight = FW_BOLD;
     hBoldFont = CreateFontIndirect(&lf);
 }
-
