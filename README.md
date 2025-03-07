@@ -2,7 +2,8 @@
 
 **This is the C++ GUI version of the Fresh Random Civ Picker.**
 
-![frcp demo3](https://github.com/user-attachments/assets/19407519-89dd-4138-bcfc-5548db26b9e7)
+![frcp demo5](https://github.com/user-attachments/assets/e620fc7c-3e40-491b-8390-7e072b12e63e)
+
 
 
 ## Purpose
