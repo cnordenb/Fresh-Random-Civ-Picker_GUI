@@ -232,6 +232,7 @@ bool autotoggle_enabled = true;
 bool remainlog_enabled = true;
 bool reset_state = true;
 bool hotkey_pressed = false;
+bool mouse_is_leaving = false;
 
 
 

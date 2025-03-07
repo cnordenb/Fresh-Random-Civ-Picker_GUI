@@ -202,6 +202,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    TOOLINFO toolInfo = { 0 };
+    toolInfo.cbSize = sizeof(toolInfo);
+    toolInfo.hwnd = hWnd;
+    toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS | TTF_TRACK;
     switch (message)
     {  
         case WM_CREATE:
@@ -320,16 +324,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             break;
         }
-        case WM_MOUSELEAVE:
-        {
-            TOOLINFO toolInfo = { 0 };
-            toolInfo.cbSize = sizeof(toolInfo);
-            toolInfo.hwnd = hWnd;
-            toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS | TTF_TRACK;
 
-			DeactivateTooltips(toolInfo);
-            break;
-        }
         case WM_MOUSEMOVE:
         {
             if (!tooltips_enabled) break;
@@ -344,10 +339,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 // Check if the cursor is over any button and update the tooltip accordingly
                 RECT rect;
-                TOOLINFO toolInfo = { 0 };
-                toolInfo.cbSize = sizeof(toolInfo);
-                toolInfo.hwnd = hWnd;
-                toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS | TTF_TRACK;
+
 
                 bool tooltipActivated = false;
 
@@ -384,7 +376,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (!tooltipActivated)
                 {
                     DeactivateTooltips(toolInfo);
-
                 }
 
                 // Request WM_MOUSELEAVE notification
@@ -394,6 +385,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 tme.hwndTrack = hWnd;
                 TrackMouseEvent(&tme);
             }
+            break;
+        }
+        case WM_MOUSELEAVE:
+        {
+            //if (!mouse_is_leaving) break;
+
+            DeactivateTooltips(toolInfo);
+            
+
             break;
         }
         case WM_GETMINMAXINFO:                                  // minimum window size
@@ -418,7 +418,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }            
 
             if (wParam == HOTKEY_ID_F1) {
-                OpenOptions(hWnd);                // escape for exiting
+                OpenOptions(hWnd);               
             }
 
             if (current_tab == 0)
@@ -601,9 +601,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case IDM_EXIT:                                     // "Exit"
                 PostQuitMessage(0);
                 break;
-            case IDM_OPTIONS:								   // "Options"
-                if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-                DialogBox(instance, MAKEINTRESOURCE(IDD_OPTIONS), hWnd, OptionsDlgProc);
+            case IDM_OPTIONS:							   // "Options"
+                OpenOptions(hWnd);
                 break;
             case IDM_HOTKEYS:
                 OpenHotkeys(hWnd);
@@ -635,6 +634,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 break;
             case IDC_BUTTON_OPTIONS:
+                mouse_is_leaving = true;
+                while (mouse_is_leaving) DeactivateTooltips(toolInfo);
                 OpenOptions(hWnd);
                 break;
             case IDC_BUTTON_TECHTREE:
@@ -2630,6 +2631,7 @@ void DeactivateTooltips(TTTOOLINFOW toolinfo)
     {
         SendMessage(hwndTooltip[i], TTM_TRACKACTIVATE, FALSE, (LPARAM)&toolinfo);
     }
+    mouse_is_leaving = false;
 }
 
 void CreateBoldFont()
