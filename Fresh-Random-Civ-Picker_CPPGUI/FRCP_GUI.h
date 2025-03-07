@@ -191,7 +191,7 @@ HBITMAP icon_khans, icon_dukes, icon_west, icon_india, icon_rome, icon_royals,  
 icon_forgotten, icon_africans, icon_rajas,
 icon_aoc;
 
-HBITMAP icon_techtree;                                                                             // tech tree button icon
+HBITMAP icon_techtree, icon_options;                                                                             // tech tree button icon
 
 
 int iterator = 0; // Global variable to keep track of the count
