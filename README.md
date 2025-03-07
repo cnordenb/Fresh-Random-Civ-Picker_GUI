@@ -1,6 +1,7 @@
 # Fresh Random Civ Picker
 
 **This is the C++ GUI version of the Fresh Random Civ Picker.**
+<img src="https://i.imgur.com/oOKWLFw.gif" width="934" height="756" />
 ![Fresh random civ picker window showing civilisation name and icon upon the Draw button being clicked](https://i.imgur.com/oOKWLFw.gif)
 
 ## Purpose
