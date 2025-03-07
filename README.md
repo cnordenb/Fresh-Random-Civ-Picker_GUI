@@ -1,7 +1,10 @@
 # Fresh Random Civ Picker
 
 **This is the C++ GUI version of the Fresh Random Civ Picker.**
-![](https://i.imgur.com/oOKWLFw.gif)
+
+![frcp demo5](https://github.com/user-attachments/assets/e620fc7c-3e40-491b-8390-7e072b12e63e)
+
+
 
 ## Purpose
 Purpose of Fresh Random Civ Picker: the user can randomly iterate through the entire civ pool or a user-defined civ pool without drawing the same civ twice.
