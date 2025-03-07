@@ -991,7 +991,6 @@ void ResetProgram()
                 custom_max_civs++;
             }
         }
-
     }
     else
     {
@@ -2320,6 +2319,8 @@ void LoadLog(HWND hWnd)
     std::wstring remain_text = std::to_wstring(custom_max_civs - iterator) + L"/" + std::to_wstring(custom_max_civs);
     SetWindowText(label_corner, label_text.c_str());
     SetWindowText(label_centre, current_civ.c_str());
+    std::wstring drawn_label = L"Drawn: " + label_text;
+    if (iterator == 0) SetWindowText(label_drawncount, drawn_label.c_str());
 
 
     HBITMAP drawn_civ_icon = FetchIcon(current_civ);
@@ -2606,8 +2607,7 @@ void CreateLabels(HWND hWnd)
     label_corner = CreateWindow(L"STATIC", L"", WS_VISIBLE | WS_CHILD, 0, 0, 30, 15, tab, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     label_centre = CreateWindow(L"STATIC", L"?", WS_VISIBLE | WS_CHILD, 0, 0, 90, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     label_drawncount = CreateWindow(L"STATIC", L"", WS_VISIBLE | WS_CHILD, 100, 25, 100, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-    label_remainingcount = CreateWindow(
-        L"STATIC", L"", WS_VISIBLE | WS_CHILD, 0, 25, 100, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    label_remainingcount = CreateWindow(L"STATIC", L"", WS_VISIBLE | WS_CHILD, 0, 25, 100, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
 }
 
 void CreateTextfields(HWND hWnd)
