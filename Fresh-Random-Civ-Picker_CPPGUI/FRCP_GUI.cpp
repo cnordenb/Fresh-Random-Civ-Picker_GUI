@@ -250,14 +250,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             int height = HIWORD(lParam);
 
             SetWindowPos(button_draw, NULL, (width - 100) / 2, (height + 100) / 2, 100, 30, SWP_NOZORDER);   // draw button anchored to centre
-            SetWindowPos(button_techtree, NULL, width - 150, height - 120, 60, 60, SWP_NOZORDER);   // draw button anchored to centre
+            SetWindowPos(button_techtree, NULL, width - 150, height - 120, 60, 60, SWP_NOZORDER);   // techtree button anchored its traditional location
+            SetWindowPos(button_options, NULL, width - 25, 0, 25, 25, SWP_NOZORDER);   // techtree button anchored its traditional location
 
 
             if (current_tab == 0) {
-                SetWindowPos(button_reset, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);
+                SetWindowPos(button_reset, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);                          // reset button anchored to bottom left corner
             }
             else {
-                SetWindowPos(button_reset, NULL, (width - 100) / 2, height - 40, 100, 30, SWP_NOZORDER);
+                SetWindowPos(button_reset, NULL, (width - 100) / 2, height - 40, 100, 30, SWP_NOZORDER);             // reset button centred when on log tab
             }
 
 
@@ -265,7 +266,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SetWindowPos(label_corner, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);                          // remaining civ indicator anchored to bottom right corner 
             SetWindowPos(label_centre, NULL, (width - 80) / 2, (height + 35) / 2, 100, 15, SWP_NOZORDER);       // drawn civ label anchored to centre
             SetWindowPos(civ_icon, NULL, (width - 100) / 2, (height - 180) / 2, 104, 104, SWP_NOZORDER);       // civ icon anchored to centre
-                          // reset button anchored to bottom left corner
+
 			
             SetWindowPos(label_drawncount, NULL, 10, 25, 90, 15, SWP_NOZORDER);                           // drawn civ label anchored to top left corner
 			SetWindowPos(button_clearlog, NULL, 110, 25, 100, 30, SWP_NOZORDER);                           // clear log button anchored to top left corner
@@ -328,7 +329,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             break;
         }
+        case WM_MOUSELEAVE:
+        {
+            TOOLINFO toolInfo = { 0 };
+            toolInfo.cbSize = sizeof(toolInfo);
+            toolInfo.hwnd = hWnd;
+            toolInfo.uFlags = TTF_IDISHWND | TTF_SUBCLASS | TTF_TRACK;
 
+			DeactivateTooltips(toolInfo);
+            break;
+        }
         case WM_MOUSEMOVE:
         {
             if (!tooltips_enabled) break;
@@ -351,11 +361,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 bool tooltipActivated = false;
 
                 HWND button[] = { button_draw, button_reset, button_techtree, button_options, button_clearlog,
-                    button_enableall, button_disableall, checkbox_showremainlog,
-                    radiobutton_de, radiobutton_hd, radiobutton_aok, checkbox_royals,
-                checkbox_rome, checkbox_india, checkbox_dukes, checkbox_west, checkbox_khans,
-                checkbox_rajas, checkbox_africans, checkbox_forgotten, checkbox_aoc,
-                checkbox_autotoggle, checkbox_autoreset };
+                                    button_enableall, button_disableall, checkbox_showremainlog,
+                                    radiobutton_de, radiobutton_hd, radiobutton_aok, checkbox_royals,
+                                checkbox_rome, checkbox_india, checkbox_dukes, checkbox_west, checkbox_khans,
+                                checkbox_rajas, checkbox_africans, checkbox_forgotten, checkbox_aoc,
+                                checkbox_autotoggle, checkbox_autoreset };
 
                 int tooltip_id[] = { TOOLTIP_DRAW, TOOLTIP_RESET, TOOLTIP_TECHTREE, TOOLTIP_OPTIONS, TOOLTIP_CLEAR,
                                         TOOLTIP_ENABLEALL, TOOLTIP_DISABLEALL, TOOLTIP_REMAININGTOGGLE,
@@ -383,12 +393,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 // Deactivate the tooltip if the cursor is not over any button
                 if (!tooltipActivated)
                 {
-                    for (int i = 0; i < hwnd_length; i++)
-                    {
-                        SendMessage(hwndTooltip[i], TTM_TRACKACTIVATE, FALSE, (LPARAM)&toolInfo);
-                    }                   
+                    DeactivateTooltips(toolInfo);
 
                 }
+
+
+                // Request WM_MOUSELEAVE notification
+                TRACKMOUSEEVENT tme;
+                tme.cbSize = sizeof(TRACKMOUSEEVENT);
+                tme.dwFlags = TME_LEAVE;
+                tme.hwndTrack = hWnd;
+                TrackMouseEvent(&tme);
             }
             break;
         }
@@ -413,12 +428,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 KillApplication();                // escape for exiting
             }            
 
+            if (wParam == HOTKEY_ID_F1) {
+                OpenOptions(hWnd);                // escape for exiting
+            }
+
             if (current_tab == 0)
             {
-                if (wParam == HOTKEY_ID_Q)
-                {
-                    OpenOptions(hWnd);
-                }
                 if (wParam == HOTKEY_ID_T)
                 {
                     if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
@@ -1129,11 +1144,12 @@ void EnableHotkeys(HWND hWnd)
 	RegisterHotKey(hWnd, HOTKEY_ID_H, 0, 0x48);
 	RegisterHotKey(hWnd, HOTKEY_ID_R, 0, 0x52);
 	RegisterHotKey(hWnd, HOTKEY_ID_T, 0, 0x54);
+	RegisterHotKey(hWnd, HOTKEY_ID_F1, 0, VK_F1);
 }
 
 void DisableHotkeys(HWND hWnd)
 {
-	for (int i = 1; i < 24; i++) {
+	for (int i = 1; i < 25; i++) {
 		UnregisterHotKey(hWnd, i);
 	}
 }
@@ -1515,7 +1531,6 @@ void ShowDrawTab(bool state, HWND hWnd) {
 	    if (labels_enabled) ShowWindow(label_centre, SW_SHOW);
 	    ShowWindow(label_corner, SW_SHOW);
 		ShowWindow(button_techtree, SW_SHOW);
-        ShowWindow(button_options, SW_SHOW);
 	}
     else if (state == false) {
         ShowWindow(civ_icon, SW_HIDE);
@@ -1525,7 +1540,6 @@ void ShowDrawTab(bool state, HWND hWnd) {
         ShowWindow(label_centre, SW_HIDE);
         ShowWindow(label_corner, SW_HIDE);
 		ShowWindow(button_techtree, SW_HIDE);
-        ShowWindow(button_options, SW_HIDE);
     }
 	
 }
@@ -2559,7 +2573,7 @@ void AddTooltips()
 {
     AddTooltip(button_draw, hwndTooltip[TOOLTIP_DRAW], StringCleaner(L"Draws a fresh random civilisation\nHotkey: Space"));
     AddTooltip(button_reset, hwndTooltip[TOOLTIP_RESET], StringCleaner(L"Resets the pool of drawn civs and renders all enabled civs available\nHotkey: Enter"));
-    AddTooltip(button_options, hwndTooltip[TOOLTIP_OPTIONS], StringCleaner(L"Opens options\nHotkey: Q"));
+    AddTooltip(button_options, hwndTooltip[TOOLTIP_OPTIONS], StringCleaner(L"Opens options\nHotkey: F1"));
     AddTooltip(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
 
     AddTooltip(button_clearlog, hwndTooltip[TOOLTIP_CLEAR], StringCleaner(L"Clears the log of previously drawn civs\nHotkey: Q"));
@@ -2665,7 +2679,7 @@ void CreateButtons(HWND hWnd)
     button_reset = CreateWindow(L"BUTTON", L"Reset", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 200, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_RESET, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     button_techtree = CreateWindow(L"BUTTON", L"", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP, 0, 0, 60, 60, hWnd, (HMENU)IDC_BUTTON_TECHTREE, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     SendMessageW(button_techtree, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_techtree);
-    button_options = CreateWindow(L"BUTTON", L"", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP, 89, 85, 60, 60, hWnd, (HMENU)IDC_BUTTON_OPTIONS, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    button_options = CreateWindow(L"BUTTON", L"", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP, 0, 0, 25, 25, hWnd, (HMENU)IDC_BUTTON_OPTIONS, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     SendMessageW(button_options, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_options); 
     button_clearlog = CreateWindow(L"BUTTON", L"Clear Log", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_CLEARLOG, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     button_enableall = CreateWindow(L"BUTTON", L"Enable All", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 340, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_ENABLEALL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
@@ -2693,4 +2707,12 @@ void CreateRadiobuttons(HWND hWnd)
     radiobutton_hd = CreateWindow(L"BUTTON", L"HD Edition (2013)", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, 10, 60, 175, 20, hWnd, (HMENU)IDC_RADIO_HD, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     radiobutton_aok = CreateWindow(L"BUTTON", L"Age of Kings (1999)", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, 10, 90, 175, 20, hWnd, (HMENU)IDC_RADIO_AOK, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     CheckRadioButton(hWnd, IDC_RADIO_DE, IDC_RADIO_AOK, IDC_RADIO_DE);
+}
+
+void DeactivateTooltips(TTTOOLINFOW toolinfo)
+{
+    for (int i = 0; i < hwnd_length; i++)
+    {
+        SendMessage(hwndTooltip[i], TTM_TRACKACTIVATE, FALSE, (LPARAM)&toolinfo);
+    }
 }

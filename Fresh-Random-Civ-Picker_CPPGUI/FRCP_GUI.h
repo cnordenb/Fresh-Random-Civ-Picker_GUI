@@ -59,6 +59,7 @@
 #define HOTKEY_ID_G 20
 #define HOTKEY_ID_H 21
 #define HOTKEY_ID_R 22
+#define HOTKEY_ID_F1 23
 
 
 #define DT_UNDERLINE 0x80000000
@@ -393,7 +394,7 @@ void ToggleAutoReset(HWND);
 void AddTooltip(HWND, HWND, LPCWSTR);
 
 void ActivateTooltip(HWND, TOOLINFO *, POINT);
-
+void DeactivateTooltips(TTTOOLINFOW);
 
 
 HWND hwndTooltip[23];
