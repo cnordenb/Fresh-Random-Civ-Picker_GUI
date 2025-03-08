@@ -26,6 +26,7 @@ How to use: the user can click the "Draw" button (or press spacebar) to have the
 ![frcp demo6](https://github.com/user-attachments/assets/951b35e6-fe8b-4df4-a487-d6c85444bdba)
 
 If the user wishes to see the tech tree of the drawn civ, they can click the Tech Tree button near the bottom right corner of the window.
+
 ![frcp demo7](https://github.com/user-attachments/assets/741be987-c490-4729-affc-95734e91765b)
 
 
