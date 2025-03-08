@@ -21,10 +21,7 @@ void CreateTabs(HWND hWnd)
     InitCommonControlsEx(&icex);
 
     // Create the tab control
-    tab = CreateWindow(WC_TABCONTROL, L"",
-        WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
-        0, 0, MIN_WIDTH, MIN_HEIGHT,
-        hWnd, NULL, instance, NULL);
+    tab = CreateWindow(WC_TABCONTROL, L"", WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE, 0, 0, MIN_WIDTH, MIN_HEIGHT, hWnd, NULL, instance, NULL);
 
     // Add tabs
     TCITEM tie;
@@ -44,41 +41,31 @@ void CreateTabs(HWND hWnd)
 // Function to show/hide components based on the selected tab
 void ShowTabComponents(int tabIndex, HWND hWnd)
 {
-    if (startup && jingles_enabled) PlayJingle(current_civ);
-    else if (ui_sounds_enabled) PlaySound(L"tab_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+    if (!startup && ui_sounds_enabled) PlaySound(L"tab_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+    else if (startup && jingles_enabled) PlayJingle(current_civ);    
+    current_tab = tabIndex;
     if (tabIndex == 0)
-    {
-        current_tab = 0;
+    {        
 		ShowLogTab(false);
 		ShowCustomTab(false);
-
         ShowDrawTab(true, hWnd);
     }
     else if (tabIndex == 1)
-    {
-        current_tab = 1;
+    {        
 		ShowDrawTab(false, hWnd);
 		ShowCustomTab(false);
-
         ShowLogTab(true);
     }
     else if (tabIndex == 2)
-    {
-        current_tab = 2;
+    {        
 		ShowDrawTab(false, hWnd);
 		ShowLogTab(false);
-
 		ShowCustomTab(true);
-
     }
 }
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
-{
-    
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
+{    
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -102,10 +89,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MyRegisterClass(hInstance);
 
     // Perform application initialization:
-    if (!InitInstance (hInstance, nCmdShow))
-    {
-        return FALSE;
-    }
+    if (!InitInstance (hInstance, nCmdShow)) return FALSE;
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_WINDOWSPROJECT1));
 
@@ -124,8 +108,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Shutdown GDI+
     Gdiplus::GdiplusShutdown(gdiplusToken);
 
-
     DeleteObject(font_underline);
+    DeleteObject(hBoldFont);
 
     if (persistent_logging) SaveLog();
     SaveSettings();
@@ -176,13 +160,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	wcscpy_s(title, L"Fresh Random Civ Picker");
 
     // Set the default window size to 400x300
-    HWND hWnd = CreateWindowW(window_class, title, WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, 0, MIN_WIDTH, MIN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
+    HWND hWnd = CreateWindowW(window_class, title, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, MIN_WIDTH, MIN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
 
-    if (!hWnd)
-    {
-        return FALSE;
-    }
+    if (!hWnd) return FALSE;    
 
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
@@ -214,7 +194,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             iccex.dwSize = sizeof(INITCOMMONCONTROLSEX);
             iccex.dwICC = ICC_WIN95_CLASSES | ICC_BAR_CLASSES | ICC_COOL_CLASSES | ICC_TREEVIEW_CLASSES;
             InitCommonControlsEx(&iccex);
-            if (!InitCommonControlsEx(&iccex)) {
+            if (!InitCommonControlsEx(&iccex))
+            {
                 MessageBox(hWnd, L"Failed to initialize common controls.", L"Error", MB_OK | MB_ICONERROR);
                 return -1;
             }
@@ -235,60 +216,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				LoadLog(hWnd);
                 ValidateAllDlcToggles(hWnd);
             }           
-			ShowTabComponents(0, hWnd);
-            startup = false;
+			ShowTabComponents(0, hWnd);            
             EnableHotkeys(hWnd);
             if (draw_on_startup) DrawCiv();
-			else if (!persistent_logging) ResetProgram();            
+			else if (!persistent_logging) ResetProgram(false);      
+            startup = false;
             break;
         }
         case WM_SIZE:
         {
-            int width = LOWORD(lParam);
-            int height = HIWORD(lParam);
-
-            SetWindowPos(button_draw, NULL, (width - 100) / 2, (height + 100) / 2, 100, 30, SWP_NOZORDER);   // draw button anchored to centre
-            SetWindowPos(button_techtree, NULL, width - 150, height - 120, 60, 60, SWP_NOZORDER);   // techtree button anchored its traditional location
-            SetWindowPos(button_options, NULL, width - 25, 0, 25, 25, SWP_NOZORDER);   // techtree button anchored its traditional location
-
-
-            if (current_tab == 0) {
-                SetWindowPos(button_reset, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);                          // reset button anchored to bottom left corner
-            }
-            else {
-                SetWindowPos(button_reset, NULL, (width - 100) / 2, height - 40, 100, 30, SWP_NOZORDER);             // reset button centred when on log tab
-            }
-
-
-            SetWindowPos(tab, NULL, 0, 0, width, height, SWP_NOZORDER);                                        // tab size anchored to window size
-            SetWindowPos(label_corner, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);                          // remaining civ indicator anchored to bottom right corner 
-            SetWindowPos(label_centre, NULL, (width - 80) / 2, (height + 35) / 2, 90, 15, SWP_NOZORDER);       // drawn civ label anchored to centre
-            SetWindowPos(civ_icon, NULL, (width - 100) / 2, (height - 180) / 2, 104, 104, SWP_NOZORDER);       // civ icon anchored to centre
-			
-            SetWindowPos(label_drawncount, NULL, 10, 25, 90, 15, SWP_NOZORDER);                           // drawn civ label anchored to top left corner
-			SetWindowPos(button_clearlog, NULL, 110, 25, 100, 30, SWP_NOZORDER);                           // clear log button anchored to top left corner
-            SetWindowPos(drawn_log, NULL, 10, 60, width - (width / 2) - 69, height - 70, SWP_NOZORDER);        // log text field anchored to window size
-            
-			SetWindowPos(label_remainingcount, NULL, (width / 2) + 60, 25, 130, 15, SWP_NOZORDER);                           // drawn civ label anchored to top right corner
-			SetWindowPos(checkbox_showremainlog, NULL, (width / 2) + 190, 25, 60, 15, SWP_NOZORDER);                           // drawn civ label anchored to top right corner
-            SetWindowPos(remaining_log, NULL, (width / 2) + 60, 60, width - (width / 2) - 65, height - 70, SWP_NOZORDER);                   // log text field anchored to window size
-
-            SetWindowPos(royals_icon, NULL, 345, 25, 18, 18, SWP_NOZORDER);
-            SetWindowPos(rome_icon, NULL, 345, 45, 18, 18, SWP_NOZORDER);
-            SetWindowPos(india_icon, NULL, 345, 65, 18, 18, SWP_NOZORDER);
-            SetWindowPos(dukes_icon, NULL, 345, 85, 18, 18, SWP_NOZORDER);
-            SetWindowPos(west_icon, NULL, 345, 105, 18, 18, SWP_NOZORDER);
-            SetWindowPos(khans_icon, NULL, 345, 125, 18, 18, SWP_NOZORDER);
-
-            SetWindowPos(rajas_icon, NULL, 350, 30, 30, 30, SWP_NOZORDER);
-            SetWindowPos(africans_icon, NULL, 350, 65, 30, 30, SWP_NOZORDER);
-            SetWindowPos(forgotten_icon, NULL, 350, 100, 30, 30, SWP_NOZORDER);
-
-            SetWindowPos(aoc_icon, NULL, 340, 50, 45, 45, SWP_NOZORDER);
-
-            SetWindowPos(edition_icon, NULL, 190, 30, 128, 93, SWP_NOZORDER);
-
-
+            PositionComponents(lParam);
             break;
         }
         case WM_ACTIVATE: // re-enables hotkeys when window returns to foreground 
@@ -327,7 +264,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case WM_MOUSEMOVE:
         {
-            if (!tooltips_enabled) break;
             if (hwndTooltip)
             {
                 // Get the cursor position
@@ -373,27 +309,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				}             
                 
                 // Deactivate the tooltip if the cursor is not over any button
-                if (!tooltipActivated)
-                {
-                    DeactivateTooltips(toolInfo);
-                }
-
-                // Request WM_MOUSELEAVE notification
-                TRACKMOUSEEVENT tme;
-                tme.cbSize = sizeof(TRACKMOUSEEVENT);
-                tme.dwFlags = TME_LEAVE;
-                tme.hwndTrack = hWnd;
-                TrackMouseEvent(&tme);
+                if (!tooltipActivated) DeactivateTooltips(toolInfo);
             }
-            break;
-        }
-        case WM_MOUSELEAVE:
-        {
-            //if (!mouse_is_leaving) break;
-
-            DeactivateTooltips(toolInfo);
-            
-
             break;
         }
         case WM_GETMINMAXINFO:                                  // minimum window size
@@ -413,48 +330,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             else EnableHotkeys(hWnd);
 
-            if (wParam == HOTKEY_ID_ESC) {              
-                PostQuitMessage(0);               // escape for exiting
-            }            
+            if (wParam == HOTKEY_ID_ESC) PostQuitMessage(0);               // escape for exiting                        
 
-            if (wParam == HOTKEY_ID_F1) {
-                OpenOptions(hWnd);               
-            }
+            if (wParam == HOTKEY_ID_F1) OpenOptions(hWnd);
+            if (wParam == HOTKEY_ID_F2) OpenHotkeys(hWnd);
+            if (wParam == HOTKEY_ID_F3) OpenAbout(hWnd);
 
             if (current_tab == 0)
             {
-                if (wParam == HOTKEY_ID_T)
-                {
-                    if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-                    OpenTechTree();                    
-                }
+                if (wParam == HOTKEY_ID_Q) OpenOptions(hWnd);
+                if (wParam == HOTKEY_ID_T) OpenTechTree();
             }
 
             if (current_tab != 2) {
                 if (wParam == HOTKEY_ID_SPACE) DrawCiv();           // space for drawing civ
-                if (wParam == HOTKEY_ID_RETURN) ResetProgram();            // return for resetting
+                if (wParam == HOTKEY_ID_RETURN) ResetProgram(false);            // return for resetting
             }
             else if (current_tab == 2)
             {
-                if (wParam > 1 && wParam < 4 || wParam > 12 && wParam < 22)
-                {                    
-                    if (autoreset_enabled) ResetProgram();
-                }
-                    
+                if (wParam > 1 && wParam < 4 || wParam > 12 && wParam < 22) if (autoreset_enabled) ResetProgram(true);             
                 if (wParam == HOTKEY_ID_SPACE) EnableAll(hWnd);           
                 if (wParam == HOTKEY_ID_RETURN) DisableAll(hWnd);
                 if (wParam == HOTKEY_ID_Q) SetEditionState(hWnd, DE);
                 if (wParam == HOTKEY_ID_W) SetEditionState(hWnd, HD);
 				if (wParam == HOTKEY_ID_E) SetEditionState(hWnd, AOK);
                 if (wParam == HOTKEY_ID_R) ToggleAutoToggle(hWnd);
-                if (wParam == HOTKEY_ID_T) ToggleAutoReset(hWnd);
-                
-                if (ui_sounds_enabled)
-                {
-                    if (wParam > 15 && wParam < 23 ||
-                        wParam == HOTKEY_ID_T) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-                }                   
-
+                if (wParam == HOTKEY_ID_T) ToggleAutoReset(hWnd);                        
                 if (edition_state == DE)
                 {
 					if (wParam == HOTKEY_ID_A) ToggleDlc(royals, hWnd);
@@ -470,23 +371,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					if (wParam == HOTKEY_ID_S) ToggleDlc(africans, hWnd);
 					if (wParam == HOTKEY_ID_D) ToggleDlc(forgotten, hWnd);
 				}
-                else if (edition_state == AOK)
-                {
-                    if (wParam == HOTKEY_ID_A) ToggleDlc(aoc, hWnd);
-                }
+                else if (edition_state == AOK) if (wParam == HOTKEY_ID_A) ToggleDlc(aoc, hWnd);                
             }
-
             if (current_tab == 1)
             {
-                if (wParam == HOTKEY_ID_Q)
-                {
-                    SetWindowText(drawn_log, L"");
-                    if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-                }
-				if (wParam == HOTKEY_ID_W)
-				{
-                    ToggleRemainLog();
-				}
+                if (wParam == HOTKEY_ID_Q) ClearDrawnLog();
+				if (wParam == HOTKEY_ID_W) ToggleRemainLog();
             }
 
             if (wParam == HOTKEY_ID_TAB)                        // tab for switching tabs
@@ -517,47 +407,72 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				ShowTabComponents(2, hWnd);
 			}
 
-            if (wParam == HOTKEY_ID_Z) {
-                if (labels_enabled) {
-					labels_enabled = false;
+            if (wParam == HOTKEY_ID_Z)
+            {
+                if (ui_sounds_enabled) PlayButtonSound();
+                if (civ_labels_enabled)
+                {
+					civ_labels_enabled = false;
                     ShowWindow(label_centre, SW_HIDE);
 				}
                 else {
-					labels_enabled = true;
-					if (current_tab == 0) ShowWindow(label_centre, SW_SHOW);
+					civ_labels_enabled = true;
+					if (current_tab != 2) ShowWindow(label_centre, SW_SHOW);
                 }
             }
 
-			if (wParam == HOTKEY_ID_X) {
-				if (icons_enabled) {
+			if (wParam == HOTKEY_ID_X)
+            {
+                if (ui_sounds_enabled) PlayButtonSound();
+				if (icons_enabled)
+                {
 					icons_enabled = false;
 					ShowWindow(civ_icon, SW_HIDE);
 				}
-				else {
+				else
+                {
 					icons_enabled = true;
-					if (current_tab == 0) ShowWindow(civ_icon, SW_SHOW);
+					if (current_tab != 2) ShowWindow(civ_icon, SW_SHOW);
 				}
 			}
 
-            if (wParam == HOTKEY_ID_C) {
-                if (jingles_enabled) {
+            if (wParam == HOTKEY_ID_V)
+            {
+                if (jingles_enabled)
+                {
                     jingles_enabled = false;
 					MuteSounds();
                 }
-                else {
+                else
+                {
                     jingles_enabled = true;
                     PlayJingle(current_civ);
                 }
             }
 
-			if (wParam == HOTKEY_ID_V) {
-				if (ui_sounds_enabled) {
-					ui_sounds_enabled = false;
-				}
-				else {
-					ui_sounds_enabled = true;
-				}
+			if (wParam == HOTKEY_ID_B)
+            {
+				if (ui_sounds_enabled) ui_sounds_enabled = false;				
+                else
+                {
+                    PlayButtonSound();
+                    ui_sounds_enabled = true;
+                }                    				
 			}             
+
+            if (wParam == HOTKEY_ID_C)
+            {
+                if (ui_sounds_enabled) PlayButtonSound();
+                if (iteration_label_enabled)
+                {
+                    iteration_label_enabled = false;
+                    ShowWindow(label_corner, SW_HIDE);
+                }
+                else {
+                    iteration_label_enabled = true;
+                    if (current_tab != 2) ShowWindow(label_corner, SW_SHOW);
+                }
+            }
 
             if (hOptionsDlg != NULL)
             {
@@ -573,30 +488,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             int wmId = LOWORD(wParam);            
 
 
-            if (wmId >= 5 && wmId <= 49) {
-
+            if (wmId >= 5 && wmId <= 49)
+            {
+                if (ui_sounds_enabled) PlayButtonSound();
                 if (IsDlgButtonChecked(hWnd, wmId) == BST_CHECKED) AddCiv(civ_index[wmId-5]);
                 else RemoveCiv(civ_index[wmId - 5]);
-                ValidateDlcToggle(hWnd, GetCivDLC(civ_index[wmId - 5]));			
-
-            }         
-			// button sounds in tab views
-            if (ui_sounds_enabled) {
-                if (wmId > 2 && wmId < 51 || wmId > 53 && wmId < 68) {
-                    PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-                }
-            }
+                ValidateDlcToggle(hWnd, GetCivDLC(civ_index[wmId - 5]));	
+            }     
 
             // auto-reset
-            if (autoreset_enabled) {
-				if (wmId > 4 && wmId < 50 || wmId > 50 && wmId < 65) ResetProgram();
-            }
-
+            if (autoreset_enabled) if (wmId > 4 && wmId < 50 || wmId > 50 && wmId < 65) ResetProgram(true);
+            
             switch (wmId)
             {
             case IDM_ABOUT:                                     // "About"
-                if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-                DialogBox(instance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
+                OpenAbout(hWnd);
                 break;
             case IDM_EXIT:                                     // "Exit"
                 PostQuitMessage(0);
@@ -608,20 +514,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 OpenHotkeys(hWnd);
                 break;
             case IDM_GITHUB:                                    // "GitHub"
-                if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                if (ui_sounds_enabled) PlayButtonSound();
                 ShellExecute(0, 0, L"https://github.com/cnordenb/Fresh-Random-Civ-Picker_CPPGUI", 0, 0, SW_SHOW);
                 break;
             case IDM_WEBVERSION:                                // "Web Version"
-                if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                if (ui_sounds_enabled) PlayButtonSound();
                 ShellExecute(0, 0, L"https://cnordenb.github.io/Fresh-Random-Civ-Picker_web/", 0, 0, SW_SHOW);
                 break;
             case IDC_BUTTON_DRAW:                                             // "Draw"     
-                if (ui_sounds_enabled && !jingles_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 DrawCiv();
                 break;
             case IDC_BUTTON_RESET:                                             // "Reset"
-                if (ui_sounds_enabled && !jingles_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-                ResetProgram();
+                ResetProgram(false);
                 break;
             case IDC_BUTTON_ENABLEALL:                                             // "Enable All"                
                 EnableAll(hWnd);
@@ -630,12 +534,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DisableAll(hWnd);
                 break;
 			case IDC_BUTTON_CLEARLOG:                           // "Clear"
-				SetWindowText(drawn_log, L"");
-                if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                ClearDrawnLog();
                 break;
             case IDC_BUTTON_OPTIONS:
-                mouse_is_leaving = true;
-                while (mouse_is_leaving) DeactivateTooltips(toolInfo);
+                DeactivateTooltips(toolInfo);
                 OpenOptions(hWnd);
                 break;
             case IDC_BUTTON_TECHTREE:
@@ -814,7 +716,6 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     {
     case WM_INITDIALOG:
     {
-        
         HWND hwndHyperlink = GetDlgItem(hDlg, IDC_HYPERLINK);
         oldProc = (WNDPROC)SetWindowLongPtr(hwndHyperlink, GWLP_WNDPROC, (LONG_PTR)HyperlinkProc);
         return(INT_PTR)TRUE;
@@ -822,6 +723,7 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     case WM_COMMAND:
         if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
         {
+            if (ui_sounds_enabled) PlayButtonSound();
             EndDialog(hDlg, LOWORD(wParam));
             return(INT_PTR)TRUE;
         }
@@ -839,7 +741,8 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
     case WM_INITDIALOG:
     {        
         //oldProc = (WNDPROC)SetWindowLongPtr(hwndHyperlink, GWLP_WNDPROC, (LONG_PTR)HyperlinkProc);
-        CheckDlgButton(hDlg, IDC_CHECKBOX_LABELS, labels_enabled ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(hDlg, IDC_CHECKBOX_LABELS, civ_labels_enabled ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(hDlg, IDC_CHECKBOX_CORNERLABEL, iteration_label_enabled ? BST_CHECKED : BST_UNCHECKED);
         CheckDlgButton(hDlg, IDC_CHECKBOX_ICONS, icons_enabled ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(hDlg, IDC_CHECKBOX_JINGLES, jingles_enabled ? BST_CHECKED : BST_UNCHECKED);
         CheckDlgButton(hDlg, IDC_CHECKBOX_SOUNDS, ui_sounds_enabled ? BST_CHECKED : BST_UNCHECKED);
@@ -856,34 +759,30 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 
         return(INT_PTR)TRUE;
     }
-        case WM_HOTKEY:
-        {
-			if (wParam == HOTKEY_ID_Q) OpenOptions(hDlg);
-            break;
-        }
         case WM_COMMAND:
     {
         int wmId = LOWORD(wParam);
         int wmEvent = HIWORD(wParam);
 
 
-        if (ui_sounds_enabled && IDC_LEGACY_OPTION) {
+        if (IDC_LEGACY_OPTION) {
             switch (wmEvent)
             {
             case CBN_DROPDOWN:
                 // Handle dropdown open event
-                PlaySound(L"hover_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                if (ui_sounds_enabled) PlaySound(L"hover_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                 break;
 
             case CBN_SELCHANGE:
-                // Handle selection change event
-                PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                if (ui_sounds_enabled && !VerifiedLegacyCiv(current_civ)) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                else if (jingles_enabled) PlayJingle(current_civ);
                 break;
             }
         }
 
 		ui_sounds_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_SOUNDS) == BST_CHECKED;
-		labels_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_LABELS) == BST_CHECKED;
+        civ_labels_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_LABELS) == BST_CHECKED;
+        iteration_label_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_CORNERLABEL) == BST_CHECKED;
 		icons_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_ICONS) == BST_CHECKED;
         jingles_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_JINGLES) == BST_CHECKED;
         tooltips_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_TOOLTIPS) == BST_CHECKED;
@@ -919,28 +818,32 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 				OpenHotkeys(hDlg);
                 break;
             case IDC_CHECKBOX_LABELS:
+            case IDC_CHECKBOX_CORNERLABEL:
             case IDC_CHECKBOX_ICONS:
             case IDC_CHECKBOX_SOUNDS:
             case IDC_CHECKBOX_TOOLTIPS:
 			case IDC_CHECKBOX_STARTDRAW:
-                if (ui_sounds_enabled)
-                {
-                    PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-                }
+                if (ui_sounds_enabled) PlayButtonSound();
                 break;
 			case IDC_RADIO_LOGGING:
+                if (ui_sounds_enabled) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
 				persistent_logging = true;
                 break;
 			case IDC_RADIO_STARTRESET:
+                if (ui_sounds_enabled) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
 				persistent_logging = false;
 				break;
             }
         }
 
-		if (!labels_enabled) ShowWindow(label_centre, SW_HIDE);
-		else if (current_tab == 0) ShowWindow(label_centre, SW_SHOW); 
+        if (!civ_labels_enabled) ShowWindow(label_centre, SW_HIDE);
+        else if (current_tab == 0) ShowWindow(label_centre, SW_SHOW);
+
+        if (!iteration_label_enabled) ShowWindow(label_corner, SW_HIDE);
+        else if (current_tab == 0) ShowWindow(label_corner, SW_SHOW);
         
         if (wmId == IDCANCEL || wmId == IDOK) {
+            if (ui_sounds_enabled) PlayButtonSound();
             EndDialog(hDlg, wmId);
             return(INT_PTR)TRUE;
         }        
@@ -973,8 +876,9 @@ LRESULT CALLBACK HyperlinkProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-void ResetProgram()
+void ResetProgram(bool auto_reset)
 {
+    if (ui_sounds_enabled && !startup && !auto_reset && !jingles_enabled) PlayButtonSound();
     if (custom_max_civs < MAX_CIVS) custom_civ_pool = true;
 
     current_civ = L"Random";
@@ -1007,7 +911,10 @@ void ResetProgram()
     SetWindowText(label_corner, (L"0/" + std::to_wstring(custom_max_civs)).c_str());     // resets remaining civs label
     SetWindowText(label_centre, L"?");                                      // resets drawn civ label
     SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_random);
-    if (jingles_enabled && current_tab != 2) PlayJingle(current_civ);
+
+    if (!auto_reset && jingles_enabled && current_tab != 2) PlayJingle(current_civ);
+
+    
     reset_state = true;
 
     UpdateRemainingLog(false);
@@ -1016,6 +923,7 @@ void ResetProgram()
 
 void DrawCiv()
 {
+    if (!startup && ui_sounds_enabled && !jingles_enabled) PlayButtonSound();
     reset_state = false;
 
     if (custom_max_civs == 0) {
@@ -1024,7 +932,7 @@ void DrawCiv()
         return;        // if no civs are selected, return
     }
 
-    if (civs.empty() || iterator == custom_max_civs || iterator == 0) ResetProgram();        // if all civs have been drawn, reset program and civ vector
+    if (civs.empty() || iterator == custom_max_civs || iterator == 0) ResetProgram(true);        // if all civs have been drawn, reset program and civ vector
 
     std::random_device rd;      // seeding random number
     std::mt19937 mt(rd());      // with Mersenne Twister 
@@ -1052,11 +960,7 @@ void DrawCiv()
     UpdateRemainingLog(false);
 
 
-    /*
-    if (current_tab == 2) {
-        ShowWindow(civ_icon, SW_HIDE);
-        ShowWindow(label_centre, SW_HIDE);
-    }*/
+
 
 
     if (jingles_enabled)
@@ -1065,6 +969,7 @@ void DrawCiv()
         sound_thread.detach();*/
         PlayJingle(current_civ);
     }
+    
 
 
     UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
@@ -1097,12 +1002,15 @@ void EnableHotkeys(HWND hWnd)
 	RegisterHotKey(hWnd, HOTKEY_ID_H, 0, 0x48);
 	RegisterHotKey(hWnd, HOTKEY_ID_R, 0, 0x52);
 	RegisterHotKey(hWnd, HOTKEY_ID_T, 0, 0x54);
-	RegisterHotKey(hWnd, HOTKEY_ID_F1, 0, VK_F1);
+    RegisterHotKey(hWnd, HOTKEY_ID_F1, 0, VK_F1);
+    RegisterHotKey(hWnd, HOTKEY_ID_F2, 0, VK_F2);
+    RegisterHotKey(hWnd, HOTKEY_ID_F3, 0, VK_F3);
+    RegisterHotKey(hWnd, HOTKEY_ID_B, 0, 0x42);
 }
 
 void DisableHotkeys(HWND hWnd)
 {
-	for (int i = 1; i < 25; i++) {
+	for (int i = 1; i < 28; i++) {
 		UnregisterHotKey(hWnd, i);
 	}
 }
@@ -1415,7 +1323,7 @@ void HideCustomPoolCheckboxes() {
 }
 
 void EnableAll(HWND hWnd) {
-    if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+    if (ui_sounds_enabled) PlayButtonSound();
 	custom_civ_pool = false;
 
     if (edition_state == DE) {
@@ -1441,18 +1349,18 @@ void EnableAll(HWND hWnd) {
 		}
 	}
     
-    if (autoreset_enabled) ResetProgram();
+    if (autoreset_enabled) ResetProgram(true);
     ValidateAllDlcToggles(hWnd);
 }
 
 void DisableAll(HWND hWnd) {
-    if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+    if (ui_sounds_enabled) PlayButtonSound();
 	custom_civ_pool = true;
     for (int i = 0; i < MAX_CIVS; i++) {
         SendMessage(civ_checkbox[i], BM_SETCHECK, BST_UNCHECKED, 0);
 		RemoveCiv(civ_index[i]);
     }
-    if (autoreset_enabled) ResetProgram();
+    if (autoreset_enabled) ResetProgram(true);
     ValidateAllDlcToggles(hWnd);
 }
 
@@ -1463,17 +1371,20 @@ void ShowDrawTab(bool state, HWND hWnd) {
         ShowWindow(button_draw, SW_SHOW);
         SetWindowPos(button_reset, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);
 	    ShowWindow(button_reset, SW_SHOW);
-	    if (labels_enabled) ShowWindow(label_centre, SW_SHOW);
+	    if (civ_labels_enabled) ShowWindow(label_centre, SW_SHOW);
         if (icons_enabled) ShowWindow(civ_icon, SW_SHOW);
-	    ShowWindow(label_corner, SW_SHOW);
+	    if (iteration_label_enabled) ShowWindow(label_corner, SW_SHOW);
 		ShowWindow(button_techtree, SW_SHOW);
 	}
     else if (state == false) {
-        ShowWindow(button_draw, SW_HIDE);
+        if (current_tab == 2)
+        {
+            ShowWindow(civ_icon, SW_HIDE);
+            ShowWindow(button_draw, SW_HIDE);
+            ShowWindow(label_centre, SW_HIDE);
+        }
         ShowWindow(button_reset, SW_HIDE);
         SetWindowPos(button_reset, NULL, (width - 100) / 2, height - 40, 100, 30, SWP_NOZORDER);
-        ShowWindow(label_centre, SW_HIDE);
-        ShowWindow(civ_icon, SW_HIDE);
         ShowWindow(label_corner, SW_HIDE);
 		ShowWindow(button_techtree, SW_HIDE);
     }
@@ -1484,7 +1395,7 @@ void ShowLogTab(bool state) {
     if (state == true) {
         ShowWindow(button_draw, SW_SHOW);
         ShowWindow(button_reset, SW_SHOW);
-        if (labels_enabled) ShowWindow(label_centre, SW_SHOW);
+        if (civ_labels_enabled) ShowWindow(label_centre, SW_SHOW);
         if (icons_enabled) ShowWindow(civ_icon, SW_SHOW);
 		ShowWindow(label_drawncount, SW_SHOW);
 		ShowWindow(button_clearlog, SW_SHOW);
@@ -1495,16 +1406,19 @@ void ShowLogTab(bool state) {
     }
 
     else if (state == false) {
+        if (current_tab == 2)
+        {
+            ShowWindow(button_draw, SW_HIDE);
+            ShowWindow(label_centre, SW_HIDE);
+            ShowWindow(civ_icon, SW_HIDE);
+        }
+        ShowWindow(button_reset, SW_HIDE);
 		ShowWindow(label_drawncount, SW_HIDE);
 		ShowWindow(button_clearlog, SW_HIDE);
         ShowWindow(drawn_log, SW_HIDE);
 		ShowWindow(label_remainingcount, SW_HIDE);
 		ShowWindow(checkbox_showremainlog, SW_HIDE);
         ShowWindow(remaining_log, SW_HIDE);
-        ShowWindow(button_draw, SW_HIDE);
-        ShowWindow(button_reset, SW_HIDE);
-        ShowWindow(label_centre, SW_HIDE);
-        ShowWindow(civ_icon, SW_HIDE);
     }
 }
 
@@ -1664,7 +1578,7 @@ void ShowAOCCheckbox(bool aok_state) {
 
 void ToggleDlc(dlc civ_dlc, HWND hWnd)
 {
-
+    if (!startup && ui_sounds_enabled) PlayButtonSound();
 	int check_id = GetDlcCheckboxId(civ_dlc);
 
 
@@ -1812,9 +1726,8 @@ void ValidateAllDlcToggles(HWND hWnd) {
 	ValidateDlcToggle(hWnd, aoc);
 }
 
-void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted) {
-
-    
+void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted)
+{    
     if (drawn)
     {
         drawnlog_length = GetWindowTextLength(drawn_log);
@@ -1839,29 +1752,34 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted) {
 
             drawnlog_text = L"\r\n" + drawnlog_text;
             SetWindowText(drawn_log, drawnlog_text.c_str());
-
         }        
     }
 
     std::wstring drawn_label = L"Drawn: " + std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
     SetWindowText(label_drawncount, drawn_label.c_str());
+
+    if (start_state)
+    {
+        if (!icons_enabled) ShowWindow(civ_icon, SW_HIDE);
+        if (!civ_labels_enabled) ShowWindow(label_centre, SW_HIDE);
+        if (!iteration_label_enabled) ShowWindow(label_corner, SW_HIDE);
+    }
 }
 
-void UpdateRemainingLog(bool civ_pool_changed) {
-
-    if (reset_state || civ_pool_changed) {
-        std::vector<std::wstring> sorted_civs = civs;
-        std::sort(sorted_civs.begin(), sorted_civs.end());
+void UpdateRemainingLog(bool civ_pool_changed)
+{
+    if (reset_state || civ_pool_changed)
+    {
+        std::sort(civs.begin(), civs.end());
         remaininglog_text.clear();
-        for (const auto& civ : sorted_civs) {
+        for (const auto& civ : civs) {
             remaininglog_text += civ + L"\r\n";
         }
     }
-    else {
+    else
+    {
         size_t pos = remaininglog_text.find(current_civ + L"\r\n");
-        if (pos != std::wstring::npos) {
-            remaininglog_text.erase(pos, current_civ.length() + 2); // +2 for "\r\n"
-        }
+        if (pos != std::wstring::npos) remaininglog_text.erase(pos, current_civ.length() + 2); // +2 for "\r\n"
     }
 
 	std::wstring remain_label = L"Remaining: " + std::to_wstring(custom_max_civs - iterator) + L"/" + std::to_wstring(custom_max_civs);
@@ -1869,19 +1787,23 @@ void UpdateRemainingLog(bool civ_pool_changed) {
 	SetWindowText(label_remainingcount, remain_label.c_str());
 }
 
-int GetWindowWidth(HWND hWnd) {
+int GetWindowWidth(HWND hWnd)
+{
     RECT rect;
     GetClientRect(hWnd, &rect);
     return rect.right - rect.left;
 }
 
-int GetWindowHeight(HWND hWnd) {
+int GetWindowHeight(HWND hWnd)
+{
     RECT rect;
     GetClientRect(hWnd, &rect);
     return rect.bottom - rect.top;
 }
 
-void OpenTechTree() {
+void OpenTechTree()
+{
+    if (ui_sounds_enabled) PlayButtonSound();
     std::wstring techtree_path = L"https://aoe2techtree.net/#";
     if (current_civ != L"Random") techtree_path += current_civ;
 	ShellExecute(NULL, L"open", techtree_path.c_str(), NULL, NULL, SW_SHOWNORMAL);
@@ -1889,7 +1811,8 @@ void OpenTechTree() {
 
 void AddTooltip(HWND hwndTool, HWND hwndTip, LPCWSTR pszText)
 {
-    if (!hwndTool || !hwndTip) {
+    if (!hwndTool || !hwndTip)
+    {
         MessageBox(NULL, L"Invalid handle(s) provided to AddTooltip", L"Error", MB_OK | MB_ICONERROR);
         return;
     }
@@ -1905,7 +1828,8 @@ void AddTooltip(HWND hwndTool, HWND hwndTip, LPCWSTR pszText)
     toolInfo.rect.right = 0;
     toolInfo.rect.bottom = 0;
 
-    if (!SendMessage(hwndTip, TTM_ADDTOOL, 0, (LPARAM)&toolInfo)) {
+    if (!SendMessage(hwndTip, TTM_ADDTOOL, 0, (LPARAM)&toolInfo))
+    {
 		MessageBox(NULL, L"Failed to add tooltip", L"Error", MB_OK);
         OutputDebugString(L"Failed to add tooltip\n");
     }
@@ -1919,9 +1843,7 @@ void ActivateTooltip(HWND hwndTip, TOOLINFO *toolInfo, POINT pt)
     // Set the tooltip position to be next to the mouse cursor
     SendMessage(hwndTip, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y + 20));
 
-    if (!SendMessage(hwndTip, TTM_TRACKACTIVATE, TRUE, (LPARAM)toolInfo)) {
-        OutputDebugString(L"Failed to activate tooltip\n");
-    }
+    if (!SendMessage(hwndTip, TTM_TRACKACTIVATE, TRUE, (LPARAM)toolInfo)) OutputDebugString(L"Failed to activate tooltip\n");
 }
 
 LPCWSTR StringCleaner(const std::wstring &dirty_string)
@@ -1932,7 +1854,8 @@ LPCWSTR StringCleaner(const std::wstring &dirty_string)
 
 void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText)
 {
-    if (!hwndTool || !hwndTip) {
+    if (!hwndTool || !hwndTip)
+    {
         MessageBox(NULL, L"Invalid handle(s) provided to UpdateTooltipText", L"Error", MB_OK | MB_ICONERROR);
         return;
     }
@@ -1982,11 +1905,7 @@ void SetEditionState(HWND hWnd, edition edition)
             ShowDEDLCCheckboxes(false);
             ShowHDDLCCheckboxes(true);
             ShowAOCCheckbox(false);
-            if (autotoggle_enabled && !startup) {
-                for (int i = 0; i < 2; i++) {
-                    EnableDlc(old_dlc[i], hWnd);
-                }
-            }
+            if (autotoggle_enabled && !startup) for (int i = 0; i < 2; i++) EnableDlc(old_dlc[i], hWnd);
             SendMessageW(edition_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_hd);
             edition_state = HD;
             ShowHDPoolCheckboxes();
@@ -2004,9 +1923,7 @@ void SetEditionState(HWND hWnd, edition edition)
             ShowDEDLCCheckboxes(false);
             ShowHDDLCCheckboxes(false);
             ShowAOCCheckbox(true);
-            if (autotoggle_enabled && !startup) {
-                EnableDlc(aok, hWnd);
-            }
+            if (autotoggle_enabled && !startup) EnableDlc(aok, hWnd);
             SendMessageW(edition_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_aok);
             edition_state = AOK;
             ShowAOCPoolCheckboxes();
@@ -2025,22 +1942,18 @@ void SetEditionState(HWND hWnd, edition edition)
        
 void ToggleRemainLog()
 {	
+    if (ui_sounds_enabled) PlayButtonSound();
     if (remainlog_enabled)
     {
         ShowWindow(remaining_log, SW_HIDE);
         remainlog_enabled = false;
         if (hotkey_pressed)
         {
-            if ((SendMessage(checkbox_showremainlog, BM_GETCHECK, 0, 0)) != BST_UNCHECKED)
-            {
-                SendMessage(checkbox_showremainlog, BM_SETCHECK, BST_UNCHECKED, 0);
-            }
-            else
-            {
+            if ((SendMessage(checkbox_showremainlog, BM_GETCHECK, 0, 0)) != BST_UNCHECKED)            
+                SendMessage(checkbox_showremainlog, BM_SETCHECK, BST_UNCHECKED, 0);            
+            else            
                 SendMessage(checkbox_showremainlog, BM_SETCHECK, BST_CHECKED, 0);
-            }
-        }
-        
+        }        
     }
 
 	else
@@ -2050,84 +1963,62 @@ void ToggleRemainLog()
 
         if (hotkey_pressed)
         {
-            if ((SendMessage(checkbox_showremainlog, BM_GETCHECK, 0, 0)) != BST_CHECKED)
-            {
-                SendMessage(checkbox_showremainlog, BM_SETCHECK, BST_CHECKED, 0);
-            }
-            else
-            {
+            if ((SendMessage(checkbox_showremainlog, BM_GETCHECK, 0, 0)) != BST_CHECKED)            
+                SendMessage(checkbox_showremainlog, BM_SETCHECK, BST_CHECKED, 0);            
+            else            
                 SendMessage(checkbox_showremainlog, BM_SETCHECK, BST_UNCHECKED, 0);
-            }
-        }
-        
+        }        
 	}
-
-    if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
 }
 
 int GetDlcCheckboxId(dlc dlc)
 {
     switch (dlc)
     {
-    case royals:
-		return IDC_CHECKBOX_ROYALS;
-	case khans:
-		return IDC_CHECKBOX_KHANS;
-	case dukes:
-		return IDC_CHECKBOX_DUKES;
-	case west:
-		return IDC_CHECKBOX_WEST;
-	case india:
-		return IDC_CHECKBOX_INDIA;
-	case rome:
-		return IDC_CHECKBOX_ROME;
-	case forgotten:
-		return IDC_CHECKBOX_FORGOTTEN;
-	case africans:
-		return IDC_CHECKBOX_AFRICANS;
-	case rajas:
-		return IDC_CHECKBOX_RAJAS;
-	case aoc:
-		return IDC_CHECKBOX_AOC;
+    case royals:     return IDC_CHECKBOX_ROYALS;
+	case khans:      return IDC_CHECKBOX_KHANS;
+	case dukes:      return IDC_CHECKBOX_DUKES;
+	case west:       return IDC_CHECKBOX_WEST;
+	case india:      return IDC_CHECKBOX_INDIA;
+	case rome:       return IDC_CHECKBOX_ROME;
+	case forgotten:  return IDC_CHECKBOX_FORGOTTEN;
+	case africans:   return IDC_CHECKBOX_AFRICANS;
+	case rajas:      return IDC_CHECKBOX_RAJAS;
+	case aoc:        return IDC_CHECKBOX_AOC;
     }
 }
 
 void ToggleAutoToggle(HWND hWnd)
 {
-
+    if (!startup && ui_sounds_enabled) PlayButtonSound();
     if (hotkey_pressed)
     {
-        if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTOTOGGLE) == BST_CHECKED)
-        {
-			CheckDlgButton(hWnd, IDC_CHECKBOX_AUTOTOGGLE, BST_UNCHECKED);
-		}
-        else
-        {
+        if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTOTOGGLE) == BST_CHECKED)        
+			CheckDlgButton(hWnd, IDC_CHECKBOX_AUTOTOGGLE, BST_UNCHECKED);		
+        else        
             CheckDlgButton(hWnd, IDC_CHECKBOX_AUTOTOGGLE, BST_CHECKED);
-        }
     }
 
     if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTOTOGGLE) == BST_CHECKED) {
         autotoggle_enabled = true;
-        switch (edition_state) {
+        switch (edition_state)
+        {
         case DE:
-            for (int i = 0; i < 5; i++) {
-                EnableDlc(old_dlc[i], hWnd);
-            }
+            for (int i = 0; i < 5; i++) EnableDlc(old_dlc[i], hWnd);
             break;
         case HD:
-            for (int i = 0; i < 2; i++) {
-                EnableDlc(old_dlc[i], hWnd);
-            }
+            for (int i = 0; i < 2; i++) EnableDlc(old_dlc[i], hWnd);
             break;
         case AOK:
             EnableDlc(aok, hWnd);
             break;
         }
     }
-    else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTOTOGGLE) == BST_UNCHECKED) {
+    else if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTOTOGGLE) == BST_UNCHECKED)
+    {
         autotoggle_enabled = false;
-        switch (edition_state) {
+        switch (edition_state)
+        {
         case DE:
             for (int i = 0; i < 5; i++) {
                 DisableDlc(old_dlc[i], hWnd);
@@ -2147,16 +2038,13 @@ void ToggleAutoToggle(HWND hWnd)
 
 void ToggleAutoReset(HWND hWnd)
 {
+    if (!startup && ui_sounds_enabled) PlayButtonSound();
 	if (hotkey_pressed)
 	{
-		if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_CHECKED)
-		{
-			CheckDlgButton(hWnd, IDC_CHECKBOX_AUTORESET, BST_UNCHECKED);
-		}
-		else
-		{
+		if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_CHECKED)		
+			CheckDlgButton(hWnd, IDC_CHECKBOX_AUTORESET, BST_UNCHECKED);		
+		else		
 			CheckDlgButton(hWnd, IDC_CHECKBOX_AUTORESET, BST_CHECKED);
-		}
 	}
 
     if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_CHECKED) autoreset_enabled = true;
@@ -2168,7 +2056,8 @@ void SaveSettings()
     WritePrivateProfileString(L"Settings", L"PersistentLogging", persistent_logging ? L"1" : L"0", INI_FILE_PATH);
 	WritePrivateProfileString(L"Settings", L"DrawOnStartup", draw_on_startup ? L"1" : L"0", INI_FILE_PATH);
     WritePrivateProfileString(L"Settings", L"UISoundsEnabled", ui_sounds_enabled ? L"1" : L"0", INI_FILE_PATH);
-    WritePrivateProfileString(L"Settings", L"LabelsEnabled", labels_enabled ? L"1" : L"0", INI_FILE_PATH);
+    WritePrivateProfileString(L"Settings", L"LabelsEnabled", civ_labels_enabled ? L"1" : L"0", INI_FILE_PATH);
+    WritePrivateProfileString(L"Settings", L"IterationLabelEnabled", iteration_label_enabled ? L"1" : L"0", INI_FILE_PATH);
     WritePrivateProfileString(L"Settings", L"IconsEnabled", icons_enabled ? L"1" : L"0", INI_FILE_PATH);
     WritePrivateProfileString(L"Settings", L"JinglesEnabled", jingles_enabled ? L"1" : L"0", INI_FILE_PATH);
     WritePrivateProfileString(L"Settings", L"TooltipsEnabled", tooltips_enabled ? L"1" : L"0", INI_FILE_PATH);
@@ -2185,7 +2074,8 @@ void LoadSettings()
 	persistent_logging = GetPrivateProfileInt(L"Settings", L"PersistentLogging", 1, INI_FILE_PATH);
 	draw_on_startup = GetPrivateProfileInt(L"Settings", L"DrawOnStartup", 1, INI_FILE_PATH);
     ui_sounds_enabled = GetPrivateProfileInt(L"Settings", L"UISoundsEnabled", 1, INI_FILE_PATH);
-    labels_enabled = GetPrivateProfileInt(L"Settings", L"LabelsEnabled", 1, INI_FILE_PATH);
+    civ_labels_enabled = GetPrivateProfileInt(L"Settings", L"LabelsEnabled", 1, INI_FILE_PATH);
+    iteration_label_enabled = GetPrivateProfileInt(L"Settings", L"IterationLabelEnabled", 1, INI_FILE_PATH);
     icons_enabled = GetPrivateProfileInt(L"Settings", L"IconsEnabled", 1, INI_FILE_PATH);
     jingles_enabled = GetPrivateProfileInt(L"Settings", L"JinglesEnabled", 1, INI_FILE_PATH);
     tooltips_enabled = GetPrivateProfileInt(L"Settings", L"TooltipsEnabled", 1, INI_FILE_PATH);
@@ -2193,16 +2083,14 @@ void LoadSettings()
     autoreset_enabled = GetPrivateProfileInt(L"Settings", L"AutoResetEnabled", 0, INI_FILE_PATH);
     autotoggle_enabled = GetPrivateProfileInt(L"Settings", L"AutoToggleEnabled", 0, INI_FILE_PATH);
     legacy_jingle_enabled = GetPrivateProfileInt(L"Settings", L"LegacyJingleEnabled", 0, INI_FILE_PATH);
-
 }
 
 void SaveLog()
 {
     std::wofstream outFile(LOG_FILE_PATH);
-    if (!outFile)
-    {
-        return;
-    }
+
+    if (!outFile) return;
+    
 
 // Save the civilization states
     outFile << L"CivStates:" << std::endl;
@@ -2215,10 +2103,7 @@ void SaveLog()
     outFile << L"DrawnCivs:" << std::endl;
 	for (int i = 0; i < MAX_CIVS; i++)
 	{
-        if (drawn_civs[i] != L"")
-        {
-            outFile << drawn_civs[i] << std::endl;
-        }
+        if (drawn_civs[i] != L"") outFile << drawn_civs[i] << std::endl;        
         else break;
 	}
 
@@ -2281,14 +2166,12 @@ void LoadLog(HWND hWnd)
             int state;
             if (iss >> civName >> state)
             {
-                if (state == 0) {
+                if (state == 0)
+                {
                     RemoveCiv(civName);
                     SendMessage(GetCivCheckbox(civName), BM_SETCHECK, BST_UNCHECKED, 0);
                 }
-
-                else {
-                    SendMessage(GetCivCheckbox(civName), BM_SETCHECK, BST_CHECKED, 0);
-                }
+                else SendMessage(GetCivCheckbox(civName), BM_SETCHECK, BST_CHECKED, 0);
             }
         }
         else if (readingDrawnCivs)
@@ -2300,18 +2183,9 @@ void LoadLog(HWND hWnd)
 		}
 		else if (readingEditionState)
 		{
-			if (line == L"DE")
-			{
-				SetEditionState(hWnd, DE);
-			}
-			else if (line == L"HD")
-			{
-				SetEditionState(hWnd, HD);
-			}
-			else if (line == L"AOK")
-			{
-				SetEditionState(hWnd, AOK);
-			}
+			if (line == L"DE") SetEditionState(hWnd, DE);			
+			else if (line == L"HD") SetEditionState(hWnd, HD);			
+			else if (line == L"AOK") SetEditionState(hWnd, AOK);			
 		}        
     }
 
@@ -2345,15 +2219,9 @@ void GenerateFilePaths()
 
     // Remove the executable name from the path
     wchar_t *lastSlashS = wcsrchr(exePathS, L'\\');
-    if (lastSlashS != NULL)
-    {
-        *lastSlashS = L'\0';
-    }
+    if (lastSlashS != NULL) *lastSlashS = L'\0';
     wchar_t *lastSlashL = wcsrchr(exePathL, L'\\');
-    if (lastSlashL != NULL)
-    {
-        *lastSlashL = L'\0';
-    }
+    if (lastSlashL != NULL) *lastSlashL = L'\0';
     
     wcscat_s(exePathS, MAX_PATH, L"\\settings.ini");
     wcscat_s(exePathL, MAX_PATH, L"\\log.txt");
@@ -2365,13 +2233,7 @@ void GenerateFilePaths()
 
 HWND GetCivCheckbox(const std::wstring &civ_name)
 {
-	for (int i = 0; i < MAX_CIVS; i++)
-	{
-		if (civ_index[i] == civ_name)
-		{
-			return civ_checkbox[i];
-		}
-	}
+	for (int i = 0; i < MAX_CIVS; i++) if (civ_index[i] == civ_name) return civ_checkbox[i];	
 	return NULL;
 }
 
@@ -2386,21 +2248,24 @@ void InitialiseCivs()
                 L"Tatars", L"Teutons", L"Turks", L"Vietnamese", L"Vikings" };
 }
 
-void MuteSounds()
-{
-    PlaySound(L"mute.wav", NULL, SND_FILENAME | SND_ASYNC);
-}
+void MuteSounds() { PlaySound(L"mute.wav", NULL, SND_FILENAME | SND_ASYNC); }
 
 void OpenOptions(HWND hWnd)
 {
-    if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+    if (ui_sounds_enabled) PlayButtonSound();
     DialogBox(instance, MAKEINTRESOURCE(IDD_OPTIONS), hWnd, OptionsDlgProc);    
 }
 
 void OpenHotkeys(HWND hWnd)
 {
-    if (ui_sounds_enabled) PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+    if (ui_sounds_enabled) PlayButtonSound();
 	DialogBox(instance, MAKEINTRESOURCE(IDD_HOTKEYS), hWnd, HotkeysDlgProc);	
+}
+
+void OpenAbout(HWND hWnd)
+{
+    if (ui_sounds_enabled) PlayButtonSound();
+    DialogBox(instance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc);
 }
 
 INT_PTR CALLBACK HotkeysDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -2425,7 +2290,9 @@ INT_PTR CALLBACK HotkeysDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
             int wmId = LOWORD(wParam);
             int wmEvent = HIWORD(wParam);
 
-            if (wmId == IDCANCEL || wmId == IDOK) {
+            if (wmId == IDCANCEL || wmId == IDOK)
+            {
+                if (ui_sounds_enabled) PlayButtonSound();
                 EndDialog(hDlg, wmId);
                 return(INT_PTR)TRUE;
             }
@@ -2479,14 +2346,12 @@ void CreateTooltips(HWND hWnd)
             hWnd, NULL, instance, NULL);
     }
 
-    if (!hwndTooltip) {
+    if (!hwndTooltip)
+    {
         MessageBox(hWnd, L"Failed to create tooltip window.", L"Error", MB_OK | MB_ICONERROR);
         return;
     }
-    for (int i = 0; i < hwnd_length; i++)
-    {
-        SendMessage(hwndTooltip[i], TTM_SETMAXTIPWIDTH, 0, 300);
-    }
+    for (int i = 0; i < hwnd_length; i++) SendMessage(hwndTooltip[i], TTM_SETMAXTIPWIDTH, 0, 300);
 }
 
 void AddTooltips()
@@ -2531,10 +2396,7 @@ void CreateCheckboxes(HWND hWnd)
     int row[] = { 30, 50, 70, 90, 110, 130, 150, 170, 190 };
     int column[] = { 10, 112, 214, 316, 418 };
 
-    for (int i = 0; i < MAX_CIVS; i++)
-    {
-        civ_checkbox[i] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), column[i % 5], row[i / 5], 100, 20, i + 5, civ_index[i].c_str());
-    }
+    for (int i = 0; i < MAX_CIVS; i++) civ_checkbox[i] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), column[i % 5], row[i / 5], 100, 20, i + 5, civ_index[i].c_str());
 
     checkbox_autoreset = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 230, 180, 20, IDC_CHECKBOX_AUTORESET, L"Auto-reset upon change");
     checkbox_autotoggle = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 0, 170, 20, IDC_CHECKBOX_AUTOTOGGLE, L"Auto-toggle older civs");
@@ -2625,14 +2487,7 @@ void CreateRadiobuttons(HWND hWnd)
     CheckRadioButton(hWnd, IDC_RADIO_DE, IDC_RADIO_AOK, IDC_RADIO_DE);
 }
 
-void DeactivateTooltips(TTTOOLINFOW toolinfo)
-{
-    for (int i = 0; i < hwnd_length; i++)
-    {
-        SendMessage(hwndTooltip[i], TTM_TRACKACTIVATE, FALSE, (LPARAM)&toolinfo);
-    }
-    mouse_is_leaving = false;
-}
+void DeactivateTooltips(TTTOOLINFOW toolinfo) { for (int i = 0; i < hwnd_length; i++) SendMessage(hwndTooltip[i], TTM_TRACKACTIVATE, FALSE, (LPARAM)&toolinfo); }
 
 void CreateBoldFont()
 {
@@ -2641,4 +2496,55 @@ void CreateBoldFont()
     GetObject(hFont, sizeof(LOGFONT), &lf);
     lf.lfWeight = FW_BOLD;
     hBoldFont = CreateFontIndirect(&lf);
+}
+
+void PositionComponents(LPARAM lParam)
+{
+    int width = LOWORD(lParam);
+    int height = HIWORD(lParam);
+
+    SetWindowPos(button_draw, NULL, (width - 100) / 2, (height + 100) / 2, 100, 30, SWP_NOZORDER);   // draw button anchored to centre
+    SetWindowPos(button_techtree, NULL, width - 150, height - 120, 60, 60, SWP_NOZORDER);   // techtree button anchored its traditional location
+    SetWindowPos(button_options, NULL, width - 35, 0, 25, 25, SWP_NOZORDER);   // techtree button anchored its traditional location
+
+
+    if (current_tab == 0)  SetWindowPos(button_reset, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);          // reset button anchored to bottom left corner    
+    else SetWindowPos(button_reset, NULL, (width - 100) / 2, height - 40, 100, 30, SWP_NOZORDER);             // reset button centred when on log tab    
+
+
+    SetWindowPos(tab, NULL, 0, 0, width, height, SWP_NOZORDER);                                        // tab size anchored to window size
+    SetWindowPos(label_corner, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);                          // remaining civ indicator anchored to bottom right corner 
+    SetWindowPos(label_centre, NULL, (width - 80) / 2, (height + 35) / 2, 90, 15, SWP_NOZORDER);       // drawn civ label anchored to centre
+    SetWindowPos(civ_icon, NULL, (width - 100) / 2, (height - 180) / 2, 104, 104, SWP_NOZORDER);       // civ icon anchored to centre
+
+    SetWindowPos(label_drawncount, NULL, 10, 25, 90, 15, SWP_NOZORDER);                           // drawn civ label anchored to top left corner
+    SetWindowPos(button_clearlog, NULL, 110, 25, 100, 30, SWP_NOZORDER);                           // clear log button anchored to top left corner
+    SetWindowPos(drawn_log, NULL, 10, 60, width - (width / 2) - 69, height - 70, SWP_NOZORDER);        // log text field anchored to window size
+
+    SetWindowPos(label_remainingcount, NULL, (width / 2) + 60, 25, 130, 15, SWP_NOZORDER);                           // drawn civ label anchored to top right corner
+    SetWindowPos(checkbox_showremainlog, NULL, (width / 2) + 190, 25, 60, 15, SWP_NOZORDER);                           // drawn civ label anchored to top right corner
+    SetWindowPos(remaining_log, NULL, (width / 2) + 60, 60, width - (width / 2) - 65, height - 70, SWP_NOZORDER);                   // log text field anchored to window size
+
+    SetWindowPos(royals_icon, NULL, 345, 25, 18, 18, SWP_NOZORDER);
+    SetWindowPos(rome_icon, NULL, 345, 45, 18, 18, SWP_NOZORDER);
+    SetWindowPos(india_icon, NULL, 345, 65, 18, 18, SWP_NOZORDER);
+    SetWindowPos(dukes_icon, NULL, 345, 85, 18, 18, SWP_NOZORDER);
+    SetWindowPos(west_icon, NULL, 345, 105, 18, 18, SWP_NOZORDER);
+    SetWindowPos(khans_icon, NULL, 345, 125, 18, 18, SWP_NOZORDER);
+
+    SetWindowPos(rajas_icon, NULL, 350, 30, 30, 30, SWP_NOZORDER);
+    SetWindowPos(africans_icon, NULL, 350, 65, 30, 30, SWP_NOZORDER);
+    SetWindowPos(forgotten_icon, NULL, 350, 100, 30, 30, SWP_NOZORDER);
+
+    SetWindowPos(aoc_icon, NULL, 340, 50, 45, 45, SWP_NOZORDER);
+
+    SetWindowPos(edition_icon, NULL, 190, 30, 128, 93, SWP_NOZORDER);
+}
+
+void PlayButtonSound() { PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC); }
+
+void ClearDrawnLog()
+{
+    if (!startup && ui_sounds_enabled) PlayButtonSound();
+    SetWindowText(drawn_log, L"");
 }

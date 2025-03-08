@@ -60,6 +60,9 @@
 #define HOTKEY_ID_H 21
 #define HOTKEY_ID_R 22
 #define HOTKEY_ID_F1 23
+#define HOTKEY_ID_B 24
+#define HOTKEY_ID_F2 25
+#define HOTKEY_ID_F3 26
 
 
 #define DT_UNDERLINE 0x80000000
@@ -223,7 +226,8 @@ bool persistent_logging = true;
 bool draw_on_startup = false;
 bool icons_enabled = true;
 bool jingles_enabled = false;
-bool labels_enabled = true;
+bool civ_labels_enabled = true;
+bool iteration_label_enabled = true;
 bool legacy_jingle_enabled = false;
 bool ui_sounds_enabled = false;
 bool tooltips_enabled = true;
@@ -232,9 +236,6 @@ bool autotoggle_enabled = true;
 bool remainlog_enabled = true;
 bool reset_state = true;
 bool hotkey_pressed = false;
-bool mouse_is_leaving = false;
-
-
 
 
 enum edition {
@@ -315,7 +316,7 @@ HBITMAP FetchIcon(const std::wstring &);
 void CreateTabs(HWND);
 void ShowTabComponents(int, HWND);
 
-void ResetProgram();
+void ResetProgram(bool);
 
 void DrawCiv();
 
@@ -350,6 +351,7 @@ void DLCToggles(edition);
 void OpenTechTree();
 void OpenOptions(HWND);
 void OpenHotkeys(HWND);
+void OpenAbout(HWND);
 
 void CreateCheckboxes(HWND);
 void CreateImages(HWND);
@@ -357,6 +359,7 @@ void CreateButtons(HWND);
 void CreateLabels(HWND);
 void CreateTextfields(HWND);
 void CreateRadiobuttons(HWND);
+void PositionComponents(LPARAM);
 
 void SubclassButtons();
 void AddTooltips();
@@ -383,6 +386,7 @@ HWND GetCivCheckbox(const std::wstring &);
 void UpdateDrawnLog(bool, bool, bool);
 void UpdateRemainingLog(bool);
 void ToggleRemainLog();
+void ClearDrawnLog();
 
 bool DlcEmpty(dlc);
 void ToggleDlc(dlc, HWND);
@@ -405,6 +409,7 @@ int hwnd_length = sizeof(hwndTooltip) / sizeof(hwndTooltip[0]);
 
 void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText);
 
+void PlayButtonSound();
 
 LPCWSTR StringCleaner(const std::wstring &);
 
