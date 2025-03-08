@@ -335,6 +335,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (wParam == HOTKEY_ID_F1) OpenOptions(hWnd);
             if (wParam == HOTKEY_ID_F2) OpenHotkeys(hWnd);
             if (wParam == HOTKEY_ID_F3) OpenAbout(hWnd);
+            if (wParam == HOTKEY_ID_F4) OpenTechTree();
 
             if (current_tab == 0)
             {
@@ -470,8 +471,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 }
                 else {
                     iteration_label_enabled = true;
-                    if (current_tab != 2) ShowWindow(label_corner, SW_SHOW);
+                    if (current_tab == 0) ShowWindow(label_corner, SW_SHOW);
                 }
+
             }
 
             if (hOptionsDlg != NULL)
@@ -1005,12 +1007,13 @@ void EnableHotkeys(HWND hWnd)
     RegisterHotKey(hWnd, HOTKEY_ID_F1, 0, VK_F1);
     RegisterHotKey(hWnd, HOTKEY_ID_F2, 0, VK_F2);
     RegisterHotKey(hWnd, HOTKEY_ID_F3, 0, VK_F3);
+    RegisterHotKey(hWnd, HOTKEY_ID_F4, 0, VK_F4);
     RegisterHotKey(hWnd, HOTKEY_ID_B, 0, 0x42);
 }
 
 void DisableHotkeys(HWND hWnd)
 {
-	for (int i = 1; i < 28; i++) {
+	for (int i = 1; i < 29; i++) {
 		UnregisterHotKey(hWnd, i);
 	}
 }
@@ -1375,6 +1378,7 @@ void ShowDrawTab(bool state, HWND hWnd) {
         if (icons_enabled) ShowWindow(civ_icon, SW_SHOW);
 	    if (iteration_label_enabled) ShowWindow(label_corner, SW_SHOW);
 		ShowWindow(button_techtree, SW_SHOW);
+        UpdateTooltipText(button_options, hwndTooltip[TOOLTIP_OPTIONS], StringCleaner(L"Opens options\nHotkey: Q (Draw tab only) / F1"));
 	}
     else if (state == false) {
         if (current_tab == 2)
@@ -1387,6 +1391,7 @@ void ShowDrawTab(bool state, HWND hWnd) {
         SetWindowPos(button_reset, NULL, (width - 100) / 2, height - 40, 100, 30, SWP_NOZORDER);
         ShowWindow(label_corner, SW_HIDE);
 		ShowWindow(button_techtree, SW_HIDE);
+        UpdateTooltipText(button_options, hwndTooltip[TOOLTIP_OPTIONS], StringCleaner(L"Opens options\nHotkey: F1"));
     }
 	
 }

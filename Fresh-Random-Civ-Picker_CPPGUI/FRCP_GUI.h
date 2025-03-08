@@ -63,6 +63,7 @@
 #define HOTKEY_ID_B 24
 #define HOTKEY_ID_F2 25
 #define HOTKEY_ID_F3 26
+#define HOTKEY_ID_F4 27
 
 
 #define DT_UNDERLINE 0x80000000
