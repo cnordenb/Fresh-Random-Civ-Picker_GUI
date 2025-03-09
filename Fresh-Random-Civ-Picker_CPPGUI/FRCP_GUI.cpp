@@ -1,8 +1,7 @@
 /*
 TODO
 
-- add options button on draw tab
-- add hotkeys list info to options
+- rewrite some functions to avoid repetition
 - civ info button and pages
 - additional resources and links page
 - make subclassed button component graphics react to hover again
@@ -865,7 +864,7 @@ LRESULT CALLBACK HyperlinkProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
         SetBkMode(device_handling_context, TRANSPARENT);
         SelectObject(device_handling_context, font_underline);        
         GetClientRect(hwnd, &rectangle_struct);
-        DrawText(device_handling_context, L"Hjörleif", -1, &rectangle_struct, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX | DT_UNDERLINE);
+        DrawText(device_handling_context, L"HjÃ¶rleif", -1, &rectangle_struct, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX | DT_UNDERLINE);
         EndPaint(hwnd, &paint_struct);
         return 0;    
     case WM_LBUTTONDOWN:    
