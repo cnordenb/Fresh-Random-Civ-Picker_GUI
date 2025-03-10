@@ -8,6 +8,8 @@
 #define IDD_ABOUTBOX                    103
 #define IDM_ABOUT                       104
 #define IDM_EXIT                        105
+#define IDM_SAVELOG						129
+#define IDM_LOADLOG						130
 #define IDI_WINDOWSPROJECT1             107
 #define IDI_SMALL                       108
 #define IDC_WINDOWSPROJECT1             109
