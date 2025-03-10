@@ -1,4 +1,4 @@
-/*
+﻿/*
 TODO
 
 - rewrite some functions to avoid repetition
@@ -1904,7 +1904,7 @@ void LoadLog(HWND hWnd, bool user_save)
     label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
     std::wstring remain_text = std::to_wstring(custom_max_civs - iterator) + L"/" + std::to_wstring(custom_max_civs);
     SetWindowText(label_corner, label_text.c_str());
-    SetWindowText(label_centre, current_civ.c_str());
+    
     std::wstring drawn_label = L"Drawn: " + label_text;
     if (iterator == 0) SetWindowText(label_drawncount, drawn_label.c_str());
 
@@ -1915,8 +1915,18 @@ void LoadLog(HWND hWnd, bool user_save)
     reset_state = true;
     UpdateRemainingLog(false);
 
-    UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
-    
+    if (current_civ == L"Random")
+    {
+        UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T (Draw tab only) / F4"));
+        SetWindowText(label_centre, L"?");
+    }        
+    else
+    {
+        UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T (Draw tab only) / F4"));
+        SetWindowText(label_centre, current_civ.c_str());
+    }
+        
+
     inFile.close();
 }
 
@@ -2038,7 +2048,7 @@ void AddTooltips()
     AddTooltip(button_draw, hwndTooltip[TOOLTIP_DRAW], StringCleaner(L"Draws a fresh random civilisation\nHotkey: Space"));
     AddTooltip(button_reset, hwndTooltip[TOOLTIP_RESET], StringCleaner(L"Resets the pool of drawn civs and renders all enabled civs available\nHotkey: Enter"));
     AddTooltip(button_options, hwndTooltip[TOOLTIP_OPTIONS], StringCleaner(L"Opens options\nHotkey: F1"));
-    AddTooltip(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
+    AddTooltip(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T (Draw tab only) / F4"));
 
     AddTooltip(button_clearlog, hwndTooltip[TOOLTIP_CLEAR], StringCleaner(L"Clears the log of previously drawn civs\nHotkey: Q"));
     AddTooltip(checkbox_showremainlog, hwndTooltip[TOOLTIP_REMAININGTOGGLE], StringCleaner(L"Toggles the display of the remaining civs log\nHotkey: W"));
