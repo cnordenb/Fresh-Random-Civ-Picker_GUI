@@ -40,7 +40,7 @@ void CreateTabs(HWND hWnd)
 // Function to show/hide components based on the selected tab
 void ShowTabComponents(int tabIndex, HWND hWnd)
 {
-    if (!startup && ui_sounds_enabled) PlaySound(L"tab_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+    if (!startup && ui_sounds_enabled) PlaySound(L"sounds\\tab_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
     else if (startup && jingles_enabled) PlayJingle(current_civ);    
     current_tab = tabIndex;
     if (tabIndex == 0)
@@ -352,8 +352,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             else if (current_tab == 2)
             {
                 if (wParam > 1 && wParam < 4 || wParam > 12 && wParam < 22) if (autoreset_enabled) ResetProgram(true);             
-                if (wParam == HOTKEY_ID_SPACE) EnableAll(hWnd);           
-                if (wParam == HOTKEY_ID_RETURN) DisableAll(hWnd);
+                if (wParam == HOTKEY_ID_SPACE) EnableAll(hWnd, true);           
+                if (wParam == HOTKEY_ID_RETURN) DisableAll(hWnd, true);
                 if (wParam == HOTKEY_ID_Q) SetEditionState(hWnd, DE);
                 if (wParam == HOTKEY_ID_W) SetEditionState(hWnd, HD);
 				if (wParam == HOTKEY_ID_E) SetEditionState(hWnd, AOK);
@@ -544,10 +544,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     ResetProgram(false);
                     break;
                 case IDC_BUTTON_ENABLEALL:                                             // "Enable All"                
-                    EnableAll(hWnd);
+                    EnableAll(hWnd, true);
                     break;
                 case IDC_BUTTON_DISABLEALL:                                             // "Disable All"
-                    DisableAll(hWnd);
+                    DisableAll(hWnd, true);
                     break;
 			    case IDC_BUTTON_CLEARLOG:                           // "Clear"
                     ClearDrawnLog();
@@ -735,12 +735,12 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
                 {
                     case CBN_DROPDOWN:
                     {
-                        if (ui_sounds_enabled) PlaySound(L"hover_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                        if (ui_sounds_enabled) PlaySound(L"sounds\\hover_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                         break;
                     }
                     case CBN_SELCHANGE:
                     {
-                        if (ui_sounds_enabled && !IsLegacyCiv(current_civ)) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                        if (ui_sounds_enabled && !IsLegacyCiv(current_civ)) PlaySound(L"sounds\\view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                         else if (jingles_enabled) PlayJingle(current_civ);
                         break;
                     }
@@ -788,11 +788,11 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
                     if (ui_sounds_enabled) PlayButtonSound();
                     break;
 			    case IDC_RADIO_LOGGING:
-                    if (ui_sounds_enabled) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                    if (ui_sounds_enabled) PlaySound(L"sounds\\view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
 				    persistent_logging = true;
                     break;
 			    case IDC_RADIO_STARTRESET:
-                    if (ui_sounds_enabled) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                    if (ui_sounds_enabled) PlaySound(L"sounds\\view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
 				    persistent_logging = false;
 				    break;
                 }
@@ -899,7 +899,7 @@ void DrawCiv()
 
     if (custom_max_civs == 0)
     {
-        if (ui_sounds_enabled) PlaySound(L"error_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+        if (ui_sounds_enabled) PlaySound(L"sounds\\error_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
         SetWindowTextA(label_centre, "Empty pool!");
         return;        // if no civs are selected, return
     }
@@ -1001,23 +1001,23 @@ void LoadImages()
     {
         bmp_parsed_civname = civ_index[i];
         bmp_parsed_civname[0] = std::tolower(bmp_parsed_civname[0]);
-        icon_path = L"civ_icons\\" + bmp_parsed_civname + L".bmp";
+        icon_path = L"images\\civ_icons\\" + bmp_parsed_civname + L".bmp";
         civ_icon_array[i] = (HBITMAP)LoadImageW(NULL, icon_path.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     }
 
-    icon_techtree = (HBITMAP)LoadImageW(NULL, L"civ_icons\\techtree.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	icon_options = (HBITMAP)LoadImageW(NULL, L"civ_icons\\options.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);    
+    icon_techtree = (HBITMAP)LoadImageW(NULL, L"images\\civ_icons\\techtree.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	icon_options = (HBITMAP)LoadImageW(NULL, L"images\\civ_icons\\options.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);    
     
-    icon_random = (HBITMAP)LoadImageW(NULL, L"civ_icons\\random.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    icon_random = (HBITMAP)LoadImageW(NULL, L"images\\civ_icons\\random.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
-	icon_de = (HBITMAP)LoadImageW(NULL, L"edition_icons\\aoe2de.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	icon_hd = (HBITMAP)LoadImageW(NULL, L"edition_icons\\aoe2hd.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	icon_aok = (HBITMAP)LoadImageW(NULL, L"edition_icons\\aok.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	icon_de = (HBITMAP)LoadImageW(NULL, L"images\\edition_icons\\aoe2de.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	icon_hd = (HBITMAP)LoadImageW(NULL, L"images\\edition_icons\\aoe2hd.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	icon_aok = (HBITMAP)LoadImageW(NULL, L"images\\edition_icons\\aok.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
-    for (int i = 0; i < de_dlc_amount; i++) de_dlc_bmp[i] = (HBITMAP)LoadImageW(NULL, StringCleaner(L"dlc_icons\\" + de_dlc_bmpstring[i]), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    for (int i = 0; i < hd_dlc_amount; i++) hd_dlc_bmp[i] = (HBITMAP)LoadImageW(NULL, StringCleaner(L"dlc_icons\\" + hd_dlc_bmpstring[i]), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    for (int i = 0; i < de_dlc_amount; i++) de_dlc_bmp[i] = (HBITMAP)LoadImageW(NULL, StringCleaner(L"images\\dlc_icons\\" + de_dlc_bmpstring[i]), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    for (int i = 0; i < hd_dlc_amount; i++) hd_dlc_bmp[i] = (HBITMAP)LoadImageW(NULL, StringCleaner(L"images\\dlc_icons\\" + hd_dlc_bmpstring[i]), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
-	icon_aoc = (HBITMAP)LoadImageW(NULL, L"dlc_icons\\aoc.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);  	
+	icon_aoc = (HBITMAP)LoadImageW(NULL, L"images\\dlc_icons\\aoc.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);  	
 }
 
 HBITMAP FetchCivIcon(const std::wstring &civ_name)
@@ -1033,8 +1033,8 @@ void PlayJingle(std::wstring &civ_name)
     processed_civ_name[0] = std::tolower(processed_civ_name[0]);
     std::wstring jingle_path;
 
-    if (legacy_jingle_enabled && IsLegacyCiv(civ_name)) jingle_path = L"civ_jingles\\legacy\\" + processed_civ_name + L".wav";
-	else jingle_path = L"civ_jingles\\" + processed_civ_name + L".wav";    
+    if (legacy_jingle_enabled && IsLegacyCiv(civ_name)) jingle_path = L"sounds\\civ_jingles\\legacy\\" + processed_civ_name + L".wav";
+	else jingle_path = L"sounds\\civ_jingles\\" + processed_civ_name + L".wav";    
     
     PlaySound(jingle_path.c_str(), NULL, SND_FILENAME | SND_ASYNC);    
 }
@@ -1148,9 +1148,9 @@ void HideCustomPoolCheckboxes()
     ShowWindow(checkbox_aoc, SW_HIDE);
 }
 
-void EnableAll(HWND hWnd)
+void EnableAll(HWND hWnd, bool sound_acceptable)
 {
-    if (ui_sounds_enabled) PlayButtonSound();
+    if (ui_sounds_enabled && sound_acceptable) PlayButtonSound();
 	custom_civ_pool = false;
 
     if (edition_state == DE)
@@ -1187,9 +1187,9 @@ void EnableAll(HWND hWnd)
     ValidateAllDlcToggles(hWnd);
 }
 
-void DisableAll(HWND hWnd)
+void DisableAll(HWND hWnd, bool sound_acceptable)
 {
-    if (ui_sounds_enabled) PlayButtonSound();
+    if (ui_sounds_enabled && sound_acceptable) PlayButtonSound();
 	custom_civ_pool = true;
     for (int i = 0; i < MAX_CIVS; i++)
     {
@@ -1615,7 +1615,7 @@ void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText)
 
 void SetEditionState(HWND hWnd, edition edition)
 {
-    if (ui_sounds_enabled && !startup) PlaySound(L"view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+    if (ui_sounds_enabled && !startup) PlaySound(L"sounds\\view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
     switch (edition)
     {
         case DE:
@@ -1800,13 +1800,60 @@ void LoadSettings()
 
 void SaveLog(bool user_save)
 {
+    std::wstring saveFilePath = LOG_FILE_PATH;
     if (user_save)
     {
-        MessageBox(NULL, L"This feature is currently not available.\nThe pool will save automatically upon closing the application if Persistent logging is enabled.", L"Manual Saving", MB_OK);
-        return;
+        // Get the current date and time
+        SYSTEMTIME st;
+        GetLocalTime(&st);
+
+        // Format the date and time as "DD-MM-YY_HHMM"
+        std::wstringstream wss;
+        wss << L"FRCP_Saved_pool_" << std::setw(2) << std::setfill(L'0') << st.wDay << L"-"
+            << std::setw(2) << std::setfill(L'0') << st.wMonth << L"-"
+            << std::setw(2) << std::setfill(L'0') << (st.wYear % 100) << L"_"
+            << std::setw(2) << std::setfill(L'0') << st.wHour
+            << std::setw(2) << std::setfill(L'0') << st.wMinute << L".txt";
+
+        std::wstring defaultFileName = wss.str();
+
+        // Get the path of the executable
+        wchar_t exePath[MAX_PATH];
+        GetModuleFileName(NULL, exePath, MAX_PATH);
+
+        // Remove the executable name from the path
+        wchar_t *lastSlash = wcsrchr(exePath, L'\\');
+        if (lastSlash != NULL) *lastSlash = L'\0';
+
+        // Append the "saves" folder to the path
+        PathAppend(exePath, L"saves");
+
+        OPENFILENAME ofn;
+
+        wchar_t szFile[MAX_PATH] = L"";
+        wcscpy_s(szFile, defaultFileName.c_str());
+
+
+        ZeroMemory(&ofn, sizeof(ofn));
+        ofn.lStructSize = sizeof(ofn);
+        ofn.hwndOwner = NULL;
+        ofn.lpstrFile = szFile;
+        ofn.nMaxFile = sizeof(szFile);
+        ofn.lpstrFilter = L"Text Files\0*.txt\0All Files\0*.*\0";
+        ofn.nFilterIndex = 1;
+        ofn.lpstrFileTitle = NULL;
+        ofn.nMaxFileTitle = 0;
+        ofn.lpstrInitialDir = exePath; // Set the initial directory to the executable's directory
+        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
+
+        if (GetSaveFileName(&ofn) == TRUE)
+        {
+            saveFilePath = ofn.lpstrFile;
+        }
+        else return;
     }
 
-    std::wofstream outFile(LOG_FILE_PATH);
+    std::wofstream outFile(saveFilePath);
 
     if (!outFile) return;
     
@@ -1834,15 +1881,60 @@ void SaveLog(bool user_save)
     outFile.close();
 }
 
-void LoadLog(HWND hWnd, bool user_save)
+void LoadLog(HWND hWnd, bool user_load)
 {
-    if (user_save)
+    std::wstring loadFilePath = LOG_FILE_PATH;
+
+    if (user_load)
     {
-        MessageBox(hWnd, L"This feature is currently not available.\nThe pool will load automatically upon opening the application if Persistent logging is enabled.", L"Manual Loading", MB_OK);
-        return;
+		if (ui_sounds_enabled) PlayButtonSound();
+
+        // Get the path of the executable
+        wchar_t exePath[MAX_PATH];
+        GetModuleFileName(NULL, exePath, MAX_PATH);
+
+        // Remove the executable name from the path
+        wchar_t *lastSlash = wcsrchr(exePath, L'\\');
+        if (lastSlash != NULL) *lastSlash = L'\0';
+
+        // Append the "saves" folder to the path
+        PathAppend(exePath, L"saves");
+
+        OPENFILENAME ofn;
+        wchar_t szFile[MAX_PATH] = L"";
+        ZeroMemory(&ofn, sizeof(ofn));
+        ofn.lStructSize = sizeof(ofn);
+        ofn.hwndOwner = hWnd;
+        ofn.lpstrFile = szFile;
+        ofn.nMaxFile = sizeof(szFile);
+        ofn.lpstrFilter = L"Text Files\0*.txt\0All Files\0*.*\0";
+        ofn.nFilterIndex = 1;
+        ofn.lpstrFileTitle = NULL;
+        ofn.nMaxFileTitle = 0;
+        ofn.lpstrInitialDir = exePath; // Set the initial directory to the "saves" directory
+        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
+
+        if (GetOpenFileName(&ofn) == TRUE)
+        {
+            loadFilePath = ofn.lpstrFile;
+        }
+        else
+        {
+			if (ui_sounds_enabled) PlayButtonSound();
+			startup = false;
+            return;
+        }
+
+        startup = true;
+        SetWindowText(remaining_log, L"");
+        SetWindowText(drawn_log, L"");
+        DisableAll(hWnd, false);
+        EnableAll(hWnd, false);
+        ResetProgram(true);
+
     }
 
-    std::wifstream inFile(LOG_FILE_PATH);
+    std::wifstream inFile(loadFilePath);
 
     if (!inFile) return;
 
@@ -1850,7 +1942,8 @@ void LoadLog(HWND hWnd, bool user_save)
     bool readingDrawnCivs = false;
     bool readingCivStates = false;
 	bool readingEditionState = false;
-    InitialiseCivs();
+    if (!user_load) InitialiseCivs();
+
 
     while (std::getline(inFile, line))
     {
@@ -1921,7 +2014,7 @@ void LoadLog(HWND hWnd, bool user_save)
     reset_state = true;
     UpdateRemainingLog(false);
 
-    if (current_civ == L"Random")
+    if (!user_load && current_civ == L"Random")
     {
         UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T (Draw tab only) / F4"));
         SetWindowText(label_centre, L"?");
@@ -1934,6 +2027,13 @@ void LoadLog(HWND hWnd, bool user_save)
     if (!civ_labels_enabled) ShowWindow(label_centre, SW_HIDE);
 
     inFile.close();
+
+    if (user_load)
+    {
+        ShowTabComponents(current_tab, hWnd);
+        ValidateAllDlcToggles(hWnd);
+        startup = false;
+    }
 }
 
 void GenerateFilePaths()
@@ -1971,7 +2071,7 @@ void InitialiseCivs()
                 L"Tatars", L"Teutons", L"Turks", L"Vietnamese", L"Vikings" };
 }
 
-void MuteSounds() { PlaySound(L"mute.wav", NULL, SND_FILENAME | SND_ASYNC); }
+void MuteSounds() { PlaySound(L"sounds\\mute.wav", NULL, SND_FILENAME | SND_ASYNC); }
 
 void OpenOptions(HWND hWnd) { if (ui_sounds_enabled) PlayButtonSound(); DialogBox(instance, MAKEINTRESOURCE(IDD_OPTIONS), hWnd, OptionsDlgProc); }
 
@@ -2192,6 +2292,6 @@ void PositionComponents(LPARAM lParam)
     SetWindowPos(edition_icon, NULL, 190, 30, 128, 93, SWP_NOZORDER);
 }
 
-void PlayButtonSound() { PlaySound(L"button_sound.wav", NULL, SND_FILENAME | SND_ASYNC); }
+void PlayButtonSound() { PlaySound(L"sounds\\button_sound.wav", NULL, SND_FILENAME | SND_ASYNC); }
 
 void ClearDrawnLog() { if (!startup && ui_sounds_enabled) PlayButtonSound(); SetWindowText(drawn_log, L""); }

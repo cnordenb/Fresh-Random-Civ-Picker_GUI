@@ -14,6 +14,7 @@
 #include <Windows.h>
 #include "Resource.h"
 #include <commctrl.h>
+#include <commdlg.h>
 #include <shellapi.h>
 #include <shlwapi.h>
 #include <strsafe.h>
@@ -21,6 +22,7 @@
 #include <mmsystem.h>
 #include <map>
 #include <thread>
+#include <iomanip>
 
 
 
@@ -425,8 +427,8 @@ dlc GetCivDLC(const std::wstring &);
 
 void SetEditionState(HWND hWnd, edition edition);
 
-void EnableAll(HWND);
-void DisableAll(HWND);
+void EnableAll(HWND, bool);
+void DisableAll(HWND, bool);
 
 void ShowDrawTab(bool, HWND);
 void ShowLogTab(bool);
