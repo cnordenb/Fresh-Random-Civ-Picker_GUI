@@ -757,7 +757,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 
             // Handle the combobox selection
             HWND hComboBox = GetDlgItem(hDlg, IDC_LEGACY_OPTION);
-            int selectedIndex = SendMessage(hComboBox, CB_GETCURSEL, 0, 0);
+            int selectedIndex = static_cast<int>(SendMessage(hComboBox, CB_GETCURSEL, 0, 0));
             legacy_jingle_enabled = (selectedIndex == 1);
 
 
@@ -878,7 +878,9 @@ void ResetProgram(bool auto_reset)
 	}
 
     SetWindowText(label_corner, (L"0/" + std::to_wstring(custom_max_civs)).c_str());     // resets remaining civs label
+	if (!iteration_label_enabled) ShowWindow(label_corner, SW_HIDE);
     SetWindowText(label_centre, L"?");                                      // resets drawn civ label
+	if (!civ_labels_enabled) ShowWindow(label_centre, SW_HIDE);
     SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_random);
 
     if (!auto_reset && jingles_enabled && current_tab != 2) PlayJingle(current_civ);
@@ -918,7 +920,9 @@ void DrawCiv()
     // Update the labels
     label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
     SetWindowText(label_corner, label_text.c_str());
+	if (!iteration_label_enabled) ShowWindow(label_corner, SW_HIDE);
     SetWindowTextA(label_centre, civ_name_str.c_str());
+	if (!civ_labels_enabled) ShowWindow(label_centre, SW_HIDE);
 
 
     HBITMAP drawn_civ_icon = FetchCivIcon(current_civ);
@@ -1020,6 +1024,7 @@ HBITMAP FetchCivIcon(const std::wstring &civ_name)
 {
     if (civ_name == L"Random") return icon_random;
     for (int i = 0; i < MAX_CIVS; i++) if (civ_name == civ_index[i]) return civ_icon_array[i];
+	return icon_random;
 }
 
 void PlayJingle(std::wstring &civ_name)
@@ -1121,7 +1126,7 @@ HWND CreateCheckbox(HWND hWnd, HINSTANCE hInstance, int x, int y, int width, int
         width+2,              // Button width
         height,             // Button height
         hWnd,               // Parent window
-        (HMENU)id,          // Control ID
+        reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)),          // Control ID
         hInstance,          // Instance handle
         NULL                // Pointer not needed
     );
@@ -1713,6 +1718,7 @@ int GetDlcCheckboxId(dlc dlc)
 	case rajas:      return IDC_CHECKBOX_RAJAS;
 	case aoc:        return IDC_CHECKBOX_AOC;
     }
+    return 0;
 }
 
 void ToggleAutoToggle(HWND hWnd)
@@ -1836,7 +1842,6 @@ void LoadLog(HWND hWnd, bool user_save)
         return;
     }
 
-
     std::wifstream inFile(LOG_FILE_PATH);
 
     if (!inFile) return;
@@ -1904,13 +1909,14 @@ void LoadLog(HWND hWnd, bool user_save)
     label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
     std::wstring remain_text = std::to_wstring(custom_max_civs - iterator) + L"/" + std::to_wstring(custom_max_civs);
     SetWindowText(label_corner, label_text.c_str());
-    
+	if (!iteration_label_enabled) ShowWindow(label_corner, SW_HIDE);
     std::wstring drawn_label = L"Drawn: " + label_text;
     if (iterator == 0) SetWindowText(label_drawncount, drawn_label.c_str());
 
 
     HBITMAP drawn_civ_icon = FetchCivIcon(current_civ);
     SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
+	if (!icons_enabled) ShowWindow(civ_icon, SW_HIDE);
 
     reset_state = true;
     UpdateRemainingLog(false);
@@ -1923,9 +1929,9 @@ void LoadLog(HWND hWnd, bool user_save)
     else
     {
         UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T (Draw tab only) / F4"));
-        SetWindowText(label_centre, current_civ.c_str());
+        SetWindowText(label_centre, current_civ.c_str());		
     }
-        
+    if (!civ_labels_enabled) ShowWindow(label_centre, SW_HIDE);
 
     inFile.close();
 }
