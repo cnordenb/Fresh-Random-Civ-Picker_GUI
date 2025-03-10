@@ -41,7 +41,7 @@ void CreateTabs(HWND hWnd)
 void ShowTabComponents(int tabIndex, HWND hWnd)
 {
     if (!startup && ui_sounds_enabled) PlaySound(L"sounds\\tab_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-    else if (startup && jingles_enabled) PlayJingle(current_civ);    
+    else if (startup && jingles_enabled && current_tab != 2) PlayJingle(current_civ);    
     current_tab = tabIndex;
     if (tabIndex == 0)
     {        
@@ -1803,17 +1803,19 @@ void SaveLog(bool user_save)
     std::wstring saveFilePath = LOG_FILE_PATH;
     if (user_save)
     {
+		if (ui_sounds_enabled) PlayButtonSound();
         // Get the current date and time
         SYSTEMTIME st;
         GetLocalTime(&st);
 
         // Format the date and time as "DD-MM-YY_HHMM"
         std::wstringstream wss;
-        wss << L"FRCP_Saved_pool_" << std::setw(2) << std::setfill(L'0') << st.wDay << L"-"
-            << std::setw(2) << std::setfill(L'0') << st.wMonth << L"-"
-            << std::setw(2) << std::setfill(L'0') << (st.wYear % 100) << L"_"
+        wss << L"FRCP Preset v1.3.0 @" << std::setw(4) << std::setfill(L'0') << st.wYear << L"." 
+            << std::setw(2) << std::setfill(L'0') << st.wMonth << L"."
+            << std::setw(2) << std::setfill(L'0') << st.wDay << L" "
             << std::setw(2) << std::setfill(L'0') << st.wHour
-            << std::setw(2) << std::setfill(L'0') << st.wMinute << L".txt";
+            << std::setw(2) << std::setfill(L'0') << st.wMinute
+            << std::setw(2) << std::setfill(L'0') << st.wSecond << L".txt";
 
         std::wstring defaultFileName = wss.str();
 
@@ -1848,9 +1850,19 @@ void SaveLog(bool user_save)
 
         if (GetSaveFileName(&ofn) == TRUE)
         {
+            if (ui_sounds_enabled) PlayButtonSound();
             saveFilePath = ofn.lpstrFile;
+            // Check if the file extension is .txt, if not, append .txt
+            if (saveFilePath.find(L".txt") == std::wstring::npos)
+            {
+                saveFilePath.append(L".txt");
+            }
         }
-        else return;
+        else
+        {
+            if (ui_sounds_enabled) PlayButtonSound();
+            return;
+        }
     }
 
     std::wofstream outFile(saveFilePath);
