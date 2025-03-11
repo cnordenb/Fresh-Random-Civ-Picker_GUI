@@ -1,4 +1,6 @@
-# Fresh Random Civ Picker
+
+# Fresh Ra![social-preview](https://github.com/user-attachments/assets/bc0c602c-1f8d-4c14-9235-2d3645cdaaa1)
+ndom Civ Picker
 
 **This is the C++ GUI version of the Fresh Random Civ Picker.**
 
