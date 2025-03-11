@@ -47,7 +47,7 @@ When you run the executable, Microsoft Defender Smart Screen will give you a pop
 ## System requirements
 OS: Windows x64
 
-Drive space: at least 56.6mb available
+Drive space: at least 56.6 megabytes available
 
 ## Project Milestones Achieved
 - v1.0: GUI with simple log
