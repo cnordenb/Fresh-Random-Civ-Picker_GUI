@@ -24,6 +24,8 @@ Once all civs have been drawn, the next draw will reset the program and all civs
 - Reset the drawn civ pool at any time! Whenever you want, reset the program and render all enabled civs drawable.
 - Customise your own civ pool! Tailor the exact civ pool you want using the civ pool tab.
 - Save your custom civ pool preset! At any time, save your civ pools to a file which can be loadable at any time.
+- Pick up where you left off! Even without saving manually, when the program starts it will remember what civs you had enabled and drawn last time you ran the program. This can be turned off in options if the user prefers the program to reset upon startup.
+- Quickdraw! The Fresh Random Civ Picker can draw a fresh random civ for you automatically as soon as you start the program. This can be turned off or on in options.
 - Civ icons! See the civ icon of the civ you draw.
 - Civ jingles! Hear the civ jingle of the civ you draw. Legacy jingles toggleable.
 - Join an AoE2DE lobby straight from the app! Works the same as Windows run prompt but only accepts AoE2DE lobby code inputs.
