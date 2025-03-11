@@ -72,7 +72,9 @@
 #define HOTKEY_ID_CTRLS 28
 #define HOTKEY_ID_CTRLR 29
 #define HOTKEY_ID_CTRLF 30
-#define HOTKEY_AMOUNT 31
+#define HOTKEY_ID_CTRLZ 31
+#define HOTKEY_ID_CTRLX 32
+#define HOTKEY_AMOUNT 33
 
 
 #define DT_UNDERLINE 0x80000000
@@ -381,6 +383,9 @@ void ResetProgram(bool);
 
 void DrawCiv();
 
+void UndrawCiv();
+void RedrawCiv();
+
 void SaveSettings();
 void LoadSettings();
 
@@ -445,7 +450,7 @@ HWND GetCivCheckbox(const std::wstring &);
 
 
 void UpdateDrawnLog(bool, bool, bool);
-void UpdateRemainingLog(bool);
+void UpdateRemainingLog(bool, bool);
 void ToggleRemainLog();
 void ClearDrawnLog();
 
