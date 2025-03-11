@@ -6,13 +6,13 @@
 
 [Purpose](#Purpose)  
 [GUI Description](#GUI-Description)  
-[Usage](#How-do-I-use-this-application?)  
+[Usage](#How-do-I-use-this-application)  
 [Features](#Features)  
 [Installation](#How-to-install)  
 [System requirements](#System-requirements)  
 [Project Milestones](#Project-Milestones-Achieved)  
-[Application Description](#What-is-this-application?)  
-[Origin Story](#Why-was-it-created?)  
+[Application Description](#What-is-this-application)  
+[Origin Story](#Why-was-it-created)  
 [Microsoft Assets](#Regarding-usage-of-Microsoft-assets-in-this-project)  
 
 ## Purpose
