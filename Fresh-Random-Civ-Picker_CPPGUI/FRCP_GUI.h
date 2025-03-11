@@ -69,6 +69,10 @@
 #define HOTKEY_ID_F2 25
 #define HOTKEY_ID_F3 26
 #define HOTKEY_ID_F4 27
+#define HOTKEY_ID_CTRLS 28
+#define HOTKEY_ID_CTRLR 29
+#define HOTKEY_ID_CTRLF 30
+#define HOTKEY_AMOUNT 31
 
 
 #define DT_UNDERLINE 0x80000000
@@ -390,7 +394,7 @@ void CreateUnderlineFont();
 void LoadImages();
 
 void MuteSounds();
-void PlayJingle(std::wstring &);
+void PlayJingle(const std::wstring &);
 bool IsLegacyCiv(const std::wstring &);
 
 void InitialiseCivs();
@@ -480,7 +484,8 @@ void SubclassButton(HWND);
 int GetWindowWidth(HWND);
 int GetWindowHeight(HWND);
 
-
+void JoinLobby(HWND);
+bool IsValidLobbyCode(const std::wstring &);
 
 std::string ConvertToString(const std::wstring &);
 HWND CreateCheckbox(HWND hWnd, HINSTANCE hInstance, int x, int y, int width, int height, int id, LPCWSTR text);
@@ -494,5 +499,6 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    OptionsDlgProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    HotkeysDlgProc(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK JoinLobbyDlgProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK    HyperlinkProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK    ButtonProc(HWND, UINT, WPARAM, LPARAM);

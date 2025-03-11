@@ -284,14 +284,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                                     button_enableall, button_disableall, checkbox_showremainlog,
                                     radiobutton_de, radiobutton_hd, radiobutton_aok, de_dlc_checkbox[0],
                                 de_dlc_checkbox[1], de_dlc_checkbox[2], de_dlc_checkbox[3], de_dlc_checkbox[4], de_dlc_checkbox[5],
-                                checkbox_rajas, checkbox_africans, checkbox_forgotten, checkbox_aoc,
+                                hd_dlc_checkbox[0], hd_dlc_checkbox[1], hd_dlc_checkbox[2], checkbox_aoc,
                                 checkbox_autotoggle, checkbox_autoreset };
 
                 int tooltip_id[] = { TOOLTIP_DRAW, TOOLTIP_RESET, TOOLTIP_TECHTREE, TOOLTIP_OPTIONS, TOOLTIP_CLEAR,
                                         TOOLTIP_ENABLEALL, TOOLTIP_DISABLEALL, TOOLTIP_REMAININGTOGGLE,
                                         TOOLTIP_DE, TOOLTIP_HD, TOOLTIP_AOK, de_dlc_tipid[0], de_dlc_tipid[1],
                                     de_dlc_tipid[2], de_dlc_tipid[3], de_dlc_tipid[4], de_dlc_tipid[5],
-                                    TOOLTIP_RAJAS, TOOLTIP_AFRICANS, TOOLTIP_FORGOTTEN, TOOLTIP_AOC,
+                                    hd_dlc_tipid[0], hd_dlc_tipid[1], hd_dlc_tipid[2], TOOLTIP_AOC,
                                     TOOLTIP_AUTOTOGGLE, TOOLTIP_AUTORESET };
                 
 				for (int i = 0; i < sizeof(button) / sizeof(button[0]); i++)
@@ -337,6 +337,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (wParam == HOTKEY_ID_F2) OpenHotkeys(hWnd);
             if (wParam == HOTKEY_ID_F3) OpenAbout(hWnd);
             if (wParam == HOTKEY_ID_F4) OpenTechTree();
+
+            if (wParam == HOTKEY_ID_CTRLS) SaveLog(true);
+            if (wParam == HOTKEY_ID_CTRLR) LoadLog(hWnd, true);
+			if (wParam == HOTKEY_ID_CTRLF) JoinLobby(hWnd);
 
             if (current_tab == 0)
             {
@@ -526,6 +530,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 case IDM_LOADLOG:
                     LoadLog(hWnd, true);
                     break;
+                case IDM_JOINLOBBY:
+					JoinLobby(hWnd);
+                    break;
+                case IDM_AOE2INSIGHTS:
+                    if (ui_sounds_enabled) PlayButtonSound();
+                    ShellExecute(0, 0, L"https://www.aoe2insights.com/lobbies/", 0, 0, SW_SHOW);
+                    break;
+                case IDM_SPECTATORDASHBOARD:
+                    if (ui_sounds_enabled) PlayButtonSound();
+                    ShellExecute(0, 0, L"https://aoe2recs.com/", 0, 0, SW_SHOW);
+                    break;
                 case IDM_HOTKEYS:
                     OpenHotkeys(hWnd);
                     break;
@@ -537,6 +552,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     if (ui_sounds_enabled) PlayButtonSound();
                     ShellExecute(0, 0, L"https://cnordenb.github.io/Fresh-Random-Civ-Picker_web/", 0, 0, SW_SHOW);
                     break;
+				case IDM_DISCORD:                                   // "Discord"
+					if (ui_sounds_enabled) PlayButtonSound();
+					ShellExecute(0, 0, L"https://discord.gg/rcFqrBdVUN", 0, 0, SW_SHOW);
+					break;
+				case IDM_DONATE:                                    // "Donate"
+					if (ui_sounds_enabled) PlayButtonSound();
+					ShellExecute(0, 0, L"https://ko-fi.com/hjoerleif", 0, 0, SW_SHOW);
+                    break;
+				case IDM_UPDATE:                                    // "Check for updates"
+					if (ui_sounds_enabled) PlayButtonSound();
+					ShellExecute(0, 0, L"https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases", 0, 0, SW_SHOW);
+                    break;
+				case IDM_TECHTREE:                                  // "Tech Tree"
+                    if (ui_sounds_enabled) PlayButtonSound();
+                    ShellExecute(0, 0, L"https://aoe2techtree.net/", 0, 0, SW_SHOW);                
+					break;
+				case IDM_STATS:                                     // "Stats"
+					if (ui_sounds_enabled) PlayButtonSound();
+					ShellExecute(0, 0, L"https://aoestats.io/", 0, 0, SW_SHOW);
+					break;
+				case IDM_DESTEAM:                                   // "Definitive Edition on Steam"
+					if (ui_sounds_enabled) PlayButtonSound();
+					ShellExecute(0, 0, L"https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/", 0, 0, SW_SHOW);
+					break;
+				case IDM_HDSTEAM:                                   // "HD Edition on Steam"
+					if (ui_sounds_enabled) PlayButtonSound();
+					ShellExecute(0, 0, L"https://store.steampowered.com/app/221380/Age_of_Empires_II_Retired/", 0, 0, SW_SHOW);
+					break;
+				case IDM_VOOBLY:                                    // "Voobly"
+					if (ui_sounds_enabled) PlayButtonSound();
+					ShellExecute(0, 0, L"https://www.voobly.com/games/view/Age-of-Empires-II-The-Conquerors", 0, 0, SW_SHOW);
+					break;
+				case IDM_XBOX:                                      // "Definitive Edition on Xbox"
+					if (ui_sounds_enabled) PlayButtonSound();
+					ShellExecute(0, 0, L"https://www.xbox.com/games/store/age-of-empires-ii-definitive-edition/9N42SSSX2MTG/0010", 0, 0, SW_SHOW);
+					break;
                 case IDC_BUTTON_DRAW:                                             // "Draw"     
                     DrawCiv();
                     break;
@@ -627,14 +678,14 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                                     button_enableall, button_disableall, checkbox_showremainlog,
                                     radiobutton_de, radiobutton_hd, radiobutton_aok, de_dlc_checkbox[0],
                                 de_dlc_checkbox[1], de_dlc_checkbox[2], de_dlc_checkbox[3], de_dlc_checkbox[4], de_dlc_checkbox[5],
-                                checkbox_rajas, checkbox_africans, checkbox_forgotten, checkbox_aoc,
+                                hd_dlc_checkbox[0], hd_dlc_checkbox[1], hd_dlc_checkbox[2], checkbox_aoc,
                                 checkbox_autotoggle, checkbox_autoreset };
 
                 int tooltip_id[] = { TOOLTIP_DRAW, TOOLTIP_RESET, TOOLTIP_TECHTREE, TOOLTIP_OPTIONS, TOOLTIP_CLEAR,
                                         TOOLTIP_ENABLEALL, TOOLTIP_DISABLEALL, TOOLTIP_REMAININGTOGGLE,
                                         TOOLTIP_DE, TOOLTIP_HD, TOOLTIP_AOK, de_dlc_tipid[0], de_dlc_tipid[1],
                                     de_dlc_tipid[2], de_dlc_tipid[3], de_dlc_tipid[4], de_dlc_tipid[5],
-                                    TOOLTIP_RAJAS, TOOLTIP_AFRICANS, TOOLTIP_FORGOTTEN, TOOLTIP_AOC,
+                                    hd_dlc_tipid[0], hd_dlc_tipid[1], hd_dlc_tipid[2], TOOLTIP_AOC,
                                     TOOLTIP_AUTOTOGGLE, TOOLTIP_AUTORESET };
 
                 for (int i = 0; i < sizeof(button) / sizeof(button[0]); i++)
@@ -762,7 +813,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 
 
             // Handle the checkbox state as needed
-            if (icons_enabled && current_tab == 0) ShowWindow(civ_icon, SW_SHOW);            
+            if (icons_enabled && current_tab != 2) ShowWindow(civ_icon, SW_SHOW);            
             else ShowWindow(civ_icon, SW_HIDE);
                     
 
@@ -799,7 +850,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
             }
 
             if (!civ_labels_enabled) ShowWindow(label_centre, SW_HIDE);
-            else if (current_tab == 0) ShowWindow(label_centre, SW_SHOW);
+            else if (current_tab != 2) ShowWindow(label_centre, SW_SHOW);
 
             if (!iteration_label_enabled) ShowWindow(label_corner, SW_HIDE);
             else if (current_tab == 0) ShowWindow(label_corner, SW_SHOW);
@@ -972,9 +1023,12 @@ void EnableHotkeys(HWND hWnd)
     RegisterHotKey(hWnd, HOTKEY_ID_F3, 0, VK_F3);
     RegisterHotKey(hWnd, HOTKEY_ID_F4, 0, VK_F4);
     RegisterHotKey(hWnd, HOTKEY_ID_B, 0, 0x42);
+	RegisterHotKey(hWnd, HOTKEY_ID_CTRLS, MOD_CONTROL, 0x53);
+	RegisterHotKey(hWnd, HOTKEY_ID_CTRLR, MOD_CONTROL, 0x52);
+	RegisterHotKey(hWnd, HOTKEY_ID_CTRLF, MOD_CONTROL, 0x46);
 }
 
-void DisableHotkeys(HWND hWnd) { for (int i = 1; i < 29; i++) UnregisterHotKey(hWnd, i); }
+void DisableHotkeys(HWND hWnd) { for (int i = 1; i < HOTKEY_AMOUNT; i++) UnregisterHotKey(hWnd, i); }
 
 void CreateUnderlineFont()
 {
@@ -1027,7 +1081,7 @@ HBITMAP FetchCivIcon(const std::wstring &civ_name)
 	return icon_random;
 }
 
-void PlayJingle(std::wstring &civ_name)
+void PlayJingle(const std::wstring &civ_name)
 {
     std::wstring processed_civ_name = civ_name;
     processed_civ_name[0] = std::tolower(processed_civ_name[0]);
@@ -1940,7 +1994,7 @@ void LoadLog(HWND hWnd, bool user_load)
         startup = true;
         SetWindowText(remaining_log, L"");
         SetWindowText(drawn_log, L"");
-        DisableAll(hWnd, false);
+		SetEditionState(hWnd, DE);
         EnableAll(hWnd, false);
         ResetProgram(true);
 
@@ -2307,3 +2361,82 @@ void PositionComponents(LPARAM lParam)
 void PlayButtonSound() { PlaySound(L"sounds\\button_sound.wav", NULL, SND_FILENAME | SND_ASYNC); }
 
 void ClearDrawnLog() { if (!startup && ui_sounds_enabled) PlayButtonSound(); SetWindowText(drawn_log, L""); }
+
+void JoinLobby(HWND hWnd)
+{
+	if (ui_sounds_enabled) PlayButtonSound();
+    std::wstring lobbyCode;
+    if (DialogBoxParam(instance, MAKEINTRESOURCE(IDD_JOINLOBBY_DIALOG), hWnd, JoinLobbyDlgProc, reinterpret_cast<LPARAM>(&lobbyCode)) == IDC_BUTTON_OK)
+    {
+		if (lobbyCode.length() == 9) ShellExecute(NULL, L"open", StringCleaner(L"aoe2de://0/" + lobbyCode), NULL, NULL, SW_SHOWNORMAL);
+		else ShellExecute(NULL, L"open", lobbyCode.c_str(), NULL, NULL, SW_SHOWNORMAL);     
+    }
+}
+
+INT_PTR CALLBACK JoinLobbyDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    static std::wstring *lobbyCode;
+
+    switch (message)
+    {
+        case WM_INITDIALOG:
+            lobbyCode = reinterpret_cast<std::wstring *>(lParam);
+            return (INT_PTR)TRUE;
+        case WM_COMMAND:
+        {
+            int wmId = LOWORD(wParam);
+            int wmEvent = HIWORD(wParam);
+            if (wmId == IDCANCEL)
+            {
+                if (ui_sounds_enabled) PlayButtonSound();
+                EndDialog(hDlg, wmId);
+                return(INT_PTR)TRUE;
+            }
+            if (LOWORD(wParam) == IDC_BUTTON_OK)
+            {
+                if (ui_sounds_enabled) PlayButtonSound();
+                wchar_t buffer[256];
+                GetDlgItemText(hDlg, IDC_EDIT_LOBBYCODE, buffer, 256);
+                *lobbyCode = buffer;
+                if (!IsValidLobbyCode(*lobbyCode))
+                {
+                    MessageBox(hDlg, L"Invalid lobby code entered.\n\nInput code must be of a format which is either 'aoe2de://0/123456789' or '123456789'. ", L"Error: invalid input", MB_OK | MB_ICONERROR);
+                    return (INT_PTR)FALSE;
+                }
+                EndDialog(hDlg, LOWORD(wParam));
+                return (INT_PTR)TRUE;
+            }
+            else if (LOWORD(wParam) == IDC_BUTTON_CANCEL)
+            {
+                if (ui_sounds_enabled) PlayButtonSound();
+                EndDialog(hDlg, LOWORD(wParam));
+                return (INT_PTR)TRUE;
+            }
+            break;
+        }
+
+    }
+    return (INT_PTR)FALSE;
+}
+
+bool IsValidLobbyCode(const std::wstring &lobbyCode)
+{
+    int lngth = lobbyCode.length();
+    switch (lngth)
+    {
+        case 9: break;
+        case 20: break;
+        default: return false;
+    }
+
+    if (lngth == 20)
+    {
+        if (lobbyCode.substr(0, 11) != L"aoe2de://0/") return false;
+        std::wstring numbers = lobbyCode.substr(12, 20);
+        if (numbers.find_first_not_of(L"0123456789") != std::wstring::npos) return false;
+    }
+
+    if (lngth == 9) if (lobbyCode.find_first_not_of(L"0123456789") != std::wstring::npos) return false;   
+
+	return true;
+}
