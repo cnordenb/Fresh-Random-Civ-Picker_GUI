@@ -5,15 +5,25 @@
 **This is the C++ GUI version of the Fresh Random Civ Picker.**
 
 [Purpose](#Purpose)
+
 [GUI Description](#GUI-Description)
+
 [Usage](#How-do-I-use-this-application?)
+
 [Features](#Features)
+
 [Installation](#How-to-install)
+
 [System requirements](#System-requirements)
+
 [Project Milestones](#Project-Milestones-Achieved)
+
 [Application Description](#What-is-this-application?)
+
 [Origin Story](#Why-was-it-created?)
+
 [Microsoft Assets](#Regarding-usage-of-Microsoft-assets-in-this-project)
+
 
 ## Purpose
 Purpose of Fresh Random Civ Picker: the user can randomly iterate through the entire civ pool or a user-defined civ pool without drawing the same civ twice.
