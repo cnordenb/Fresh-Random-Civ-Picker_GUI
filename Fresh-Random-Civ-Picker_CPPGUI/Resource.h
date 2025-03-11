@@ -26,6 +26,8 @@
 #define IDM_HDSTEAM						144
 #define IDM_VOOBLY						145
 #define IDM_XBOX						146
+#define IDM_UNDRAW						147
+#define IDM_REDRAW						148
 #define IDI_WINDOWSPROJECT1             107
 #define IDI_SMALL                       108
 #define IDC_WINDOWSPROJECT1             109

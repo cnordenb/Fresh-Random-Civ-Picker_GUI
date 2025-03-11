@@ -342,8 +342,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (wParam == HOTKEY_ID_CTRLR) LoadLog(hWnd, true);
 			if (wParam == HOTKEY_ID_CTRLF) JoinLobby(hWnd);
 
-			if (wParam == HOTKEY_ID_CTRLZ) UndrawCiv();
-			if (wParam == HOTKEY_ID_CTRLX) RedrawCiv();
+            if (wParam == HOTKEY_ID_CTRLZ) UndrawCiv();
+            if (wParam == HOTKEY_ID_CTRLX) RedrawCiv();
 
             if (current_tab == 0)
             {
@@ -535,6 +535,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     break;
                 case IDM_JOINLOBBY:
 					JoinLobby(hWnd);
+                    break;
+                case IDM_UNDRAW:
+                    UndrawCiv();
+                    break;
+                case IDM_REDRAW:
+                    RedrawCiv();
                     break;
                 case IDM_AOE2INSIGHTS:
                     if (ui_sounds_enabled) PlayButtonSound();
@@ -940,6 +946,7 @@ void ResetProgram(bool auto_reset)
 
     UpdateRemainingLog(false, false);
     UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
+    undrawable = false;
 }
 
 void DrawCiv()
@@ -991,7 +998,8 @@ void DrawCiv()
     }
 
     UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
-
+    redrawable = false;
+    undrawable = true;
 }
 
 void EnableHotkeys(HWND hWnd)
@@ -2446,19 +2454,26 @@ bool IsValidLobbyCode(const std::wstring &lobbyCode)
 
 void UndrawCiv()
 {
-	if (iterator == 0) return;
-	else if (drawn_civs[iterator-1] == L"") return;
+    if (!undrawable || iterator < 1)
+    {
+        if (ui_sounds_enabled) PlaySound(L"sounds\\error_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+        return;
+    }
 	if (ui_sounds_enabled) PlayButtonSound();
     if (iterator > 0) iterator--; else return;
     civs.push_back(current_civ);
-	if (iterator > 0) current_civ = drawn_civs[iterator - 1];
+    if (iterator >= 1)current_civ = drawn_civs[iterator - 1];
+    else current_civ = L"Random";
 	HBITMAP drawn_civ_icon = FetchCivIcon(current_civ);
 	SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
-	if (iterator == 0) SetWindowText(label_centre, L"?");
-	else SetWindowText(label_centre, current_civ.c_str());
-	if (iterator == 0) SetWindowText(label_drawncount, StringCleaner(L"Drawn: 0/" + std::to_wstring(custom_max_civs)));
-	else SetWindowText(label_drawncount, StringCleaner(L"Drawn: " + std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs)));
-	if (iterator == 0) SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_random);
+    if (jingles_enabled) PlayJingle(current_civ);
+    if (current_civ == L"Random") SetWindowText(label_centre, L"?");
+    else SetWindowText(label_centre, current_civ.c_str());	
+    if (!civ_labels_enabled) ShowWindow(label_centre, SW_HIDE);
+    SetWindowText(label_drawncount, StringCleaner(L"Drawn: " + std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs)));
+    SetWindowText(label_corner, StringCleaner(std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs)));
+    if (!iteration_label_enabled || current_tab != 0) ShowWindow(label_corner, SW_HIDE);
+    if (iterator == 0) SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_random);
 
     int drawnlog_length = GetWindowTextLength(drawn_log);
     if (drawnlog_length > 0)
@@ -2474,23 +2489,27 @@ void UndrawCiv()
     }
 
 	UpdateRemainingLog(false, true);
+    redrawable = true;
 }
 
 void RedrawCiv()
 {
-	if (iterator == custom_max_civs) return;
-	else if (drawn_civs[iterator] == L"") return;
-	if (ui_sounds_enabled) PlayButtonSound();
+    if (!redrawable || drawn_civs[iterator] == L"")
+    {
+        if (ui_sounds_enabled) PlaySound(L"sounds\\error_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+        return;
+    }
+    current_civ = drawn_civs[iterator];
 	civs.erase(std::remove(civs.begin(), civs.end(), current_civ), civs.end());
-	current_civ = drawn_civs[iterator];
+    iterator++;
 	HBITMAP drawn_civ_icon = FetchCivIcon(current_civ);
 	SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
-	if (iterator == 0) SetWindowText(label_centre, L"?");
-	else SetWindowText(label_centre, current_civ.c_str());
-	SetWindowText(label_drawncount, StringCleaner(L"Drawn: " + std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs)));
-	if (iterator == 0) ShowWindow(civ_icon, SW_HIDE);
+    if (jingles_enabled) PlayJingle(current_civ);
+	SetWindowText(label_centre, current_civ.c_str());
+	//SetWindowText(label_drawncount, StringCleaner(L"Drawn: " + std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs)));
     UpdateDrawnLog(false, true, false);
     UpdateRemainingLog(false, false);
-    if (iterator < MAX_CIVS) iterator++; else return;
+
+    if (iterator == custom_max_civs) redrawable = false;
 
 }
