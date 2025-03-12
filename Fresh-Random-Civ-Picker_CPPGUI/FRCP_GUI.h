@@ -40,7 +40,7 @@
 #define DLC_AMOUNT 10
 #define EDITION_AMOUNT 3
 #define MAX_LOADSTRING 100
-
+#define HOTKEY_AMOUNT 33
 
 #define HOTKEY_ID_TAB 1
 #define HOTKEY_ID_SPACE 2
@@ -74,7 +74,6 @@
 #define HOTKEY_ID_CTRLF 30
 #define HOTKEY_ID_CTRLZ 31
 #define HOTKEY_ID_CTRLX 32
-#define HOTKEY_AMOUNT 33
 
 
 #define DT_UNDERLINE 0x80000000
@@ -110,6 +109,26 @@
 #define TOOLTIP_AUTORESET  	        21
 #define TOOLTIP_OPTIONS             22
 
+class Hotkey
+{
+public:
+	UINT modifier;
+	UINT key;
+	UINT id;
+
+	Hotkey(UINT modifier, UINT key, UINT id) : modifier(modifier), key(key), id(id) {}
+};
+
+Hotkey hotkey[HOTKEY_AMOUNT] = { Hotkey(0, VK_TAB, HOTKEY_ID_TAB), Hotkey(0, VK_SPACE, HOTKEY_ID_SPACE),
+Hotkey(0, VK_RETURN, HOTKEY_ID_RETURN), Hotkey(0, VK_ESCAPE, HOTKEY_ID_ESC), Hotkey(0, 0x5A, HOTKEY_ID_Z),
+Hotkey(0, 0x58, HOTKEY_ID_X), Hotkey(0, 0x43, HOTKEY_ID_C), Hotkey(0, 0x56, HOTKEY_ID_V), Hotkey(0, 0x54, HOTKEY_ID_T),
+Hotkey(0, 0x31, HOTKEY_ID_1), Hotkey(0, 0x32, HOTKEY_ID_2), Hotkey(0, 0x33, HOTKEY_ID_3), Hotkey(0, 0x51, HOTKEY_ID_Q),
+Hotkey(0, 0x57, HOTKEY_ID_W), Hotkey(0, 0x45, HOTKEY_ID_E), Hotkey(0, 0x41, HOTKEY_ID_A), Hotkey(0, 0x53, HOTKEY_ID_S),
+Hotkey(0, 0x44, HOTKEY_ID_D), Hotkey(0, 0x46, HOTKEY_ID_F), Hotkey(0, 0x47, HOTKEY_ID_G), Hotkey(0, 0x48, HOTKEY_ID_H),
+Hotkey(0, 0x52, HOTKEY_ID_R), Hotkey(0, 0x54, HOTKEY_ID_T), Hotkey(0, VK_F1, HOTKEY_ID_F1), Hotkey(0, 0x42, HOTKEY_ID_B),
+Hotkey(0, VK_F2, HOTKEY_ID_F2), Hotkey(0, VK_F3, HOTKEY_ID_F3), Hotkey(0, VK_F4, HOTKEY_ID_F4), Hotkey(MOD_CONTROL, 0x53, HOTKEY_ID_CTRLS),
+Hotkey(MOD_CONTROL, 0x52, HOTKEY_ID_CTRLR), Hotkey(MOD_CONTROL, 0x46, HOTKEY_ID_CTRLF),
+    Hotkey(MOD_CONTROL, 0x5A, HOTKEY_ID_CTRLZ), Hotkey(MOD_CONTROL, 0x58, HOTKEY_ID_CTRLX) };
 
 class Civ
 {
@@ -119,8 +138,10 @@ public:
 	enum edition edition;
 	enum dlc dlc;
     bool legacy;
+	HWND checkbox;
+	HBITMAP icon;
 
-	Civ(std::wstring name, bool enabled, enum edition edition, enum dlc dlc, bool legacy) : name(name), enabled(enabled), edition(edition), dlc(dlc), legacy(legacy)  {}
+	Civ(std::wstring name, bool enabled, enum edition edition, enum dlc dlc, bool legacy, HWND checkbox, HBITMAP icon) : name(name), enabled(enabled), edition(edition), dlc(dlc), legacy(legacy), checkbox(checkbox), icon(icon)  {}
 
     void SetEnabled(bool enabled) { this->enabled = enabled; }
 };
@@ -156,6 +177,8 @@ HWND checkbox_showremainlog;
 HWND hOptionsDlg = NULL;
 
 
+
+
 HWND checkbox_armenians, checkbox_aztecs, checkbox_bengalis, checkbox_berbers, checkbox_bohemians,       // checkboxes for custom civ pool tab
 checkbox_britons, checkbox_bulgarians, checkbox_burgundians, checkbox_burmese, checkbox_byzantines,
 checkbox_celts, checkbox_chinese, checkbox_cumans, checkbox_dravidians, checkbox_ethiopians,
@@ -167,15 +190,7 @@ checkbox_saracens, checkbox_sicilians, checkbox_slavs, checkbox_spanish, checkbo
 checkbox_teutons, checkbox_turks, checkbox_vietnamese, checkbox_vikings;
 
 
-HWND civ_checkbox[] = { checkbox_armenians, checkbox_aztecs, checkbox_bengalis, checkbox_berbers, checkbox_bohemians,       // array of checkboxes
-                        checkbox_britons, checkbox_bulgarians, checkbox_burgundians, checkbox_burmese, checkbox_byzantines,
-                        checkbox_celts, checkbox_chinese, checkbox_cumans, checkbox_dravidians, checkbox_ethiopians,
-                        checkbox_franks, checkbox_georgians, checkbox_goths, checkbox_gurjaras, checkbox_huns, checkbox_incas,
-                        checkbox_hindustanis, checkbox_italians, checkbox_japanese, checkbox_khmer, checkbox_koreans,
-                        checkbox_lithuanians, checkbox_magyars, checkbox_malay, checkbox_malians, checkbox_mayans,
-                        checkbox_mongols, checkbox_persians, checkbox_poles, checkbox_portuguese, checkbox_romans,
-                        checkbox_saracens, checkbox_sicilians, checkbox_slavs, checkbox_spanish, checkbox_tatars,
-                        checkbox_teutons, checkbox_turks, checkbox_vietnamese, checkbox_vikings };
+
 
 HWND checkbox_khans, checkbox_dukes, checkbox_west, checkbox_india, checkbox_rome, checkbox_royals, // dlc checkboxes
 checkbox_forgotten, checkbox_africans, checkbox_rajas,
@@ -199,6 +214,8 @@ HFONT hBoldFont;
 HBRUSH brush_white;
 HBRUSH brush_black;
 
+
+
 HBITMAP icon_armenians, icon_aztecs, icon_bengalis, icon_berber, icon_bohemians,	                        // civ icons
 icon_britons, icon_bulgarians, icon_burgundians, icon_burmese, icon_byzantines,
 icon_celts, icon_chinese, icon_cumans, icon_dravidians, icon_ethiopians,
@@ -209,15 +226,7 @@ icon_mongols, icon_persians, icon_poles, icon_portuguese, icon_romans,
 icon_saracens, icon_sicilians, icon_slavs, icon_spanish, icon_tatars,
 icon_teutons, icon_turks, icon_vietnamese, icon_vikings, icon_random;
 
-HBITMAP civ_icon_array[] = { icon_armenians, icon_aztecs, icon_bengalis, icon_berber, icon_bohemians,	                        // civ icons
-                    icon_britons, icon_bulgarians, icon_burgundians, icon_burmese, icon_byzantines,
-                    icon_celts, icon_chinese, icon_cumans, icon_dravidians, icon_ethiopians,
-                    icon_franks, icon_georgians, icon_goths, icon_gurjaras, icon_huns, icon_incas,
-                    icon_hindustanis, icon_italians, icon_japanese, icon_khmer, icon_koreans,
-                    icon_lithuanians, icon_magyars, icon_malay, icon_malians, icon_mayans,
-                    icon_mongols, icon_persians, icon_poles, icon_portuguese, icon_romans,
-                    icon_saracens, icon_sicilians, icon_slavs, icon_spanish, icon_tatars,
-                    icon_teutons, icon_turks, icon_vietnamese, icon_vikings };
+
 
 HBITMAP icon_de, icon_hd, icon_aok;	                                                            // edition icons
 
@@ -334,53 +343,54 @@ int every_dlc_id[] = { IDC_CHECKBOX_AOC, IDC_CHECKBOX_FORGOTTEN, IDC_CHECKBOX_AF
 edition every_edition[] = { AOK, HD, DE };
 int every_edition_id[] = { IDC_RADIO_AOK, IDC_RADIO_HD, IDC_RADIO_DE };
 
-Civ random(L"Random", false, AOK, aok, true);
+HWND placeholder_hwnd;
+Civ random(L"Random", false, AOK, aok, true, placeholder_hwnd, icon_random);
 
-Civ armenians(L"Armenians", true, DE, royals, false);
-Civ aztecs(L"Aztecs", true, AOK, aoc, true);
-Civ bengalis(L"Bengalis", true, DE, india, false);
-Civ berbers(L"Berbers", true, HD, africans, false);
-Civ bohemians(L"Bohemians", true, DE, dukes, false);
-Civ britons(L"Britons", true, AOK, aok, true);
-Civ bulgarians(L"Bulgarians", true, DE, khans, false);
-Civ burgundians(L"Burgundians", true, DE, west, false);
-Civ burmese(L"Burmese", true, HD, rajas, false);
-Civ byzantines(L"Byzantines", true, AOK, aok, true);
-Civ celts(L"Celts", true, AOK, aok, true);
-Civ chinese(L"Chinese", true, AOK, aok, true);
-Civ cumans(L"Cumans", true, DE, khans, false);
-Civ dravidians(L"Dravidians", true, DE, india, false);
-Civ ethiopians(L"Ethiopians", true, HD, africans, false);
-Civ franks(L"Franks", true, AOK, aok, true);
-Civ georgians(L"Georgians", true, DE, royals, false);
-Civ goths(L"Goths", true, AOK, aok, true);
-Civ gurjaras(L"Gurjaras", true, DE, india, false);
-Civ hindustanis(L"Hindustanis", true, HD, forgotten, false);
-Civ huns(L"Huns", true, AOK, aoc, true);
-Civ incas(L"Incas", true, HD, forgotten, false);
-Civ italians(L"Italians", true, HD, forgotten, false);
-Civ japanese(L"Japanese", true, AOK, aok, true);
-Civ khmer(L"Khmer", true, HD, rajas, false);
-Civ koreans(L"Koreans", true, AOK, aoc, true);
-Civ lithuanians(L"Lithuanians", true, DE, khans, false);
-Civ magyars(L"Magyars", true, HD, forgotten, false);
-Civ malay(L"Malay", true, HD, rajas, false);
-Civ malians(L"Malians", true, HD, africans, false);
-Civ mayans(L"Mayans", true, AOK, aoc, true);
-Civ mongols(L"Mongols", true, AOK, aok, true);
-Civ persians(L"Persians", true, AOK, aok, true);
-Civ poles(L"Poles", true, DE, dukes, false);
-Civ portuguese(L"Portuguese", true, HD, africans, false);
-Civ romans(L"Romans", true, DE, rome, false);
-Civ saracens(L"Saracens", true, AOK, aoc, true);
-Civ sicilians(L"Sicilians", true, DE, west, false);
-Civ slavs(L"Slavs", true, HD, forgotten, false);
-Civ spanish(L"Spanish", true, AOK, aoc, true);
-Civ tatars(L"Tatars", true, DE, khans, false);
-Civ teutons(L"Teutons", true, AOK, aok, true);
-Civ turks(L"Turks", true, AOK, aok, true);
-Civ vietnamese(L"Vietnamese", true, HD, rajas, false);
-Civ vikings(L"Vikings", true, AOK, aok, true);
+Civ armenians(L"Armenians", true, DE, royals, false, checkbox_armenians, icon_armenians);
+Civ aztecs(L"Aztecs", true, AOK, aoc, true, checkbox_aztecs, icon_aztecs);
+Civ bengalis(L"Bengalis", true, DE, india, false, checkbox_bengalis, icon_bengalis);
+Civ berbers(L"Berbers", true, HD, africans, false, checkbox_berbers, icon_berber);
+Civ bohemians(L"Bohemians", true, DE, dukes, false, checkbox_bohemians, icon_bohemians);
+Civ britons(L"Britons", true, AOK, aok, true, checkbox_britons, icon_britons);
+Civ bulgarians(L"Bulgarians", true, DE, khans, false, checkbox_bulgarians, icon_bulgarians);
+Civ burgundians(L"Burgundians", true, DE, west, false, checkbox_burgundians, icon_burgundians);
+Civ burmese(L"Burmese", true, HD, rajas, false, checkbox_burmese, icon_burmese);
+Civ byzantines(L"Byzantines", true, AOK, aok, true, checkbox_byzantines, icon_byzantines);
+Civ celts(L"Celts", true, AOK, aok, true, checkbox_celts, icon_celts);
+Civ chinese(L"Chinese", true, AOK, aok, true, checkbox_chinese, icon_chinese);
+Civ cumans(L"Cumans", true, DE, khans, false, checkbox_cumans, icon_cumans);
+Civ dravidians(L"Dravidians", true, DE, india, false, checkbox_dravidians, icon_dravidians);
+Civ ethiopians(L"Ethiopians", true, HD, africans, false, checkbox_ethiopians, icon_ethiopians);
+Civ franks(L"Franks", true, AOK, aok, true, checkbox_franks, icon_franks);
+Civ georgians(L"Georgians", true, DE, royals, false, checkbox_georgians, icon_georgians);
+Civ goths(L"Goths", true, AOK, aok, true, checkbox_goths, icon_goths);
+Civ gurjaras(L"Gurjaras", true, DE, india, false, checkbox_gurjaras, icon_gurjaras);
+Civ hindustanis(L"Hindustanis", true, HD, forgotten, false, checkbox_hindustanis, icon_hindustanis);
+Civ huns(L"Huns", true, AOK, aoc, true, checkbox_huns, icon_huns);
+Civ incas(L"Incas", true, HD, forgotten, false, checkbox_incas, icon_incas);
+Civ italians(L"Italians", true, HD, forgotten, false, checkbox_italians, icon_italians);
+Civ japanese(L"Japanese", true, AOK, aok, true, checkbox_japanese, icon_japanese);
+Civ khmer(L"Khmer", true, HD, rajas, false, checkbox_khmer, icon_khmer);
+Civ koreans(L"Koreans", true, AOK, aoc, true, checkbox_koreans, icon_koreans);
+Civ lithuanians(L"Lithuanians", true, DE, khans, false, checkbox_lithuanians, icon_lithuanians);
+Civ magyars(L"Magyars", true, HD, forgotten, false, checkbox_magyars, icon_magyars);
+Civ malay(L"Malay", true, HD, rajas, false, checkbox_malay, icon_malay);
+Civ malians(L"Malians", true, HD, africans, false, checkbox_malians, icon_malians);
+Civ mayans(L"Mayans", true, AOK, aoc, true, checkbox_mayans, icon_mayans);
+Civ mongols(L"Mongols", true, AOK, aok, true, checkbox_mongols, icon_mongols);
+Civ persians(L"Persians", true, AOK, aok, true, checkbox_persians, icon_persians);
+Civ poles(L"Poles", true, DE, dukes, false, checkbox_poles, icon_poles);
+Civ portuguese(L"Portuguese", true, HD, africans, false, checkbox_portuguese, icon_portuguese);
+Civ romans(L"Romans", true, DE, rome, false, checkbox_romans, icon_romans);
+Civ saracens(L"Saracens", true, AOK, aoc, true, checkbox_saracens, icon_saracens);
+Civ sicilians(L"Sicilians", true, DE, west, false, checkbox_sicilians, icon_sicilians);
+Civ slavs(L"Slavs", true, HD, forgotten, false, checkbox_slavs, icon_slavs);
+Civ spanish(L"Spanish", true, AOK, aoc, true, checkbox_spanish, icon_spanish);
+Civ tatars(L"Tatars", true, DE, khans, false, checkbox_tatars, icon_tatars);
+Civ teutons(L"Teutons", true, AOK, aok, true, checkbox_teutons, icon_teutons);
+Civ turks(L"Turks", true, AOK, aok, true, checkbox_turks, icon_turks);
+Civ vietnamese(L"Vietnamese", true, HD, rajas, false, checkbox_vietnamese, icon_vietnamese);
+Civ vikings(L"Vikings", true, AOK, aok, true, checkbox_vikings, icon_vikings);
 
 Civ civs_array[MAX_CIVS] = { armenians, aztecs, bengalis, berbers, bohemians, britons, bulgarians, burgundians, burmese, byzantines,
                         celts, chinese, cumans, dravidians, ethiopians, franks, georgians, goths, gurjaras, huns, incas, hindustanis,

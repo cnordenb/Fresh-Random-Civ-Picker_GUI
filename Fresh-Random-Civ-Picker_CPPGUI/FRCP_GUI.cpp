@@ -1004,42 +1004,7 @@ void DrawCiv()
     undrawable = true;
 }
 
-void EnableHotkeys(HWND hWnd)
-{
-	RegisterHotKey(hWnd, HOTKEY_ID_TAB, 0, VK_TAB);
-	RegisterHotKey(hWnd, HOTKEY_ID_SPACE, 0, VK_SPACE);
-	RegisterHotKey(hWnd, HOTKEY_ID_RETURN, 0, VK_RETURN);
-	RegisterHotKey(hWnd, HOTKEY_ID_ESC, 0, VK_ESCAPE);
-    RegisterHotKey(hWnd, HOTKEY_ID_Z, 0, 0x5A);
-	RegisterHotKey(hWnd, HOTKEY_ID_X, 0, 0x58);
-	RegisterHotKey(hWnd, HOTKEY_ID_C, 0, 0x43);
-	RegisterHotKey(hWnd, HOTKEY_ID_V, 0, 0x56);
-	RegisterHotKey(hWnd, HOTKEY_ID_T, 0, 0x54);
-	RegisterHotKey(hWnd, HOTKEY_ID_1, 0, 0x31);
-	RegisterHotKey(hWnd, HOTKEY_ID_2, 0, 0x32);
-	RegisterHotKey(hWnd, HOTKEY_ID_3, 0, 0x33);
-	RegisterHotKey(hWnd, HOTKEY_ID_Q, 0, 0x51);
-	RegisterHotKey(hWnd, HOTKEY_ID_W, 0, 0x57);
-	RegisterHotKey(hWnd, HOTKEY_ID_E, 0, 0x45);
-	RegisterHotKey(hWnd, HOTKEY_ID_A, 0, 0x41);
-	RegisterHotKey(hWnd, HOTKEY_ID_S, 0, 0x53);
-	RegisterHotKey(hWnd, HOTKEY_ID_D, 0, 0x44);
-	RegisterHotKey(hWnd, HOTKEY_ID_F, 0, 0x46);
-	RegisterHotKey(hWnd, HOTKEY_ID_G, 0, 0x47);
-	RegisterHotKey(hWnd, HOTKEY_ID_H, 0, 0x48);
-	RegisterHotKey(hWnd, HOTKEY_ID_R, 0, 0x52);
-	RegisterHotKey(hWnd, HOTKEY_ID_T, 0, 0x54);
-    RegisterHotKey(hWnd, HOTKEY_ID_F1, 0, VK_F1);
-    RegisterHotKey(hWnd, HOTKEY_ID_F2, 0, VK_F2);
-    RegisterHotKey(hWnd, HOTKEY_ID_F3, 0, VK_F3);
-    RegisterHotKey(hWnd, HOTKEY_ID_F4, 0, VK_F4);
-    RegisterHotKey(hWnd, HOTKEY_ID_B, 0, 0x42);
-	RegisterHotKey(hWnd, HOTKEY_ID_CTRLS, MOD_CONTROL, 0x53);
-	RegisterHotKey(hWnd, HOTKEY_ID_CTRLR, MOD_CONTROL, 0x52);
-	RegisterHotKey(hWnd, HOTKEY_ID_CTRLF, MOD_CONTROL, 0x46);
-	RegisterHotKey(hWnd, HOTKEY_ID_CTRLZ, MOD_CONTROL, 0x5A);
-	RegisterHotKey(hWnd, HOTKEY_ID_CTRLX, MOD_CONTROL, 0x58);
-}
+void EnableHotkeys(HWND hWnd) {	for (int i = 0; i < HOTKEY_AMOUNT; i++) RegisterHotKey(hWnd, hotkey[i].id, hotkey[i].modifier, hotkey[i].key); }
 
 void DisableHotkeys(HWND hWnd) { for (int i = 1; i < HOTKEY_AMOUNT; i++) UnregisterHotKey(hWnd, i); }
 
@@ -1069,7 +1034,7 @@ void LoadImages()
         bmp_parsed_civname = civs_array[i].name;
         bmp_parsed_civname[0] = std::tolower(bmp_parsed_civname[0]);
         icon_path = L"images\\civ_icons\\" + bmp_parsed_civname + L".bmp";
-        civ_icon_array[i] = (HBITMAP)LoadImageW(NULL, icon_path.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+        civs_array[i].icon = (HBITMAP)LoadImageW(NULL, icon_path.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     }
 
     icon_techtree = (HBITMAP)LoadImageW(NULL, L"images\\civ_icons\\techtree.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -1090,7 +1055,7 @@ void LoadImages()
 HBITMAP FetchCivIcon(const std::wstring &civ_name)
 {
     if (civ_name == L"Random") return icon_random;
-    for (int i = 0; i < MAX_CIVS; i++) if (civ_name == civs_array[i].name) return civ_icon_array[i];
+    for (int i = 0; i < MAX_CIVS; i++) if (civ_name == civs_array[i].name) return civs_array[i].icon;
 	return icon_random;
 }
 
@@ -1160,12 +1125,12 @@ HWND CreateCheckbox(HWND hWnd, HINSTANCE hInstance, int x, int y, int width, int
 
 void ShowAllPoolCheckboxes()
 {
-    for (int i = 0; i < MAX_CIVS; i++) ShowWindow(civ_checkbox[i], SW_SHOW);
+    for (int i = 0; i < MAX_CIVS; i++) ShowWindow(civs_array[i].checkbox, SW_SHOW);
 }
 
 void HideCustomPoolCheckboxes()
 { 
-	for (int i = 0; i < MAX_CIVS; i++) ShowWindow(civ_checkbox[i], SW_HIDE);
+	for (int i = 0; i < MAX_CIVS; i++) ShowWindow(civs_array[i].checkbox, SW_HIDE);
 	ShowDEDLCCheckboxes(false);
 	ShowHDDLCCheckboxes(false);
 	ShowAOCCheckbox(false);
@@ -1182,7 +1147,7 @@ void EnableAll(HWND hWnd, bool sound_acceptable)
         
         for (int i = 0; i < MAX_CIVS; i++)
         {        
-            SendMessage(civ_checkbox[i], BM_SETCHECK, BST_CHECKED, 0);
+            SendMessage(civs_array[i].checkbox, BM_SETCHECK, BST_CHECKED, 0);
             AddCiv(civs_array[i].name);
         }
 	}
@@ -1192,7 +1157,7 @@ void EnableAll(HWND hWnd, bool sound_acceptable)
         {            
 			if (civs_array[i].edition != DE)
             {
-				SendMessage(civ_checkbox[i], BM_SETCHECK, BST_CHECKED, 0);
+				SendMessage(civs_array[i].checkbox, BM_SETCHECK, BST_CHECKED, 0);
 				AddCiv(civs_array[i].name);
 			}
 		}
@@ -1204,7 +1169,7 @@ void EnableAll(HWND hWnd, bool sound_acceptable)
             
 			if (civs_array[i].edition == AOK)
             {
-				SendMessage(civ_checkbox[i], BM_SETCHECK, BST_CHECKED, 0);
+				SendMessage(civs_array[i].checkbox, BM_SETCHECK, BST_CHECKED, 0);
 				AddCiv(civs_array[i].name);
 			}
 		}
@@ -1219,7 +1184,7 @@ void DisableAll(HWND hWnd, bool sound_acceptable)
 	custom_civ_pool = true;
     for (int i = 0; i < MAX_CIVS; i++)
     {
-        SendMessage(civ_checkbox[i], BM_SETCHECK, BST_UNCHECKED, 0);
+        SendMessage(civs_array[i].checkbox, BM_SETCHECK, BST_UNCHECKED, 0);
 		RemoveCiv(civs_array[i].name);
     }
     if (autoreset_enabled) ResetProgram(true);
@@ -1334,11 +1299,11 @@ void ShowHDPoolCheckboxes()
 {
     for (int i = 0; i < MAX_CIVS; i++)
     {        
-        if (civs_array[i].edition != DE) ShowWindow(civ_checkbox[i], SW_SHOW);
+        if (civs_array[i].edition != DE) ShowWindow(civs_array[i].checkbox, SW_SHOW);
         else
         {
-			ShowWindow(civ_checkbox[i], SW_HIDE);
-            SendMessage(civ_checkbox[i], BM_SETCHECK, BST_UNCHECKED, 0);
+			ShowWindow(civs_array[i].checkbox, SW_HIDE);
+            SendMessage(civs_array[i].checkbox, BM_SETCHECK, BST_UNCHECKED, 0);
             RemoveCiv(civs_array[i].name);
         }        
     }
@@ -1348,11 +1313,11 @@ void ShowAOCPoolCheckboxes()
 {
     for (int i = 0; i < MAX_CIVS; i++)
     {
-        if (civs_array[i].edition == AOK) ShowWindow(civ_checkbox[i], SW_SHOW);
+        if (civs_array[i].edition == AOK) ShowWindow(civs_array[i].checkbox, SW_SHOW);
 		else
         {
-            ShowWindow(civ_checkbox[i], SW_HIDE);
-            SendMessage(civ_checkbox[i], BM_SETCHECK, BST_UNCHECKED, 0);
+            ShowWindow(civs_array[i].checkbox, SW_HIDE);
+            SendMessage(civs_array[i].checkbox, BM_SETCHECK, BST_UNCHECKED, 0);
             RemoveCiv(civs_array[i].name);
         }
     }
@@ -2087,7 +2052,7 @@ void GenerateFilePaths()
     wcscpy_s(LOG_FILE_PATH, exePathL);
 }
 
-HWND GetCivCheckbox(const std::wstring &civ_name) { for (int i = 0; i < MAX_CIVS; i++) if (civs_array[i].name == civ_name) return civ_checkbox[i]; return NULL; }
+HWND GetCivCheckbox(const std::wstring &civ_name) { for (int i = 0; i < MAX_CIVS; i++) if (civs_array[i].name == civ_name) return civs_array[i].checkbox; return NULL; }
 
 void InitialiseCivs()
 {
@@ -2207,7 +2172,7 @@ void CreateCheckboxes(HWND hWnd)
     int row[] = { 30, 50, 70, 90, 110, 130, 150, 170, 190 };
     int column[] = { 10, 112, 214, 316, 418 };
 
-    for (int i = 0; i < MAX_CIVS; i++) civ_checkbox[i] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), column[i % 5], row[i / 5], 100, 20, i + 5, civs_array[i].name.c_str());
+    for (int i = 0; i < MAX_CIVS; i++) civs_array[i].checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), column[i % 5], row[i / 5], 100, 20, i + 5, civs_array[i].name.c_str());
 
     checkbox_autoreset = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 230, 180, 20, IDC_CHECKBOX_AUTORESET, L"Auto-reset upon change");
     checkbox_autotoggle = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 0, 170, 20, IDC_CHECKBOX_AUTOTOGGLE, L"Auto-toggle older civs");
