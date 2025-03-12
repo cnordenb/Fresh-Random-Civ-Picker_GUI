@@ -111,6 +111,23 @@
 #define TOOLTIP_OPTIONS             22
 
 
+class Civ
+{
+public:
+	std::wstring name;
+	bool enabled;
+	enum edition edition;
+	enum dlc dlc;
+    bool legacy;
+
+	Civ(std::wstring name, bool enabled, enum edition edition, enum dlc dlc, bool legacy) : name(name), enabled(enabled), edition(edition), dlc(dlc), legacy(legacy)  {}
+
+    void SetEnabled(bool enabled) { this->enabled = enabled; }
+};
+
+
+
+
 wchar_t INI_FILE_PATH[MAX_PATH];
 wchar_t LOG_FILE_PATH[MAX_PATH];
 
@@ -222,6 +239,7 @@ std::wstring drawnlog_text, remaininglog_text;
 std::wstring hlabel_default;
 std::wstring current_civ = L"Random";
 
+/*
 std::wstring civ_index[] = { L"Armenians", L"Aztecs", L"Bengalis", L"Berbers", L"Bohemians",       // array of civs for easy indexing
                             L"Britons", L"Bulgarians", L"Burgundians", L"Burmese", L"Byzantines",
                             L"Celts", L"Chinese", L"Cumans", L"Dravidians", L"Ethiopians",
@@ -231,6 +249,7 @@ std::wstring civ_index[] = { L"Armenians", L"Aztecs", L"Bengalis", L"Berbers", L
                             L"Mongols", L"Persians", L"Poles", L"Portuguese", L"Romans",
                             L"Saracens", L"Sicilians", L"Slavs", L"Spanish", L"Tatars",
                             L"Teutons", L"Turks", L"Vietnamese", L"Vikings" };
+*/
 
 bool startup = true;
 bool persistent_logging = true;
@@ -326,46 +345,69 @@ int every_dlc_id[] = { IDC_CHECKBOX_AOC, IDC_CHECKBOX_FORGOTTEN, IDC_CHECKBOX_AF
 edition every_edition[] = { AOK, HD, DE };
 int every_edition_id[] = { IDC_RADIO_AOK, IDC_RADIO_HD, IDC_RADIO_DE };
 
+Civ random(L"Random", false, AOK, aok, true);
+
+Civ armenians(L"Armenians", true, DE, royals, false);
+Civ aztecs(L"Aztecs", true, AOK, aoc, true);
+Civ bengalis(L"Bengalis", true, DE, india, false);
+Civ berbers(L"Berbers", true, HD, africans, false);
+Civ bohemians(L"Bohemians", true, DE, dukes, false);
+Civ britons(L"Britons", true, AOK, aok, true);
+Civ bulgarians(L"Bulgarians", true, DE, khans, false);
+Civ burgundians(L"Burgundians", true, DE, west, false);
+Civ burmese(L"Burmese", true, HD, rajas, false);
+Civ byzantines(L"Byzantines", true, AOK, aok, true);
+Civ celts(L"Celts", true, AOK, aok, true);
+Civ chinese(L"Chinese", true, AOK, aok, true);
+Civ cumans(L"Cumans", true, DE, khans, false);
+Civ dravidians(L"Dravidians", true, DE, india, false);
+Civ ethiopians(L"Ethiopians", true, HD, africans, false);
+Civ franks(L"Franks", true, AOK, aok, true);
+Civ georgians(L"Georgians", true, DE, royals, false);
+Civ goths(L"Goths", true, AOK, aok, true);
+Civ gurjaras(L"Gurjaras", true, DE, india, false);
+Civ hindustanis(L"Hindustanis", true, HD, forgotten, false);
+Civ huns(L"Huns", true, AOK, aoc, true);
+Civ incas(L"Incas", true, HD, forgotten, false);
+Civ italians(L"Italians", true, HD, forgotten, false);
+Civ japanese(L"Japanese", true, AOK, aok, true);
+Civ khmer(L"Khmer", true, HD, rajas, false);
+Civ koreans(L"Koreans", true, AOK, aoc, true);
+Civ lithuanians(L"Lithuanians", true, DE, khans, false);
+Civ magyars(L"Magyars", true, HD, forgotten, false);
+Civ malay(L"Malay", true, HD, rajas, false);
+Civ malians(L"Malians", true, HD, africans, false);
+Civ mayans(L"Mayans", true, AOK, aoc, true);
+Civ mongols(L"Mongols", true, AOK, aok, true);
+Civ persians(L"Persians", true, AOK, aok, true);
+Civ poles(L"Poles", true, DE, dukes, false);
+Civ portuguese(L"Portuguese", true, HD, africans, false);
+Civ romans(L"Romans", true, DE, rome, false);
+Civ saracens(L"Saracens", true, AOK, aoc, true);
+Civ sicilians(L"Sicilians", true, DE, west, false);
+Civ slavs(L"Slavs", true, HD, forgotten, false);
+Civ spanish(L"Spanish", true, AOK, aoc, true);
+Civ tatars(L"Tatars", true, DE, khans, false);
+Civ teutons(L"Teutons", true, AOK, aok, true);
+Civ turks(L"Turks", true, AOK, aok, true);
+Civ vietnamese(L"Vietnamese", true, HD, rajas, false);
+Civ vikings(L"Vikings", true, AOK, aok, true);
+
+Civ civs_array[MAX_CIVS] = { armenians, aztecs, bengalis, berbers, bohemians, britons, bulgarians, burgundians, burmese, byzantines,
+                        celts, chinese, cumans, dravidians, ethiopians, franks, georgians, goths, gurjaras, huns, incas, hindustanis,
+                        italians, japanese, khmer, koreans, lithuanians, magyars, malay, malians, mayans, mongols, persians, poles,
+                        portuguese, romans, saracens, sicilians, slavs, spanish, tatars, teutons, turks, vietnamese, vikings };
+
 
 
 edition edition_state = DE;
 
 bool custom_civ_pool = false;
-std::pair<std::wstring, bool> civ_enabled[MAX_CIVS];
-
-std::pair<std::wstring, enum edition> civ_edition[MAX_CIVS] = {
-        {L"Armenians", DE}, {L"Aztecs", AOK}, {L"Bengalis", DE}, {L"Berbers", HD},
-        {L"Bohemians", DE}, {L"Britons", AOK}, {L"Bulgarians", DE}, {L"Burgundians", DE},
-        {L"Burmese", HD}, {L"Byzantines", AOK}, {L"Celts", AOK}, {L"Chinese", AOK},
-        {L"Cumans", DE}, {L"Dravidians", DE}, {L"Ethiopians", HD}, {L"Franks", AOK},
-        {L"Georgians", DE}, {L"Goths", AOK}, {L"Gurjaras", DE}, {L"Hindustanis", HD},
-        {L"Huns", AOK}, {L"Incas", HD}, {L"Italians", HD}, {L"Japanese", AOK},
-        {L"Khmer", HD}, {L"Koreans", AOK}, {L"Lithuanians", DE}, {L"Magyars", HD},
-        {L"Malay", HD}, {L"Malians", HD}, {L"Mayans", AOK}, {L"Mongols", AOK},
-        {L"Persians", AOK}, {L"Poles", DE}, {L"Portuguese", HD}, {L"Romans", DE},
-        {L"Saracens", AOK}, {L"Sicilians", DE}, {L"Slavs", HD}, {L"Spanish", AOK},
-        {L"Tatars", DE}, {L"Teutons", AOK}, {L"Turks", AOK}, {L"Vietnamese", HD},
-        {L"Vikings", AOK}
-};
-
-
-std::pair<std::wstring, enum dlc> civ_dlc[MAX_CIVS] = {
-        {L"Armenians", royals}, {L"Aztecs", aoc}, {L"Bengalis", india}, {L"Berbers", africans},
-        {L"Bohemians", dukes}, {L"Britons", aok}, {L"Bulgarians", khans}, {L"Burgundians", west},
-        {L"Burmese", rajas}, {L"Byzantines", aok}, {L"Celts", aok}, {L"Chinese", aok},
-        {L"Cumans", khans}, {L"Dravidians", india}, {L"Ethiopians", africans}, {L"Franks", aok},
-        {L"Georgians", royals}, {L"Goths", aok}, {L"Gurjaras", india}, {L"Hindustanis", forgotten},
-        {L"Huns", aoc}, {L"Incas", forgotten}, {L"Italians", forgotten}, {L"Japanese", aok},
-        {L"Khmer", rajas}, {L"Koreans", aoc}, {L"Lithuanians", khans}, {L"Magyars", forgotten},
-        {L"Malay", rajas}, {L"Malians", africans}, {L"Mayans", aoc}, {L"Mongols", aok},
-        {L"Persians", aok}, {L"Poles", dukes}, {L"Portuguese", africans}, {L"Romans", rome},
-        {L"Saracens", aok}, {L"Sicilians", west}, {L"Slavs", forgotten}, {L"Spanish", aoc},
-        {L"Tatars", khans}, {L"Teutons", aok}, {L"Turks", aok}, {L"Vietnamese", rajas},
-        {L"Vikings", aok}
-};
 
 
 
+
+Civ& GetCivByName(const std::wstring &name);
 
 std::wstring drawn_civs[MAX_CIVS] = { L"" };
 
@@ -409,8 +451,8 @@ void InitialiseCivStates();
 void InitialiseCustomPoolCheckboxes(HWND);
 void AddCiv(const std::wstring &);
 void RemoveCiv(const std::wstring &);
-void SetCivStatus(const std::wstring &, bool);
-bool GetCivStatus(const std::wstring &);
+
+
 void ShowAllPoolCheckboxes();
 void HideCustomPoolCheckboxes();
 void ShowHDPoolCheckboxes();
@@ -433,8 +475,6 @@ void SubclassButtons();
 void AddTooltips();
 void CreateTooltips(HWND);
 
-edition GetCivEdition(const std::wstring &);
-dlc GetCivDLC(const std::wstring &);
 
 void SetEditionState(HWND hWnd, edition edition);
 
