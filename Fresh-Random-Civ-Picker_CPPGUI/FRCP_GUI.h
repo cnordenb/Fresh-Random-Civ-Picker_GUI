@@ -239,17 +239,6 @@ std::wstring drawnlog_text, remaininglog_text;
 std::wstring hlabel_default;
 std::wstring current_civ = L"Random";
 
-/*
-std::wstring civ_index[] = { L"Armenians", L"Aztecs", L"Bengalis", L"Berbers", L"Bohemians",       // array of civs for easy indexing
-                            L"Britons", L"Bulgarians", L"Burgundians", L"Burmese", L"Byzantines",
-                            L"Celts", L"Chinese", L"Cumans", L"Dravidians", L"Ethiopians",
-                            L"Franks", L"Georgians", L"Goths", L"Gurjaras", L"Huns", L"Incas",
-                            L"Hindustanis", L"Italians", L"Japanese", L"Khmer", L"Koreans",
-                            L"Lithuanians", L"Magyars", L"Malay", L"Malians", L"Mayans",
-                            L"Mongols", L"Persians", L"Poles", L"Portuguese", L"Romans",
-                            L"Saracens", L"Sicilians", L"Slavs", L"Spanish", L"Tatars",
-                            L"Teutons", L"Turks", L"Vietnamese", L"Vikings" };
-*/
 
 bool startup = true;
 bool persistent_logging = true;
