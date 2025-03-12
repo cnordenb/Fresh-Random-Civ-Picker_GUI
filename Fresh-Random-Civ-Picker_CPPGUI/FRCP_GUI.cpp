@@ -1,7 +1,7 @@
 ﻿/*
 TODO
 
-- rewrite some functions to avoid repetition
+- anchor civ pool tab components relative to window size
 - civ info button and pages
 - additional resources and links page
 - make subclassed button component graphics react to hover again
@@ -505,9 +505,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
 				int i = wmId - 5;
                 if (ui_sounds_enabled) PlayButtonSound();
-                if (IsDlgButtonChecked(hWnd, wmId) == BST_CHECKED) AddCiv(civs_array[i].name);
-                else RemoveCiv(civs_array[i].name);
-                ValidateDlcToggle(hWnd, civs_array[i].dlc);
+                if (IsDlgButtonChecked(hWnd, wmId) == BST_CHECKED) AddCiv(civ[i].name);
+                else RemoveCiv(civ[i].name);
+                ValidateDlcToggle(hWnd, civ[i].dlc);
             }     
 
             // auto-reset
@@ -802,7 +802,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
                     case CBN_SELCHANGE:
                     {
 						
-                        if (ui_sounds_enabled && !GetCivByName(current_civ).legacy) PlaySound(L"sounds\\view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                        if (ui_sounds_enabled && !GetCiv(current_civ).legacy) PlaySound(L"sounds\\view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
                         else if (jingles_enabled) PlayJingle(current_civ);
                         break;
                     }
@@ -923,9 +923,9 @@ void ResetProgram(bool auto_reset)
         custom_max_civs = 0;
         for (int i = 0; i < MAX_CIVS; i++)
         {
-            if (civs_array[i].enabled)
+            if (civ[i].enabled)
             {
-                civs.push_back(civs_array[i].name);
+                civs.push_back(civ[i].name);
                 custom_max_civs++;
             }
         }
@@ -1031,10 +1031,10 @@ void LoadImages()
     std::wstring icon_path;
     for (int i = 0; i < MAX_CIVS; i++)
     {
-        bmp_parsed_civname = civs_array[i].name;
+        bmp_parsed_civname = civ[i].name;
         bmp_parsed_civname[0] = std::tolower(bmp_parsed_civname[0]);
         icon_path = L"images\\civ_icons\\" + bmp_parsed_civname + L".bmp";
-        civs_array[i].icon = (HBITMAP)LoadImageW(NULL, icon_path.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+        civ[i].icon = (HBITMAP)LoadImageW(NULL, icon_path.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     }
 
     icon_techtree = (HBITMAP)LoadImageW(NULL, L"images\\civ_icons\\techtree.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -1055,7 +1055,7 @@ void LoadImages()
 HBITMAP FetchCivIcon(const std::wstring &civ_name)
 {
     if (civ_name == L"Random") return icon_random;
-    for (int i = 0; i < MAX_CIVS; i++) if (civ_name == civs_array[i].name) return civs_array[i].icon;
+    for (int i = 0; i < MAX_CIVS; i++) if (civ_name == civ[i].name) return civ[i].icon;
 	return icon_random;
 }
 
@@ -1065,7 +1065,7 @@ void PlayJingle(const std::wstring &civ_name)
     processed_civ_name[0] = std::tolower(processed_civ_name[0]);
     std::wstring jingle_path;
 
-    if (legacy_jingle_enabled && GetCivByName(civ_name).legacy) jingle_path = L"sounds\\civ_jingles\\legacy\\" + processed_civ_name + L".wav";
+    if (legacy_jingle_enabled && GetCiv(civ_name).legacy) jingle_path = L"sounds\\civ_jingles\\legacy\\" + processed_civ_name + L".wav";
 	else jingle_path = L"sounds\\civ_jingles\\" + processed_civ_name + L".wav";    
     
     PlaySound(jingle_path.c_str(), NULL, SND_FILENAME | SND_ASYNC);    
@@ -1073,10 +1073,10 @@ void PlayJingle(const std::wstring &civ_name)
 
 void AddCiv(const std::wstring &civ)
 {
-    if (!GetCivByName(civ).enabled)
+    if (!GetCiv(civ).enabled)
     {
         civs.push_back(civ);
-		GetCivByName(civ).SetEnabled(true);
+		GetCiv(civ).SetEnabled(true);
 	    custom_max_civs++;
         label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
         SetWindowText(label_corner, label_text.c_str());
@@ -1088,12 +1088,12 @@ void AddCiv(const std::wstring &civ)
 
 void RemoveCiv(const std::wstring &civ)
 {
-    if (GetCivByName(civ).enabled)
+    if (GetCiv(civ).enabled)
     {
         if (std::find(civs.begin(), civs.end(), civ) == civs.end()) iterator--;
         custom_civ_pool = true;
 	    civs.erase(std::remove(civs.begin(), civs.end(), civ), civs.end());
-		GetCivByName(civ).SetEnabled(false);
+		GetCiv(civ).SetEnabled(false);
 	    custom_max_civs--;
         label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
         SetWindowText(label_corner, label_text.c_str());
@@ -1102,7 +1102,7 @@ void RemoveCiv(const std::wstring &civ)
     }    
 }
 
-void InitialiseCivStates() { for (int i = 0; i < MAX_CIVS; i++) civs_array[i].SetEnabled(true); }
+void InitialiseCivStates() { for (int i = 0; i < MAX_CIVS; i++) civ[i].SetEnabled(true); }
 
 HWND CreateCheckbox(HWND hWnd, HINSTANCE hInstance, int x, int y, int width, int height, int id, LPCWSTR text)
 {
@@ -1125,12 +1125,12 @@ HWND CreateCheckbox(HWND hWnd, HINSTANCE hInstance, int x, int y, int width, int
 
 void ShowAllPoolCheckboxes()
 {
-    for (int i = 0; i < MAX_CIVS; i++) ShowWindow(civs_array[i].checkbox, SW_SHOW);
+    for (int i = 0; i < MAX_CIVS; i++) ShowWindow(civ[i].checkbox, SW_SHOW);
 }
 
 void HideCustomPoolCheckboxes()
 { 
-	for (int i = 0; i < MAX_CIVS; i++) ShowWindow(civs_array[i].checkbox, SW_HIDE);
+	for (int i = 0; i < MAX_CIVS; i++) ShowWindow(civ[i].checkbox, SW_HIDE);
 	ShowDEDLCCheckboxes(false);
 	ShowHDDLCCheckboxes(false);
 	ShowAOCCheckbox(false);
@@ -1147,18 +1147,18 @@ void EnableAll(HWND hWnd, bool sound_acceptable)
         
         for (int i = 0; i < MAX_CIVS; i++)
         {        
-            SendMessage(civs_array[i].checkbox, BM_SETCHECK, BST_CHECKED, 0);
-            AddCiv(civs_array[i].name);
+            SendMessage(civ[i].checkbox, BM_SETCHECK, BST_CHECKED, 0);
+            AddCiv(civ[i].name);
         }
 	}
 	else if (edition_state == HD)
     {
 		for (int i = 0; i < MAX_CIVS; i++)
         {            
-			if (civs_array[i].edition != DE)
+			if (civ[i].edition != DE)
             {
-				SendMessage(civs_array[i].checkbox, BM_SETCHECK, BST_CHECKED, 0);
-				AddCiv(civs_array[i].name);
+				SendMessage(civ[i].checkbox, BM_SETCHECK, BST_CHECKED, 0);
+				AddCiv(civ[i].name);
 			}
 		}
 	}
@@ -1167,10 +1167,10 @@ void EnableAll(HWND hWnd, bool sound_acceptable)
 		for (int i = 0; i < MAX_CIVS; i++)
         {
             
-			if (civs_array[i].edition == AOK)
+			if (civ[i].edition == AOK)
             {
-				SendMessage(civs_array[i].checkbox, BM_SETCHECK, BST_CHECKED, 0);
-				AddCiv(civs_array[i].name);
+				SendMessage(civ[i].checkbox, BM_SETCHECK, BST_CHECKED, 0);
+				AddCiv(civ[i].name);
 			}
 		}
 	}    
@@ -1184,8 +1184,8 @@ void DisableAll(HWND hWnd, bool sound_acceptable)
 	custom_civ_pool = true;
     for (int i = 0; i < MAX_CIVS; i++)
     {
-        SendMessage(civs_array[i].checkbox, BM_SETCHECK, BST_UNCHECKED, 0);
-		RemoveCiv(civs_array[i].name);
+        SendMessage(civ[i].checkbox, BM_SETCHECK, BST_UNCHECKED, 0);
+		RemoveCiv(civ[i].name);
     }
     if (autoreset_enabled) ResetProgram(true);
     ValidateAllDlcToggles(hWnd);
@@ -1299,12 +1299,12 @@ void ShowHDPoolCheckboxes()
 {
     for (int i = 0; i < MAX_CIVS; i++)
     {        
-        if (civs_array[i].edition != DE) ShowWindow(civs_array[i].checkbox, SW_SHOW);
+        if (civ[i].edition != DE) ShowWindow(civ[i].checkbox, SW_SHOW);
         else
         {
-			ShowWindow(civs_array[i].checkbox, SW_HIDE);
-            SendMessage(civs_array[i].checkbox, BM_SETCHECK, BST_UNCHECKED, 0);
-            RemoveCiv(civs_array[i].name);
+			ShowWindow(civ[i].checkbox, SW_HIDE);
+            SendMessage(civ[i].checkbox, BM_SETCHECK, BST_UNCHECKED, 0);
+            RemoveCiv(civ[i].name);
         }        
     }
 }
@@ -1313,12 +1313,12 @@ void ShowAOCPoolCheckboxes()
 {
     for (int i = 0; i < MAX_CIVS; i++)
     {
-        if (civs_array[i].edition == AOK) ShowWindow(civs_array[i].checkbox, SW_SHOW);
+        if (civ[i].edition == AOK) ShowWindow(civ[i].checkbox, SW_SHOW);
 		else
         {
-            ShowWindow(civs_array[i].checkbox, SW_HIDE);
-            SendMessage(civs_array[i].checkbox, BM_SETCHECK, BST_UNCHECKED, 0);
-            RemoveCiv(civs_array[i].name);
+            ShowWindow(civ[i].checkbox, SW_HIDE);
+            SendMessage(civ[i].checkbox, BM_SETCHECK, BST_UNCHECKED, 0);
+            RemoveCiv(civ[i].name);
         }
     }
 }
@@ -1393,10 +1393,10 @@ void ToggleDlc(dlc civ_dlc, HWND hWnd)
     {
         for (int i = 0; i < MAX_CIVS; i++)
         {
-            if (civs_array[i].dlc == civ_dlc)
+            if (civ[i].dlc == civ_dlc)
             {
                 CheckDlgButton(hWnd, i + 5, BST_CHECKED);
-                AddCiv(civs_array[i].name);
+                AddCiv(civ[i].name);
             }
         }
     }
@@ -1404,10 +1404,10 @@ void ToggleDlc(dlc civ_dlc, HWND hWnd)
     {
         for (int i = 0; i < MAX_CIVS; i++)
         {
-            if (civs_array[i].dlc == civ_dlc)
+            if (civ[i].dlc == civ_dlc)
             {
                 CheckDlgButton(hWnd, i + 5, BST_UNCHECKED);
-                RemoveCiv(civs_array[i].name);
+                RemoveCiv(civ[i].name);
             }
         }
     }
@@ -1418,10 +1418,10 @@ void EnableDlc(dlc civ_dlc, HWND hWnd)
     for (int i = 0; i < MAX_CIVS; i++)
     {
         
-        if (civs_array[i].dlc == civ_dlc)
+        if (civ[i].dlc == civ_dlc)
         {
             CheckDlgButton(hWnd, i + 5, BST_CHECKED);
-            AddCiv(civs_array[i].name);
+            AddCiv(civ[i].name);
         }
     }
 }
@@ -1430,10 +1430,10 @@ void DisableDlc(dlc civ_dlc, HWND hWnd)
 {
     for (int i = 0; i < MAX_CIVS; i++)
     {
-        if (civs_array[i].dlc == civ_dlc)
+        if (civ[i].dlc == civ_dlc)
         {
             CheckDlgButton(hWnd, i + 5, BST_UNCHECKED);
-            RemoveCiv(civs_array[i].name);
+            RemoveCiv(civ[i].name);
         }
     }
 }
@@ -1442,7 +1442,7 @@ bool IsDlcEmpty(dlc civ_dlc)
 {
     
 	int count = 0;
-	for (int i = 0; i < MAX_CIVS; i++) if (civs_array[i].enabled && civs_array[i].dlc == civ_dlc) count++;
+	for (int i = 0; i < MAX_CIVS; i++) if (civ[i].enabled && civ[i].dlc == civ_dlc) count++;
 	if (count == 0) return true;
 	else return false;
 }
@@ -1467,7 +1467,7 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted)
         drawnlog_text = log_entry + drawnlog_text;
         if (iterator == custom_max_civs) drawnlog_text += L"\r\n";
         SetWindowText(drawn_log, drawnlog_text.c_str());
-        if (!start_state || start_state && GetCivByName(current_civ).enabled) drawn_civs[iterator-1] = current_civ;
+        if (!start_state || start_state && GetCiv(current_civ).enabled) drawn_civs[iterator-1] = current_civ;
     }
     
     else if (!reset_state && blankline_wanted)
@@ -1853,7 +1853,7 @@ void SaveLog(bool user_save)
 
 // Save the civilization states
     outFile << L"CivStates:" << std::endl;
-	for (int i = 0; i < MAX_CIVS; i++) outFile << civs_array[i].name << L" " << (civs_array[i].enabled ? L"1" : L"0") << std::endl;
+	for (int i = 0; i < MAX_CIVS; i++) outFile << civ[i].name << L" " << (civ[i].enabled ? L"1" : L"0") << std::endl;
     //for (const auto &civ : civs_array) outFile << civ.first << L" " << (civ.second ? L"1" : L"0") << std::endl;    
 
     // Save the drawn civilisations
@@ -1981,7 +1981,7 @@ void LoadLog(HWND hWnd, bool user_load)
         {
             civs.erase(std::remove(civs.begin(), civs.end(), line), civs.end());
             current_civ = line;
-            if (GetCivByName(current_civ).enabled) iterator++;
+            if (GetCiv(current_civ).enabled) iterator++;
             UpdateDrawnLog(true, true, false);       
 		}
 		else if (readingEditionState)
@@ -2052,13 +2052,13 @@ void GenerateFilePaths()
     wcscpy_s(LOG_FILE_PATH, exePathL);
 }
 
-HWND GetCivCheckbox(const std::wstring &civ_name) { for (int i = 0; i < MAX_CIVS; i++) if (civs_array[i].name == civ_name) return civs_array[i].checkbox; return NULL; }
+HWND GetCivCheckbox(const std::wstring &civ_name) { for (int i = 0; i < MAX_CIVS; i++) if (civ[i].name == civ_name) return civ[i].checkbox; return NULL; }
 
 void InitialiseCivs()
 {
     civs.reserve(MAX_CIVS);
     if (!civs.empty()) civs.clear();
-    for (int i = 0; i < MAX_CIVS; i++) civs.push_back(civs_array[i].name);
+    for (int i = 0; i < MAX_CIVS; i++) civs.push_back(civ[i].name);
 }
 
 void MuteSounds() { PlaySound(L"sounds\\mute.wav", NULL, SND_FILENAME | SND_ASYNC); }
@@ -2169,10 +2169,10 @@ void CreateCheckboxes(HWND hWnd)
     checkbox_showremainlog = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 230, 180, 20, IDC_CHECKBOX_REMAINLOG, L"Show");
     CheckDlgButton(hWnd, IDC_CHECKBOX_REMAINLOG, remainlog_enabled ? BST_CHECKED : BST_UNCHECKED);
 
-    int row[] = { 30, 50, 70, 90, 110, 130, 150, 170, 190 };
+    int row[] = { 30, 50, 70, 90, 110, 130, 150, 170, 190, 210 };
     int column[] = { 10, 112, 214, 316, 418 };
 
-    for (int i = 0; i < MAX_CIVS; i++) civs_array[i].checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), column[i % 5], row[i / 5], 100, 20, i + 5, civs_array[i].name.c_str());
+    for (int i = 0; i < MAX_CIVS; i++) civ[i].checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), column[i % 5], row[i / 5], 100, 20, i + 5, civ[i].name.c_str());
 
     checkbox_autoreset = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 230, 180, 20, IDC_CHECKBOX_AUTORESET, L"Auto-reset upon change");
     checkbox_autotoggle = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 0, 170, 20, IDC_CHECKBOX_AUTOTOGGLE, L"Auto-toggle older civs");
@@ -2427,4 +2427,4 @@ void RedrawCiv()
 
 }
 
-Civ &GetCivByName(const std::wstring &name) { for (int i = 0; i < MAX_CIVS; i++) if (civs_array[i].name == name) return civs_array[i]; return random; }
+Civ &GetCiv(const std::wstring &name) { for (int i = 0; i < MAX_CIVS; i++) if (civ[i].name == name) return civ[i]; return random; }
