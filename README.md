@@ -1,3 +1,6 @@
+
+![social-preview](https://github.com/user-attachments/assets/5ae32863-a995-4922-9a32-4850bed951d9)
+
 # Fresh Random Civ Picker
 
 **This is the Fresh Random Civ Picker.**  
