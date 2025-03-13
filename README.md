@@ -41,14 +41,34 @@ This is an application which generates a randomly drawn civilisation name out of
 ![civ pool tab](https://github.com/user-attachments/assets/0b8b35f6-7f87-40e7-8bb4-56e7fd44fabf)  
 *Tailor the exact civ pool you want using the civ pool tab.*
 
-- **Save your custom civ pool preset!** *Save your civ pools to a file which can be loadable at any time.*
-- **Pick up where you left off!** *Even without saving manually, when the program starts it will remember what civs you had enabled and drawn last time you ran the program. This can be turned off in options if the user prefers the program to reset upon startup.*
-- **Quickdraw!** *The Fresh Random Civ Picker can draw a fresh random civ for you automatically as soon as you start the program. This can be turned off or on in options.*
-- **Civ icons!** *See the civ icon of the civ you draw.*
-- **Civ jingles!** *Hear the civ jingle of the civ you draw. Legacy jingles toggleable.*
-- **Join an AoE2DE lobby straight from the app!** *Works the same as Windows run prompt but only accepts AoE2DE lobby code inputs.*
+- **Save your custom civ pool preset!**
+![image](https://github.com/user-attachments/assets/1772bbd2-9e89-4112-b741-03d680e25884)  
+*Save your civ pools to a file which can be loadable at any time.*
 
-- **Undraw a drawn civ!** *Go back and undraw the civ you drew with Ctrl+Z. If you change your mind again right away, redraw the undrawn civ with Ctrl+X.*
+- **Pick up where you left off!**  
+![image](https://github.com/user-attachments/assets/cca21d7a-5f0e-44bd-b719-f1e414a85583)  
+*Even without saving manually, when the program starts it will remember what civs you had enabled and drawn last time you ran the program. This can be turned off in options if the user prefers the program to reset upon startup.*
+
+- **Quickdraw!**  
+![image](https://github.com/user-attachments/assets/992e73f9-4476-47c9-a27e-95e84d6d98a3)  
+*The Fresh Random Civ Picker can draw a fresh random civ for you automatically as soon as you start the program. This can be turned off or on in options.*
+
+- **Civ icons!**  
+![image](https://github.com/user-attachments/assets/8c59c287-2e9a-41d5-afc3-7d0ec4466eec)  
+*See the civ icon of the civ you draw.*
+
+- **Civ jingles!**  
+![image](https://github.com/user-attachments/assets/f1cd5977-7811-4ecd-90e6-337dea88e67f)  
+*Hear the civ jingle of the civ you draw. Legacy jingles toggleable.*
+
+- **Join an AoE2DE lobby straight from the app!**  
+![image](https://github.com/user-attachments/assets/a2fbe3af-29b2-4760-b625-01064f2c4afd)  
+*Works the same as Windows run prompt but only accepts AoE2DE lobby code inputs.*
+
+- **Undraw a drawn civ!**  
+![image](https://github.com/user-attachments/assets/06866ebd-1e9d-4096-a272-6c2e843d2a0f)  
+*Go back and undraw the civ you drew with Ctrl+Z. If you change your mind again right away, redraw the undrawn civ with Ctrl+X.*
+
 - **Use hotkeys!** *Most of the program is entirely controllable with key bindings.*
 
 ## GUI Description  
