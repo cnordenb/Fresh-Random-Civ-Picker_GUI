@@ -44,12 +44,24 @@ Once all civs have been drawn, the next draw will reset the program and all civs
 
 
 ## How to install
-1. Go to releases
-2. Click Fresh_Random_Civ_Picker.zip to download it
-3. Extract at any directory which is not privileged (does not require admin rights)
-4. Run FRCP_X.X.X.exe
-5. Click More info
-6. Click Run anyway
+1. Go to Releases, located on this page in the right-hand sidebar below About and above Packages
+![step 1](https://github.com/user-attachments/assets/c8340f36-7072-42e7-a3a3-15648a694656)
+
+2. Under Assets, click Fresh_Random_Civ_Picker.zip to download it
+![step 2](https://github.com/user-attachments/assets/e144bae4-c132-427b-b3d6-76291d77c3c6)
+
+3. Extract the downloaded zip file at any directory which is not privileged (does not require admin rights)
+![step 3](https://github.com/user-attachments/assets/9e244af8-6ed0-437c-aaf0-3c801b30c05c)
+
+4. Navigate to inside the folder Fresh Random Civ Picker and run FRCP_X.X.X.exe
+![step 4](https://github.com/user-attachments/assets/42a86057-364c-429c-9fe3-a32fef87ff94)
+
+5. Click More info  
+![step 5](https://github.com/user-attachments/assets/99dbf317-7ff7-4a3f-bfa8-b53eaecf522f)
+
+6. Click Run anyway  
+![step 6](https://github.com/user-attachments/assets/005fbcbd-5c77-4ccf-af1c-76c5a4488cbd)
+
 
 ### Why does Microsoft Defender want to protect my PC against this program?
 When you run the executable, Microsoft Defender Smart Screen will give you a popup telling you your PC has been protected. This doesn’t mean that it has scanned the executable, in fact you can go ahead and scan it with Microsoft Defender by right-clicking the executable and clicking "Scan with Microsoft Defender...". The popup only means that it has found that the application application is not digitally signed with a Microsoft-approved certificate. The smart screen popup is warning you that I have not acquired a certificate under the Microsoft Authenticode programme which requires some hundreds of euros in digital signature services per year which I cannot afford at this point in time.
@@ -57,7 +69,7 @@ When you run the executable, Microsoft Defender Smart Screen will give you a pop
 ## System requirements
 OS: Windows x64
 
-Drive space: at least 56.6 megabytes available
+Drive space: at least 71.3 megabytes available
 
 ## Project Milestones Achieved
 - v1.0: GUI with simple log
