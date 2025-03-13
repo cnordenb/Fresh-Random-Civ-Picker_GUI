@@ -3,7 +3,7 @@
 **This is the Fresh Random Civ Picker.**  
 ![demo gif](https://github.com/user-attachments/assets/04f98b24-e096-4030-825b-c0cd147f80bf)
 
-### ReadMe Table of Contents (click to jump)
+Table of Contents (click to jump)
 [Purpose](#Purpose)  
 [Application Description](#What-is-this-application)  
 [Features](#Features)  
