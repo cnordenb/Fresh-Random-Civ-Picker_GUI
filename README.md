@@ -37,6 +37,11 @@ This is an application which generates a randomly drawn civilisation name out of
 ![image](https://github.com/user-attachments/assets/ee443bbf-818b-42a4-97dc-9f5463934d1c)  
 *At any time, go to the tech tree of the drawn civ. aoe2techtree.net courtesy of Siege Engineers.*
 
+- **Track drawn and remaining civs!**
+![image](https://github.com/user-attachments/assets/8ad3f017-d204-4b14-95cb-c16bcdf8e479)  
+*See which civs have been drawn and which are remaining on the log tab.*
+
+
 - **Customise your own civ pool!**
 ![civ pool tab](https://github.com/user-attachments/assets/0b8b35f6-7f87-40e7-8bb4-56e7fd44fabf)  
 *Tailor the exact civ pool you want using the civ pool tab.*
