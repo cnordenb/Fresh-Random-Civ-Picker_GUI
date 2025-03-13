@@ -86,7 +86,13 @@ On the Draw tab the user can draw a fresh random civ and see its icon and hear i
 ![draw demo gif](https://github.com/user-attachments/assets/66808895-0ee1-4d99-8677-20baf540a3ff)
 
 
-On the "Log" tab, the user can view the log of drawn civs as well as of remaining civs in the pool. On the "Civ Pool", the user can customise which civs are part of the civ pool.
+On the "Log" tab, the user can view the log of drawn civs as well as of remaining civs in the pool.  
+![log demo gif](https://github.com/user-attachments/assets/0994a260-4cd9-47ac-8e6a-9562c4059237)
+
+
+On the "Civ Pool" tab, the user can customise which civs are part of the civ pool.  
+![civpool demo gif](https://github.com/user-attachments/assets/66256e41-59f8-4cc6-9961-2dca608e435e)
+
 
 
 ## How do I use this application?
