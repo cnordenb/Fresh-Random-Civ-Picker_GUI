@@ -44,22 +44,28 @@ Once all civs have been drawn, the next draw will reset the program and all civs
 
 
 ## How to install
-1. Go to Releases, located on this page in the right-hand sidebar below About and above Packages
+**Step 1. Go to Releases, located on this page in the right-hand sidebar below About and above Packages**
+
 ![step 1](https://github.com/user-attachments/assets/c8340f36-7072-42e7-a3a3-15648a694656)
 
-2. Under Assets, click Fresh_Random_Civ_Picker.zip to download it
+**Step 2. Under Assets, click Fresh_Random_Civ_Picker.zip to download it**
+
 ![step 2](https://github.com/user-attachments/assets/e144bae4-c132-427b-b3d6-76291d77c3c6)
 
-3. Extract the downloaded zip file at any directory which is not privileged (does not require admin rights)
+**Step 3. Extract the downloaded zip file at any directory which is not privileged (does not require admin rights)**
+
 ![step 3](https://github.com/user-attachments/assets/9e244af8-6ed0-437c-aaf0-3c801b30c05c)
 
-4. Navigate to inside the folder Fresh Random Civ Picker and run FRCP_X.X.X.exe
+**Step 4. Navigate to inside the folder Fresh Random Civ Picker and run FRCP_X.X.X.exe**
+
 ![step 4](https://github.com/user-attachments/assets/42a86057-364c-429c-9fe3-a32fef87ff94)
 
-5. Click More info  
+**Step 5. Click More info**  
+
 ![step 5](https://github.com/user-attachments/assets/99dbf317-7ff7-4a3f-bfa8-b53eaecf522f)
 
-6. Click Run anyway  
+**Step 6. Click Run anyway**  
+
 ![step 6](https://github.com/user-attachments/assets/005fbcbd-5c77-4ccf-af1c-76c5a4488cbd)
 
 
