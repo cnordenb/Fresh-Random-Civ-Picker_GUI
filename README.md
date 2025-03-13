@@ -4,18 +4,21 @@
 ![demo gif](https://github.com/user-attachments/assets/04f98b24-e096-4030-825b-c0cd147f80bf)
 
 [Purpose](#Purpose)  
+[Application Description](#What-is-this-application)  
 [Features](#Features)  
 [GUI Description](#GUI-Description)  
 [Usage](#How-do-I-use-this-application)   
 [Installation](#How-to-install)  
 [System requirements](#System-requirements)  
 [Project Milestones](#Project-Milestones-Achieved)  
-[Application Description](#What-is-this-application)  
 [Origin Story](#Why-was-it-created)  
 [Microsoft Assets](#Regarding-usage-of-Microsoft-assets-in-this-project)  
 
 ## Purpose
-Purpose of Fresh Random Civ Picker: the user can randomly iterate through the entire civ pool or a user-defined civ pool without drawing the same civ twice.
+The user can randomly iterate through the entire civ pool or a user-defined civ pool without drawing the same civ twice.
+
+## What is this application?
+This is an application which generates a randomly drawn civilisation name out of the civilisations available to play in a computer game called "Age of Empires II: Definitive Edition" which is a real-time strategy game. What my application offers which the random civ name generator in the game itself doesn't is the "freshness" which is that a civilisation is not repeated until all the civilisations have been iterated through.  
 
 ## Features
 - **Draw a fresh random civ!**  
@@ -97,8 +100,7 @@ Drive space: at least 71.3 megabytes available
 - v1.2: Persistent feature states and automatically logged current civ pool over program lifetimes and sessions
 - v1.3: Ctrl+Z/Ctrl+X undraw/redraw feature, ability to save and load presets, and to join AoE2DE lobbies using lobby code
 
-## What is this application?
-This is an application which generates a randomly drawn civilisation name out of the civilisations available to play in a computer game called "Age of Empires II: Definitive Edition" which is a real-time strategy game. What my application offers which the random civ name generator in the game itself doesn't is the "freshness" which is that a civilisation is not repeated until all the civilisations have been iterated through.
+
 
 ## Why was it created?
 I got the idea to create this application when I was playing the game one day and got to play the same civilisation twice throughout five matches, despite the fact that I picked random every time and the fact that the game has 45 civilisations. This made me feel frustrated and that I was wasting my time. As a full-time student and with other priorities in life I do not have the time to play the game every day. I might only have the opportunity to play five matches in a month. I want to play random civilisations and I also want to minimise the repetition of some factors like the civilisation played. The frustrating experience of having to replay the same civilisation during my precious few five matches in a game that has 45(!) civilisations gave me the motivation to create a solution for this problem. Thus, the idea, work, and birth of this program came to.
