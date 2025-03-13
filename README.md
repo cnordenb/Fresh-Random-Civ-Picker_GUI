@@ -19,8 +19,14 @@
 Purpose of Fresh Random Civ Picker: the user can randomly iterate through the entire civ pool or a user-defined civ pool without drawing the same civ twice.
 
 ## Features
-- **Draw a fresh random civ!** *Never draw the same civ twice within the civ pool.*
-- **Reset the drawn civ pool at any time!** *Whenever you want, reset the program and render all enabled civs drawable.*
+- **Draw a fresh random civ!**  
+![image](https://github.com/user-attachments/assets/e021f793-b1ff-44b3-91e6-2adb3eed5908)  
+*Never draw the same civ twice within the civ pool.*
+
+- **Reset the drawn civ pool at any time!**
+![image](https://github.com/user-attachments/assets/8dfb402c-df21-4b7e-9daa-9ae6b3ebfcde)  
+*Whenever you want, reset the program and render all enabled civs drawable.*
+
 - **Customise your own civ pool!**
 ![civ pool tab](https://github.com/user-attachments/assets/0b8b35f6-7f87-40e7-8bb4-56e7fd44fabf)  
 *Tailor the exact civ pool you want using the civ pool tab.*
