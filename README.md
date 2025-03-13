@@ -35,7 +35,9 @@ Purpose of Fresh Random Civ Picker: the user can randomly iterate through the en
 - **Undraw a drawn civ!** *Go back and undraw the civ you drew with Ctrl+Z. If you change your mind again right away, redraw the undrawn civ with Ctrl+X.*
 - **Use hotkeys!** *Most of the program is entirely controllable with key bindings.*
 
-## GUI Description
+## GUI Description  
+![tabs gif](https://github.com/user-attachments/assets/97fc3d9d-7ffe-4455-9a60-3cb42a53002f)
+
 The program has a graphical user interface which is a window. This window contains three tabs: "Draw Civ", "Log", and "Civ Pool". On the Draw tab the user can draw a fresh random civ and see its icon and hear its jingle. There is also a tech tree button which links to the tech tree of the currently drawn civ. On the "Log" tab, the user can view the log of drawn civs as well as of remaining civs in the pool. On the "Civ Pool", the user can customise which civs are part of the civ pool.
 
 
