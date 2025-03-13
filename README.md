@@ -79,9 +79,14 @@ This is an application which generates a randomly drawn civilisation name out of
 *Most of the program is entirely controllable with key bindings.*
 
 ## GUI Description  
+The program has a graphical user interface which is a window. This window contains three tabs: "Draw Civ", "Log", and "Civ Pool".  
 ![tabs gif](https://github.com/user-attachments/assets/97fc3d9d-7ffe-4455-9a60-3cb42a53002f)
 
-The program has a graphical user interface which is a window. This window contains three tabs: "Draw Civ", "Log", and "Civ Pool". On the Draw tab the user can draw a fresh random civ and see its icon and hear its jingle. There is also a tech tree button which links to the tech tree of the currently drawn civ. On the "Log" tab, the user can view the log of drawn civs as well as of remaining civs in the pool. On the "Civ Pool", the user can customise which civs are part of the civ pool.
+On the Draw tab the user can draw a fresh random civ and see its icon and hear its jingle. There is also a tech tree button which links to the tech tree of the currently drawn civ. 
+![draw demo gif](https://github.com/user-attachments/assets/66808895-0ee1-4d99-8677-20baf540a3ff)
+
+
+On the "Log" tab, the user can view the log of drawn civs as well as of remaining civs in the pool. On the "Civ Pool", the user can customise which civs are part of the civ pool.
 
 
 ## How do I use this application?
