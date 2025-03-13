@@ -1938,24 +1938,34 @@ void LoadLog(HWND hWnd, bool user_load)
 	bool readingEditionState = false;
     if (!user_load) InitialiseCivs();
 
-
+    bool stateread_commenced = false;           // mitigations to ensure program is not broken by malicious log file
+	bool drawnread_commenced = false;
+	bool editionread_commenced = false;
+    int i = 0;
+    int j = 0;
+    int stop = MAX_CIVS*2+4;
     while (std::getline(inFile, line))
     {
-        if (line == L"CivStates:")
+		if (i >= stop) break;                               // will not read past the maximum length of a log file
+        if (line == L"CivStates:" && !stateread_commenced)      // will not enter a read state more than once
         {
+            j = 0;
             readingCivStates = true;
             readingDrawnCivs = false;
 			readingEditionState = false;
+			stateread_commenced = true;
             continue;
         }
-        else if (line == L"DrawnCivs:")
+        else if (line == L"DrawnCivs:" && !drawnread_commenced)
         {
+            j = 0;
             readingCivStates = false;
             readingDrawnCivs = true;
 			readingEditionState = false;
+			drawnread_commenced = true;
             continue;
         }
-        else if (line == L"EditionState:")
+        else if (line == L"EditionState:" && !editionread_commenced)
         {
             readingCivStates = false;
             readingDrawnCivs = false;
@@ -1964,6 +1974,7 @@ void LoadLog(HWND hWnd, bool user_load)
         }
         if (readingCivStates)
         {
+			if (j >= MAX_CIVS) break;
             std::wistringstream iss(line);
             std::wstring civName;
             int state;
@@ -1976,20 +1987,24 @@ void LoadLog(HWND hWnd, bool user_load)
                 }
                 else SendMessage(GetCivCheckbox(civName), BM_SETCHECK, BST_CHECKED, 0);
             }
+            j++;
         }
         else if (readingDrawnCivs)
         {
+            if (j >= MAX_CIVS) break;
             civs.erase(std::remove(civs.begin(), civs.end(), line), civs.end());
             current_civ = line;
             if (GetCiv(current_civ).enabled) iterator++;
             UpdateDrawnLog(true, true, false);       
+            j++;
 		}
 		else if (readingEditionState)
 		{
 			if (line == L"DE") SetEditionState(hWnd, DE);			
 			else if (line == L"HD") SetEditionState(hWnd, HD);			
 			else if (line == L"AOK") SetEditionState(hWnd, AOK);			
-		}        
+		}
+		i++;
     }
 
     // Update the labels
@@ -2419,7 +2434,8 @@ void RedrawCiv()
 	SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
     if (jingles_enabled) PlayJingle(current_civ);
 	SetWindowText(label_centre, current_civ.c_str());
-	//SetWindowText(label_drawncount, StringCleaner(L"Drawn: " + std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs)));
+    SetWindowText(label_corner, StringCleaner(std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs)));
+    if (!iteration_label_enabled || current_tab != 0) ShowWindow(label_corner, SW_HIDE);
     UpdateDrawnLog(false, true, false);
     UpdateRemainingLog(false, false);
 
