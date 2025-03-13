@@ -5,9 +5,9 @@
 **This is the C++ GUI version of the Fresh Random Civ Picker.**
 
 [Purpose](#Purpose)  
+[Features](#Features) 
 [GUI Description](#GUI-Description)  
-[Usage](#How-do-I-use-this-application)  
-[Features](#Features)  
+[Usage](#How-do-I-use-this-application)   
 [Installation](#How-to-install)  
 [System requirements](#System-requirements)  
 [Project Milestones](#Project-Milestones-Achieved)  
