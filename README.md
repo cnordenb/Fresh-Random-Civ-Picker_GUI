@@ -18,17 +18,6 @@
 ## Purpose
 Purpose of Fresh Random Civ Picker: the user can randomly iterate through the entire civ pool or a user-defined civ pool without drawing the same civ twice.
 
-## GUI Description
-The program has a graphical user interface which is a window. This window contains three tabs: "Draw", "Log", and "Civ Pool". On the Draw tab the user can draw a fresh random civ and see its icon and hear its jingle. There is also a tech tree button which links to the tech tree of the currently drawn civ. On the "Log" tab, the user can view the log of drawn civs as well as of remaining civs in the pool. On the "Civ Pool", the user can customise which civs are part of the civ pool.
-
-
-## How do I use this application?
-How to use: the user can click the "Draw" button (or press spacebar) to have the centre label display a fresh random civ. There is an indicator at the bottom right which tells how many civs have been drawn so far. If the user wishes to see the tech tree of the drawn civ, they can click the Tech Tree button near the bottom right corner of the window.
-
-
-Once all civs have been drawn, the next draw will reset the program and all civs are once again available to draw. The user can at any time reset the program manually by clicking the "Reset" button (or pressing Return). The user can at any time navigate to the "Log" tab (by either clicking it or pressing Tab) to view the history of drawn civs. The user can at any time navigate to the "Civ Pool" tab to customise which civs are enabled in the pool. Disabled civs are never drawn.
-
-
 ## Features
 - **Draw a fresh random civ!** *Never draw the same civ twice within the civ pool.*
 - **Reset the drawn civ pool at any time!** *Whenever you want, reset the program and render all enabled civs drawable.*
@@ -42,6 +31,17 @@ Once all civs have been drawn, the next draw will reset the program and all civs
 - **Go to the tech tree!** *At any time, go to the tech tree of the drawn civ. aoe2techtree.net courtesy of Siege Engineers.*
 - **Undraw a drawn civ!** *Go back and undraw the civ you drew with Ctrl+Z. If you change your mind again right away, redraw the undrawn civ with Ctrl+X.*
 - **Use hotkeys!** *Most of the program is entirely controllable with key bindings.*
+
+## GUI Description
+The program has a graphical user interface which is a window. This window contains three tabs: "Draw", "Log", and "Civ Pool". On the Draw tab the user can draw a fresh random civ and see its icon and hear its jingle. There is also a tech tree button which links to the tech tree of the currently drawn civ. On the "Log" tab, the user can view the log of drawn civs as well as of remaining civs in the pool. On the "Civ Pool", the user can customise which civs are part of the civ pool.
+
+
+## How do I use this application?
+How to use: the user can click the "Draw" button (or press spacebar) to have the centre label display a fresh random civ. There is an indicator at the bottom right which tells how many civs have been drawn so far. If the user wishes to see the tech tree of the drawn civ, they can click the Tech Tree button near the bottom right corner of the window.
+
+
+Once all civs have been drawn, the next draw will reset the program and all civs are once again available to draw. The user can at any time reset the program manually by clicking the "Reset" button (or pressing Return). The user can at any time navigate to the "Log" tab (by either clicking it or pressing Tab) to view the history of drawn civs. The user can at any time navigate to the "Civ Pool" tab to customise which civs are enabled in the pool. Disabled civs are never drawn.
+
 
 ## How to install
 1. Go to releases
