@@ -63,7 +63,7 @@ Drive space: at least 56.6 megabytes available
 - v1.0: GUI with simple log
 - v1.1: Customisable civ pool and user options
 - v1.2: Persistent feature states and automatically logged current civ pool over program lifetimes and sessions
-- v1.3: Ctrl+Z/Ctrl+X undraw/redraw feature, possibility to save and load presets, and ability to join AoE2DE lobby using lobby code
+- v1.3: Ctrl+Z/Ctrl+X undraw/redraw feature, ability to save and load presets, and to join AoE2DE lobby using lobby code
 
 ## What is this application?
 This is an application which generates a randomly drawn civilisation name out of the civilisations available to play in a computer game called "Age of Empires II: Definitive Edition" which is a real-time strategy game. What my application offers which the random civ name generator in the game itself doesn't is the "freshness" which is that a civilisation is not repeated until all the civilisations have been iterated through.
