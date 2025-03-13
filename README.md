@@ -26,6 +26,10 @@ Purpose of Fresh Random Civ Picker: the user can randomly iterate through the en
 ![image](https://github.com/user-attachments/assets/8dfb402c-df21-4b7e-9daa-9ae6b3ebfcde)  
 *Whenever you want, reset the program and render all enabled civs drawable.*
 
+- **Go to the tech tree!**
+![image](https://github.com/user-attachments/assets/ee443bbf-818b-42a4-97dc-9f5463934d1c)  
+*At any time, go to the tech tree of the drawn civ. aoe2techtree.net courtesy of Siege Engineers.*
+
 - **Customise your own civ pool!**
 ![civ pool tab](https://github.com/user-attachments/assets/0b8b35f6-7f87-40e7-8bb4-56e7fd44fabf)  
 *Tailor the exact civ pool you want using the civ pool tab.*
@@ -36,7 +40,7 @@ Purpose of Fresh Random Civ Picker: the user can randomly iterate through the en
 - **Civ icons!** *See the civ icon of the civ you draw.*
 - **Civ jingles!** *Hear the civ jingle of the civ you draw. Legacy jingles toggleable.*
 - **Join an AoE2DE lobby straight from the app!** *Works the same as Windows run prompt but only accepts AoE2DE lobby code inputs.*
-- **Go to the tech tree!** *At any time, go to the tech tree of the drawn civ. aoe2techtree.net courtesy of Siege Engineers.*
+
 - **Undraw a drawn civ!** *Go back and undraw the civ you drew with Ctrl+Z. If you change your mind again right away, redraw the undrawn civ with Ctrl+X.*
 - **Use hotkeys!** *Most of the program is entirely controllable with key bindings.*
 
