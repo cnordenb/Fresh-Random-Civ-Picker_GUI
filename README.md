@@ -2,7 +2,8 @@
 ![social-preview](https://github.com/user-attachments/assets/bc0c602c-1f8d-4c14-9235-2d3645cdaaa1)
 # Fresh Random Civ Picker
 
-**This is the C++ GUI version of the Fresh Random Civ Picker.**
+**This is the C++ GUI version of the Fresh Random Civ Picker.**  
+![demo gif](https://github.com/user-attachments/assets/04f98b24-e096-4030-825b-c0cd147f80bf)
 
 [Purpose](#Purpose)  
 [Features](#Features)  
