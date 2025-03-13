@@ -69,7 +69,9 @@ This is an application which generates a randomly drawn civilisation name out of
 ![image](https://github.com/user-attachments/assets/06866ebd-1e9d-4096-a272-6c2e843d2a0f)  
 *Go back and undraw the civ you drew with Ctrl+Z. If you change your mind again right away, redraw the undrawn civ with Ctrl+X.*
 
-- **Use hotkeys!** *Most of the program is entirely controllable with key bindings.*
+- **Use hotkeys!**  
+![image](https://github.com/user-attachments/assets/0941124f-9f4b-4722-9394-67370d760e8b)  
+*Most of the program is entirely controllable with key bindings.*
 
 ## GUI Description  
 ![tabs gif](https://github.com/user-attachments/assets/97fc3d9d-7ffe-4455-9a60-3cb42a53002f)
