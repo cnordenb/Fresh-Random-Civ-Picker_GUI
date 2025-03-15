@@ -199,7 +199,7 @@ HWND checkbox_autoreset, checkbox_autotoggle;			 // autoreset checkbox
 
 HWND radiobutton_de, radiobutton_hd, radiobutton_aok;	 // radio buttons
 
-HFONT hBoldFont;
+HFONT font_bold;
 
 
 

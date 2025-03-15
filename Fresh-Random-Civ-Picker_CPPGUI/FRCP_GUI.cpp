@@ -104,7 +104,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     Gdiplus::GdiplusShutdown(gdiplusToken);
 
     DeleteObject(font_underline);
-    DeleteObject(hBoldFont);
+    DeleteObject(font_bold);
 
     if (persistent_logging) SaveLog(false);
     SaveSettings();
@@ -206,7 +206,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             SubclassButtons();
             CreateTooltips(hWnd);
             AddTooltips();
-            SetEditionState(hWnd, DE);   
+            SetEditionState(hWnd, DE);
+            civs.reserve(MAX_CIVS);
             if (persistent_logging) {LoadLog(hWnd, false); ValidateAllDlcToggles(hWnd);}           
 			ShowTabComponents(0, hWnd);            
             EnableHotkeys(hWnd);
@@ -1684,9 +1685,8 @@ void SaveSettings()
     WritePrivateProfileString(L"Settings", L"LegacyJingleEnabled", legacy_jingle_enabled ? L"1" : L"0", INI_FILE_PATH);
 }
 
-void LoadSettings()
+void LoadSettings() // Load boolean settings
 {
-    // Load boolean settings
 	persistent_logging = GetPrivateProfileInt(L"Settings", L"PersistentLogging", 1, INI_FILE_PATH);
 	draw_on_startup = GetPrivateProfileInt(L"Settings", L"DrawOnStartup", 1, INI_FILE_PATH);
     ui_sounds_enabled = GetPrivateProfileInt(L"Settings", L"UISoundsEnabled", 1, INI_FILE_PATH);
@@ -1986,7 +1986,6 @@ HWND GetCivCheckbox(const std::wstring &civ_name) { for (int i = 0; i < MAX_CIVS
 
 void InitialiseCivs()
 {
-    civs.reserve(MAX_CIVS);
     if (!civs.empty()) civs.clear();
     for (int i = 0; i < MAX_CIVS; i++) civs.push_back(civ[i].name);
 }
@@ -2009,10 +2008,10 @@ INT_PTR CALLBACK HotkeysDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
             CreateBoldFont();
 
             // Apply the bold font to specific controls
-            SendMessage(GetDlgItem(hDlg, IDC_STATIC_GLOBAL_HOTKEYS), WM_SETFONT, (WPARAM)hBoldFont, TRUE);
-            SendMessage(GetDlgItem(hDlg, IDC_STATIC_DRAW_CIV_HOTKEYS), WM_SETFONT, (WPARAM)hBoldFont, TRUE);
-            SendMessage(GetDlgItem(hDlg, IDC_STATIC_LOG_TAB_HOTKEYS), WM_SETFONT, (WPARAM)hBoldFont, TRUE);
-            SendMessage(GetDlgItem(hDlg, IDC_STATIC_CIV_POOL_HOTKEYS), WM_SETFONT, (WPARAM)hBoldFont, TRUE);
+            SendMessage(GetDlgItem(hDlg, IDC_STATIC_GLOBAL_HOTKEYS), WM_SETFONT, (WPARAM)font_bold, TRUE);
+            SendMessage(GetDlgItem(hDlg, IDC_STATIC_DRAW_CIV_HOTKEYS), WM_SETFONT, (WPARAM)font_bold, TRUE);
+            SendMessage(GetDlgItem(hDlg, IDC_STATIC_LOG_TAB_HOTKEYS), WM_SETFONT, (WPARAM)font_bold, TRUE);
+            SendMessage(GetDlgItem(hDlg, IDC_STATIC_CIV_POOL_HOTKEYS), WM_SETFONT, (WPARAM)font_bold, TRUE);
 
             return(INT_PTR)TRUE;
         }
@@ -2174,7 +2173,7 @@ void CreateBoldFont()
     HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
     GetObject(hFont, sizeof(LOGFONT), &lf);
     lf.lfWeight = FW_BOLD;
-    hBoldFont = CreateFontIndirect(&lf);
+    font_bold = CreateFontIndirect(&lf);
 }
 
 void PositionComponents(LPARAM lParam)
@@ -2229,12 +2228,12 @@ void JoinLobby(HWND hWnd)
 
 INT_PTR CALLBACK JoinLobbyDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    static std::wstring *lobbyCode;
+    static std::wstring *lobby_code;
 
     switch (message)
     {
         case WM_INITDIALOG:
-            lobbyCode = reinterpret_cast<std::wstring *>(lParam);
+            lobby_code = reinterpret_cast<std::wstring *>(lParam);
             return (INT_PTR)TRUE;
         case WM_COMMAND:
         {
@@ -2251,8 +2250,8 @@ INT_PTR CALLBACK JoinLobbyDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
                 if (ui_sounds_enabled) PlayButtonSound();
                 wchar_t buffer[256];
                 GetDlgItemText(hDlg, IDC_EDIT_LOBBYCODE, buffer, 256);
-                *lobbyCode = buffer;
-                if (!IsValidLobbyCode(*lobbyCode))
+                *lobby_code = buffer;
+                if (!IsValidLobbyCode(*lobby_code))
                 {
                     MessageBox(hDlg, L"Invalid lobby code entered.\n\nInput code must be of a format which is either 'aoe2de://0/123456789' or '123456789'. ", L"Error: invalid input", MB_OK | MB_ICONERROR);
                     return (INT_PTR)FALSE;
@@ -2273,9 +2272,9 @@ INT_PTR CALLBACK JoinLobbyDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
     return (INT_PTR)FALSE;
 }
 
-bool IsValidLobbyCode(const std::wstring &lobbyCode)
+bool IsValidLobbyCode(const std::wstring &lobby_code)
 {
-    size_t lngth = lobbyCode.length();
+    size_t lngth = lobby_code.length();
     switch (lngth)
     {
         case 9: break;
@@ -2285,12 +2284,12 @@ bool IsValidLobbyCode(const std::wstring &lobbyCode)
 
     if (lngth == 20)
     {
-        if (lobbyCode.substr(0, 11) != L"aoe2de://0/") return false;
-        std::wstring numbers = lobbyCode.substr(12, 20);
+        if (lobby_code.substr(0, 11) != L"aoe2de://0/") return false;
+        std::wstring numbers = lobby_code.substr(12, 20);
         if (numbers.find_first_not_of(L"0123456789") != std::wstring::npos) return false;
     }
 
-    if (lngth == 9) if (lobbyCode.find_first_not_of(L"0123456789") != std::wstring::npos) return false;   
+    if (lngth == 9) if (lobby_code.find_first_not_of(L"0123456789") != std::wstring::npos) return false;   
 
 	return true;
 }
