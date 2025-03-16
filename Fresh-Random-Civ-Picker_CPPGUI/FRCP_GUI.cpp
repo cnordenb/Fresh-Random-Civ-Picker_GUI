@@ -577,14 +577,11 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             if (hwndTooltip)
             {
-                // Get the cursor position
                 POINT pt;
                 GetCursorPos(&pt);
 
-                // Convert screen coordinates to client coordinates
                 ScreenToClient(hwnd, &pt);
 
-                // Check if the cursor is over any button and update the tooltip accordingly
                 RECT rect;
                 TOOLINFO toolInfo = { 0 };
                 toolInfo.cbSize = sizeof(toolInfo);
@@ -618,13 +615,11 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				    }
 			    }
             }
-            // Forward the WM_MOUSEMOVE message to the parent window
             SendMessage(GetParent(hwnd), WM_MOUSEMOVE, wParam, lParam);
             break;
         }
         
         case WM_SETCURSOR:
-            // Set the cursor to a hand cursor when the mouse is over the button
             SetCursor(LoadCursor(NULL, IDC_HAND));
             return TRUE;
         default:
@@ -632,7 +627,6 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     }
 
     return 0;
-    // Call the original window procedure for default processing    
 }
 
 void SubclassButton(HWND button) { originalButtonProcs[button] = (WNDPROC)SetWindowLongPtr(button, GWLP_WNDPROC, (LONG_PTR)ButtonProc); }
@@ -664,13 +658,10 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 
 INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    //static WNDPROC oldProc;
-
     switch (message)
     {
         case WM_INITDIALOG:
         {        
-            //oldProc = (WNDPROC)SetWindowLongPtr(hwndHyperlink, GWLP_WNDPROC, (LONG_PTR)HyperlinkProc);
             CheckDlgButton(hDlg, IDC_CHECKBOX_LABELS, civ_labels_enabled ? BST_CHECKED : BST_UNCHECKED);
             CheckDlgButton(hDlg, IDC_CHECKBOX_CORNERLABEL, iteration_label_enabled ? BST_CHECKED : BST_UNCHECKED);
             CheckDlgButton(hDlg, IDC_CHECKBOX_ICONS, icons_enabled ? BST_CHECKED : BST_UNCHECKED);
@@ -685,7 +676,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
             HWND hComboBox = GetDlgItem(hDlg, IDC_LEGACY_OPTION);
             SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Definitive Edition");
             SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Legacy");
-            SendMessage(hComboBox, CB_SETCURSEL, legacy_jingle_enabled ? 1 : 0, 0); // Set default selection based on current setting
+            SendMessage(hComboBox, CB_SETCURSEL, legacy_jingle_enabled ? 1 : 0, 0);
 
             return(INT_PTR)TRUE;
         }
@@ -720,12 +711,10 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
             tooltips_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_TOOLTIPS) == BST_CHECKED;
 		    draw_on_startup = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_STARTDRAW) == BST_CHECKED;
 
-            // Handle the combobox selection
             HWND hComboBox = GetDlgItem(hDlg, IDC_LEGACY_OPTION);
             int selectedIndex = static_cast<int>(SendMessage(hComboBox, CB_GETCURSEL, 0, 0));
             legacy_jingle_enabled = (selectedIndex == 1);
 
-            // Handle the checkbox state as needed
             if (icons_enabled && current_tab != 2) ShowWindow(civ_icon, SW_SHOW);            
             else ShowWindow(civ_icon, SW_HIDE);                    
 
@@ -786,7 +775,7 @@ LRESULT CALLBACK HyperlinkProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
         case WM_PAINT:
         {
             device_handling_context = BeginPaint(hwnd, &paint_struct);
-            SetTextColor(device_handling_context, RGB(0, 0, 255)); // Blue color
+            SetTextColor(device_handling_context, RGB(0, 0, 255));
             SetBkMode(device_handling_context, TRANSPARENT);
             SelectObject(device_handling_context, font_underline);
             GetClientRect(hwnd, &rectangle_struct);
@@ -835,9 +824,9 @@ void ResetProgram(bool auto_reset)
     
 	for (int i = 0; i < MAX_CIVS; i++) drawn_civs[i] = L"";
 
-    SetWindowText(label_corner, (L"0/" + std::to_wstring(custom_max_civs)).c_str());     // resets remaining civs label
+    SetWindowText(label_corner, (L"0/" + std::to_wstring(custom_max_civs)).c_str());
 	if (!iteration_label_enabled) ShowWindow(label_corner, SW_HIDE);
-    SetWindowText(label_centre, L"?");                                      // resets drawn civ label
+    SetWindowText(label_centre, L"?");
 	if (!civ_labels_enabled) ShowWindow(label_centre, SW_HIDE);
     SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_random);
 
@@ -859,25 +848,24 @@ void DrawCiv()
     {
         if (ui_sounds_enabled) PlaySound(L"sounds\\error_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
         SetWindowTextA(label_centre, "Empty pool!");
-        return;        // if no civs are selected, return
+        return;
     }
 
-    if (civs.empty() || iterator == custom_max_civs || iterator == 0) ResetProgram(true);        // if all civs have been drawn, reset program and civ vector
+    if (civs.empty() || iterator == custom_max_civs || iterator == 0) ResetProgram(true);
 
-    std::random_device rd;      // seeding random number
-    std::mt19937 mt(rd());      // with Mersenne Twister 
+    std::random_device rd;
+    std::mt19937 mt(rd());
 
-    std::shuffle(civs.begin(), civs.end(), mt); // shuffling civs vector
-    current_civ = civs.back();		// draws last element
-    civs.pop_back();							// removes last element from pool
+    std::shuffle(civs.begin(), civs.end(), mt);
+    current_civ = civs.back();
+    civs.pop_back();
 
-	drawn_civs[iterator] = current_civ;		// adds drawn civ to drawn civs array
+	drawn_civs[iterator] = current_civ;
 
     std::string civ_name_str = ConvertToString(current_civ);
 
     iterator++;
 
-    // Update the labels
     label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
     SetWindowText(label_corner, label_text.c_str());
 	if (!iteration_label_enabled) ShowWindow(label_corner, SW_HIDE);
@@ -1004,19 +992,7 @@ void InitialiseCivStates() { for (int i = 0; i < MAX_CIVS; i++) civ[i].SetEnable
 
 HWND CreateCheckbox(HWND hWnd, HINSTANCE hInstance, int x, int y, int width, int height, int id, LPCWSTR text)
 {
-    HWND checkbox = CreateWindow(
-        L"BUTTON",          // Predefined class; Unicode assumed
-        text,               // Button text
-        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, // Styles
-        x,                  // x position
-        y+120,                  // y position
-        width+2,              // Button width
-        height,             // Button height
-        hWnd,               // Parent window
-        reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)),          // Control ID
-        hInstance,          // Instance handle
-        NULL                // Pointer not needed
-    );
+    HWND checkbox = CreateWindow(L"BUTTON", text, WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, x, y+120, width+2, height, hWnd, reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)), hInstance, NULL);
     SendMessage(checkbox, BM_SETCHECK, BST_CHECKED, 0);
     return checkbox;
 }
@@ -1350,7 +1326,7 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted)
         drawnlog_length = GetWindowTextLength(drawn_log);
         drawnlog_text.resize(drawnlog_length + 1);
         GetWindowText(drawn_log, &drawnlog_text[0], drawnlog_length + 1);
-        drawnlog_text.pop_back(); // Remove the null terminator
+        drawnlog_text.pop_back();
         log_entry = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs) + L" - " + std::wstring(current_civ.begin(), current_civ.end()) + L"\r\n";
         drawnlog_text = log_entry + drawnlog_text;
         if (iterator == custom_max_civs) drawnlog_text += L"\r\n";
@@ -1359,7 +1335,7 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted)
     }    
     else if (!reset_state && blankline_wanted)
     {
-        if (iterator >= 0)                       // adds blank line to log before next iteration of civ drawing
+        if (iterator >= 0)
         {
             drawnlog_length = GetWindowTextLength(drawn_log);
             drawnlog_text.resize(drawnlog_length + 1);
@@ -1393,7 +1369,7 @@ void UpdateRemainingLog(bool civ_pool_changed, bool backwards)
     else
     {
         size_t pos = remaininglog_text.find(current_civ + L"\r\n");
-        if (pos != std::wstring::npos) remaininglog_text.erase(pos, current_civ.length() + 2); // +2 for "\r\n"
+        if (pos != std::wstring::npos) remaininglog_text.erase(pos, current_civ.length() + 2);
     }
 
 	std::wstring remain_label = L"Remaining: " + std::to_wstring(custom_max_civs - iterator) + L"/" + std::to_wstring(custom_max_civs);
@@ -1441,10 +1417,8 @@ void AddTooltip(HWND hwndTool, HWND hwndTip, LPCWSTR pszText)
 
 void ActivateTooltip(HWND hwndTip, TOOLINFO *toolInfo, POINT pt)
 {
-    // Convert client coordinates to screen coordinates
     ClientToScreen(toolInfo->hwnd, &pt);
 
-    // Set the tooltip position to be next to the mouse cursor
     SendMessage(hwndTip, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y + 20));
 
     if (!SendMessage(hwndTip, TTM_TRACKACTIVATE, TRUE, (LPARAM)toolInfo)) OutputDebugString(L"Failed to activate tooltip\n");
@@ -1467,7 +1441,6 @@ void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText)
     toolInfo.uId = (UINT_PTR)hwndTool;
     toolInfo.lpszText = (LPWSTR)newText;
 
-    // Update the tooltip text
     SendMessage(hwndTip, TTM_UPDATETIPTEXT, 0, (LPARAM)&toolInfo);
 }
 
@@ -1483,7 +1456,7 @@ void SetEditionState(HWND hWnd, edition edition)
             ShowAOCCheckbox(false);
             SendMessageW(edition_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_de);
             edition_state = DE;
-            if (autotoggle_enabled && !startup) for (int i = 0; i < 5; i++) EnableDlc(old_dlc[i], hWnd);      // aok, aoc, tf, tak, ror          
+            if (autotoggle_enabled && !startup) for (int i = 0; i < 5; i++) EnableDlc(old_dlc[i], hWnd);
             ShowAllPoolCheckboxes();
             if ((SendMessage(radiobutton_de, BM_GETCHECK, 0, 0)) != BST_CHECKED)
             {
@@ -1498,7 +1471,7 @@ void SetEditionState(HWND hWnd, edition edition)
             ShowDEDLCCheckboxes(false);
             ShowHDDLCCheckboxes(true);
             ShowAOCCheckbox(false);
-            if (autotoggle_enabled && !startup) for (int i = 0; i < 2; i++) EnableDlc(old_dlc[i], hWnd);       // aok, aoc
+            if (autotoggle_enabled && !startup) for (int i = 0; i < 2; i++) EnableDlc(old_dlc[i], hWnd);
             SendMessageW(edition_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_hd);
             ShowHDPoolCheckboxes();
             if ((SendMessage(radiobutton_hd, BM_GETCHECK, 0, 0)) != BST_CHECKED)
@@ -1633,7 +1606,7 @@ void SaveSettings()
     WritePrivateProfileString(L"Settings", L"LegacyJingleEnabled", legacy_jingle_enabled ? L"1" : L"0", INI_FILE_PATH);
 }
 
-void LoadSettings() // Load boolean settings
+void LoadSettings()
 {
 	persistent_logging = GetPrivateProfileInt(L"Settings", L"PersistentLogging", 1, INI_FILE_PATH);
 	draw_on_startup = GetPrivateProfileInt(L"Settings", L"DrawOnStartup", 1, INI_FILE_PATH);
@@ -1655,11 +1628,10 @@ void SaveLog(bool user_save)
     if (user_save)
     {
 		if (ui_sounds_enabled) PlayButtonSound();
-        // Get the current date and time
+
         SYSTEMTIME st;
         GetLocalTime(&st);
 
-        // Format the date and time as "DD-MM-YY_HHMM"
         std::wstringstream wss;
         wss << L"FRCP Preset v1.3.0 @" << std::setw(4) << std::setfill(L'0') << st.wYear << L"." 
             << std::setw(2) << std::setfill(L'0') << st.wMonth << L"."
@@ -1670,15 +1642,12 @@ void SaveLog(bool user_save)
 
         std::wstring defaultFileName = wss.str();
 
-        // Get the path of the executable
         wchar_t exePath[MAX_PATH];
         GetModuleFileName(NULL, exePath, MAX_PATH);
 
-        // Remove the executable name from the path
         wchar_t *lastSlash = wcsrchr(exePath, L'\\');
         if (lastSlash != NULL) *lastSlash = L'\0';
 
-        // Append the "saves" folder to the path
         PathAppend(exePath, L"saves");
 
         OPENFILENAME ofn;
@@ -1695,14 +1664,13 @@ void SaveLog(bool user_save)
         ofn.nFilterIndex = 1;
         ofn.lpstrFileTitle = NULL;
         ofn.nMaxFileTitle = 0;
-        ofn.lpstrInitialDir = exePath; // Set the initial directory to the executable's directory
+        ofn.lpstrInitialDir = exePath;
         ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
 
         if (GetSaveFileName(&ofn) == TRUE)
         {
             if (ui_sounds_enabled) PlayButtonSound();
             saveFilePath = ofn.lpstrFile;
-            // Check if the file extension is .txt, if not, append .txt
             if (saveFilePath.find(L".txt") == std::wstring::npos)
             {
                 saveFilePath.append(L".txt");
@@ -1720,12 +1688,8 @@ void SaveLog(bool user_save)
     if (!outFile) return;
     
 
-// Save the civilization states
     outFile << L"CivStates:" << std::endl;
 	for (int i = 0; i < MAX_CIVS; i++) outFile << civ[i].name << L" " << (civ[i].enabled ? L"1" : L"0") << std::endl;
-    //for (const auto &civ : civs_array) outFile << civ.first << L" " << (civ.second ? L"1" : L"0") << std::endl;    
-
-    // Save the drawn civilisations
     outFile << L"DrawnCivs:" << std::endl;
 	for (int i = 0; i < MAX_CIVS; i++)
 	{
@@ -1752,15 +1716,12 @@ void LoadLog(HWND hWnd, bool user_load)
     {
 		if (ui_sounds_enabled) PlayButtonSound();
 
-        // Get the path of the executable
         wchar_t exePath[MAX_PATH];
         GetModuleFileName(NULL, exePath, MAX_PATH);
 
-        // Remove the executable name from the path
         wchar_t *lastSlash = wcsrchr(exePath, L'\\');
         if (lastSlash != NULL) *lastSlash = L'\0';
 
-        // Append the "saves" folder to the path
         PathAppend(exePath, L"saves");
 
         OPENFILENAME ofn;
@@ -1774,7 +1735,7 @@ void LoadLog(HWND hWnd, bool user_load)
         ofn.nFilterIndex = 1;
         ofn.lpstrFileTitle = NULL;
         ofn.nMaxFileTitle = 0;
-        ofn.lpstrInitialDir = exePath; // Set the initial directory to the "saves" directory
+        ofn.lpstrInitialDir = exePath;
         ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
 
         if (GetOpenFileName(&ofn) == TRUE) loadFilePath = ofn.lpstrFile;
@@ -1803,7 +1764,7 @@ void LoadLog(HWND hWnd, bool user_load)
 	bool readingEditionState = false;
     if (!user_load) InitialiseCivs();
 
-    bool stateread_commenced = false;           // mitigations to ensure program is not broken by malicious log file
+    bool stateread_commenced = false;
 	bool drawnread_commenced = false;
 	bool editionread_commenced = false;
     int i = 0;
@@ -1811,8 +1772,8 @@ void LoadLog(HWND hWnd, bool user_load)
     int stop = MAX_CIVS*2+4;
     while (std::getline(inFile, line))
     {
-		if (i >= stop) break;                               // will not read past the maximum length of a log file
-        if (line == L"CivStates:" && !stateread_commenced)      // will not enter a read state more than once
+		if (i >= stop) break;
+        if (line == L"CivStates:" && !stateread_commenced)
         {
             j = 0;
             readingCivStates = true;
@@ -1872,7 +1833,6 @@ void LoadLog(HWND hWnd, bool user_load)
 		i++;
     }
 
-    // Update the labels
     label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
     std::wstring remain_text = std::to_wstring(custom_max_civs - iterator) + L"/" + std::to_wstring(custom_max_civs);
     SetWindowText(label_corner, label_text.c_str());
@@ -1911,13 +1871,11 @@ void LoadLog(HWND hWnd, bool user_load)
 
 void GenerateFilePaths()
 {
-    // Get the path of the executable
     wchar_t exePathS[MAX_PATH];
     wchar_t exePathL[MAX_PATH];
     GetModuleFileName(NULL, exePathS, MAX_PATH);
     GetModuleFileName(NULL, exePathL, MAX_PATH);
 
-    // Remove the executable name from the path
     wchar_t *lastSlashS = wcsrchr(exePathS, L'\\');
     if (lastSlashS != NULL) *lastSlashS = L'\0';
     wchar_t *lastSlashL = wcsrchr(exePathL, L'\\');
@@ -1952,10 +1910,8 @@ INT_PTR CALLBACK HotkeysDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
     {
         case WM_INITDIALOG:
         {
-            // Create the bold font
             CreateBoldFont();
 
-            // Apply the bold font to specific controls
             SendMessage(GetDlgItem(hDlg, IDC_STATIC_GLOBAL_HOTKEYS), WM_SETFONT, (WPARAM)font_bold, TRUE);
             SendMessage(GetDlgItem(hDlg, IDC_STATIC_DRAW_CIV_HOTKEYS), WM_SETFONT, (WPARAM)font_bold, TRUE);
             SendMessage(GetDlgItem(hDlg, IDC_STATIC_LOG_TAB_HOTKEYS), WM_SETFONT, (WPARAM)font_bold, TRUE);
@@ -2129,27 +2085,27 @@ void PositionComponents(LPARAM lParam)
     int width = LOWORD(lParam);
     int height = HIWORD(lParam);
 
-    SetWindowPos(button_draw, NULL, (width - 100) / 2, (height + 100) / 2, 100, 30, SWP_NOZORDER);   // draw button anchored to centre
-    SetWindowPos(button_techtree, NULL, width - 150, height - 120, 60, 60, SWP_NOZORDER);   // techtree button anchored its traditional location
-    SetWindowPos(button_options, NULL, width - 35, 0, 25, 25, SWP_NOZORDER);   // techtree button anchored its traditional location
+    SetWindowPos(button_draw, NULL, (width - 100) / 2, (height + 100) / 2, 100, 30, SWP_NOZORDER);
+    SetWindowPos(button_techtree, NULL, width - 150, height - 120, 60, 60, SWP_NOZORDER);
+    SetWindowPos(button_options, NULL, width - 35, 0, 25, 25, SWP_NOZORDER);
 
 
-    if (current_tab == 0)  SetWindowPos(button_reset, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);          // reset button anchored to bottom left corner    
-    else SetWindowPos(button_reset, NULL, (width - 100) / 2, height - 40, 100, 30, SWP_NOZORDER);             // reset button centred when on log tab    
+    if (current_tab == 0)  SetWindowPos(button_reset, NULL, 10, height - 40, 100, 30, SWP_NOZORDER);
+    else SetWindowPos(button_reset, NULL, (width - 100) / 2, height - 40, 100, 30, SWP_NOZORDER);
 
 
-    SetWindowPos(tab, NULL, 0, 0, width, height, SWP_NOZORDER);                                        // tab size anchored to window size
-    SetWindowPos(label_corner, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);                          // remaining civ indicator anchored to bottom right corner 
-    SetWindowPos(label_centre, NULL, (width - 80) / 2, (height + 35) / 2, 90, 15, SWP_NOZORDER);       // drawn civ label anchored to centre
-    SetWindowPos(civ_icon, NULL, (width - 100) / 2, (height - 180) / 2, 104, 104, SWP_NOZORDER);       // civ icon anchored to centre
+    SetWindowPos(tab, NULL, 0, 0, width, height, SWP_NOZORDER);
+    SetWindowPos(label_corner, NULL, width - 50, height - 20, 40, 15, SWP_NOZORDER);
+    SetWindowPos(label_centre, NULL, (width - 80) / 2, (height + 35) / 2, 90, 15, SWP_NOZORDER);
+    SetWindowPos(civ_icon, NULL, (width - 100) / 2, (height - 180) / 2, 104, 104, SWP_NOZORDER);
 
-    SetWindowPos(label_drawncount, NULL, 10, 25, 90, 15, SWP_NOZORDER);                           // drawn civ label anchored to top left corner
-    SetWindowPos(button_clearlog, NULL, 110, 25, 100, 30, SWP_NOZORDER);                           // clear log button anchored to top left corner
-    SetWindowPos(drawn_log, NULL, 10, 60, width - (width / 2) - 69, height - 70, SWP_NOZORDER);        // log text field anchored to window size
+    SetWindowPos(label_drawncount, NULL, 10, 25, 90, 15, SWP_NOZORDER);
+    SetWindowPos(button_clearlog, NULL, 110, 25, 100, 30, SWP_NOZORDER);
+    SetWindowPos(drawn_log, NULL, 10, 60, width - (width / 2) - 69, height - 70, SWP_NOZORDER);
 
-    SetWindowPos(label_remainingcount, NULL, (width / 2) + 60, 25, 130, 15, SWP_NOZORDER);                           // drawn civ label anchored to top right corner
-    SetWindowPos(checkbox_showremainlog, NULL, (width / 2) + 190, 25, 60, 15, SWP_NOZORDER);                           // drawn civ label anchored to top right corner
-    SetWindowPos(remaining_log, NULL, (width / 2) + 60, 60, width - (width / 2) - 65, height - 70, SWP_NOZORDER);                   // log text field anchored to window size
+    SetWindowPos(label_remainingcount, NULL, (width / 2) + 60, 25, 130, 15, SWP_NOZORDER);
+    SetWindowPos(checkbox_showremainlog, NULL, (width / 2) + 190, 25, 60, 15, SWP_NOZORDER);
+    SetWindowPos(remaining_log, NULL, (width / 2) + 60, 60, width - (width / 2) - 65, height - 70, SWP_NOZORDER);
 
 
     for (int i = 0; i < de_dlc_amount; i++) SetWindowPos(de_dlc_icon[i], NULL, 345, de_dlc_row[i], 18, 18, SWP_NOZORDER);
@@ -2273,7 +2229,7 @@ void UndrawCiv()
         size_t pos = drawnlog_text.find(L"\r\n");
         if (pos != std::wstring::npos)
         {
-            drawnlog_text = drawnlog_text.substr(pos + 2); // Remove the first line
+            drawnlog_text = drawnlog_text.substr(pos + 2);
             SetWindowText(drawn_log, drawnlog_text.c_str());
         }
     }

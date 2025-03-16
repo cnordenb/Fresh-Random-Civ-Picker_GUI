@@ -1,7 +1,6 @@
 #pragma once
 #define IDC_STATIC_TEXT 1001
 #define IDC_HYPERLINK 1002
-#include "resource.h"
 
 #include "framework.h"
 #include "FRCP_GUI.h"
@@ -154,23 +153,22 @@ wchar_t LOG_FILE_PATH[MAX_PATH];
 
 std::map<HWND, WNDPROC> originalButtonProcs;
 
-// Global Variables
 PAINTSTRUCT paint_struct;
 HDC device_handling_context;
 RECT rectangle_struct;
-HINSTANCE instance;                                // current instance
-WCHAR title[MAX_LOADSTRING];                  // The title bar text
-WCHAR window_class[MAX_LOADSTRING];            // the main window class name
+HINSTANCE instance;
+WCHAR title[MAX_LOADSTRING];
+WCHAR window_class[MAX_LOADSTRING];
 
 
-HWND label_corner, label_centre, label_drawncount, label_remainingcount;    // labels
+HWND label_corner, label_centre, label_drawncount, label_remainingcount;
 
-HWND button_draw, button_reset, button_enableall, button_disableall, button_clearlog, button_techtree, button_options;	    // buttons
+HWND button_draw, button_reset, button_enableall, button_disableall, button_clearlog, button_techtree, button_options;
 
-HWND drawn_log, remaining_log;				 // textfield for log tab
+HWND drawn_log, remaining_log;
 
 
-HWND civ_icon, edition_icon;						// icons
+HWND civ_icon, edition_icon;
 
 HWND checkbox_showremainlog;
 
@@ -184,20 +182,20 @@ HWND hOptionsDlg = NULL;
 
 
 
-HWND checkbox_khans, checkbox_dukes, checkbox_west, checkbox_india, checkbox_rome, checkbox_royals, // dlc checkboxes
+HWND checkbox_khans, checkbox_dukes, checkbox_west, checkbox_india, checkbox_rome, checkbox_royals,
 checkbox_forgotten, checkbox_africans, checkbox_rajas,
 checkbox_aoc;
 
-HWND khans_icon, dukes_icon, west_icon, india_icon, rome_icon, royals_icon,     // dlc icons
+HWND khans_icon, dukes_icon, west_icon, india_icon, rome_icon, royals_icon,
 forgotten_icon, africans_icon, rajas_icon,
 aoc_icon;
 
 
 
 
-HWND checkbox_autoreset, checkbox_autotoggle;			 // autoreset checkbox
+HWND checkbox_autoreset, checkbox_autotoggle;
 
-HWND radiobutton_de, radiobutton_hd, radiobutton_aok;	 // radio buttons
+HWND radiobutton_de, radiobutton_hd, radiobutton_aok;
 
 HFONT font_bold;
 
@@ -212,16 +210,16 @@ HBRUSH brush_black;
 
 
 
-HBITMAP icon_de, icon_hd, icon_aok;	                                                            // edition icons
+HBITMAP icon_de, icon_hd, icon_aok;
 
-HBITMAP icon_khans, icon_dukes, icon_west, icon_india, icon_rome, icon_royals,                      // dlc icons
+HBITMAP icon_khans, icon_dukes, icon_west, icon_india, icon_rome, icon_royals,
 icon_forgotten, icon_africans, icon_rajas,
 icon_aoc;
 
-HBITMAP icon_techtree, icon_options;                                                                             // tech tree button icon
+HBITMAP icon_techtree, icon_options;
 
 
-int iterator = 0; // Global variable to keep track of the count
+int iterator = 0;
 int drawnlog_length = GetWindowTextLength(drawn_log);
 int remaininglog_length = GetWindowTextLength(remaining_log);
 int current_tab = 0;
@@ -252,26 +250,25 @@ bool redrawable = false;
 bool undrawable = false;
 
 enum edition {
-    DE,     // Definitive Edition
-    HD,     // HD Edition / (2013)
-    AOK     // Age of Kings
+    DE,
+    HD,
+    AOK
 };
 
 enum dlc {
-    aok,   // Age of Kings
-    aoc,   // The Conquerors
+    aok,
+    aoc,
 
-    forgotten,   // The Forgotten
-    africans,   // African Kingdoms
-    rajas,   // Rise of Rajas
+    forgotten,
+    africans,
+    rajas,
 
-    khans,   // Last Khans
-    west,   // Lords of the West
-    dukes,   // Dawn of the Dukes
-    india,   // Dynasties of India
-    royals,   // The Mountain Royals
-    rome    // Return of Rome
-    
+    khans,
+    west,
+    dukes,
+    india,
+    royals,
+    rome    
 };
 
 int de_dlc_row[] = { 25, 45, 65, 85, 105, 125 };
@@ -326,7 +323,7 @@ int every_dlc_id[] = { IDC_CHECKBOX_AOC, IDC_CHECKBOX_FORGOTTEN, IDC_CHECKBOX_AF
 edition every_edition[] = { AOK, HD, DE };
 int every_edition_id[] = { IDC_RADIO_AOK, IDC_RADIO_HD, IDC_RADIO_DE };
 
-HWND checkbox_armenians, checkbox_aztecs, checkbox_bengalis, checkbox_berbers, checkbox_bohemians,       // checkboxes for custom civ pool tab
+HWND checkbox_armenians, checkbox_aztecs, checkbox_bengalis, checkbox_berbers, checkbox_bohemians,
 checkbox_britons, checkbox_bulgarians, checkbox_burgundians, checkbox_burmese, checkbox_byzantines,
 checkbox_celts, checkbox_chinese, checkbox_cumans, checkbox_dravidians, checkbox_ethiopians,
 checkbox_franks, checkbox_georgians, checkbox_goths, checkbox_gurjaras, checkbox_huns, checkbox_incas,
@@ -336,7 +333,7 @@ checkbox_mongols, checkbox_persians, checkbox_poles, checkbox_portuguese, checkb
 checkbox_saracens, checkbox_sicilians, checkbox_slavs, checkbox_spanish, checkbox_tatars,
 checkbox_teutons, checkbox_turks, checkbox_vietnamese, checkbox_vikings;
 
-HBITMAP icon_armenians, icon_aztecs, icon_bengalis, icon_berber, icon_bohemians,	                        // civ icons
+HBITMAP icon_armenians, icon_aztecs, icon_bengalis, icon_berber, icon_bohemians,
 icon_britons, icon_bulgarians, icon_burgundians, icon_burmese, icon_byzantines,
 icon_celts, icon_chinese, icon_cumans, icon_dravidians, icon_ethiopians,
 icon_franks, icon_georgians, icon_goths, icon_gurjaras, icon_huns, icon_incas,
@@ -409,13 +406,12 @@ Civ& GetCiv(const std::wstring &name);
 
 std::wstring drawn_civs[MAX_CIVS] = { L"" };
 
-bool accessor_out_of_bounds = false;             // for unit testing
-int times_drawn[MAX_CIVS] = { 0 };               // for unit testing
+bool accessor_out_of_bounds = false;
+int times_drawn[MAX_CIVS] = { 0 };
 HFONT font_underline = NULL;
 HWND tab;
 std::vector<std::wstring> civs;
 
-// Function declarations
 void CreateBoldFont();
 HBITMAP FetchCivIcon(const std::wstring &);
 void CreateTabs(HWND);
@@ -537,7 +533,6 @@ HWND CreateCheckbox(HWND hWnd, HINSTANCE hInstance, int x, int y, int width, int
 
 void GenerateFilePaths();
 
-// Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
