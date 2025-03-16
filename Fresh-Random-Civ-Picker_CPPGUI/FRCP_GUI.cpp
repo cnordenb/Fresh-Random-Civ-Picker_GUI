@@ -1,31 +1,17 @@
-﻿/*
-TODO
+﻿#include "FRCP_GUI.h" 
 
-- anchor civ pool tab components relative to window size
-- civ info button and pages
-- additional resources and links page
-- make subclassed button component graphics react to hover again
-
-*/
-#include "FRCP_GUI.h"
-
-// Function to create tabs
 void CreateTabs(HWND hWnd)
 {
-    // Initialize common controls
     INITCOMMONCONTROLSEX icex;
     icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
     icex.dwICC = ICC_TAB_CLASSES;
     InitCommonControlsEx(&icex);
 
-    // Create the tab control
     tab = CreateWindow(WC_TABCONTROL, L"", WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE, 0, 0, MIN_WIDTH, MIN_HEIGHT, hWnd, NULL, instance, NULL);
 
-    // Add tabs
     TCITEM tie;
     tie.mask = TCIF_TEXT;
 
-    // Change the type of pszText to LPCWSTR
     tie.pszText = const_cast<LPWSTR>(L"Draw Civ");
     TabCtrl_InsertItem(tab, 0, &tie);
 
@@ -36,7 +22,6 @@ void CreateTabs(HWND hWnd)
     TabCtrl_InsertItem(tab, 2, &tie);    
 }
 
-// Function to show/hide components based on the selected tab
 void ShowTabComponents(int tabIndex, HWND hWnd)
 {
     if (!startup && ui_sounds_enabled) PlaySound(L"sounds\\tab_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
@@ -70,7 +55,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     GenerateFilePaths();
     LoadSettings();    
 
-    // Initialize GDI+
     Gdiplus::GdiplusStartupInput gdiplusStartupInput;
     ULONG_PTR gdiplusToken;
     Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
@@ -78,19 +62,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     CreateUnderlineFont();
 	InitialiseCivStates();
 
-    // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, title, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_WINDOWSPROJECT1, window_class, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
-    // Perform application initialization:
     if (!InitInstance (hInstance, nCmdShow)) return FALSE;
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_WINDOWSPROJECT1));
 
     MSG msg;
 
-    // Main message loop:
     while (GetMessage(&msg, nullptr, 0, 0))
     {
         if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
@@ -100,7 +81,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
         }
     }
 
-    // Shutdown GDI+
     Gdiplus::GdiplusShutdown(gdiplusToken);
 
     DeleteObject(font_underline);
@@ -112,11 +92,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     return (int) msg.wParam;
 }
 
-//
-//  FUNCTION: MyRegisterClass()
-//
-//  PURPOSE: Registers the window class.
-//
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex;
@@ -138,23 +113,12 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     return RegisterClassExW(&wcex);
 }
 
-//
-//   FUNCTION: InitInstance(HINSTANCE, int)
-//
-//   PURPOSE: Saves instance handle and creates main window
-//
-//   COMMENTS:
-//
-//        In this function, we save the instance handle in a global variable and
-//        create and display the main program window.
-//
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-    instance = hInstance; // Store instance handle in our global variable
+    instance = hInstance;
 
 	wcscpy_s(title, L"Fresh Random Civ Picker");
 
-    // Set the default window size to 400x300
     HWND hWnd = CreateWindowW(window_class, title, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, MIN_WIDTH, MIN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
 
     if (!hWnd) return FALSE;    
@@ -165,16 +129,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
     return TRUE;
 }
 
-//
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PURPOSE: Processes messages for the main window.
-//
-//  WM_COMMAND  - process the application menu
-//  WM_PAINT    - Paint the main window
-//  WM_DESTROY  - post a quit message and return
-//
-//
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     TOOLINFO toolInfo = { 0 };
@@ -221,7 +175,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             PositionComponents(lParam);
             break;
         }
-        case WM_ACTIVATE: // re-enables hotkeys when window returns to foreground 
+        case WM_ACTIVATE:
         {
             if (wParam == WA_ACTIVE || wParam == WA_CLICKACTIVE) EnableHotkeys(hWnd);
             else if (wParam == WA_INACTIVE) DisableHotkeys(hWnd);
@@ -241,14 +195,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             if (pnmhdr->code == TTN_SHOW)
             {
-                // Get the tooltip info
                 LPNMTTDISPINFO lpttd = (LPNMTTDISPINFO)lParam;
 
-                // Get the cursor position
                 POINT pt;
                 GetCursorPos(&pt);
 
-                // Set the tooltip position
                 SendMessage(pnmhdr->hwndFrom, TTM_TRACKPOSITION, 0, (LPARAM)MAKELONG(pt.x + 10, pt.y + 10));
                 return TRUE;
             }
@@ -258,14 +209,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             if (hwndTooltip)
             {
-                // Get the cursor position
                 POINT pt;
                 GetCursorPos(&pt);
 
-                // Convert screen coordinates to client coordinates
                 ScreenToClient(hWnd, &pt);
 
-                // Check if the cursor is over any button and update the tooltip accordingly
                 RECT rect;
 
                 bool tooltipActivated = false;
@@ -302,24 +250,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             break;
         }
-        case WM_GETMINMAXINFO:                                  // minimum window size
+        case WM_GETMINMAXINFO:
         {
             MINMAXINFO *pmmi = (MINMAXINFO *)lParam;
-            pmmi->ptMinTrackSize.x = MIN_WIDTH; // Minimum width
-            pmmi->ptMinTrackSize.y = MIN_HEIGHT; // Minimum height
+            pmmi->ptMinTrackSize.x = MIN_WIDTH;
+            pmmi->ptMinTrackSize.y = MIN_HEIGHT;
             break;
         }
         case WM_HOTKEY:
         {     
             hotkey_pressed = true;
-            if (GetForegroundWindow() != hWnd)  // disables hotkeys if window is not in foreground
+            if (GetForegroundWindow() != hWnd)
             {
                 DisableHotkeys(hWnd);
                 break;
             }
             else EnableHotkeys(hWnd);
 
-            if (wParam == HOTKEY_ID_ESC) PostQuitMessage(0);               // escape for exiting  
+            if (wParam == HOTKEY_ID_ESC) PostQuitMessage(0);
             if (wParam == HOTKEY_ID_F1) OpenOptions(hWnd);
             if (wParam == HOTKEY_ID_F2) OpenHotkeys(hWnd);
             if (wParam == HOTKEY_ID_F3) OpenAbout(hWnd);
@@ -336,8 +284,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             if (current_tab != 2)
             {
-                if (wParam == HOTKEY_ID_SPACE) DrawCiv();           // space for drawing civ
-                if (wParam == HOTKEY_ID_RETURN) ResetProgram(false);            // return for resetting
+                if (wParam == HOTKEY_ID_SPACE) DrawCiv();
+                if (wParam == HOTKEY_ID_RETURN) ResetProgram(false);
             }
             else if (current_tab == 2)
             {
@@ -480,13 +428,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             switch (wmId)
             {
-                case IDM_ABOUT:                                     // "About"
+                case IDM_ABOUT:
                     OpenAbout(hWnd);
                     break;
-                case IDM_EXIT:                                     // "Exit"
+                case IDM_EXIT:
                     PostQuitMessage(0);
                     break;
-                case IDM_OPTIONS:							   // "Options"
+                case IDM_OPTIONS:
                     OpenOptions(hWnd);
                     break;
                 case IDM_SAVELOG:
@@ -515,63 +463,63 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 case IDM_HOTKEYS:
                     OpenHotkeys(hWnd);
                     break;
-                case IDM_GITHUB:                                    // "GitHub"
+                case IDM_GITHUB:
                     if (ui_sounds_enabled) PlayButtonSound();
                     ShellExecute(0, 0, L"https://github.com/cnordenb/Fresh-Random-Civ-Picker_CPPGUI", 0, 0, SW_SHOW);
                     break;
-                case IDM_WEBVERSION:                                // "Web Version"
+                case IDM_WEBVERSION:
                     if (ui_sounds_enabled) PlayButtonSound();
                     ShellExecute(0, 0, L"https://cnordenb.github.io/Fresh-Random-Civ-Picker_web/", 0, 0, SW_SHOW);
                     break;
-				case IDM_DISCORD:                                   // "Discord"
+				case IDM_DISCORD:
 					if (ui_sounds_enabled) PlayButtonSound();
 					ShellExecute(0, 0, L"https://discord.gg/rcFqrBdVUN", 0, 0, SW_SHOW);
 					break;
-				case IDM_DONATE:                                    // "Donate"
+				case IDM_DONATE:
 					if (ui_sounds_enabled) PlayButtonSound();
 					ShellExecute(0, 0, L"https://ko-fi.com/hjoerleif", 0, 0, SW_SHOW);
                     break;
-				case IDM_UPDATE:                                    // "Check for updates"
+				case IDM_UPDATE:
 					if (ui_sounds_enabled) PlayButtonSound();
 					ShellExecute(0, 0, L"https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases", 0, 0, SW_SHOW);
                     break;
-				case IDM_TECHTREE:                                  // "Tech Tree"
+				case IDM_TECHTREE:
                     if (ui_sounds_enabled) PlayButtonSound();
                     ShellExecute(0, 0, L"https://aoe2techtree.net/", 0, 0, SW_SHOW);                
 					break;
-				case IDM_STATS:                                     // "Stats"
+				case IDM_STATS:
 					if (ui_sounds_enabled) PlayButtonSound();
 					ShellExecute(0, 0, L"https://aoestats.io/", 0, 0, SW_SHOW);
 					break;
-				case IDM_DESTEAM:                                   // "Definitive Edition on Steam"
+				case IDM_DESTEAM:
 					if (ui_sounds_enabled) PlayButtonSound();
 					ShellExecute(0, 0, L"https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/", 0, 0, SW_SHOW);
 					break;
-				case IDM_HDSTEAM:                                   // "HD Edition on Steam"
+				case IDM_HDSTEAM:
 					if (ui_sounds_enabled) PlayButtonSound();
 					ShellExecute(0, 0, L"https://store.steampowered.com/app/221380/Age_of_Empires_II_Retired/", 0, 0, SW_SHOW);
 					break;
-				case IDM_VOOBLY:                                    // "Voobly"
+				case IDM_VOOBLY:
 					if (ui_sounds_enabled) PlayButtonSound();
 					ShellExecute(0, 0, L"https://www.voobly.com/games/view/Age-of-Empires-II-The-Conquerors", 0, 0, SW_SHOW);
 					break;
-				case IDM_XBOX:                                      // "Definitive Edition on Xbox"
+				case IDM_XBOX:
 					if (ui_sounds_enabled) PlayButtonSound();
 					ShellExecute(0, 0, L"https://www.xbox.com/games/store/age-of-empires-ii-definitive-edition/9N42SSSX2MTG/0010", 0, 0, SW_SHOW);
 					break;
-                case IDC_BUTTON_DRAW:                                             // "Draw"     
+                case IDC_BUTTON_DRAW:
                     DrawCiv();
                     break;
-                case IDC_BUTTON_RESET:                                             // "Reset"
+                case IDC_BUTTON_RESET:
                     ResetProgram(false);
                     break;
-                case IDC_BUTTON_ENABLEALL:                                             // "Enable All"                
+                case IDC_BUTTON_ENABLEALL:
                     EnableAll(hWnd, true);
                     break;
-                case IDC_BUTTON_DISABLEALL:                                             // "Disable All"
+                case IDC_BUTTON_DISABLEALL:
                     DisableAll(hWnd, true);
                     break;
-			    case IDC_BUTTON_CLEARLOG:                           // "Clear"
+			    case IDC_BUTTON_CLEARLOG:
                     ClearDrawnLog();
                     break;
                 case IDC_BUTTON_OPTIONS:
@@ -581,13 +529,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 case IDC_BUTTON_TECHTREE:
                     OpenTechTree();
                     break;
-                case IDC_CHECKBOX_REMAINLOG:                        // "Show Remaining Civs Log"
+                case IDC_CHECKBOX_REMAINLOG:
                     ToggleRemainLog();
                     break;
-                case IDC_CHECKBOX_AUTORESET:										                            // Auto-reset Checkbox
+                case IDC_CHECKBOX_AUTORESET:
                     ToggleAutoReset(hWnd);
                     break;
-                case IDC_CHECKBOX_AUTOTOGGLE:											                            // Auto-reset Checkbox
+                case IDC_CHECKBOX_AUTOTOGGLE:
                     ToggleAutoToggle(hWnd);
                     break;
                 case IDC_ICON_CIV:
