@@ -31,6 +31,7 @@
 #define IDI_WINDOWSPROJECT1             107
 #define IDI_SMALL                       108
 #define IDC_WINDOWSPROJECT1             109
+#define IDC_VERSION						9999
 #define IDD_OPTIONS                     110
 #define IDC_BUTTON_HOTKEYS				113
 #define IDM_HOTKEYS                     112

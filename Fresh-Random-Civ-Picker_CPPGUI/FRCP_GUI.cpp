@@ -333,7 +333,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (wParam == HOTKEY_ID_3) {TabCtrl_SetCurSel(tab, 2); ShowTabComponents(2, hWnd);}
             if (wParam == HOTKEY_ID_Z)
             {
-                if (ui_sounds_enabled) PlayButtonSound();
+				PlayAudio(button);
                 if (civ_labels_enabled)
                 {
 					civ_labels_enabled = false;
@@ -347,8 +347,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
 			if (wParam == HOTKEY_ID_X)
             {
-                if (ui_sounds_enabled) PlayButtonSound();
-				if (icons_enabled)
+                PlayAudio(button);
+                if (icons_enabled)
                 {
 					icons_enabled = false;
 					ShowWindow(civ_icon, SW_HIDE);
@@ -365,7 +365,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (jingles_enabled)
                 {
                     jingles_enabled = false;
-					MuteSounds();
+                    PlayAudio(mute);
                 }
                 else
                 {
@@ -379,14 +379,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				if (ui_sounds_enabled) ui_sounds_enabled = false;				
                 else
                 {
-                    PlayButtonSound();
+                    PlayAudio(button);
                     ui_sounds_enabled = true;
                 }                    				
 			}             
 
             if (wParam == HOTKEY_ID_C)
             {
-                if (ui_sounds_enabled) PlayButtonSound();
+                PlayAudio(button);
                 if (iteration_label_enabled)
                 {
                     iteration_label_enabled = false;
@@ -415,7 +415,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (wmId >= 5 && wmId <= 49)
             {
 				int i = wmId - 5;
-                if (ui_sounds_enabled) PlayButtonSound();
+                PlayAudio(button);
                 if (IsDlgButtonChecked(hWnd, wmId) == BST_CHECKED) AddCiv(civ[i].name);
                 else RemoveCiv(civ[i].name);
                 ValidateDlcToggle(hWnd, civ[i].dlc);
@@ -453,59 +453,59 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     RedrawCiv();
                     break;
                 case IDM_AOE2INSIGHTS:
-                    if (ui_sounds_enabled) PlayButtonSound();
+                    PlayAudio(button);
                     ShellExecute(0, 0, L"https://www.aoe2insights.com/lobbies/", 0, 0, SW_SHOW);
                     break;
                 case IDM_SPECTATORDASHBOARD:
-                    if (ui_sounds_enabled) PlayButtonSound();
+                    PlayAudio(button);
                     ShellExecute(0, 0, L"https://aoe2recs.com/", 0, 0, SW_SHOW);
                     break;
                 case IDM_HOTKEYS:
                     OpenHotkeys(hWnd);
                     break;
                 case IDM_GITHUB:
-                    if (ui_sounds_enabled) PlayButtonSound();
+                    PlayAudio(button);
                     ShellExecute(0, 0, L"https://github.com/cnordenb/Fresh-Random-Civ-Picker_CPPGUI", 0, 0, SW_SHOW);
                     break;
                 case IDM_WEBVERSION:
-                    if (ui_sounds_enabled) PlayButtonSound();
+                    PlayAudio(button);
                     ShellExecute(0, 0, L"https://cnordenb.github.io/Fresh-Random-Civ-Picker_web/", 0, 0, SW_SHOW);
                     break;
 				case IDM_DISCORD:
-					if (ui_sounds_enabled) PlayButtonSound();
-					ShellExecute(0, 0, L"https://discord.gg/rcFqrBdVUN", 0, 0, SW_SHOW);
+                    PlayAudio(button);
+                    ShellExecute(0, 0, L"https://discord.gg/rcFqrBdVUN", 0, 0, SW_SHOW);
 					break;
 				case IDM_DONATE:
-					if (ui_sounds_enabled) PlayButtonSound();
-					ShellExecute(0, 0, L"https://ko-fi.com/hjoerleif", 0, 0, SW_SHOW);
+                    PlayAudio(button);
+                    ShellExecute(0, 0, L"https://ko-fi.com/hjoerleif", 0, 0, SW_SHOW);
                     break;
 				case IDM_UPDATE:
-					if (ui_sounds_enabled) PlayButtonSound();
-					ShellExecute(0, 0, L"https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases", 0, 0, SW_SHOW);
+                    PlayAudio(button);
+                    ShellExecute(0, 0, L"https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases", 0, 0, SW_SHOW);
                     break;
 				case IDM_TECHTREE:
-                    if (ui_sounds_enabled) PlayButtonSound();
-                    ShellExecute(0, 0, L"https://aoe2techtree.net/", 0, 0, SW_SHOW);                
+                    PlayAudio(button);
+                    ShellExecute(0, 0, L"https://aoe2techtree.net/", 0, 0, SW_SHOW);
 					break;
 				case IDM_STATS:
-					if (ui_sounds_enabled) PlayButtonSound();
-					ShellExecute(0, 0, L"https://aoestats.io/", 0, 0, SW_SHOW);
+                    PlayAudio(button);
+                    ShellExecute(0, 0, L"https://aoestats.io/", 0, 0, SW_SHOW);
 					break;
 				case IDM_DESTEAM:
-					if (ui_sounds_enabled) PlayButtonSound();
-					ShellExecute(0, 0, L"https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/", 0, 0, SW_SHOW);
+                    PlayAudio(button);
+                    ShellExecute(0, 0, L"https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/", 0, 0, SW_SHOW);
 					break;
 				case IDM_HDSTEAM:
-					if (ui_sounds_enabled) PlayButtonSound();
-					ShellExecute(0, 0, L"https://store.steampowered.com/app/221380/Age_of_Empires_II_Retired/", 0, 0, SW_SHOW);
+                    PlayAudio(button);
+                    ShellExecute(0, 0, L"https://store.steampowered.com/app/221380/Age_of_Empires_II_Retired/", 0, 0, SW_SHOW);
 					break;
 				case IDM_VOOBLY:
-					if (ui_sounds_enabled) PlayButtonSound();
-					ShellExecute(0, 0, L"https://www.voobly.com/games/view/Age-of-Empires-II-The-Conquerors", 0, 0, SW_SHOW);
+                    PlayAudio(button);
+                    ShellExecute(0, 0, L"https://www.voobly.com/games/view/Age-of-Empires-II-The-Conquerors", 0, 0, SW_SHOW);
 					break;
 				case IDM_XBOX:
-					if (ui_sounds_enabled) PlayButtonSound();
-					ShellExecute(0, 0, L"https://www.xbox.com/games/store/age-of-empires-ii-definitive-edition/9N42SSSX2MTG/0010", 0, 0, SW_SHOW);
+                    PlayAudio(button);
+                    ShellExecute(0, 0, L"https://www.xbox.com/games/store/age-of-empires-ii-definitive-edition/9N42SSSX2MTG/0010", 0, 0, SW_SHOW);
 					break;
                 case IDC_BUTTON_DRAW:
                     DrawCiv();
@@ -539,7 +539,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     ToggleAutoToggle(hWnd);
                     break;
                 case IDC_ICON_CIV:
-                    if (jingles_enabled) PlayJingle(current_civ);
+                    PlayJingle(current_civ);
                     break;
                 case IDC_ICON_EDITION:
                     switch (edition_state)
@@ -640,13 +640,14 @@ INT_PTR CALLBACK AboutDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
         {
             HWND hwndHyperlink = GetDlgItem(hDlg, IDC_HYPERLINK);
             oldProc = (WNDPROC)SetWindowLongPtr(hwndHyperlink, GWLP_WNDPROC, (LONG_PTR)HyperlinkProc);
+            SetDlgItemText(hDlg, IDC_VERSION, VERSION);
             return(INT_PTR)TRUE;
         }
         case WM_COMMAND:
         {
             if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
             {
-                if (ui_sounds_enabled) PlayButtonSound();
+                PlayAudio(button);
                 EndDialog(hDlg, LOWORD(wParam));
                 return(INT_PTR)TRUE;
             }
@@ -691,13 +692,13 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
                 {
                     case CBN_DROPDOWN:
                     {
-                        if (ui_sounds_enabled) PlaySound(L"sounds\\hover_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+                        PlayAudio(hover);
                         break;
                     }
                     case CBN_SELCHANGE:
                     {						
-                        if (ui_sounds_enabled && !GetCiv(current_civ).legacy) PlaySound(L"sounds\\view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-                        else if (jingles_enabled) PlayJingle(current_civ);
+                        if (!GetCiv(current_civ).legacy) PlayAudio(view);
+                        else PlayJingle(current_civ);
                         break;
                     }
                 }
@@ -722,8 +723,8 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
             {
                 if (wmId == IDC_CHECKBOX_JINGLES)
                 {
-                    if (!jingles_enabled) MuteSounds();
-                    else PlayJingle(current_civ);
+                    PlayAudio(mute);
+                    PlayJingle(current_civ);
                 }
                 
                 switch (wmId)
@@ -737,15 +738,15 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
                 case IDC_CHECKBOX_SOUNDS:
                 case IDC_CHECKBOX_TOOLTIPS:
 			    case IDC_CHECKBOX_STARTDRAW:
-                    if (ui_sounds_enabled) PlayButtonSound();
+                    PlayAudio(button);
                     break;
 			    case IDC_RADIO_LOGGING:
-                    if (ui_sounds_enabled) PlaySound(L"sounds\\view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-				    persistent_logging = true;
+                    PlayAudio(view);
+                    persistent_logging = true;
                     break;
 			    case IDC_RADIO_STARTRESET:
-                    if (ui_sounds_enabled) PlaySound(L"sounds\\view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
-				    persistent_logging = false;
+                    PlayAudio(view);
+                    persistent_logging = false;
 				    break;
                 }
             }
@@ -758,7 +759,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
         
             if (wmId == IDCANCEL || wmId == IDOK)
             {
-                if (ui_sounds_enabled) PlayButtonSound();
+                PlayAudio(button);
                 EndDialog(hDlg, wmId);
                 return(INT_PTR)TRUE;
             }        
@@ -799,7 +800,7 @@ LRESULT CALLBACK HyperlinkProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 void ResetProgram(bool auto_reset)
 {
-    if (ui_sounds_enabled && !startup && !auto_reset && !jingles_enabled) PlayButtonSound();
+    if (!startup && !auto_reset && !jingles_enabled) PlayAudio(button);
     if (custom_max_civs < MAX_CIVS) custom_civ_pool = true;
 
     current_civ = L"Random";
@@ -841,12 +842,12 @@ void ResetProgram(bool auto_reset)
 
 void DrawCiv()
 {
-    if (!startup && ui_sounds_enabled && !jingles_enabled) PlayButtonSound();
+    if (!startup && !jingles_enabled) PlayAudio(button);
     reset_state = false;
 
     if (custom_max_civs == 0)
     {
-        if (ui_sounds_enabled) PlaySound(L"sounds\\error_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+        PlayAudio(error);
         SetWindowTextA(label_centre, "Empty pool!");
         return;
     }
@@ -878,12 +879,12 @@ void DrawCiv()
     UpdateDrawnLog(false, true, false);
     UpdateRemainingLog(false, false);
 
-    if (jingles_enabled)
-    {/*
-        std::thread sound_thread(PlayJingle, current_civ);
-        sound_thread.detach();*/
-        PlayJingle(current_civ);
-    }
+
+/*
+    std::thread sound_thread(PlayJingle, current_civ);
+    sound_thread.detach();*/
+    PlayJingle(current_civ);
+    
 
     UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
     redrawable = false;
@@ -947,6 +948,8 @@ HBITMAP FetchCivIcon(const std::wstring &civ_name)
 
 void PlayJingle(const std::wstring &civ_name)
 {
+	if (!jingles_enabled) return;
+
     std::wstring processed_civ_name = civ_name;
     processed_civ_name[0] = std::tolower(processed_civ_name[0]);
     std::wstring jingle_path;
@@ -1010,7 +1013,7 @@ void HideCustomPoolCheckboxes()
 
 void EnableAll(HWND hWnd, bool sound_acceptable)
 {
-    if (ui_sounds_enabled && sound_acceptable) PlayButtonSound();
+	if (sound_acceptable) PlayAudio(button);
 	custom_civ_pool = false;
 
     if (edition_state == DE)
@@ -1050,7 +1053,7 @@ void EnableAll(HWND hWnd, bool sound_acceptable)
 
 void DisableAll(HWND hWnd, bool sound_acceptable)
 {
-    if (ui_sounds_enabled && sound_acceptable) PlayButtonSound();
+    if (sound_acceptable) PlayAudio(button);
 	custom_civ_pool = true;
     for (int i = 0; i < MAX_CIVS; i++)
     {
@@ -1246,7 +1249,7 @@ void ShowAOCCheckbox(bool aok_state)
 
 void ToggleDlc(dlc civ_dlc, HWND hWnd)
 {
-    if (!startup && ui_sounds_enabled) PlayButtonSound();
+    if (!startup) PlayAudio(button);
 	int check_id = GetDlcCheckboxId(civ_dlc);
 
     if (hotkey_pressed)
@@ -1383,7 +1386,7 @@ int GetWindowHeight(HWND hWnd) { RECT rect; GetClientRect(hWnd, &rect); return r
 
 void OpenTechTree()
 {
-    if (ui_sounds_enabled) PlayButtonSound();
+    PlayAudio(button);
     std::wstring techtree_path = L"https://aoe2techtree.net/#";
     if (current_civ != L"Random") techtree_path += current_civ;
 	ShellExecute(NULL, L"open", techtree_path.c_str(), NULL, NULL, SW_SHOWNORMAL);
@@ -1505,7 +1508,7 @@ void SetEditionState(HWND hWnd, edition edition)
        
 void ToggleRemainLog()
 {	
-    if (ui_sounds_enabled) PlayButtonSound();
+    PlayAudio(button);
     if (remainlog_enabled)
     {
         ShowWindow(remaining_log, SW_HIDE);
@@ -1549,7 +1552,7 @@ int GetDlcCheckboxId(dlc dlc)
 
 void ToggleAutoToggle(HWND hWnd)
 {
-    if (!startup && ui_sounds_enabled) PlayButtonSound();
+    if (!startup) PlayAudio(button);
     if (hotkey_pressed)
     {
         if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTOTOGGLE) == BST_CHECKED) CheckDlgButton(hWnd, IDC_CHECKBOX_AUTOTOGGLE, BST_UNCHECKED);		
@@ -1580,7 +1583,7 @@ void ToggleAutoToggle(HWND hWnd)
 
 void ToggleAutoReset(HWND hWnd)
 {
-    if (!startup && ui_sounds_enabled) PlayButtonSound();
+    if (!startup) PlayAudio(button);
 	if (hotkey_pressed)
 	{
 		if (IsDlgButtonChecked(hWnd, IDC_CHECKBOX_AUTORESET) == BST_CHECKED) CheckDlgButton(hWnd, IDC_CHECKBOX_AUTORESET, BST_UNCHECKED);		
@@ -1627,13 +1630,14 @@ void SaveLog(bool user_save)
     std::wstring saveFilePath = LOG_FILE_PATH;
     if (user_save)
     {
-		if (ui_sounds_enabled) PlayButtonSound();
+        PlayAudio(button);
 
         SYSTEMTIME st;
         GetLocalTime(&st);
 
         std::wstringstream wss;
-        wss << L"FRCP Preset v1.3.0 @" << std::setw(4) << std::setfill(L'0') << st.wYear << L"." 
+        wss << L"FRCP Preset v" << VERSION << " @" 
+            << std::setw(4) << std::setfill(L'0') << st.wYear << L"." 
             << std::setw(2) << std::setfill(L'0') << st.wMonth << L"."
             << std::setw(2) << std::setfill(L'0') << st.wDay << L" "
             << std::setw(2) << std::setfill(L'0') << st.wHour
@@ -1669,7 +1673,7 @@ void SaveLog(bool user_save)
 
         if (GetSaveFileName(&ofn) == TRUE)
         {
-            if (ui_sounds_enabled) PlayButtonSound();
+			PlayAudio(button);
             saveFilePath = ofn.lpstrFile;
             if (saveFilePath.find(L".txt") == std::wstring::npos)
             {
@@ -1678,7 +1682,7 @@ void SaveLog(bool user_save)
         }
         else
         {
-            if (ui_sounds_enabled) PlayButtonSound();
+            PlayAudio(button);
             return;
         }
     }
@@ -1714,7 +1718,7 @@ void LoadLog(HWND hWnd, bool user_load)
 
     if (user_load)
     {
-		if (ui_sounds_enabled) PlayButtonSound();
+		PlayAudio(button);
 
         wchar_t exePath[MAX_PATH];
         GetModuleFileName(NULL, exePath, MAX_PATH);
@@ -1741,7 +1745,7 @@ void LoadLog(HWND hWnd, bool user_load)
         if (GetOpenFileName(&ofn) == TRUE) loadFilePath = ofn.lpstrFile;
         else
         {
-			if (ui_sounds_enabled) PlayButtonSound();
+			PlayAudio(button);
 			startup = false;
             return;
         }
@@ -1896,13 +1900,11 @@ void InitialiseCivs()
     for (int i = 0; i < MAX_CIVS; i++) civs.push_back(civ[i].name);
 }
 
-void MuteSounds() { PlaySound(L"sounds\\mute.wav", NULL, SND_FILENAME | SND_ASYNC); }
+void OpenOptions(HWND hWnd) { PlayAudio(button); DialogBox(instance, MAKEINTRESOURCE(IDD_OPTIONS), hWnd, OptionsDlgProc); }
 
-void OpenOptions(HWND hWnd) { if (ui_sounds_enabled) PlayButtonSound(); DialogBox(instance, MAKEINTRESOURCE(IDD_OPTIONS), hWnd, OptionsDlgProc); }
+void OpenHotkeys(HWND hWnd) { PlayAudio(button); DialogBox(instance, MAKEINTRESOURCE(IDD_HOTKEYS), hWnd, HotkeysDlgProc); }
 
-void OpenHotkeys(HWND hWnd) { if (ui_sounds_enabled) PlayButtonSound(); DialogBox(instance, MAKEINTRESOURCE(IDD_HOTKEYS), hWnd, HotkeysDlgProc); }
-
-void OpenAbout(HWND hWnd) { if (ui_sounds_enabled) PlayButtonSound(); DialogBox(instance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc); }
+void OpenAbout(HWND hWnd) { PlayAudio(button); DialogBox(instance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, AboutDlgProc); }
 
 INT_PTR CALLBACK HotkeysDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -1926,7 +1928,7 @@ INT_PTR CALLBACK HotkeysDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 
             if (wmId == IDCANCEL || wmId == IDOK)
             {
-                if (ui_sounds_enabled) PlayButtonSound();
+                PlayAudio(button);
                 EndDialog(hDlg, wmId);
                 return(INT_PTR)TRUE;
             }
@@ -2115,13 +2117,11 @@ void PositionComponents(LPARAM lParam)
     SetWindowPos(edition_icon, NULL, 190, 30, 128, 93, SWP_NOZORDER);
 }
 
-void PlayButtonSound() { PlaySound(L"sounds\\button_sound.wav", NULL, SND_FILENAME | SND_ASYNC); }
-
-void ClearDrawnLog() { if (!startup && ui_sounds_enabled) PlayButtonSound(); SetWindowText(drawn_log, L""); }
+void ClearDrawnLog() { if (!startup) PlayAudio(button); SetWindowText(drawn_log, L""); }
 
 void JoinLobby(HWND hWnd)
 {
-	if (ui_sounds_enabled) PlayButtonSound();
+    PlayAudio(button);
     std::wstring lobbyCode;
     if (DialogBoxParam(instance, MAKEINTRESOURCE(IDD_JOINLOBBY_DIALOG), hWnd, JoinLobbyDlgProc, reinterpret_cast<LPARAM>(&lobbyCode)) == IDC_BUTTON_OK)
     {
@@ -2145,13 +2145,13 @@ INT_PTR CALLBACK JoinLobbyDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
             int wmEvent = HIWORD(wParam);
             if (wmId == IDCANCEL)
             {
-                if (ui_sounds_enabled) PlayButtonSound();
+                PlayAudio(button);
                 EndDialog(hDlg, wmId);
                 return(INT_PTR)TRUE;
             }
             if (LOWORD(wParam) == IDC_BUTTON_OK)
             {
-                if (ui_sounds_enabled) PlayButtonSound();
+                PlayAudio(button);
                 wchar_t buffer[256];
                 GetDlgItemText(hDlg, IDC_EDIT_LOBBYCODE, buffer, 256);
                 *lobby_code = buffer;
@@ -2165,7 +2165,7 @@ INT_PTR CALLBACK JoinLobbyDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
             }
             else if (LOWORD(wParam) == IDC_BUTTON_CANCEL)
             {
-                if (ui_sounds_enabled) PlayButtonSound();
+                PlayAudio(button);
                 EndDialog(hDlg, LOWORD(wParam));
                 return (INT_PTR)TRUE;
             }
@@ -2202,17 +2202,17 @@ void UndrawCiv()
 {
     if (!undrawable || iterator < 1)
     {
-        if (ui_sounds_enabled) PlaySound(L"sounds\\error_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+		PlayAudio(error);
         return;
     }
-	if (ui_sounds_enabled) PlayButtonSound();
+	PlayAudio(button);
     if (iterator > 0) iterator--; else return;
     civs.push_back(current_civ);
     if (iterator >= 1)current_civ = drawn_civs[iterator - 1];
     else current_civ = L"Random";
 	HBITMAP drawn_civ_icon = FetchCivIcon(current_civ);
 	SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
-    if (jingles_enabled) PlayJingle(current_civ);
+    PlayJingle(current_civ);
     if (current_civ == L"Random") SetWindowText(label_centre, L"?");
     else SetWindowText(label_centre, current_civ.c_str());	
     if (!civ_labels_enabled) ShowWindow(label_centre, SW_HIDE);
@@ -2242,7 +2242,7 @@ void RedrawCiv()
 {
     if (!redrawable || drawn_civs[iterator] == L"")
     {
-        if (ui_sounds_enabled) PlaySound(L"sounds\\error_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+		PlayAudio(error);
         return;
     }
     current_civ = drawn_civs[iterator];
@@ -2250,7 +2250,7 @@ void RedrawCiv()
     iterator++;
 	HBITMAP drawn_civ_icon = FetchCivIcon(current_civ);
 	SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
-    if (jingles_enabled) PlayJingle(current_civ);
+    PlayJingle(current_civ);
 	SetWindowText(label_centre, current_civ.c_str());
     SetWindowText(label_corner, StringCleaner(std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs)));
     if (!iteration_label_enabled || current_tab != 0) ShowWindow(label_corner, SW_HIDE);
@@ -2261,3 +2261,17 @@ void RedrawCiv()
 }
 
 Civ &GetCiv(const std::wstring &name) { for (int i = 0; i < MAX_CIVS; i++) if (civ[i].name == name) return civ[i]; return random; }
+
+void PlayAudio(sound_type type)
+{
+	if (!ui_sounds_enabled && type != mute) return;
+    switch (type)
+    {
+    case button: PlaySound(L"sounds\\button_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
+	case tabsound: PlaySound(L"sounds\\tab_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
+	case hover: PlaySound(L"sounds\\hover_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
+	case mute: PlaySound(L"sounds\\mute.wav", NULL, SND_FILENAME | SND_ASYNC); return;
+	case error: PlaySound(L"sounds\\error_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
+	case view: PlaySound(L"sounds\\view_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
+    }
+}

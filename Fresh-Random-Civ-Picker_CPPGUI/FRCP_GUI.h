@@ -33,7 +33,7 @@
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-
+#define VERSION L"1.3.1"
 
 #define MAX_CIVS 45
 #define DLC_AMOUNT 10
@@ -249,13 +249,25 @@ bool hotkey_pressed = false;
 bool redrawable = false;
 bool undrawable = false;
 
-enum edition {
+enum sound_type
+{
+	button,
+	tabsound,
+    hover,
+    view,
+	error,
+    mute
+};
+
+enum edition
+{
     DE,
     HD,
     AOK
 };
 
-enum dlc {
+enum dlc
+{
     aok,
     aoc,
 
@@ -436,7 +448,7 @@ void DisableHotkeys(HWND);
 void CreateUnderlineFont();
 void LoadImages();
 
-void MuteSounds();
+void PlayAudio(sound_type);
 void PlayJingle(const std::wstring &);
 bool IsLegacyCiv(const std::wstring &);
 
@@ -510,8 +522,6 @@ HWND hwndTooltip[23];
 int hwnd_length = sizeof(hwndTooltip) / sizeof(hwndTooltip[0]);
 
 void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText);
-
-void PlayButtonSound();
 
 LPCWSTR StringCleaner(const std::wstring &);
 
