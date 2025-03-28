@@ -22,6 +22,7 @@
 #include <map>
 #include <thread>
 #include <iomanip>
+#include <libloaderapi.h>
 
 
 
@@ -33,13 +34,14 @@
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-#define VERSION L"1.3.1"
+#define VERSION L"1.3.2"
 
 #define MAX_CIVS 45
 #define DLC_AMOUNT 10
 #define EDITION_AMOUNT 3
 #define MAX_LOADSTRING 100
 #define HOTKEY_AMOUNT 33
+#define SOUND_AMOUNT 5
 
 #define HOTKEY_ID_TAB 1
 #define HOTKEY_ID_SPACE 2
@@ -174,13 +176,37 @@ HWND checkbox_showremainlog;
 
 HWND hOptionsDlg = NULL;
 
+struct SoundResource {
+    HRSRC hResInfo;
+    HGLOBAL hRes;
+    LPVOID lpRes;
+    LPCWSTR name;
+};
+
+SoundResource soundResources[SOUND_AMOUNT] = {
+    {NULL, NULL, NULL, L"button_sound"},
+    {NULL, NULL, NULL, L"tab_sound"},
+    {NULL, NULL, NULL, L"hover_sound"},
+    {NULL, NULL, NULL, L"error_sound"},
+    {NULL, NULL, NULL, L"view_sound"}
+};
 
 
+/*
+HRSRC button_sound, tab_sound, hover_sound, view_sound, error_sound;
+HRSRC button_sound_inf, tab_sound_inf, hover_sound_inf, view_sound_inf, error_sound_inf;
+HGLOBAL button_sound_gl, tab_sound_gl, hover_sound_gl, view_sound_gl, error_sound_gl;
+LPCWSTR button_name = L"button_sound", tab_name = L"tab_sound", hover_name = L"hover_sound", view_name = L"view_sound", error_name = L"error_sound";
+LPVOID button_sound_data, tab_sound_data, hover_sound_data, view_sound_data, error_sound_data;
 
+HRSRC sound_resource[] = { button_sound, tab_sound, hover_sound, view_sound, error_sound };
+HRSRC sound_resource_inf[] = { button_sound_inf, tab_sound_inf, hover_sound_inf, view_sound_inf, error_sound_inf };
+HGLOBAL sound_global[] = { button_sound_gl, tab_sound_gl, hover_sound_gl, view_sound_gl, error_sound_gl };
+LPCWSTR sound_name[] = { button_name, tab_name, hover_name, view_name, error_name };
+LPVOID sound_data[] = { button_sound_data, tab_sound_data, hover_sound_data, view_sound_data, error_sound_data };
 
-
-
-
+int sound_amount = sizeof(sound_global) / sizeof(sound_global[0]);
+*/
 
 HWND checkbox_khans, checkbox_dukes, checkbox_west, checkbox_india, checkbox_rome, checkbox_royals,
 checkbox_forgotten, checkbox_africans, checkbox_rajas,
@@ -255,8 +281,7 @@ enum sound_type
 	tabsound,
     hover,
     view,
-	error,
-    mute
+	error
 };
 
 enum edition
@@ -405,14 +430,9 @@ Civ(L"Turks", true, AOK, aok, true, checkbox_turks, icon_turks),
 Civ(L"Vietnamese", true, HD, rajas, false, checkbox_vietnamese, icon_vietnamese), 
 Civ(L"Vikings", true, AOK, aok, true, checkbox_vikings, icon_vikings)};
 
-
-
 edition edition_state = DE;
 
 bool custom_civ_pool = false;
-
-
-
 
 Civ& GetCiv(const std::wstring &name);
 
@@ -448,6 +468,14 @@ void DisableHotkeys(HWND);
 void CreateUnderlineFont();
 void LoadImages();
 
+BOOL PlayResource(const SoundResource &);
+
+bool LoadSound(SoundResource &);
+void LoadSounds();
+void UnloadSound(HGLOBAL);
+void UnloadSounds();
+
+void StopSound();
 void PlayAudio(sound_type);
 void PlayJingle(const std::wstring &);
 bool IsLegacyCiv(const std::wstring &);
@@ -457,7 +485,6 @@ void InitialiseCivStates();
 void InitialiseCustomPoolCheckboxes(HWND);
 void AddCiv(const std::wstring &);
 void RemoveCiv(const std::wstring &);
-
 
 void ShowAllPoolCheckboxes();
 void HideCustomPoolCheckboxes();
@@ -481,7 +508,6 @@ void SubclassButtons();
 void AddTooltips();
 void CreateTooltips(HWND);
 
-
 void SetEditionState(HWND hWnd, edition edition);
 
 void EnableAll(HWND, bool);
@@ -495,7 +521,6 @@ void ShowHDDLCCheckboxes(bool);
 void ShowAOCCheckbox(bool);
 int GetDlcCheckboxId(dlc);
 HWND GetCivCheckbox(const std::wstring &);
-
 
 void UpdateDrawnLog(bool, bool, bool);
 void UpdateRemainingLog(bool, bool);
@@ -511,26 +536,23 @@ void ValidateAllDlcToggles(HWND);
 void ToggleAutoToggle(HWND);
 void ToggleAutoReset(HWND);
 
-
 void AddTooltip(HWND, HWND, LPCWSTR);
 
 void ActivateTooltip(HWND, TOOLINFO *, POINT);
 void DeactivateTooltips(TTTOOLINFOW);
-
 
 HWND hwndTooltip[23];
 int hwnd_length = sizeof(hwndTooltip) / sizeof(hwndTooltip[0]);
 
 void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText);
 
-LPCWSTR StringCleaner(const std::wstring &);
+LPCWSTR StringConjurer(LPVOID);
+LPCWSTR StringCleaner(const std::wstring&);
 
 HWND lastTooltipControl = NULL;
 bool tooltipActive = false;
 
-
 void SubclassButton(HWND);
-
 
 int GetWindowWidth(HWND);
 int GetWindowHeight(HWND);
@@ -549,6 +571,6 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    OptionsDlgProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    HotkeysDlgProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK JoinLobbyDlgProc(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    JoinLobbyDlgProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK    HyperlinkProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK    ButtonProc(HWND, UINT, WPARAM, LPARAM);

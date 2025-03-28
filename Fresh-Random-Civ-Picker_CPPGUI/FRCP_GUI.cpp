@@ -24,7 +24,7 @@ void CreateTabs(HWND hWnd)
 
 void ShowTabComponents(int tabIndex, HWND hWnd)
 {
-    if (!startup && ui_sounds_enabled) PlaySound(L"sounds\\tab_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+    if (!startup) PlayAudio(tabsound);
     else if (startup && jingles_enabled && current_tab != 2) PlayJingle(current_civ);    
     current_tab = tabIndex;
     if (tabIndex == 0)
@@ -49,6 +49,7 @@ void ShowTabComponents(int tabIndex, HWND hWnd)
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {    
+    LoadSounds();
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -88,6 +89,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
     if (persistent_logging) SaveLog(false);
     SaveSettings();
+
+    UnloadSounds();
 
     return (int) msg.wParam;
 }
@@ -365,7 +368,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (jingles_enabled)
                 {
                     jingles_enabled = false;
-                    PlayAudio(mute);
+                    StopSound();
                 }
                 else
                 {
@@ -723,7 +726,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
             {
                 if (wmId == IDC_CHECKBOX_JINGLES)
                 {
-                    PlayAudio(mute);
+                    StopSound();
                     PlayJingle(current_civ);
                 }
                 
@@ -957,7 +960,7 @@ void PlayJingle(const std::wstring &civ_name)
     if (legacy_jingle_enabled && GetCiv(civ_name).legacy) jingle_path = L"sounds\\civ_jingles\\legacy\\" + processed_civ_name + L".wav";
 	else jingle_path = L"sounds\\civ_jingles\\" + processed_civ_name + L".wav";    
     
-    PlaySound(jingle_path.c_str(), NULL, SND_FILENAME | SND_ASYNC);    
+    PlaySound(jingle_path.c_str(), NULL, SND_FILENAME | SND_ASYNC);
 }
 
 void AddCiv(const std::wstring &civ)
@@ -1429,6 +1432,8 @@ void ActivateTooltip(HWND hwndTip, TOOLINFO *toolInfo, POINT pt)
 
 LPCWSTR StringCleaner(const std::wstring &dirty_string) { LPCWSTR clean_string = const_cast<LPCWSTR>(dirty_string.c_str()); return clean_string; }
 
+LPCWSTR StringConjurer(LPVOID dirty_string) { LPCWSTR clean_string = static_cast<LPCWSTR>(dirty_string); return clean_string; }
+
 void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText)
 {
     if (!hwndTool || !hwndTip)
@@ -1449,7 +1454,7 @@ void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText)
 
 void SetEditionState(HWND hWnd, edition edition)
 {
-    if (ui_sounds_enabled && !startup) PlaySound(L"sounds\\view_sound.wav", NULL, SND_FILENAME | SND_ASYNC);
+    if (!startup) PlayAudio(view);
     switch (edition)
     {
         case DE:
@@ -2262,16 +2267,84 @@ void RedrawCiv()
 
 Civ &GetCiv(const std::wstring &name) { for (int i = 0; i < MAX_CIVS; i++) if (civ[i].name == name) return civ[i]; return random; }
 
-void PlayAudio(sound_type type)
-{
-	if (!ui_sounds_enabled && type != mute) return;
-    switch (type)
-    {
-    case button: PlaySound(L"sounds\\button_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
-	case tabsound: PlaySound(L"sounds\\tab_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
-	case hover: PlaySound(L"sounds\\hover_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
-	case mute: PlaySound(L"sounds\\mute.wav", NULL, SND_FILENAME | SND_ASYNC); return;
-	case error: PlaySound(L"sounds\\error_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
-	case view: PlaySound(L"sounds\\view_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
+void PlayAudio(sound_type type) {
+    if (!ui_sounds_enabled) return;
+    switch (type) {
+    case button: PlayResource(soundResources[0]); return;
+    case tabsound: PlayResource(soundResources[1]); return;
+    case hover: PlayResource(soundResources[2]); return;
+    case error: PlayResource(soundResources[3]); return;
+    case view: PlayResource(soundResources[4]); return;
     }
 }
+
+/*
+void PlayAudio(sound_type type)
+{
+	if (!ui_sounds_enabled) return;
+    switch (type)
+    {
+    case button: PlayResource(sound_name[0]); return;
+    //case button: PlaySound(L"sounds\\button_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
+    case tabsound: PlayResource(L"tab_sound"); return;
+    //case tabsound: PlaySound(L"sounds\\tab_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
+    case hover: PlayResource(L"hover_sound"); return;
+    //case hover: PlaySound(L"sounds\\hover_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
+    case error: PlayResource(L"error_sound"); return;
+    //case error: PlaySound(L"sounds\\error_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
+    case view: PlayResource(L"view_sound"); return;
+    //case view: PlaySound(L"sounds\\view_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
+    }
+}*/
+
+void StopSound() { PlaySound(NULL, NULL, 0); }
+
+BOOL PlayResource(const SoundResource &sound_resource) 
+{ 
+    BOOL bRtn = sndPlaySound(static_cast<LPCWSTR>(sound_resource.lpRes), SND_MEMORY | SND_ASYNC | SND_NODEFAULT);
+    if (!bRtn) {
+        MessageBox(NULL, L"Failed to play sound.", L"Error", MB_OK | MB_ICONERROR);
+    }
+    return bRtn;
+}
+
+bool LoadSound(SoundResource& soundResource)
+{
+    soundResource.hResInfo = FindResource(instance, soundResource.name, L"WAVE");
+    if (soundResource.hResInfo == NULL)
+    {
+        MessageBox(NULL, L"Failed to find resource.", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    soundResource.hRes = LoadResource(instance, soundResource.hResInfo);
+    if (soundResource.hRes == NULL)
+    {
+        MessageBox(NULL, L"Failed to load resource.", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    soundResource.lpRes = LockResource(soundResource.hRes);
+    if (soundResource.lpRes == NULL)
+    {
+        MessageBox(NULL, L"Failed to lock resource.", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    return true;
+}
+
+
+void UnloadSound(SoundResource& soundResource) {
+    if (soundResource.lpRes) {
+        UnlockResource(soundResource.lpRes);
+        soundResource.lpRes = NULL;
+    }
+    if (soundResource.hRes) {
+        FreeResource(soundResource.hRes);
+        soundResource.hRes = NULL;
+    }
+}
+void LoadSounds() { for (int i = 0; i < SOUND_AMOUNT; ++i) LoadSound(soundResources[i]); }
+
+void UnloadSounds() { for (int i = 0; i < SOUND_AMOUNT; ++i) UnloadSound(soundResources[i]); }
