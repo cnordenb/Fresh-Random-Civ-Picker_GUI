@@ -40,7 +40,7 @@
 #define DLC_AMOUNT 10
 #define EDITION_AMOUNT 3
 #define MAX_LOADSTRING 100
-#define HOTKEY_AMOUNT 33
+#define HOTKEY_AMOUNT 34
 #define SOUND_AMOUNT 5
 
 #define HOTKEY_ID_TAB 1
@@ -70,11 +70,12 @@
 #define HOTKEY_ID_F2 25
 #define HOTKEY_ID_F3 26
 #define HOTKEY_ID_F4 27
-#define HOTKEY_ID_CTRLS 28
-#define HOTKEY_ID_CTRLR 29
-#define HOTKEY_ID_CTRLF 30
-#define HOTKEY_ID_CTRLZ 31
-#define HOTKEY_ID_CTRLX 32
+#define HOTKEY_ID_F5 28
+#define HOTKEY_ID_CTRLS 29
+#define HOTKEY_ID_CTRLR 30
+#define HOTKEY_ID_CTRLF 31
+#define HOTKEY_ID_CTRLZ 32
+#define HOTKEY_ID_CTRLX 33
 
 
 #define DT_UNDERLINE 0x80000000
@@ -109,6 +110,7 @@
 #define TOOLTIP_AUTOTOGGLE  	    20
 #define TOOLTIP_AUTORESET  	        21
 #define TOOLTIP_OPTIONS             22
+#define TOOLTIP_SURVAPP			    23
 
 class Hotkey
 {
@@ -127,9 +129,9 @@ Hotkey(0, 0x31, HOTKEY_ID_1), Hotkey(0, 0x32, HOTKEY_ID_2), Hotkey(0, 0x33, HOTK
 Hotkey(0, 0x57, HOTKEY_ID_W), Hotkey(0, 0x45, HOTKEY_ID_E), Hotkey(0, 0x41, HOTKEY_ID_A), Hotkey(0, 0x53, HOTKEY_ID_S),
 Hotkey(0, 0x44, HOTKEY_ID_D), Hotkey(0, 0x46, HOTKEY_ID_F), Hotkey(0, 0x47, HOTKEY_ID_G), Hotkey(0, 0x48, HOTKEY_ID_H),
 Hotkey(0, 0x52, HOTKEY_ID_R), Hotkey(0, 0x54, HOTKEY_ID_T), Hotkey(0, VK_F1, HOTKEY_ID_F1), Hotkey(0, 0x42, HOTKEY_ID_B),
-Hotkey(0, VK_F2, HOTKEY_ID_F2), Hotkey(0, VK_F3, HOTKEY_ID_F3), Hotkey(0, VK_F4, HOTKEY_ID_F4), Hotkey(MOD_CONTROL, 0x53, HOTKEY_ID_CTRLS),
+Hotkey(0, VK_F2, HOTKEY_ID_F2), Hotkey(0, VK_F3, HOTKEY_ID_F3), Hotkey(0, VK_F4, HOTKEY_ID_F4), Hotkey(0, VK_F5, HOTKEY_ID_F5), Hotkey(MOD_CONTROL, 0x53, HOTKEY_ID_CTRLS),
 Hotkey(MOD_CONTROL, 0x52, HOTKEY_ID_CTRLR), Hotkey(MOD_CONTROL, 0x46, HOTKEY_ID_CTRLF),
-    Hotkey(MOD_CONTROL, 0x5A, HOTKEY_ID_CTRLZ), Hotkey(MOD_CONTROL, 0x58, HOTKEY_ID_CTRLX) };
+    Hotkey(MOD_CONTROL, 0x5A, HOTKEY_ID_CTRLZ), Hotkey(MOD_CONTROL, 0x58, HOTKEY_ID_CTRLX)};
 
 class Civ
 {
@@ -148,8 +150,6 @@ public:
 };
 
 
-
-
 wchar_t INI_FILE_PATH[MAX_PATH];
 wchar_t LOG_FILE_PATH[MAX_PATH];
 
@@ -165,7 +165,7 @@ WCHAR window_class[MAX_LOADSTRING];
 
 HWND label_corner, label_centre, label_drawncount, label_remainingcount;
 
-HWND button_draw, button_reset, button_enableall, button_disableall, button_clearlog, button_techtree, button_options;
+HWND button_draw, button_reset, button_enableall, button_disableall, button_clearlog, button_techtree, button_options, button_survapp;
 
 HWND drawn_log, remaining_log;
 
@@ -192,22 +192,6 @@ SoundResource soundResources[SOUND_AMOUNT] = {
 };
 
 
-/*
-HRSRC button_sound, tab_sound, hover_sound, view_sound, error_sound;
-HRSRC button_sound_inf, tab_sound_inf, hover_sound_inf, view_sound_inf, error_sound_inf;
-HGLOBAL button_sound_gl, tab_sound_gl, hover_sound_gl, view_sound_gl, error_sound_gl;
-LPCWSTR button_name = L"button_sound", tab_name = L"tab_sound", hover_name = L"hover_sound", view_name = L"view_sound", error_name = L"error_sound";
-LPVOID button_sound_data, tab_sound_data, hover_sound_data, view_sound_data, error_sound_data;
-
-HRSRC sound_resource[] = { button_sound, tab_sound, hover_sound, view_sound, error_sound };
-HRSRC sound_resource_inf[] = { button_sound_inf, tab_sound_inf, hover_sound_inf, view_sound_inf, error_sound_inf };
-HGLOBAL sound_global[] = { button_sound_gl, tab_sound_gl, hover_sound_gl, view_sound_gl, error_sound_gl };
-LPCWSTR sound_name[] = { button_name, tab_name, hover_name, view_name, error_name };
-LPVOID sound_data[] = { button_sound_data, tab_sound_data, hover_sound_data, view_sound_data, error_sound_data };
-
-int sound_amount = sizeof(sound_global) / sizeof(sound_global[0]);
-*/
-
 HWND checkbox_khans, checkbox_dukes, checkbox_west, checkbox_india, checkbox_rome, checkbox_royals,
 checkbox_forgotten, checkbox_africans, checkbox_rajas,
 checkbox_aoc;
@@ -217,24 +201,14 @@ forgotten_icon, africans_icon, rajas_icon,
 aoc_icon;
 
 
-
-
 HWND checkbox_autoreset, checkbox_autotoggle;
 
 HWND radiobutton_de, radiobutton_hd, radiobutton_aok;
 
 HFONT font_bold;
 
-
-
 HBRUSH brush_white;
 HBRUSH brush_black;
-
-
-
-
-
-
 
 HBITMAP icon_de, icon_hd, icon_aok;
 
@@ -242,7 +216,7 @@ HBITMAP icon_khans, icon_dukes, icon_west, icon_india, icon_rome, icon_royals,
 icon_forgotten, icon_africans, icon_rajas,
 icon_aoc;
 
-HBITMAP icon_techtree, icon_options;
+HBITMAP icon_survapp, icon_techtree, icon_options;
 
 
 int iterator = 0;
@@ -491,6 +465,7 @@ void HideCustomPoolCheckboxes();
 void ShowHDPoolCheckboxes();
 void ShowAOCPoolCheckboxes();
 void DLCToggles(edition);
+void OpenSurvapp();
 void OpenTechTree();
 void OpenOptions(HWND);
 void OpenHotkeys(HWND);
@@ -541,7 +516,7 @@ void AddTooltip(HWND, HWND, LPCWSTR);
 void ActivateTooltip(HWND, TOOLINFO *, POINT);
 void DeactivateTooltips(TTTOOLINFOW);
 
-HWND hwndTooltip[23];
+HWND hwndTooltip[24];
 int hwnd_length = sizeof(hwndTooltip) / sizeof(hwndTooltip[0]);
 
 void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText);

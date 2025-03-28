@@ -226,14 +226,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                                     radiobutton_de, radiobutton_hd, radiobutton_aok, de_dlc_checkbox[0],
                                 de_dlc_checkbox[1], de_dlc_checkbox[2], de_dlc_checkbox[3], de_dlc_checkbox[4], de_dlc_checkbox[5],
                                 hd_dlc_checkbox[0], hd_dlc_checkbox[1], hd_dlc_checkbox[2], checkbox_aoc,
-                                checkbox_autotoggle, checkbox_autoreset };
+                                checkbox_autotoggle, checkbox_autoreset, button_survapp };
 
                 int tooltip_id[] = { TOOLTIP_DRAW, TOOLTIP_RESET, TOOLTIP_TECHTREE, TOOLTIP_OPTIONS, TOOLTIP_CLEAR,
                                         TOOLTIP_ENABLEALL, TOOLTIP_DISABLEALL, TOOLTIP_REMAININGTOGGLE,
                                         TOOLTIP_DE, TOOLTIP_HD, TOOLTIP_AOK, de_dlc_tipid[0], de_dlc_tipid[1],
                                     de_dlc_tipid[2], de_dlc_tipid[3], de_dlc_tipid[4], de_dlc_tipid[5],
                                     hd_dlc_tipid[0], hd_dlc_tipid[1], hd_dlc_tipid[2], TOOLTIP_AOC,
-                                    TOOLTIP_AUTOTOGGLE, TOOLTIP_AUTORESET };
+                                    TOOLTIP_AUTOTOGGLE, TOOLTIP_AUTORESET, TOOLTIP_SURVAPP };
                 
 				for (int i = 0; i < sizeof(button) / sizeof(button[0]); i++)
 				{
@@ -282,6 +282,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (wParam == HOTKEY_ID_CTRLX) RedrawCiv();
             if (current_tab == 0)
             {
+                if (wParam == HOTKEY_ID_R) OpenSurvapp();
                 if (wParam == HOTKEY_ID_Q) OpenOptions(hWnd);
                 if (wParam == HOTKEY_ID_T) OpenTechTree();
             }
@@ -529,6 +530,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     DeactivateTooltips(toolInfo);
                     OpenOptions(hWnd);
                     break;
+                case IDC_BUTTON_SURVAPP:
+                    OpenSurvapp();
+                    break;
                 case IDC_BUTTON_TECHTREE:
                     OpenTechTree();
                     break;
@@ -596,14 +600,14 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                                     radiobutton_de, radiobutton_hd, radiobutton_aok, de_dlc_checkbox[0],
                                 de_dlc_checkbox[1], de_dlc_checkbox[2], de_dlc_checkbox[3], de_dlc_checkbox[4], de_dlc_checkbox[5],
                                 hd_dlc_checkbox[0], hd_dlc_checkbox[1], hd_dlc_checkbox[2], checkbox_aoc,
-                                checkbox_autotoggle, checkbox_autoreset };
+                                checkbox_autotoggle, checkbox_autoreset, button_survapp };
 
                 int tooltip_id[] = { TOOLTIP_DRAW, TOOLTIP_RESET, TOOLTIP_TECHTREE, TOOLTIP_OPTIONS, TOOLTIP_CLEAR,
                                         TOOLTIP_ENABLEALL, TOOLTIP_DISABLEALL, TOOLTIP_REMAININGTOGGLE,
                                         TOOLTIP_DE, TOOLTIP_HD, TOOLTIP_AOK, de_dlc_tipid[0], de_dlc_tipid[1],
                                     de_dlc_tipid[2], de_dlc_tipid[3], de_dlc_tipid[4], de_dlc_tipid[5],
                                     hd_dlc_tipid[0], hd_dlc_tipid[1], hd_dlc_tipid[2], TOOLTIP_AOC,
-                                    TOOLTIP_AUTOTOGGLE, TOOLTIP_AUTORESET };
+                                    TOOLTIP_AUTOTOGGLE, TOOLTIP_AUTORESET, TOOLTIP_SURVAPP };
 
                 for (int i = 0; i < sizeof(button) / sizeof(button[0]); i++)
 			    {
@@ -928,6 +932,7 @@ void LoadImages()
     }
 
     icon_techtree = (HBITMAP)LoadImageW(NULL, L"images\\civ_icons\\techtree.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	icon_survapp = (HBITMAP)LoadImageW(NULL, L"images\\survivalist.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_options = (HBITMAP)LoadImageW(NULL, L"images\\civ_icons\\options.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);    
     
     icon_random = (HBITMAP)LoadImageW(NULL, L"images\\civ_icons\\random.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -1079,6 +1084,7 @@ void ShowDrawTab(bool showing_enabled, HWND hWnd)
 	    if (civ_labels_enabled) ShowWindow(label_centre, SW_SHOW);
         if (icons_enabled) ShowWindow(civ_icon, SW_SHOW);
 	    if (iteration_label_enabled) ShowWindow(label_corner, SW_SHOW);
+        ShowWindow(button_survapp, SW_SHOW);
 		ShowWindow(button_techtree, SW_SHOW);
         UpdateTooltipText(button_options, hwndTooltip[TOOLTIP_OPTIONS], StringCleaner(L"Opens options\nHotkey: Q (Draw tab only) / F1"));
 	}
@@ -1093,6 +1099,7 @@ void ShowDrawTab(bool showing_enabled, HWND hWnd)
         ShowWindow(button_reset, SW_HIDE);
         SetWindowPos(button_reset, NULL, (width - 100) / 2, height - 40, 100, 30, SWP_NOZORDER);
         ShowWindow(label_corner, SW_HIDE);
+		ShowWindow(button_survapp, SW_HIDE);
 		ShowWindow(button_techtree, SW_HIDE);
         UpdateTooltipText(button_options, hwndTooltip[TOOLTIP_OPTIONS], StringCleaner(L"Opens options\nHotkey: F1"));
     }	
@@ -1392,7 +1399,13 @@ void OpenTechTree()
     PlayAudio(button);
     std::wstring techtree_path = L"https://aoe2techtree.net/#";
     if (current_civ != L"Random") techtree_path += current_civ;
-	ShellExecute(NULL, L"open", techtree_path.c_str(), NULL, NULL, SW_SHOWNORMAL);
+    ShellExecute(NULL, L"open", techtree_path.c_str(), NULL, NULL, SW_SHOWNORMAL);
+}
+
+void OpenSurvapp()
+{
+    PlayAudio(button);
+    ShellExecute(NULL, L"open", L"https://aoe2-de-tools.herokuapp.com/villagers-required/", NULL, NULL, SW_SHOWNORMAL);
 }
 
 void AddTooltip(HWND hwndTool, HWND hwndTip, LPCWSTR pszText)
@@ -1950,6 +1963,7 @@ void SubclassButtons()
     SubclassButton(button_clearlog);
     SubclassButton(checkbox_showremainlog);
     SubclassButton(button_techtree);
+    SubclassButton(button_survapp);
 	SubclassButton(button_options);
 
     SubclassButton(button_enableall);
@@ -1985,6 +1999,7 @@ void AddTooltips()
     AddTooltip(button_reset, hwndTooltip[TOOLTIP_RESET], StringCleaner(L"Resets the pool of drawn civs and renders all enabled civs available\nHotkey: Enter"));
     AddTooltip(button_options, hwndTooltip[TOOLTIP_OPTIONS], StringCleaner(L"Opens options\nHotkey: F1"));
     AddTooltip(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T (Draw tab only) / F4"));
+    AddTooltip(button_survapp, hwndTooltip[TOOLTIP_SURVAPP], StringCleaner(L"Opens Survivalist's webapp to calculate villagers required for sustainable production\nHotkey: R (Draw tab only) / F5"));
 
     AddTooltip(button_clearlog, hwndTooltip[TOOLTIP_CLEAR], StringCleaner(L"Clears the log of previously drawn civs\nHotkey: Q"));
     AddTooltip(checkbox_showremainlog, hwndTooltip[TOOLTIP_REMAININGTOGGLE], StringCleaner(L"Toggles the display of the remaining civs log\nHotkey: W"));
@@ -2045,6 +2060,8 @@ void CreateButtons(HWND hWnd)
 {
     button_draw = CreateWindow(L"BUTTON", L"Draw", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | TTF_TRACK, 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_DRAW, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     button_reset = CreateWindow(L"BUTTON", L"Reset", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 200, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_RESET, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    button_survapp = CreateWindow(L"BUTTON", L"", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP, 0, 0, 50, 50, hWnd, (HMENU)IDC_BUTTON_SURVAPP, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    SendMessageW(button_survapp, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_survapp);
     button_techtree = CreateWindow(L"BUTTON", L"", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP, 0, 0, 60, 60, hWnd, (HMENU)IDC_BUTTON_TECHTREE, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     SendMessageW(button_techtree, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_techtree);
     button_options = CreateWindow(L"BUTTON", L"", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP, 0, 0, 25, 25, hWnd, (HMENU)IDC_BUTTON_OPTIONS, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
@@ -2094,6 +2111,7 @@ void PositionComponents(LPARAM lParam)
 
     SetWindowPos(button_draw, NULL, (width - 100) / 2, (height + 100) / 2, 100, 30, SWP_NOZORDER);
     SetWindowPos(button_techtree, NULL, width - 150, height - 120, 60, 60, SWP_NOZORDER);
+    SetWindowPos(button_survapp, NULL, width - 100, 50, 50, 50, SWP_NOZORDER);
     SetWindowPos(button_options, NULL, width - 35, 0, 25, 25, SWP_NOZORDER);
 
 
@@ -2267,7 +2285,8 @@ void RedrawCiv()
 
 Civ &GetCiv(const std::wstring &name) { for (int i = 0; i < MAX_CIVS; i++) if (civ[i].name == name) return civ[i]; return random; }
 
-void PlayAudio(sound_type type) {
+void PlayAudio(sound_type type)
+{
     if (!ui_sounds_enabled) return;
     switch (type) {
     case button: PlayResource(soundResources[0]); return;
@@ -2277,25 +2296,6 @@ void PlayAudio(sound_type type) {
     case view: PlayResource(soundResources[4]); return;
     }
 }
-
-/*
-void PlayAudio(sound_type type)
-{
-	if (!ui_sounds_enabled) return;
-    switch (type)
-    {
-    case button: PlayResource(sound_name[0]); return;
-    //case button: PlaySound(L"sounds\\button_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
-    case tabsound: PlayResource(L"tab_sound"); return;
-    //case tabsound: PlaySound(L"sounds\\tab_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
-    case hover: PlayResource(L"hover_sound"); return;
-    //case hover: PlaySound(L"sounds\\hover_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
-    case error: PlayResource(L"error_sound"); return;
-    //case error: PlaySound(L"sounds\\error_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
-    case view: PlayResource(L"view_sound"); return;
-    //case view: PlaySound(L"sounds\\view_sound.wav", NULL, SND_FILENAME | SND_ASYNC); return;
-    }
-}*/
 
 void StopSound() { PlaySound(NULL, NULL, 0); }
 
