@@ -152,7 +152,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 MessageBox(hWnd, L"Failed to initialize common controls.", L"Error", MB_OK | MB_ICONERROR);
                 return -1;
             }
-            LoadImages();
             CreateTabs(hWnd);        
             CreateImages(hWnd);
             CreateCheckboxes(hWnd);
@@ -923,34 +922,6 @@ std::string ConvertToString(const std::wstring& wstr)
     str.reserve(MAX_LENGTH);
     WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, &str[0], MAX_LENGTH, nullptr, nullptr);
     return str;
-}
-
-void LoadImages()
-{ 
-    std::wstring bmp_parsed_civname;
-    std::wstring icon_path;
-    for (int i = 0; i < MAX_CIVS; i++)
-    {
-        bmp_parsed_civname = civ[i].name;
-        bmp_parsed_civname[0] = std::tolower(bmp_parsed_civname[0]);
-        icon_path = L"images\\civ_icons\\" + bmp_parsed_civname + L".bmp";
-        civ[i].icon = (HBITMAP)LoadImageW(NULL, icon_path.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    }
-
-    icon_techtree = (HBITMAP)LoadImageW(NULL, L"images\\civ_icons\\techtree.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	icon_survapp = (HBITMAP)LoadImageW(NULL, L"images\\survivalist.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	icon_options = (HBITMAP)LoadImageW(NULL, L"images\\civ_icons\\options.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);    
-    
-    icon_random = (HBITMAP)LoadImageW(NULL, L"images\\civ_icons\\random.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-
-	icon_de = (HBITMAP)LoadImageW(NULL, L"images\\edition_icons\\aoe2de.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	icon_hd = (HBITMAP)LoadImageW(NULL, L"images\\edition_icons\\aoe2hd.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	icon_aok = (HBITMAP)LoadImageW(NULL, L"images\\edition_icons\\aok.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-
-    for (int i = 0; i < de_dlc_amount; i++) de_dlc_bmp[i] = (HBITMAP)LoadImageW(NULL, StringCleaner(L"images\\dlc_icons\\" + de_dlc_bmpstring[i]), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    for (int i = 0; i < hd_dlc_amount; i++) hd_dlc_bmp[i] = (HBITMAP)LoadImageW(NULL, StringCleaner(L"images\\dlc_icons\\" + hd_dlc_bmpstring[i]), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-
-	icon_aoc = (HBITMAP)LoadImageW(NULL, L"images\\dlc_icons\\aoc.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);  	
 }
 
 HBITMAP FetchCivIcon(const std::wstring &civ_name)
