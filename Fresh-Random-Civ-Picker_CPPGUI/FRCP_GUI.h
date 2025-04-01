@@ -425,7 +425,6 @@ std::vector<std::wstring> civs;
 enum savetype { automatic, manual, quick };
 
 void CreateBoldFont();
-HBITMAP FetchCivIcon(const std::wstring &);
 void CreateTabs(HWND);
 void ShowTabComponents(int, HWND);
 
@@ -446,7 +445,6 @@ void EnableHotkeys(HWND);
 void DisableHotkeys(HWND);
 
 void CreateUnderlineFont();
-void LoadImages();
 
 BOOL PlayResource(const SoundResource &);
 

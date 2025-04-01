@@ -23,9 +23,7 @@ void CreateTabs(HWND hWnd)
 }
 
 void ShowTabComponents(int tabIndex, HWND hWnd)
-{
-    if (!startup) PlayAudio(tabsound);
-    else if (startup && jingles_enabled && current_tab != 2) PlayJingle(current_civ);    
+{ 
     current_tab = tabIndex;
     if (tabIndex == 0)
     {        
@@ -376,7 +374,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 else
                 {
                     jingles_enabled = true;
-                    PlayJingle(current_civ);
                 }
             }
 
@@ -551,7 +548,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     ToggleAutoToggle(hWnd);
                     break;
                 case IDC_ICON_CIV:
-                    PlayJingle(current_civ);
                     break;
                 case IDC_ICON_EDITION:
                     switch (edition_state)
@@ -698,24 +694,6 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
             int wmId = LOWORD(wParam);
             int wmEvent = HIWORD(wParam);
 
-            if (IDC_LEGACY_OPTION)
-            {
-                switch (wmEvent)
-                {
-                    case CBN_DROPDOWN:
-                    {
-                        PlayAudio(hover);
-                        break;
-                    }
-                    case CBN_SELCHANGE:
-                    {						
-                        if (!GetCiv(current_civ).legacy) PlayAudio(view);
-                        else PlayJingle(current_civ);
-                        break;
-                    }
-                }
-            }
-
 		    ui_sounds_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_SOUNDS) == BST_CHECKED;
             civ_labels_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_LABELS) == BST_CHECKED;
             iteration_label_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_CORNERLABEL) == BST_CHECKED;
@@ -733,11 +711,6 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 
             if (wmEvent == BN_CLICKED)
             {
-                if (wmId == IDC_CHECKBOX_JINGLES)
-                {
-                    StopSound();
-                    PlayJingle(current_civ);
-                }
                 
                 switch (wmId)
                 {
@@ -843,8 +816,6 @@ void ResetProgram(bool auto_reset)
 	if (!civ_labels_enabled) ShowWindow(label_centre, SW_HIDE);
     SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_random);
 
-    if (!auto_reset && jingles_enabled && current_tab != 2) PlayJingle(current_civ);
-
     reset_state = true;
 
     UpdateRemainingLog(false, false);
@@ -885,17 +856,8 @@ void DrawCiv()
     SetWindowTextA(label_centre, civ_name_str.c_str());
 	if (!civ_labels_enabled) ShowWindow(label_centre, SW_HIDE);
 
-    HBITMAP drawn_civ_icon = FetchCivIcon(current_civ);
-    SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
-
     UpdateDrawnLog(false, true, false);
     UpdateRemainingLog(false, false);
-
-
-/*
-    std::thread sound_thread(PlayJingle, current_civ);
-    sound_thread.detach();*/
-    PlayJingle(current_civ);
     
 
     UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
@@ -922,27 +884,6 @@ std::string ConvertToString(const std::wstring& wstr)
     str.reserve(MAX_LENGTH);
     WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, &str[0], MAX_LENGTH, nullptr, nullptr);
     return str;
-}
-
-HBITMAP FetchCivIcon(const std::wstring &civ_name)
-{
-    if (civ_name == L"Random") return icon_random;
-    for (int i = 0; i < MAX_CIVS; i++) if (civ_name == civ[i].name) return civ[i].icon;
-	return icon_random;
-}
-
-void PlayJingle(const std::wstring &civ_name)
-{
-	if (!jingles_enabled) return;
-
-    std::wstring processed_civ_name = civ_name;
-    processed_civ_name[0] = std::tolower(processed_civ_name[0]);
-    std::wstring jingle_path;
-
-    if (legacy_jingle_enabled && GetCiv(civ_name).legacy) jingle_path = L"sounds\\civ_jingles\\legacy\\" + processed_civ_name + L".wav";
-	else jingle_path = L"sounds\\civ_jingles\\" + processed_civ_name + L".wav";    
-    
-    PlaySound(jingle_path.c_str(), NULL, SND_FILENAME | SND_ASYNC);
 }
 
 void AddCiv(const std::wstring &civ)
@@ -1879,8 +1820,6 @@ void LoadLog(HWND hWnd, savetype type)
     std::wstring drawn_label = L"Drawn: " + label_text;
     if (iterator == 0) SetWindowText(label_drawncount, drawn_label.c_str());
 
-    HBITMAP drawn_civ_icon = FetchCivIcon(current_civ);
-    SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
 	if (!icons_enabled) ShowWindow(civ_icon, SW_HIDE);
 
     reset_state = true;
@@ -2250,9 +2189,6 @@ void UndrawCiv()
     civs.push_back(current_civ);
     if (iterator >= 1)current_civ = drawn_civs[iterator - 1];
     else current_civ = L"Random";
-	HBITMAP drawn_civ_icon = FetchCivIcon(current_civ);
-	SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
-    PlayJingle(current_civ);
     if (current_civ == L"Random") SetWindowText(label_centre, L"?");
     else SetWindowText(label_centre, current_civ.c_str());	
     if (!civ_labels_enabled) ShowWindow(label_centre, SW_HIDE);
@@ -2288,9 +2224,6 @@ void RedrawCiv()
     current_civ = drawn_civs[iterator];
 	civs.erase(std::remove(civs.begin(), civs.end(), current_civ), civs.end());
     iterator++;
-	HBITMAP drawn_civ_icon = FetchCivIcon(current_civ);
-	SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
-    PlayJingle(current_civ);
 	SetWindowText(label_centre, current_civ.c_str());
     SetWindowText(label_corner, StringCleaner(std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs)));
     if (!iteration_label_enabled || current_tab != 0) ShowWindow(label_corner, SW_HIDE);
@@ -2304,14 +2237,6 @@ Civ &GetCiv(const std::wstring &name) { for (int i = 0; i < MAX_CIVS; i++) if (c
 
 void PlayAudio(sound_type type)
 {
-    if (!ui_sounds_enabled) return;
-    switch (type) {
-    case button: PlayResource(soundResources[0]); return;
-    case tabsound: PlayResource(soundResources[1]); return;
-    case hover: PlayResource(soundResources[2]); return;
-    case error: PlayResource(soundResources[3]); return;
-    case view: PlayResource(soundResources[4]); return;
-    }
 }
 
 void StopSound() { PlaySound(NULL, NULL, 0); }
