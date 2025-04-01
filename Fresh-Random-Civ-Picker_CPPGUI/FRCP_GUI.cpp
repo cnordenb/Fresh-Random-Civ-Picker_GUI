@@ -2045,7 +2045,7 @@ void AddTooltips()
     AddTooltip(button_reset, hwndTooltip[TOOLTIP_RESET], StringCleaner(L"Resets the pool of drawn civs and renders all enabled civs available\nHotkey: Enter"));
     AddTooltip(button_options, hwndTooltip[TOOLTIP_OPTIONS], StringCleaner(L"Opens options\nHotkey: F1"));
     AddTooltip(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T (Draw tab only) / F4"));
-    AddTooltip(button_survapp, hwndTooltip[TOOLTIP_SURVAPP], StringCleaner(L"Opens Survivalist's webapp to calculate villagers required for sustainable production\nHotkey: R (Draw tab only) / F5"));
+    AddTooltip(button_survapp, hwndTooltip[TOOLTIP_SURVAPP], StringCleaner(L"Opens Survivalist's webapp to calculate villagers required for sustainable production\nHotkey: R (Draw tab only) / Ctrl + T"));
 
     AddTooltip(button_clearlog, hwndTooltip[TOOLTIP_CLEAR], StringCleaner(L"Clears the log of previously drawn civs\nHotkey: Q"));
     AddTooltip(checkbox_showremainlog, hwndTooltip[TOOLTIP_REMAININGTOGGLE], StringCleaner(L"Toggles the display of the remaining civs log\nHotkey: W"));
