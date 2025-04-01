@@ -87,7 +87,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     DeleteObject(font_underline);
     DeleteObject(font_bold);
 
-    if (persistent_logging) SaveLog(false);
+    if (persistent_logging) SaveLog(automatic);
     SaveSettings();
 
     UnloadSounds();
@@ -165,7 +165,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             AddTooltips();
             SetEditionState(hWnd, DE);
             civs.reserve(MAX_CIVS);
-            if (persistent_logging) {LoadLog(hWnd, false); ValidateAllDlcToggles(hWnd);}           
+            if (persistent_logging) {LoadLog(hWnd, automatic); ValidateAllDlcToggles(hWnd);}           
 			ShowTabComponents(0, hWnd);            
             EnableHotkeys(hWnd);
             if (draw_on_startup) DrawCiv();
@@ -275,11 +275,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (wParam == HOTKEY_ID_F2) OpenHotkeys(hWnd);
             if (wParam == HOTKEY_ID_F3) OpenAbout(hWnd);
             if (wParam == HOTKEY_ID_F4) OpenTechTree();
-            if (wParam == HOTKEY_ID_CTRLS) SaveLog(true);
-            if (wParam == HOTKEY_ID_CTRLR) LoadLog(hWnd, true);
+            if (wParam == HOTKEY_ID_F5) SaveLog(quick);
+			if (wParam == HOTKEY_ID_F9) LoadLog(hWnd, quick);
+            if (wParam == HOTKEY_ID_CTRLS) SaveLog(manual);
+            if (wParam == HOTKEY_ID_CTRLR) LoadLog(hWnd, manual);
 			if (wParam == HOTKEY_ID_CTRLF) JoinLobby(hWnd);
             if (wParam == HOTKEY_ID_CTRLZ) UndrawCiv();
             if (wParam == HOTKEY_ID_CTRLX) RedrawCiv();
+			if (wParam == HOTKEY_ID_CTRLT) OpenSurvapp();
             if (current_tab == 0)
             {
                 if (wParam == HOTKEY_ID_R) OpenSurvapp();
@@ -442,10 +445,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     OpenOptions(hWnd);
                     break;
                 case IDM_SAVELOG:
-                    SaveLog(true);
+                    SaveLog(manual);
                     break;
                 case IDM_LOADLOG:
-                    LoadLog(hWnd, true);
+                    LoadLog(hWnd, manual);
                     break;
                 case IDM_JOINLOBBY:
 					JoinLobby(hWnd);
@@ -1643,65 +1646,94 @@ void LoadSettings()
     legacy_jingle_enabled = GetPrivateProfileInt(L"Settings", L"LegacyJingleEnabled", 0, INI_FILE_PATH);
 }
 
-void SaveLog(bool user_save)
+void SaveLog(savetype type)
 {
-    std::wstring saveFilePath = LOG_FILE_PATH;
-    if (user_save)
+    if (redrawable)
     {
-        PlayAudio(button);
+		for (int i = iterator; i < (MAX_CIVS - iterator); i++)
+		{
+            if (i > MAX_CIVS || drawn_civs[i] == L"") break;
+            else drawn_civs[i] = L"";
+		}
+    }
 
-        SYSTEMTIME st;
-        GetLocalTime(&st);
+    std::wstring saveFilePath;
 
-        std::wstringstream wss;
-        wss << L"FRCP Preset v" << VERSION << " @" 
-            << std::setw(4) << std::setfill(L'0') << st.wYear << L"." 
-            << std::setw(2) << std::setfill(L'0') << st.wMonth << L"."
-            << std::setw(2) << std::setfill(L'0') << st.wDay << L" "
-            << std::setw(2) << std::setfill(L'0') << st.wHour
-            << std::setw(2) << std::setfill(L'0') << st.wMinute
-            << std::setw(2) << std::setfill(L'0') << st.wSecond << L".txt";
+    wchar_t exePath[MAX_PATH];
+    GetModuleFileName(NULL, exePath, MAX_PATH);
 
-        std::wstring defaultFileName = wss.str();
+    wchar_t* lastSlash = wcsrchr(exePath, L'\\');
+    if (lastSlash != NULL) *lastSlash = L'\0';
 
-        wchar_t exePath[MAX_PATH];
-        GetModuleFileName(NULL, exePath, MAX_PATH);
+    PathAppend(exePath, L"saves");
 
-        wchar_t *lastSlash = wcsrchr(exePath, L'\\');
-        if (lastSlash != NULL) *lastSlash = L'\0';
-
-        PathAppend(exePath, L"saves");
-
-        OPENFILENAME ofn;
-
-        wchar_t szFile[MAX_PATH] = L"";
-        wcscpy_s(szFile, defaultFileName.c_str());
-
-        ZeroMemory(&ofn, sizeof(ofn));
-        ofn.lStructSize = sizeof(ofn);
-        ofn.hwndOwner = NULL;
-        ofn.lpstrFile = szFile;
-        ofn.nMaxFile = sizeof(szFile);
-        ofn.lpstrFilter = L"Text Files\0*.txt\0All Files\0*.*\0";
-        ofn.nFilterIndex = 1;
-        ofn.lpstrFileTitle = NULL;
-        ofn.nMaxFileTitle = 0;
-        ofn.lpstrInitialDir = exePath;
-        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
-
-        if (GetSaveFileName(&ofn) == TRUE)
+    switch (type)
+    {
+        case automatic:
         {
-			PlayAudio(button);
-            saveFilePath = ofn.lpstrFile;
-            if (saveFilePath.find(L".txt") == std::wstring::npos)
-            {
-                saveFilePath.append(L".txt");
-            }
+            saveFilePath = LOG_FILE_PATH;
+            break;
         }
-        else
+        case quick:
+        {
+            PathAppend(exePath, L"quicksave.txt");
+
+            saveFilePath = exePath;
+            break;
+        }
+
+        case manual:
         {
             PlayAudio(button);
-            return;
+
+            SYSTEMTIME st;
+            GetLocalTime(&st);
+
+            std::wstringstream wss;
+            wss << L"FRCP Preset v" << VERSION << " @"
+                << std::setw(4) << std::setfill(L'0') << st.wYear << L"."
+                << std::setw(2) << std::setfill(L'0') << st.wMonth << L"."
+                << std::setw(2) << std::setfill(L'0') << st.wDay << L" "
+                << std::setw(2) << std::setfill(L'0') << st.wHour
+                << std::setw(2) << std::setfill(L'0') << st.wMinute
+                << std::setw(2) << std::setfill(L'0') << st.wSecond << L".txt";
+
+            std::wstring defaultFileName = wss.str();
+
+
+
+            OPENFILENAME ofn;
+
+            wchar_t szFile[MAX_PATH] = L"";
+            wcscpy_s(szFile, defaultFileName.c_str());
+
+            ZeroMemory(&ofn, sizeof(ofn));
+            ofn.lStructSize = sizeof(ofn);
+            ofn.hwndOwner = NULL;
+            ofn.lpstrFile = szFile;
+            ofn.nMaxFile = sizeof(szFile);
+            ofn.lpstrFilter = L"Text Files\0*.txt\0All Files\0*.*\0";
+            ofn.nFilterIndex = 1;
+            ofn.lpstrFileTitle = NULL;
+            ofn.nMaxFileTitle = 0;
+            ofn.lpstrInitialDir = exePath;
+            ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
+
+            if (GetSaveFileName(&ofn) == TRUE)
+            {
+                PlayAudio(button);
+                saveFilePath = ofn.lpstrFile;
+                if (saveFilePath.find(L".txt") == std::wstring::npos)
+                {
+                    saveFilePath.append(L".txt");
+                }
+            }
+            else
+            {
+                PlayAudio(button);
+                return;
+            }
+            break;
         }
     }
 
@@ -1730,11 +1762,11 @@ void SaveLog(bool user_save)
     outFile.close();
 }
 
-void LoadLog(HWND hWnd, bool user_load)
+void LoadLog(HWND hWnd, savetype type)
 {
     std::wstring loadFilePath = LOG_FILE_PATH;
 
-    if (user_load)
+    if (type != automatic)
     {
 		PlayAudio(button);
 
@@ -1746,27 +1778,38 @@ void LoadLog(HWND hWnd, bool user_load)
 
         PathAppend(exePath, L"saves");
 
-        OPENFILENAME ofn;
-        wchar_t szFile[MAX_PATH] = L"";
-        ZeroMemory(&ofn, sizeof(ofn));
-        ofn.lStructSize = sizeof(ofn);
-        ofn.hwndOwner = hWnd;
-        ofn.lpstrFile = szFile;
-        ofn.nMaxFile = sizeof(szFile);
-        ofn.lpstrFilter = L"Text Files\0*.txt\0All Files\0*.*\0";
-        ofn.nFilterIndex = 1;
-        ofn.lpstrFileTitle = NULL;
-        ofn.nMaxFileTitle = 0;
-        ofn.lpstrInitialDir = exePath;
-        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
-
-        if (GetOpenFileName(&ofn) == TRUE) loadFilePath = ofn.lpstrFile;
-        else
+        if (type == quick)
         {
-			PlayAudio(button);
-			startup = false;
-            return;
+            PathAppend(exePath, L"quicksave.txt");
+
+            loadFilePath = exePath;
         }
+        else if (type == manual)
+        {
+            OPENFILENAME ofn;
+            wchar_t szFile[MAX_PATH] = L"";
+            ZeroMemory(&ofn, sizeof(ofn));
+            ofn.lStructSize = sizeof(ofn);
+            ofn.hwndOwner = hWnd;
+            ofn.lpstrFile = szFile;
+            ofn.nMaxFile = sizeof(szFile);
+            ofn.lpstrFilter = L"Text Files\0*.txt\0All Files\0*.*\0";
+            ofn.nFilterIndex = 1;
+            ofn.lpstrFileTitle = NULL;
+            ofn.nMaxFileTitle = 0;
+            ofn.lpstrInitialDir = exePath;
+            ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_OVERWRITEPROMPT;
+
+            if (GetOpenFileName(&ofn) == TRUE) loadFilePath = ofn.lpstrFile;
+            else
+            {
+                PlayAudio(button);
+                startup = false;
+                return;
+            }
+        }
+
+
 
         startup = true;
         SetWindowText(remaining_log, L"");
@@ -1784,7 +1827,7 @@ void LoadLog(HWND hWnd, bool user_load)
     bool readingDrawnCivs = false;
     bool readingCivStates = false;
 	bool readingEditionState = false;
-    if (!user_load) InitialiseCivs();
+    if (type == automatic) InitialiseCivs();
 
     bool stateread_commenced = false;
 	bool drawnread_commenced = false;
@@ -1869,7 +1912,7 @@ void LoadLog(HWND hWnd, bool user_load)
     reset_state = true;
     UpdateRemainingLog(false, false);
 
-    if (!user_load && current_civ == L"Random")
+    if (type == automatic && current_civ == L"Random")
     {
         UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T (Draw tab only) / F4"));
         SetWindowText(label_centre, L"?");
@@ -1883,7 +1926,7 @@ void LoadLog(HWND hWnd, bool user_load)
 
     inFile.close();
 
-    if (user_load)
+    if (type != automatic)
     {
         ShowTabComponents(current_tab, hWnd);
         ValidateAllDlcToggles(hWnd);

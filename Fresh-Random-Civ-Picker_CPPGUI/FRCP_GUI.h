@@ -40,7 +40,7 @@
 #define DLC_AMOUNT 10
 #define EDITION_AMOUNT 3
 #define MAX_LOADSTRING 100
-#define HOTKEY_AMOUNT 34
+#define HOTKEY_AMOUNT 37
 #define SOUND_AMOUNT 5
 
 #define HOTKEY_ID_TAB 1
@@ -71,11 +71,14 @@
 #define HOTKEY_ID_F3 26
 #define HOTKEY_ID_F4 27
 #define HOTKEY_ID_F5 28
-#define HOTKEY_ID_CTRLS 29
-#define HOTKEY_ID_CTRLR 30
-#define HOTKEY_ID_CTRLF 31
-#define HOTKEY_ID_CTRLZ 32
-#define HOTKEY_ID_CTRLX 33
+#define HOTKEY_ID_F6 29
+#define HOTKEY_ID_F9 30
+#define HOTKEY_ID_CTRLS 31
+#define HOTKEY_ID_CTRLR 32
+#define HOTKEY_ID_CTRLF 33
+#define HOTKEY_ID_CTRLZ 34
+#define HOTKEY_ID_CTRLX 35
+#define HOTKEY_ID_CTRLT 36
 
 
 #define DT_UNDERLINE 0x80000000
@@ -129,9 +132,10 @@ Hotkey(0, 0x31, HOTKEY_ID_1), Hotkey(0, 0x32, HOTKEY_ID_2), Hotkey(0, 0x33, HOTK
 Hotkey(0, 0x57, HOTKEY_ID_W), Hotkey(0, 0x45, HOTKEY_ID_E), Hotkey(0, 0x41, HOTKEY_ID_A), Hotkey(0, 0x53, HOTKEY_ID_S),
 Hotkey(0, 0x44, HOTKEY_ID_D), Hotkey(0, 0x46, HOTKEY_ID_F), Hotkey(0, 0x47, HOTKEY_ID_G), Hotkey(0, 0x48, HOTKEY_ID_H),
 Hotkey(0, 0x52, HOTKEY_ID_R), Hotkey(0, 0x54, HOTKEY_ID_T), Hotkey(0, VK_F1, HOTKEY_ID_F1), Hotkey(0, 0x42, HOTKEY_ID_B),
-Hotkey(0, VK_F2, HOTKEY_ID_F2), Hotkey(0, VK_F3, HOTKEY_ID_F3), Hotkey(0, VK_F4, HOTKEY_ID_F4), Hotkey(0, VK_F5, HOTKEY_ID_F5), Hotkey(MOD_CONTROL, 0x53, HOTKEY_ID_CTRLS),
-Hotkey(MOD_CONTROL, 0x52, HOTKEY_ID_CTRLR), Hotkey(MOD_CONTROL, 0x46, HOTKEY_ID_CTRLF),
-    Hotkey(MOD_CONTROL, 0x5A, HOTKEY_ID_CTRLZ), Hotkey(MOD_CONTROL, 0x58, HOTKEY_ID_CTRLX)};
+Hotkey(0, VK_F2, HOTKEY_ID_F2), Hotkey(0, VK_F3, HOTKEY_ID_F3), Hotkey(0, VK_F4, HOTKEY_ID_F4), Hotkey(0, VK_F5, HOTKEY_ID_F5),
+Hotkey(0, VK_F6, HOTKEY_ID_F5), Hotkey(0, VK_F9, HOTKEY_ID_F9), Hotkey(MOD_CONTROL, 0x53, HOTKEY_ID_CTRLS),
+Hotkey(MOD_CONTROL, 0x52, HOTKEY_ID_CTRLR), Hotkey(MOD_CONTROL, 0x46, HOTKEY_ID_CTRLF), Hotkey(MOD_CONTROL, 0x5A, HOTKEY_ID_CTRLZ),
+Hotkey(MOD_CONTROL, 0x58, HOTKEY_ID_CTRLX), Hotkey(MOD_CONTROL, 0x54, HOTKEY_ID_CTRLT)};
 
 class Civ
 {
@@ -418,6 +422,8 @@ HFONT font_underline = NULL;
 HWND tab;
 std::vector<std::wstring> civs;
 
+enum savetype { automatic, manual, quick };
+
 void CreateBoldFont();
 HBITMAP FetchCivIcon(const std::wstring &);
 void CreateTabs(HWND);
@@ -433,8 +439,8 @@ void RedrawCiv();
 void SaveSettings();
 void LoadSettings();
 
-void SaveLog(bool);
-void LoadLog(HWND, bool);
+void SaveLog(savetype);
+void LoadLog(HWND, savetype);
 
 void EnableHotkeys(HWND);
 void DisableHotkeys(HWND);
