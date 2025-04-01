@@ -510,6 +510,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     PlayAudio(button);
                     ShellExecute(0, 0, L"https://www.voobly.com/games/view/Age-of-Empires-II-The-Conquerors", 0, 0, SW_SHOW);
 					break;
+				case IDM_SURVAPP:
+					OpenSurvapp();
+					break;
 				case IDM_XBOX:
                     PlayAudio(button);
                     ShellExecute(0, 0, L"https://www.xbox.com/games/store/age-of-empires-ii-definitive-edition/9N42SSSX2MTG/0010", 0, 0, SW_SHOW);

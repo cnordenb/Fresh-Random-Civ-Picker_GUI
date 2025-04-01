@@ -25,6 +25,7 @@
 #define IDM_DESTEAM						143
 #define IDM_HDSTEAM						144
 #define IDM_VOOBLY						145
+#define IDM_SURVAPP						149
 #define IDM_XBOX						146
 #define IDM_UNDRAW						147
 #define IDM_REDRAW						148
