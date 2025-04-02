@@ -41,7 +41,6 @@
 #define EDITION_AMOUNT 3
 #define MAX_LOADSTRING 100
 #define HOTKEY_AMOUNT 37
-#define SOUND_AMOUNT 5
 
 #define HOTKEY_ID_TAB 1
 #define HOTKEY_ID_SPACE 2
@@ -144,11 +143,9 @@ public:
 	bool enabled;
 	enum edition edition;
 	enum dlc dlc;
-    bool legacy;
 	HWND checkbox;
-	HBITMAP icon;
 
-	Civ(std::wstring name, bool enabled, enum edition edition, enum dlc dlc, bool legacy, HWND checkbox, HBITMAP icon) : name(name), enabled(enabled), edition(edition), dlc(dlc), legacy(legacy), checkbox(checkbox), icon(icon)  {}
+	Civ(std::wstring name, bool enabled, enum edition edition, enum dlc dlc, HWND checkbox) : name(name), enabled(enabled), edition(edition), dlc(dlc), checkbox(checkbox)  {}
 
     void SetEnabled(bool enabled) { this->enabled = enabled; }
 };
@@ -173,37 +170,14 @@ HWND button_draw, button_reset, button_enableall, button_disableall, button_clea
 
 HWND drawn_log, remaining_log;
 
-
-HWND civ_icon, edition_icon;
-
 HWND checkbox_showremainlog;
 
 HWND hOptionsDlg = NULL;
-
-struct SoundResource {
-    HRSRC hResInfo;
-    HGLOBAL hRes;
-    LPVOID lpRes;
-    LPCWSTR name;
-};
-
-SoundResource soundResources[SOUND_AMOUNT] = {
-    {NULL, NULL, NULL, L"button_sound"},
-    {NULL, NULL, NULL, L"tab_sound"},
-    {NULL, NULL, NULL, L"hover_sound"},
-    {NULL, NULL, NULL, L"error_sound"},
-    {NULL, NULL, NULL, L"view_sound"}
-};
 
 
 HWND checkbox_khans, checkbox_dukes, checkbox_west, checkbox_india, checkbox_rome, checkbox_royals,
 checkbox_forgotten, checkbox_africans, checkbox_rajas,
 checkbox_aoc;
-
-HWND khans_icon, dukes_icon, west_icon, india_icon, rome_icon, royals_icon,
-forgotten_icon, africans_icon, rajas_icon,
-aoc_icon;
-
 
 HWND checkbox_autoreset, checkbox_autotoggle;
 
@@ -213,14 +187,6 @@ HFONT font_bold;
 
 HBRUSH brush_white;
 HBRUSH brush_black;
-
-HBITMAP icon_de, icon_hd, icon_aok;
-
-HBITMAP icon_khans, icon_dukes, icon_west, icon_india, icon_rome, icon_royals,
-icon_forgotten, icon_africans, icon_rajas,
-icon_aoc;
-
-HBITMAP icon_survapp, icon_techtree, icon_options;
 
 
 int iterator = 0;
@@ -238,12 +204,8 @@ std::wstring current_civ = L"Random";
 bool startup = true;
 bool persistent_logging = true;
 bool draw_on_startup = false;
-bool icons_enabled = true;
-bool jingles_enabled = false;
 bool civ_labels_enabled = true;
 bool iteration_label_enabled = true;
-bool legacy_jingle_enabled = false;
-bool ui_sounds_enabled = false;
 bool tooltips_enabled = true;
 bool autoreset_enabled = true;
 bool autotoggle_enabled = true;
@@ -252,15 +214,6 @@ bool reset_state = true;
 bool hotkey_pressed = false;
 bool redrawable = false;
 bool undrawable = false;
-
-enum sound_type
-{
-	button,
-	tabsound,
-    hover,
-    view,
-	error
-};
 
 enum edition
 {
@@ -317,15 +270,6 @@ int hd_dlc_tipid[] = { TOOLTIP_RAJAS, TOOLTIP_AFRICANS, TOOLTIP_FORGOTTEN };
 dlc de_dlc[] = { royals, rome, india, dukes, west, khans };
 dlc hd_dlc[] = { rajas, africans, forgotten };
 
-std::wstring de_dlc_bmpstring[] = { L"royals.bmp", L"rome.bmp", L"india.bmp", L"dukes.bmp", L"west.bmp", L"khans.bmp" };
-std::wstring hd_dlc_bmpstring[] = { L"rajas.bmp", L"african.bmp", L"forgotten.bmp" };
-
-HBITMAP de_dlc_bmp[] = { icon_royals, icon_rome, icon_india, icon_dukes, icon_west, icon_khans };
-HBITMAP hd_dlc_bmp[] = { icon_rajas, icon_africans, icon_forgotten };
-
-HWND de_dlc_icon[] = { royals_icon, rome_icon, india_icon, dukes_icon, west_icon, khans_icon };
-HWND hd_dlc_icon[] = { rajas_icon, africans_icon, forgotten_icon };
-
 const int de_dlc_amount = 6;
 const int hd_dlc_amount = 3;
 
@@ -348,65 +292,55 @@ checkbox_mongols, checkbox_persians, checkbox_poles, checkbox_portuguese, checkb
 checkbox_saracens, checkbox_sicilians, checkbox_slavs, checkbox_spanish, checkbox_tatars,
 checkbox_teutons, checkbox_turks, checkbox_vietnamese, checkbox_vikings;
 
-HBITMAP icon_armenians, icon_aztecs, icon_bengalis, icon_berber, icon_bohemians,
-icon_britons, icon_bulgarians, icon_burgundians, icon_burmese, icon_byzantines,
-icon_celts, icon_chinese, icon_cumans, icon_dravidians, icon_ethiopians,
-icon_franks, icon_georgians, icon_goths, icon_gurjaras, icon_huns, icon_incas,
-icon_hindustanis, icon_italians, icon_japanese, icon_khmer, icon_koreans,
-icon_lithuanians, icon_magyars, icon_malay, icon_malians, icon_mayans,
-icon_mongols, icon_persians, icon_poles, icon_portuguese, icon_romans,
-icon_saracens, icon_sicilians, icon_slavs, icon_spanish, icon_tatars,
-icon_teutons, icon_turks, icon_vietnamese, icon_vikings, icon_random;
-
 HWND placeholder_hwnd;
-Civ random(L"Random", false, AOK, aok, true, placeholder_hwnd, icon_random);
+Civ random(L"Random", false, AOK, aok, placeholder_hwnd);
 
 Civ civ[MAX_CIVS] = 
-{Civ(L"Armenians", true, DE, royals, false, checkbox_armenians, icon_armenians), 
-Civ(L"Aztecs", true, AOK, aoc, true, checkbox_aztecs, icon_aztecs), 
-Civ(L"Bengalis", true, DE, india, false, checkbox_bengalis, icon_bengalis), 
-Civ(L"Berbers", true, HD, africans, false, checkbox_berbers, icon_berber), 
-Civ(L"Bohemians", true, DE, dukes, false, checkbox_bohemians, icon_bohemians), 
-Civ(L"Britons", true, AOK, aok, true, checkbox_britons, icon_britons), 
-Civ(L"Bulgarians", true, DE, khans, false, checkbox_bulgarians, icon_bulgarians), 
-Civ(L"Burgundians", true, DE, west, false, checkbox_burgundians, icon_burgundians), 
-Civ(L"Burmese", true, HD, rajas, false, checkbox_burmese, icon_burmese), 
-Civ(L"Byzantines", true, AOK, aok, true, checkbox_byzantines, icon_byzantines), 
-Civ(L"Celts", true, AOK, aok, true, checkbox_celts, icon_celts), 
-Civ(L"Chinese", true, AOK, aok, true, checkbox_chinese, icon_chinese), 
-Civ(L"Cumans", true, DE, khans, false, checkbox_cumans, icon_cumans), 
-Civ(L"Dravidians", true, DE, india, false, checkbox_dravidians, icon_dravidians), 
-Civ(L"Ethiopians", true, HD, africans, false, checkbox_ethiopians, icon_ethiopians), 
-Civ(L"Franks", true, AOK, aok, true, checkbox_franks, icon_franks), 
-Civ(L"Georgians", true, DE, royals, false, checkbox_georgians, icon_georgians), 
-Civ(L"Goths", true, AOK, aok, true, checkbox_goths, icon_goths), 
-Civ(L"Gurjaras", true, DE, india, false, checkbox_gurjaras, icon_gurjaras), 
-Civ(L"Hindustanis", true, HD, forgotten, false, checkbox_hindustanis, icon_hindustanis), 
-Civ(L"Huns", true, AOK, aoc, true, checkbox_huns, icon_huns), 
-Civ(L"Incas", true, HD, forgotten, false, checkbox_incas, icon_incas), 
-Civ(L"Italians", true, HD, forgotten, false, checkbox_italians, icon_italians), 
-Civ(L"Japanese", true, AOK, aok, true, checkbox_japanese, icon_japanese), 
-Civ(L"Khmer", true, HD, rajas, false, checkbox_khmer, icon_khmer), 
-Civ(L"Koreans", true, AOK, aoc, true, checkbox_koreans, icon_koreans), 
-Civ(L"Lithuanians", true, DE, khans, false, checkbox_lithuanians, icon_lithuanians), 
-Civ(L"Magyars", true, HD, forgotten, false, checkbox_magyars, icon_magyars), 
-Civ(L"Malay", true, HD, rajas, false, checkbox_malay, icon_malay), 
-Civ(L"Malians", true, HD, africans, false, checkbox_malians, icon_malians), 
-Civ(L"Mayans", true, AOK, aoc, true, checkbox_mayans, icon_mayans), 
-Civ(L"Mongols", true, AOK, aok, true, checkbox_mongols, icon_mongols), 
-Civ(L"Persians", true, AOK, aok, true, checkbox_persians, icon_persians), 
-Civ(L"Poles", true, DE, dukes, false, checkbox_poles, icon_poles), 
-Civ(L"Portuguese", true, HD, africans, false, checkbox_portuguese, icon_portuguese), 
-Civ(L"Romans", true, DE, rome, false, checkbox_romans, icon_romans), 
-Civ(L"Saracens", true, AOK, aoc, true, checkbox_saracens, icon_saracens), 
-Civ(L"Sicilians", true, DE, west, false, checkbox_sicilians, icon_sicilians), 
-Civ(L"Slavs", true, HD, forgotten, false, checkbox_slavs, icon_slavs), 
-Civ(L"Spanish", true, AOK, aoc, true, checkbox_spanish, icon_spanish), 
-Civ(L"Tatars", true, DE, khans, false, checkbox_tatars, icon_tatars), 
-Civ(L"Teutons", true, AOK, aok, true, checkbox_teutons, icon_teutons), 
-Civ(L"Turks", true, AOK, aok, true, checkbox_turks, icon_turks), 
-Civ(L"Vietnamese", true, HD, rajas, false, checkbox_vietnamese, icon_vietnamese), 
-Civ(L"Vikings", true, AOK, aok, true, checkbox_vikings, icon_vikings)};
+{Civ(L"Armenians", true, DE, royals, checkbox_armenians), 
+Civ(L"Aztecs", true, AOK, aoc, checkbox_aztecs), 
+Civ(L"Bengalis", true, DE, india, checkbox_bengalis), 
+Civ(L"Berbers", true, HD, africans, checkbox_berbers), 
+Civ(L"Bohemians", true, DE, dukes, checkbox_bohemians), 
+Civ(L"Britons", true, AOK, aok, checkbox_britons), 
+Civ(L"Bulgarians", true, DE, khans, checkbox_bulgarians), 
+Civ(L"Burgundians", true, DE, west, checkbox_burgundians), 
+Civ(L"Burmese", true, HD, rajas, checkbox_burmese), 
+Civ(L"Byzantines", true, AOK, aok, checkbox_byzantines), 
+Civ(L"Celts", true, AOK, aok, checkbox_celts), 
+Civ(L"Chinese", true, AOK, aok, checkbox_chinese), 
+Civ(L"Cumans", true, DE, khans, checkbox_cumans), 
+Civ(L"Dravidians", true, DE, india, checkbox_dravidians), 
+Civ(L"Ethiopians", true, HD, africans, checkbox_ethiopians), 
+Civ(L"Franks", true, AOK, aok, checkbox_franks), 
+Civ(L"Georgians", true, DE, royals, checkbox_georgians), 
+Civ(L"Goths", true, AOK, aok, checkbox_goths), 
+Civ(L"Gurjaras", true, DE, india, checkbox_gurjaras), 
+Civ(L"Hindustanis", true, HD, forgotten, checkbox_hindustanis), 
+Civ(L"Huns", true, AOK, aoc, checkbox_huns), 
+Civ(L"Incas", true, HD, forgotten, checkbox_incas), 
+Civ(L"Italians", true, HD, forgotten, checkbox_italians), 
+Civ(L"Japanese", true, AOK, aok, checkbox_japanese), 
+Civ(L"Khmer", true, HD, rajas, checkbox_khmer), 
+Civ(L"Koreans", true, AOK, aoc, checkbox_koreans), 
+Civ(L"Lithuanians", true, DE, khans, checkbox_lithuanians), 
+Civ(L"Magyars", true, HD, forgotten, checkbox_magyars), 
+Civ(L"Malay", true, HD, rajas, checkbox_malay), 
+Civ(L"Malians", true, HD, africans, checkbox_malians), 
+Civ(L"Mayans", true, AOK, aoc, checkbox_mayans), 
+Civ(L"Mongols", true, AOK, aok, checkbox_mongols), 
+Civ(L"Persians", true, AOK, aok, checkbox_persians), 
+Civ(L"Poles", true, DE, dukes, checkbox_poles), 
+Civ(L"Portuguese", true, HD, africans, checkbox_portuguese), 
+Civ(L"Romans", true, DE, rome, checkbox_romans), 
+Civ(L"Saracens", true, AOK, aoc, checkbox_saracens), 
+Civ(L"Sicilians", true, DE, west, checkbox_sicilians), 
+Civ(L"Slavs", true, HD, forgotten, checkbox_slavs), 
+Civ(L"Spanish", true, AOK, aoc, checkbox_spanish), 
+Civ(L"Tatars", true, DE, khans, checkbox_tatars), 
+Civ(L"Teutons", true, AOK, aok, checkbox_teutons), 
+Civ(L"Turks", true, AOK, aok, checkbox_turks), 
+Civ(L"Vietnamese", true, HD, rajas, checkbox_vietnamese), 
+Civ(L"Vikings", true, AOK, aok, checkbox_vikings)};
 
 edition edition_state = DE;
 
@@ -446,18 +380,6 @@ void DisableHotkeys(HWND);
 
 void CreateUnderlineFont();
 
-BOOL PlayResource(const SoundResource &);
-
-bool LoadSound(SoundResource &);
-void LoadSounds();
-void UnloadSound(HGLOBAL);
-void UnloadSounds();
-
-void StopSound();
-void PlayAudio(sound_type);
-void PlayJingle(const std::wstring &);
-bool IsLegacyCiv(const std::wstring &);
-
 void InitialiseCivs();
 void InitialiseCivStates();
 void InitialiseCustomPoolCheckboxes(HWND);
@@ -476,7 +398,6 @@ void OpenHotkeys(HWND);
 void OpenAbout(HWND);
 
 void CreateCheckboxes(HWND);
-void CreateImages(HWND);
 void CreateButtons(HWND);
 void CreateLabels(HWND);
 void CreateTextfields(HWND);
@@ -489,8 +410,8 @@ void CreateTooltips(HWND);
 
 void SetEditionState(HWND hWnd, edition edition);
 
-void EnableAll(HWND, bool);
-void DisableAll(HWND, bool);
+void EnableAll(HWND);
+void DisableAll(HWND);
 
 void ShowDrawTab(bool, HWND);
 void ShowLogTab(bool);
