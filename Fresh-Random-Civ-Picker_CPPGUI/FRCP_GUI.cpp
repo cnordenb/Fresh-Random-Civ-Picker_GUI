@@ -115,7 +115,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
     instance = hInstance;
 
-	wcscpy_s(title, L"Fresh Random Civ Picker");
+	wcscpy_s(title, L"Fresh Random Civ Picker (lite)");
 
     HWND hWnd = CreateWindowW(window_class, title, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, MIN_WIDTH, MIN_HEIGHT, nullptr, nullptr, hInstance, nullptr);
 
