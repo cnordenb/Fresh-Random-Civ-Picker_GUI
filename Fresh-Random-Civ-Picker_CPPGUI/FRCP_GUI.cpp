@@ -1703,7 +1703,7 @@ void SaveLog(savetype type)
 
             std::wstring defaultFileName = wss.str();
 
-
+            //test change
 
             OPENFILENAME ofn;
 
