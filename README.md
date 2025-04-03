@@ -132,9 +132,9 @@ Once all civs have been drawn, the next draw will reset the program and all civs
 When you run the executable, Microsoft Defender Smart Screen will give you a popup telling you your PC has been protected. This doesn’t mean that it has scanned the executable, in fact you can go ahead and scan it with Microsoft Defender by right-clicking the executable and clicking "Scan with Microsoft Defender...". The popup only means that it has found that the application application is not digitally signed with a Microsoft-approved certificate. The smart screen popup is warning you that I have not acquired a certificate under the Microsoft Authenticode programme which requires some hundreds of euros in digital signature services per year which I cannot afford at this point in time.
 
 ## System requirements
-OS: Windows x64
+OS: Windows x64 (Lite version supports x86)
 
-Drive space: at least 71.3 megabytes available
+Drive space: at least 71.3 megabytes available (Lite version requires only 500kb)
 
 ## Project Milestones Achieved
 - v1.0: GUI with simple log
