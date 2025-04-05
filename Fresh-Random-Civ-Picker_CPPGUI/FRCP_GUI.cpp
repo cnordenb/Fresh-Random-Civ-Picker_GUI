@@ -143,6 +143,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case WM_DESTROY: PostQuitMessage(0); break;
         case WM_CREATE:
         {
+            startup = true;
             INITCOMMONCONTROLSEX iccex;
             iccex.dwSize = sizeof(INITCOMMONCONTROLSEX);
             iccex.dwICC = ICC_WIN95_CLASSES | ICC_BAR_CLASSES | ICC_COOL_CLASSES | ICC_TREEVIEW_CLASSES;
@@ -168,7 +169,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (persistent_logging) {LoadLog(hWnd, automatic); ValidateAllDlcToggles(hWnd);}           
 			ShowTabComponents(0, hWnd);            
             EnableHotkeys(hWnd);
-            if (draw_on_startup) DrawCiv();
+            if (draw_on_startup) DrawCiv(false, L"");
 			else if (!persistent_logging) ResetProgram(false);      
             startup = false;
             break;
@@ -280,7 +281,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (wParam == HOTKEY_ID_CTRLS) SaveLog(manual);
             if (wParam == HOTKEY_ID_CTRLR) LoadLog(hWnd, manual);
 			if (wParam == HOTKEY_ID_CTRLF) JoinLobby(hWnd);
-            if (wParam == HOTKEY_ID_CTRLZ) UndrawCiv();
+            if (wParam == HOTKEY_ID_CTRLZ) Undo(hWnd);
             if (wParam == HOTKEY_ID_CTRLX) RedrawCiv();
 			if (wParam == HOTKEY_ID_CTRLT) OpenSurvapp();
             if (current_tab == 0)
@@ -291,7 +292,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             if (current_tab != 2)
             {
-                if (wParam == HOTKEY_ID_SPACE) DrawCiv();
+                if (wParam == HOTKEY_ID_SPACE) DrawCiv(false, L"");
                 if (wParam == HOTKEY_ID_RETURN) ResetProgram(false);
             }
             else if (current_tab == 2)
@@ -518,7 +519,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     ShellExecute(0, 0, L"https://www.xbox.com/games/store/age-of-empires-ii-definitive-edition/9N42SSSX2MTG/0010", 0, 0, SW_SHOW);
 					break;
                 case IDC_BUTTON_DRAW:
-                    DrawCiv();
+                    DrawCiv(false, L"");
                     break;
                 case IDC_BUTTON_RESET:
                     ResetProgram(false);
@@ -813,6 +814,14 @@ LRESULT CALLBACK HyperlinkProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 void ResetProgram(bool auto_reset)
 {
+    if (!auto_reset && reset_state) return;
+
+    if (cache_enabled && !auto_reset && !reset_state && !startup)
+    {
+        SaveLog(automatic);
+        cache_available = true;
+    }        
+
     if (!startup && !auto_reset && !jingles_enabled) PlayAudio(button);
     if (custom_max_civs < MAX_CIVS) custom_civ_pool = true;
 
@@ -848,12 +857,14 @@ void ResetProgram(bool auto_reset)
 
     reset_state = true;
 
-    UpdateRemainingLog(false, false);
+    UpdateRemainingLog(true);
     UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
     undrawable = false;
+
+    last_action = reset;
 }
 
-void DrawCiv()
+void DrawCiv(bool rigged, const std::wstring &civ_name)
 {
     if (!startup && !jingles_enabled) PlayAudio(button);
     reset_state = false;
@@ -865,14 +876,26 @@ void DrawCiv()
         return;
     }
 
-    if (civs.empty() || iterator == custom_max_civs || iterator == 0) ResetProgram(true);
+    if (civs.empty() || iterator == custom_max_civs || iterator == 0)
+    {
+        ResetProgram(true);
+        reset_state = false;
+    }
 
-    std::random_device rd;
-    std::mt19937 mt(rd());
+    if (rigged)
+    {
+        current_civ = civ_name;
+        civs.erase(std::remove(civs.begin(), civs.end(), civ_name), civs.end());
+    }    
+    else
+    {
+        std::random_device rd;
+        std::mt19937 mt(rd());
 
-    std::shuffle(civs.begin(), civs.end(), mt);
-    current_civ = civs.back();
-    civs.pop_back();
+        std::shuffle(civs.begin(), civs.end(), mt);
+        current_civ = civs.back();
+        civs.pop_back();
+    }
 
 	drawn_civs[iterator] = current_civ;
 
@@ -890,7 +913,7 @@ void DrawCiv()
     SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
 
     UpdateDrawnLog(false, true, false);
-    UpdateRemainingLog(false, false);
+    UpdateRemainingLog(false);
 
 
 /*
@@ -902,6 +925,8 @@ void DrawCiv()
     UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
     redrawable = false;
     undrawable = true;
+
+    last_action = draw;
 }
 
 void EnableHotkeys(HWND hWnd) {	for (int i = 0; i < HOTKEY_AMOUNT; i++) RegisterHotKey(hWnd, hotkey[i].id, hotkey[i].modifier, hotkey[i].key); }
@@ -976,33 +1001,35 @@ void PlayJingle(const std::wstring &civ_name)
 
 void AddCiv(const std::wstring &civ)
 {
-    if (!GetCiv(civ).enabled)
-    {
-        civs.push_back(civ);
-		GetCiv(civ).SetEnabled(true);
-	    custom_max_civs++;
-        label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
-        SetWindowText(label_corner, label_text.c_str());
-	    if (custom_max_civs == MAX_CIVS) custom_civ_pool = false;
-        UpdateRemainingLog(true, false);
-        UpdateDrawnLog(false, false, false);
-    }
+    if (GetCiv(civ).enabled) return;
+
+    civs.push_back(civ);
+	GetCiv(civ).SetEnabled(true);
+	custom_max_civs++;
+    label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
+    SetWindowText(label_corner, label_text.c_str());
+	if (custom_max_civs == MAX_CIVS) custom_civ_pool = false;
+    UpdateRemainingLog(true);
+    UpdateDrawnLog(false, false, false);
+
+	last_action = pool_change;
 }
 
 void RemoveCiv(const std::wstring &civ)
 {
-    if (GetCiv(civ).enabled)
-    {
-        if (std::find(civs.begin(), civs.end(), civ) == civs.end()) iterator--;
-        custom_civ_pool = true;
-	    civs.erase(std::remove(civs.begin(), civs.end(), civ), civs.end());
-		GetCiv(civ).SetEnabled(false);
-	    custom_max_civs--;
-        label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
-        SetWindowText(label_corner, label_text.c_str());
-        UpdateRemainingLog(true, false);
-		UpdateDrawnLog(false, false, false);
-    }    
+    if (!GetCiv(civ).enabled) return;
+    
+    if (std::find(civs.begin(), civs.end(), civ) == civs.end()) iterator--;
+    custom_civ_pool = true;
+	civs.erase(std::remove(civs.begin(), civs.end(), civ), civs.end());
+	GetCiv(civ).SetEnabled(false);
+	custom_max_civs--;
+    label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
+    SetWindowText(label_corner, label_text.c_str());
+    UpdateRemainingLog(true);
+	UpdateDrawnLog(false, false, false);
+
+    last_action = pool_change;    
 }
 
 void InitialiseCivStates() { for (int i = 0; i < MAX_CIVS; i++) civ[i].SetEnabled(true); }
@@ -1339,13 +1366,29 @@ void ValidateDlcToggle(HWND hWnD, dlc civ_dlc)
 void ValidateAllDlcToggles(HWND hWnd) { for (int i = 0; i < DLC_AMOUNT; i++) ValidateDlcToggle(hWnd, every_dlc[i]); }
 
 void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted)
-{    
+{   
+    std::wstring drawn_label = L"Drawn: " + std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
+    SetWindowText(label_drawncount, drawn_label.c_str());
+
+    drawnlog_length = GetWindowTextLength(drawn_log);
+    drawnlog_text.resize(drawnlog_length + 1);
+    GetWindowText(drawn_log, &drawnlog_text[0], drawnlog_length + 1);
+    drawnlog_text.pop_back();
+
+    if (cache_loading)
+    {
+        if (drawnlog_text.substr(0, 2) == L"\r\n")
+        {
+            drawnlog_text.erase(0, 2);
+            SetWindowText(drawn_log, drawnlog_text.c_str());
+        }
+        return;
+    }
+
+
     if (drawn)
     {
-        drawnlog_length = GetWindowTextLength(drawn_log);
-        drawnlog_text.resize(drawnlog_length + 1);
-        GetWindowText(drawn_log, &drawnlog_text[0], drawnlog_length + 1);
-        drawnlog_text.pop_back();
+        
         log_entry = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs) + L" - " + std::wstring(current_civ.begin(), current_civ.end()) + L"\r\n";
         drawnlog_text = log_entry + drawnlog_text;
         if (iterator == custom_max_civs) drawnlog_text += L"\r\n";
@@ -1354,7 +1397,7 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted)
     }    
     else if (!reset_state && blankline_wanted)
     {
-        if (iterator >= 0)
+        if (drawnlog_text.substr(0, 2) != L"\r\n")
         {
             drawnlog_length = GetWindowTextLength(drawn_log);
             drawnlog_text.resize(drawnlog_length + 1);
@@ -1366,7 +1409,6 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted)
         }        
     }
 
-    std::wstring drawn_label = L"Drawn: " + std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
     SetWindowText(label_drawncount, drawn_label.c_str());
 
     if (start_state)
@@ -1377,9 +1419,9 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted)
     }
 }
 
-void UpdateRemainingLog(bool civ_pool_changed, bool backwards)
+void UpdateRemainingLog(bool refresh)
 {
-    if (reset_state || civ_pool_changed || backwards)
+    if (refresh)
     {
         std::sort(civs.begin(), civs.end());
         remaininglog_text.clear();
@@ -1651,13 +1693,12 @@ void LoadSettings()
 
 void SaveLog(savetype type)
 {
-    if (redrawable)
+    bool current_found = false;
+    for (int i = 0; i < MAX_CIVS; i++)
     {
-		for (int i = iterator; i < (MAX_CIVS - iterator); i++)
-		{
-            if (i > MAX_CIVS || drawn_civs[i] == L"") break;
-            else drawn_civs[i] = L"";
-		}
+        if (drawn_civs[i] == current_civ) current_found = true;
+        else if (!current_found) continue;
+		if (drawn_civs[i] != current_civ) drawn_civs[i] = L"";
     }
 
     std::wstring saveFilePath;
@@ -1702,8 +1743,6 @@ void SaveLog(savetype type)
                 << std::setw(2) << std::setfill(L'0') << st.wSecond << L".txt";
 
             std::wstring defaultFileName = wss.str();
-
-            //test change
 
             OPENFILENAME ofn;
 
@@ -1771,12 +1810,12 @@ void LoadLog(HWND hWnd, savetype type)
 
     if (type != automatic)
     {
-		PlayAudio(button);
+        PlayAudio(button);
 
         wchar_t exePath[MAX_PATH];
         GetModuleFileName(NULL, exePath, MAX_PATH);
 
-        wchar_t *lastSlash = wcsrchr(exePath, L'\\');
+        wchar_t* lastSlash = wcsrchr(exePath, L'\\');
         if (lastSlash != NULL) *lastSlash = L'\0';
 
         PathAppend(exePath, L"saves");
@@ -1812,12 +1851,9 @@ void LoadLog(HWND hWnd, savetype type)
             }
         }
 
-
-
-        startup = true;
         SetWindowText(remaining_log, L"");
         SetWindowText(drawn_log, L"");
-		SetEditionState(hWnd, DE);
+        SetEditionState(hWnd, DE);
         EnableAll(hWnd, false);
         ResetProgram(true);
     }
@@ -1886,10 +1922,7 @@ void LoadLog(HWND hWnd, savetype type)
         else if (readingDrawnCivs)
         {
             if (j >= MAX_CIVS) break;
-            civs.erase(std::remove(civs.begin(), civs.end(), line), civs.end());
-            current_civ = line;
-            if (GetCiv(current_civ).enabled) iterator++;
-            UpdateDrawnLog(true, true, false);       
+            DrawCiv(true, line); 
             j++;
 		}
 		else if (readingEditionState)
@@ -1912,8 +1945,7 @@ void LoadLog(HWND hWnd, savetype type)
     SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
 	if (!icons_enabled) ShowWindow(civ_icon, SW_HIDE);
 
-    reset_state = true;
-    UpdateRemainingLog(false, false);
+    UpdateRemainingLog(true);
 
     if (type == automatic && current_civ == L"Random")
     {
@@ -1929,12 +1961,13 @@ void LoadLog(HWND hWnd, savetype type)
 
     inFile.close();
 
-    if (type != automatic)
+    if (type != automatic || cache_loading)
     {
         ShowTabComponents(current_tab, hWnd);
         ValidateAllDlcToggles(hWnd);
         startup = false;
     }
+    if (iterator > 0) reset_state = false;
 }
 
 void GenerateFilePaths()
@@ -2267,9 +2300,32 @@ bool IsValidLobbyCode(const std::wstring &lobby_code)
 	return true;
 }
 
+void Undo(HWND hWnd)
+{
+    switch (last_action)
+    {
+    case draw:
+        if (iterator > 0) UndrawCiv();
+        return;
+    case reset:
+        if (cache_enabled && cache_available)
+        {
+            cache_loading = true;
+            LoadLog(hWnd, automatic);
+            cache_available = false;
+            cache_loading = false;
+        }
+        return;
+    case pool_change:
+        return;
+    default:
+        return;
+    }
+}
+
 void UndrawCiv()
 {
-    if (!undrawable || iterator < 1)
+    if (!undrawable)
     {
 		PlayAudio(error);
         return;
@@ -2277,7 +2333,7 @@ void UndrawCiv()
 	PlayAudio(button);
     if (iterator > 0) iterator--; else return;
     civs.push_back(current_civ);
-    if (iterator >= 1)current_civ = drawn_civs[iterator - 1];
+    if (iterator >= 1) current_civ = drawn_civs[iterator - 1];
     else current_civ = L"Random";
 	HBITMAP drawn_civ_icon = FetchCivIcon(current_civ);
 	SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
@@ -2303,7 +2359,7 @@ void UndrawCiv()
         }
     }
 
-	UpdateRemainingLog(false, true);
+	UpdateRemainingLog(true);
     redrawable = true;
 }
 
@@ -2324,7 +2380,7 @@ void RedrawCiv()
     SetWindowText(label_corner, StringCleaner(std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs)));
     if (!iteration_label_enabled || current_tab != 0) ShowWindow(label_corner, SW_HIDE);
     UpdateDrawnLog(false, true, false);
-    UpdateRemainingLog(false, false);
+    UpdateRemainingLog(false);
 
     if (iterator == custom_max_civs) redrawable = false;
 }

@@ -34,7 +34,7 @@
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-#define VERSION L"1.3.2"
+#define VERSION L"1.3.3"
 
 #define MAX_CIVS 45
 #define DLC_AMOUNT 10
@@ -252,6 +252,9 @@ bool reset_state = true;
 bool hotkey_pressed = false;
 bool redrawable = false;
 bool undrawable = false;
+bool cache_enabled = true;
+bool cache_loading = false;
+bool cache_available = false;
 
 enum sound_type
 {
@@ -285,6 +288,16 @@ enum dlc
     royals,
     rome    
 };
+
+enum last_action_type
+{
+    draw,
+    reset,
+    pool_change
+    
+};
+
+last_action_type last_action;
 
 int de_dlc_row[] = { 25, 45, 65, 85, 105, 125 };
 int hd_dlc_row[] = { 30, 65, 100 };
@@ -431,7 +444,9 @@ void ShowTabComponents(int, HWND);
 
 void ResetProgram(bool);
 
-void DrawCiv();
+void DrawCiv(bool, const std::wstring &);
+
+void Undo(HWND);
 
 void UndrawCiv();
 void RedrawCiv();
@@ -504,7 +519,7 @@ int GetDlcCheckboxId(dlc);
 HWND GetCivCheckbox(const std::wstring &);
 
 void UpdateDrawnLog(bool, bool, bool);
-void UpdateRemainingLog(bool, bool);
+void UpdateRemainingLog(bool);
 void ToggleRemainLog();
 void ClearDrawnLog();
 
