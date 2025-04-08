@@ -136,5 +136,12 @@ Drive space: at least 71.3 megabytes available (Lite version requires only 500kb
 I got the idea to create this application when I was playing the game one day and got to play the same civilisation twice throughout five matches, despite the fact that I picked random every time and the fact that the game has 45 civilisations. This made me feel frustrated and that I was wasting my time. As a full-time student and with other priorities in life I do not have the time to play the game every day. I might only have the opportunity to play five matches in a month. I want to play random civilisations and I also want to minimise the repetition of some factors like the civilisation played. The frustrating experience of having to replay the same civilisation during my precious few five matches in a game that has 45(!) civilisations gave me the motivation to create a solution for this problem. Thus, the idea, work, and birth of this program came to.
 
 
+## Acknowledgements
+
+- hszemi, Anda, exterkamp, paulirish, lalitpatel, Jineapple, TriRem, pip, and NkoDragaš over at [Siege Engineers](https://siegeengineers.org/) for their https://aoe2techtree.net/ website which my application links to for tech tree.
+  
+- [Survivalist](https://www.youtube.com/channel/UCmFJUeU8Oubp5Neldbq0JRA) for his https://aoe2-de-tools.herokuapp.com/ webapp which my application links to for production sustainability calculations.
+
+
 ## Regarding usage of Microsoft assets in this project
 Age of Empires II © Microsoft Corporation. Fresh Random Civ Picker was created under Microsoft's "Game Content Usage Rules" using assets from Age of Empires II: Age of Kings, Age of Empires II: HD Edition, and Age of Empires II: Definitive Edition, and it is not endorsed by or affiliated with Microsoft. https://www.xbox.com/en-us/developers/rules
