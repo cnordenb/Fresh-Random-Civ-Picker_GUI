@@ -16,6 +16,7 @@
 [System requirements](#System-requirements)  
 [Project Milestones](#Project-Milestones-Achieved)  
 [Origin Story](#Why-was-it-created)  
+[Acknowledgements](#Acknowledgements)  
 [Microsoft Assets](#Regarding-usage-of-Microsoft-assets-in-this-project)  
 
 ## Purpose
