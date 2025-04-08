@@ -46,10 +46,10 @@ This is an application which generates a randomly drawn civilisation out of the 
 - **Save your custom civ pool preset!**
 *Save your civ pools to a file which can be loadable at any time. Press Ctrl+S or click Save Preset from the File menu. To load, press Ctrl+R or click Load Preset from the File menu. To quicksave and quickload, press F5 and F9.*
 
-- **Pick up where you left off!**  
+- **Autosave pool and preset; pick up where you left off!**  
 *Even without saving manually, when the program starts it will remember what civs you had enabled and drawn last time you ran the program. This can be turned off in options if the user prefers the program to reset upon startup.*
 
-- **Quickdraw!**  
+- **Quickdraw a fresh random civ!**  
 *The Fresh Random Civ Picker can draw a fresh random civ for you automatically as soon as you start the program. This can be turned off or on in options.*
 
 - **Civ icons!**  
