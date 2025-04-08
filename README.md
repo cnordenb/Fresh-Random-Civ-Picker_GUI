@@ -31,11 +31,11 @@ This is an application which generates a randomly drawn civilisation out of the 
 - **Reset the drawn civ pool at any time!**
 *Whenever you want, reset the program and render all enabled civs drawable. Click the Reset button or press Enter.*
 
-- **Go to the tech tree!**
-*At any time, go to the tech tree (website by Siege Engineers) of the drawn civ. Click the Tech Tree button or press T (global hotkey F4).*
+- **Shortcut to the tech tree!**
+*At any time, go to the tech tree (made by [Siege Engineers](https://siegeengineers.org/)) of the drawn civ. Click the Tech Tree button or press T (global hotkey F4).*
 
-- **Go to the sustainability webapp!**
-*At any time, go to the sustainability app (website by Survivalist) to see how many villagers are required for a production. Click the S button or press R (global hotkey Ctrl+T).*
+- **Shortcut to the sustainability webapp!**
+*At any time, go to the sustainability app (made by [Survivalist](https://www.youtube.com/channel/UCmFJUeU8Oubp5Neldbq0JRA)) to see how many villagers are required for a production. Click the S button or press R (global hotkey Ctrl+T).*
 
 - **Track drawn and remaining civs!**
 *See which civs have been drawn and which are remaining on the log tab. Navigate to the log by clicking the Log tab, or by pressing 2 or tab.*
