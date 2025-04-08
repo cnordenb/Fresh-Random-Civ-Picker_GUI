@@ -25,20 +25,20 @@ The user can randomly iterate through the entire civ pool or a user-defined civ 
 This is an application which generates a randomly drawn civilisation out of the civilisations available to play in a computer game called "Age of Empires II: Definitive Edition" which is a real-time strategy game. What my application offers which the random civ generator in the game itself doesn't is the "freshness" which is that a civilisation is not repeated until all the civilisations have been iterated through.  
 
 ## Features
-- **Draw a fresh random civ!**  
-*Never draw the same civ twice within the civ pool.*
+- **Draw a fresh random civ!**
+*Never draw the same civ twice within the civ pool. Click the Drawn button or press the spacebar.*
 
 - **Reset the drawn civ pool at any time!**
-*Whenever you want, reset the program and render all enabled civs drawable.*
+*Whenever you want, reset the program and render all enabled civs drawable. Click the Reset button or press Enter.*
 
 - **Go to the tech tree!**
-*At any time, go to the tech tree of the drawn civ.*
+*At any time, go to the tech tree of the drawn civ. Click the Tech Tree button or press T.*
 
 - **Track drawn and remaining civs!**
-*See which civs have been drawn and which are remaining on the log tab.*
+*See which civs have been drawn and which are remaining on the log tab. Navigate to the log by clicking the Log tab, or by pressing 2 or tab.*
 
 - **Customise your own civ pool!**
-*Tailor the exact civ pool you want using the civ pool tab.*
+*Tailor the exact civ pool you want using the civ pool tab. Navigate to the civ pool by clicking the Civ Pool tab or pressing 3 or tab. Toggle civs by clicking their corresponding checkbox.*
 
 - **Save your custom civ pool preset!**
 ![image](https://github.com/user-attachments/assets/1772bbd2-9e89-4112-b741-03d680e25884)  
