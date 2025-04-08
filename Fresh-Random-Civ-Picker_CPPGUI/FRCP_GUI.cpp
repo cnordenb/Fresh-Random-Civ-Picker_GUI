@@ -816,7 +816,7 @@ void ResetProgram(bool auto_reset)
 {
     if (!auto_reset && reset_state) return;
 
-    if (cache_enabled && !auto_reset && !reset_state && !startup)
+    if (persistent_logging && !auto_reset && !reset_state && !startup)
     {
         SaveLog(automatic);
         cache_available = true;
@@ -2306,9 +2306,16 @@ void Undo(HWND hWnd)
     {
     case draw:
         if (iterator > 0) UndrawCiv();
+        else if (persistent_logging && cache_available)
+        {
+            cache_loading = true;
+            LoadLog(hWnd, automatic);
+            cache_available = false;
+            cache_loading = false;
+        }
         return;
     case reset:
-        if (cache_enabled && cache_available)
+        if (persistent_logging && cache_available)
         {
             cache_loading = true;
             LoadLog(hWnd, automatic);

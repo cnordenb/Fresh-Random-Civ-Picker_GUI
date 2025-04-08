@@ -252,7 +252,6 @@ bool reset_state = true;
 bool hotkey_pressed = false;
 bool redrawable = false;
 bool undrawable = false;
-bool cache_enabled = true;
 bool cache_loading = false;
 bool cache_available = false;
 
