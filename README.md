@@ -26,24 +26,18 @@ This is an application which generates a randomly drawn civilisation out of the 
 
 ## Features
 - **Draw a fresh random civ!**  
-![image](https://github.com/user-attachments/assets/e021f793-b1ff-44b3-91e6-2adb3eed5908)  
 *Never draw the same civ twice within the civ pool.*
 
 - **Reset the drawn civ pool at any time!**
-![image](https://github.com/user-attachments/assets/8dfb402c-df21-4b7e-9daa-9ae6b3ebfcde)  
 *Whenever you want, reset the program and render all enabled civs drawable.*
 
 - **Go to the tech tree!**
-![image](https://github.com/user-attachments/assets/ee443bbf-818b-42a4-97dc-9f5463934d1c)  
-*At any time, go to the tech tree of the drawn civ. aoe2techtree.net courtesy of Siege Engineers.*
+*At any time, go to the tech tree of the drawn civ.*
 
 - **Track drawn and remaining civs!**
-![image](https://github.com/user-attachments/assets/8ad3f017-d204-4b14-95cb-c16bcdf8e479)  
 *See which civs have been drawn and which are remaining on the log tab.*
 
-
 - **Customise your own civ pool!**
-![civ pool tab](https://github.com/user-attachments/assets/0b8b35f6-7f87-40e7-8bb4-56e7fd44fabf)  
 *Tailor the exact civ pool you want using the civ pool tab.*
 
 - **Save your custom civ pool preset!**
