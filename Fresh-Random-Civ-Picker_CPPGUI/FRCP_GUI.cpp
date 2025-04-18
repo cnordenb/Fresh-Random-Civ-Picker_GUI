@@ -50,6 +50,9 @@ void ShowTabComponents(int tabIndex, HWND hWnd)
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {    
     LoadSounds();
+    LoadJingles();
+
+
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -91,6 +94,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     SaveSettings();
 
     UnloadSounds();
+    UnloadJingles();
 
     return (int) msg.wParam;
 }
@@ -984,20 +988,6 @@ HBITMAP FetchCivIcon(const std::wstring &civ_name)
     if (civ_name == L"Random") return icon_random;
     for (int i = 0; i < MAX_CIVS; i++) if (civ_name == civ[i].name) return civ[i].icon;
 	return icon_random;
-}
-
-void PlayJingle(const std::wstring &civ_name)
-{
-	if (!jingles_enabled) return;
-
-    std::wstring processed_civ_name = civ_name;
-    processed_civ_name[0] = std::tolower(processed_civ_name[0]);
-    std::wstring jingle_path;
-
-    if (legacy_jingle_enabled && GetCiv(civ_name).legacy) jingle_path = L"sounds\\civ_jingles\\legacy\\" + processed_civ_name + L".wav";
-	else jingle_path = L"sounds\\civ_jingles\\" + processed_civ_name + L".wav";    
-    
-    PlaySound(jingle_path.c_str(), NULL, SND_FILENAME | SND_ASYNC);
 }
 
 void AddCiv(const std::wstring &civ)
@@ -2395,6 +2385,38 @@ void PlayAudio(sound_type type)
     }
 }
 
+void PlayJingle(const std::wstring& civ_name)
+{
+    if (!jingles_enabled) return;
+
+    if (legacy_jingle_enabled && GetCiv(civ_name).legacy)
+    {
+        std::wstring legacy_civ[LEGACY_JINGLE_AMOUNT] = { L"" };
+        int j = 0;
+        for (int i = 0; i < MAX_CIVS; i++)
+        {
+            if (civ[i].legacy)
+            {
+                legacy_civ[j] = civ[i].name;
+                j++;
+            }
+        }
+		for (int i = 0; i < LEGACY_JINGLE_AMOUNT; i++) if (legacy_civ[i] == civ_name) PlayResource(legacyJingle[i]);
+    }
+    else for (int i = 0; i < MAX_CIVS; i++) if (civ[i].name == civ_name) PlayResource(jingleResource[i]);
+
+
+
+    //std::wstring processed_civ_name = civ_name;
+    //processed_civ_name[0] = std::tolower(processed_civ_name[0]);
+    //std::wstring jingle_path;
+
+    //if (legacy_jingle_enabled && GetCiv(civ_name).legacy) jingle_path = L"sounds\\civ_jingles\\legacy\\" + processed_civ_name + L".wav";
+    //else jingle_path = L"sounds\\civ_jingles\\" + processed_civ_name + L".wav";
+
+    //PlaySound(jingle_path.c_str(), NULL, SND_FILENAME | SND_ASYNC);
+}
+
 void StopSound() { PlaySound(NULL, NULL, 0); }
 
 BOOL PlayResource(const SoundResource &sound_resource) 
@@ -2446,3 +2468,26 @@ void UnloadSound(SoundResource& soundResource) {
 void LoadSounds() { for (int i = 0; i < SOUND_AMOUNT; ++i) LoadSound(soundResources[i]); }
 
 void UnloadSounds() { for (int i = 0; i < SOUND_AMOUNT; ++i) UnloadSound(soundResources[i]); }
+
+void LoadJingles()
+{
+    int j = 0;
+    for (int i = 0; i < MAX_CIVS; i++)
+    {
+        jingleResource[i] = { NULL, NULL, NULL, StringCleaner(civ[i].name) };
+        LoadSound(jingleResource[i]);
+        if (civ[i].legacy)
+        {
+			std::wstring l_str = L"l_" + civ[i].name;
+			legacyJingle[j] = { NULL, NULL, NULL, StringCleaner(l_str)};
+			LoadSound(legacyJingle[j]);
+            j++;
+        }
+    }
+}
+
+void UnloadJingles()
+{
+    for (int i = 0; i < MAX_CIVS; i++) UnloadSound(jingleResource[i]);
+	for (int i = 0; i < LEGACY_JINGLE_AMOUNT; i++) UnloadSound(legacyJingle[i]);
+}

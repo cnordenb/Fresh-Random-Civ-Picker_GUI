@@ -34,7 +34,7 @@
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-#define VERSION L"1.3.3"
+#define VERSION L"1.3.4"
 
 #define MAX_CIVS 50
 #define DLC_AMOUNT 11
@@ -43,6 +43,7 @@
 #define HOTKEY_AMOUNT 38
 #define TOOLTIP_AMOUNT 25
 #define SOUND_AMOUNT 5
+#define LEGACY_JINGLE_AMOUNT 18
 
 #define HOTKEY_ID_TAB 1
 #define HOTKEY_ID_SPACE 2
@@ -157,7 +158,6 @@ public:
     void SetEnabled(bool enabled) { this->enabled = enabled; }
 };
 
-
 wchar_t INI_FILE_PATH[MAX_PATH];
 wchar_t LOG_FILE_PATH[MAX_PATH];
 
@@ -199,6 +199,9 @@ SoundResource soundResources[SOUND_AMOUNT] = {
     {NULL, NULL, NULL, L"view_sound"}
 };
 
+
+SoundResource jingleResource[MAX_CIVS];
+SoundResource legacyJingle[LEGACY_JINGLE_AMOUNT];
 
 HWND checkbox_khans, checkbox_dukes, checkbox_west, checkbox_india, checkbox_rome, checkbox_royals, checkbox_kingdoms,
 checkbox_forgotten, checkbox_africans, checkbox_rajas,
@@ -297,8 +300,7 @@ enum last_action_type
 {
     draw,
     reset,
-    pool_change
-    
+    pool_change    
 };
 
 last_action_type last_action;
@@ -477,8 +479,10 @@ BOOL PlayResource(const SoundResource &);
 
 bool LoadSound(SoundResource &);
 void LoadSounds();
+void LoadJingles();
 void UnloadSound(HGLOBAL);
 void UnloadSounds();
+void UnloadJingles();
 
 void StopSound();
 void PlayAudio(sound_type);
