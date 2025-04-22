@@ -2450,7 +2450,6 @@ bool LoadSound(SoundResource& soundResource)
         MessageBox(NULL, L"Failed to lock resource.", L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
-
     return true;
 }
 
