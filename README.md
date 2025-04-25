@@ -12,7 +12,8 @@
 [Features](#Features)  
 [GUI Description](#GUI-Description)  
 [Usage](#How-do-I-use-this-application)   
-[Installation](#How-to-install)  
+[Compilation](#How-to-compile-in-IDE)  
+[Installation](#How-to-install-and-run-a-release)  
 [System requirements](#System-requirements)  
 [Project Milestones](#Project-Milestones-Achieved)  
 [Origin Story](#Why-was-it-created)  
@@ -92,7 +93,14 @@ How to use: the user can click the "Draw" button (or press spacebar) to have the
 Once all civs have been drawn, the next draw will reset the program and all civs are once again available to draw. The user can at any time reset the program manually by clicking the "Reset" button (or pressing Return). The user can at any time navigate to the "Log" tab (by either clicking it or pressing Tab) to view the history of drawn civs. The user can at any time navigate to the "Civ Pool" tab to customise which civs are enabled in the pool. Disabled civs are never drawn.
 
 
-## How to install
+## How to compile in IDE
+Instructions for Visual Studio on Windows
+1. Clone this repository
+2. Open FRCP_GUI.cpp
+3. Select FRCP_GUI as single startup project in Solution Property Pages
+4. Run or debug
+
+## How to install and run a release
 **Step 1. Go to Releases, located on this page in the right-hand sidebar below About and above Packages**
 
 ![step 1](https://github.com/user-attachments/assets/c8340f36-7072-42e7-a3a3-15648a694656)
