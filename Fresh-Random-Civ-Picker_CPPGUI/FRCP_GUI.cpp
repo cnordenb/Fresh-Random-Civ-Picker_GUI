@@ -482,7 +482,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     break;
                 case IDM_WEBVERSION:
                     PlayAudio(button);
-                    ShellExecute(0, 0, L"https://cnordenb.github.io/Fresh-Random-Civ-Picker_web/", 0, 0, SW_SHOW);
+                    ShellExecute(0, 0, L"https://cnordenb.github.io/frcp_tsx/", 0, 0, SW_SHOW);
                     break;
 				case IDM_DISCORD:
                     PlayAudio(button);
