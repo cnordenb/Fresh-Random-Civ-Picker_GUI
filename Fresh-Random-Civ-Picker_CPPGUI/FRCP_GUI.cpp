@@ -2085,18 +2085,18 @@ void CreateCheckboxes(HWND hWnd)
     int row[] = { 30, 50, 70, 90, 110, 130, 150, 170, 190, 210 };
     int column[] = { 10, 112, 214, 316, 418 };
 
-    for (int i = 0; i < MAX_CIVS; i++) civ[i].checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), column[i % 5], row[i / 5], 100, 20, i + 5, civ[i].name.c_str());
+    for (int i = 0; i < MAX_CIVS; i++) civ[i].checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), column[i % 5], row[i / 5] + 10, 100, 20, i + 5, civ[i].name.c_str());
 
     checkbox_autoreset = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 260, 180, 20, IDC_CHECKBOX_AUTORESET, L"Auto-reset upon change");
-    checkbox_autotoggle = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 0, 170, 20, IDC_CHECKBOX_AUTOTOGGLE, L"Auto-toggle older civs");
+    checkbox_autotoggle = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 10, 170, 20, IDC_CHECKBOX_AUTOTOGGLE, L"Auto-toggle older civs");
 
     if (!autoreset_enabled) CheckDlgButton(hWnd, IDC_CHECKBOX_AUTORESET, BST_UNCHECKED);
     if (!autotoggle_enabled) CheckDlgButton(hWnd, IDC_CHECKBOX_AUTOTOGGLE, BST_UNCHECKED);
 
-    for (int i = 0; i < de_dlc_amount; i++) de_dlc_checkbox[i] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, (de_dlc_boxrow[i] - 20), 160, 20, de_dlc_id[i], StringCleaner(de_dlc_name[i]));
-    for (int i = 0; i < hd_dlc_amount; i++) hd_dlc_checkbox[i] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 383, (hd_dlc_boxrow[i] - 20), 160, 20, hd_dlc_id[i], StringCleaner(hd_dlc_name[i]));
+    for (int i = 0; i < de_dlc_amount; i++) de_dlc_checkbox[i] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 368, (de_dlc_boxrow[i] - 10), 160, 20, de_dlc_id[i], StringCleaner(de_dlc_name[i]));
+    for (int i = 0; i < hd_dlc_amount; i++) hd_dlc_checkbox[i] = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 383, (hd_dlc_boxrow[i] - 10), 160, 20, hd_dlc_id[i], StringCleaner(hd_dlc_name[i]));
 
-    checkbox_aoc = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 388, -56, 140, 20, IDC_CHECKBOX_AOC, L"The Conquerors");
+    checkbox_aoc = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 388, -46, 140, 20, IDC_CHECKBOX_AOC, L"The Conquerors");
 }
 
 void CreateImages(HWND hWnd)
@@ -2106,8 +2106,8 @@ void CreateImages(HWND hWnd)
     edition_icon = CreateWindowW(L"BUTTON", L"", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP, 0, 0, 60, 60, hWnd, (HMENU)IDC_ICON_EDITION, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
 
     for (int i = 0; i < de_dlc_amount; i++) de_dlc_icon[i] = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
-    for (int i = 0; i < hd_dlc_amount; i++) hd_dlc_icon[i] = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
-    aoc_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 0, 0, 0, hWnd, NULL, NULL, NULL);
+    for (int i = 0; i < hd_dlc_amount; i++) hd_dlc_icon[i] = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 10, 0, 0, hWnd, NULL, NULL, NULL);
+    aoc_icon = CreateWindow(L"STATIC", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 338, 10, 0, 0, hWnd, NULL, NULL, NULL);
 
     for (int i = 0; i < de_dlc_amount; i++) SendMessage(de_dlc_icon[i], STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)de_dlc_bmp[i]);
     for (int i = 0; i < hd_dlc_amount; i++) SendMessage(hd_dlc_icon[i], STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hd_dlc_bmp[i]);
@@ -2125,8 +2125,8 @@ void CreateButtons(HWND hWnd)
     button_options = CreateWindow(L"BUTTON", L"", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP, 0, 0, 25, 25, hWnd, (HMENU)IDC_BUTTON_OPTIONS, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     SendMessageW(button_options, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_options); 
     button_clearlog = CreateWindow(L"BUTTON", L"Clear Log", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_CLEARLOG, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-    button_enableall = CreateWindow(L"BUTTON", L"Enable All", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 370, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_ENABLEALL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-    button_disableall = CreateWindow(L"BUTTON", L"Disable All", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 125, 370, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_DISABLEALL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    button_enableall = CreateWindow(L"BUTTON", L"Enable All", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 380, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_ENABLEALL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    button_disableall = CreateWindow(L"BUTTON", L"Disable All", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 125, 380, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_DISABLEALL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
 }
 
 void CreateLabels(HWND hWnd)
@@ -2145,9 +2145,9 @@ void CreateTextfields(HWND hWnd)
 
 void CreateRadiobuttons(HWND hWnd)
 {
-    radiobutton_de = CreateWindow(L"BUTTON", L"Definitive Edition (2019)", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, 10, 30, 175, 20, hWnd, (HMENU)IDC_RADIO_DE, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-    radiobutton_hd = CreateWindow(L"BUTTON", L"HD Edition (2013)", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, 10, 60, 175, 20, hWnd, (HMENU)IDC_RADIO_HD, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-    radiobutton_aok = CreateWindow(L"BUTTON", L"Age of Kings (1999)", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, 10, 90, 175, 20, hWnd, (HMENU)IDC_RADIO_AOK, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    radiobutton_de = CreateWindow(L"BUTTON", L"Definitive Edition (2019)", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, 10, 40, 175, 20, hWnd, (HMENU)IDC_RADIO_DE, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    radiobutton_hd = CreateWindow(L"BUTTON", L"HD Edition (2013)", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, 10, 70, 175, 20, hWnd, (HMENU)IDC_RADIO_HD, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    radiobutton_aok = CreateWindow(L"BUTTON", L"Age of Kings (1999)", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, 10, 100, 175, 20, hWnd, (HMENU)IDC_RADIO_AOK, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     CheckRadioButton(hWnd, IDC_RADIO_DE, IDC_RADIO_AOK, IDC_RADIO_DE);
 }
 
@@ -2191,9 +2191,9 @@ void PositionComponents(LPARAM lParam)
     SetWindowPos(remaining_log, NULL, (width / 2) + 60, 60, width - (width / 2) - 65, height - 70, SWP_NOZORDER);
 
 
-    for (int i = 0; i < de_dlc_amount; i++) SetWindowPos(de_dlc_icon[i], NULL, 345, (de_dlc_row[i] - 10), 18, 18, SWP_NOZORDER);
-    for (int i = 0; i < hd_dlc_amount; i++) SetWindowPos(hd_dlc_icon[i], NULL, 350, (hd_dlc_row[i] - 20), 30, 30, SWP_NOZORDER);
-    SetWindowPos(aoc_icon, NULL, 340, 50, 45, 45, SWP_NOZORDER);
+    for (int i = 0; i < de_dlc_amount; i++) SetWindowPos(de_dlc_icon[i], NULL, 345, (de_dlc_row[i]), 18, 18, SWP_NOZORDER);
+    for (int i = 0; i < hd_dlc_amount; i++) SetWindowPos(hd_dlc_icon[i], NULL, 350, (hd_dlc_row[i]), 30, 30, SWP_NOZORDER);
+    SetWindowPos(aoc_icon, NULL, 340, 70, 45, 45, SWP_NOZORDER);
 
     SetWindowPos(edition_icon, NULL, 190, 30, 128, 93, SWP_NOZORDER);
 }
@@ -2344,6 +2344,8 @@ void UndrawCiv()
             SetWindowText(drawn_log, drawnlog_text.c_str());
         }
     }
+    UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
+
 
 	UpdateRemainingLog(true);
     redrawable = true;
@@ -2368,6 +2370,9 @@ void RedrawCiv()
     UpdateDrawnLog(false, true, false);
     UpdateRemainingLog(false);
 
+    UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
+
+
     if (iterator == custom_max_civs) redrawable = false;
 }
 
@@ -2387,6 +2392,9 @@ void PlayAudio(sound_type type)
 
 void PlayJingle(const std::wstring& civ_name)
 {
+
+    //TODO: make jingle a member variable of Civ so loops in this function are redundant
+
     if (!jingles_enabled) return;
 
     if (legacy_jingle_enabled && GetCiv(civ_name).legacy)
