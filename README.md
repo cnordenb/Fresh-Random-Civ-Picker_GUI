@@ -134,11 +134,13 @@ OS: Windows x64 (Lite version supports x86)
 
 Drive space: at least 71.3 megabytes available (Lite version requires only 500kb)
 
-## Project Milestones Achieved
-- v1.0: GUI with simple log
-- v1.1: Customisable civ pool and user options
-- v1.2: Persistent feature states and automatically logged current civ pool over program lifetimes and sessions
-- v1.3: Ctrl+Z/Ctrl+X undraw/redraw feature, ability to save and load presets, and to join AoE2DE lobbies using lobby code
+## Project Milestones Achieved  
+January 17th, 2025: GUI with simple log  
+February 21st, 2025: Customisable civ pool and user options  
+February 25th, 2025: Persistent feature states and automatically logged current civ pool over program lifetimes and sessions  
+March 11th, 2025: Ctrl+Z/Ctrl+X undraw/redraw feature, ability to save and load presets, and to join AoE2DE lobbies using lobby code  
+April 1st, 2025: quicksave and quickload feature, shortcut button to sustainability app  
+May 7th, 2025: pre-loaded sounds for smooth playback on slow machines, support for Three Kingdoms DLC, undo reset feature
 
 
 ## Why was Fresh Random Civ Picker created?
