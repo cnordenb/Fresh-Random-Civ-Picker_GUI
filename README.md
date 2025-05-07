@@ -136,7 +136,7 @@ Drive space: at least 71.3 megabytes available (Lite version requires only 500kb
 
 ## Project Milestones Achieved  
 - GUI with simple log (January 2025)  
-- Customisable civ pool and user options, persistent feature states and automatically logged current civ pool over program lifetimes and sessions (February 2025)  
+- Customisable civ pool, user options, persistent feature states, and automatically logged civ pool over program sessions (February 2025)  
 - Ctrl+Z/Ctrl+X undraw/redraw feature, ability to save and load presets, and to join AoE2DE lobbies using lobby code (March 2025)  
 - Quicksave and quickload feature, shortcut button to sustainability app (April 2025)  
 - Pre-loaded sounds for smooth playback on slow machines, support for Three Kingdoms DLC, undo reset feature (May 2025)  
