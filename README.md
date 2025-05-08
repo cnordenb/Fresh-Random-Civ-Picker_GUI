@@ -151,7 +151,7 @@ I got the idea to create this application when I was playing the game one day an
 
 Tracked and pending fix: The tech tree button for Maya and Inca not working  
   
-Tracked: sound playback works poorly on slower computers
+Tracked: Sound playback works poorly on slower computers
   
 Solved: Icons and jingles of Maya and Inca not working
 
