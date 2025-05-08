@@ -28,7 +28,7 @@ This is an application which generates a randomly drawn civilisation out of the 
 
 ## Features
 - **Draw a fresh random civ!**
-*Never draw the same civ twice within the civ pool. Click the Drawn button or press the spacebar.*
+*Never draw the same civ twice within the civ pool. Click the Draw button or press the spacebar.*
 
 - **Reset the drawn civ pool at any time!**
 *Whenever you want, reset the program and render all enabled civs drawable. Click the Reset button or press Enter.*
