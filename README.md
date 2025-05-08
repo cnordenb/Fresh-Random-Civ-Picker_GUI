@@ -127,7 +127,7 @@ Instructions for Visual Studio on Windows
 
 
 ### Why does Microsoft Defender want to protect my PC against this program?
-When you run the executable, Microsoft Defender Smart Screen will give you a popup telling you your PC has been protected. This doesn’t mean that it has scanned the executable, in fact you can go ahead and scan it with Microsoft Defender by right-clicking the executable and clicking "Scan with Microsoft Defender...". The popup only means that it has found that the application application is not digitally signed with a Microsoft-approved certificate. The smart screen popup is warning you that I have not acquired a certificate under the Microsoft Authenticode programme which requires some hundreds of euros in digital signature services per year which I cannot afford at this point in time.
+When you run the executable, Microsoft Defender Smart Screen will give you a popup telling you your PC has been protected. This doesn’t mean that it has scanned the executable, in fact you can go ahead and scan it with Microsoft Defender by right-clicking the executable and clicking "Scan with Microsoft Defender...". The popup only means that it has found that the application application is not digitally signed with a Microsoft-approved certificate. The smart screen popup is warning you that I have not acquired a certificate under the [Microsoft Authenticode](https://learn.microsoft.com/en-us/windows-hardware/drivers/install/authenticode) programme which requires some [hundreds of euros](https://www.sslshopper.com/microsoft-authenticode-certificates.html) in digital signature services per year which I cannot afford at this point in time.
 
 ## System requirements
 OS: Windows x64 (Lite version supports x86)
@@ -139,11 +139,11 @@ Drive space: at least 71.3 megabytes available (Lite version requires only 500kb
 - Customisable civ pool, user options, persistent feature states, and automatically logged civ pool over program sessions (February 2025)  
 - Ctrl+Z/Ctrl+X undraw/redraw feature, ability to save and load presets, and to join AoE2DE lobbies using lobby code (March 2025)  
 - Quicksave and quickload feature, shortcut button to sustainability app (April 2025)  
-- Pre-loaded sounds for smooth playback on slow machines, support for Three Kingdoms DLC, undo reset feature (May 2025)  
+- Support for Three Kingdoms DLC, undo reset feature (May 2025)  
 
 
 ## Why was Fresh Random Civ Picker created?
-I got the idea to create this application when I was playing the game one day and got to play the same civilisation twice throughout five matches, despite the fact that I picked random every time and the fact that the game has 45 civilisations. This made me feel frustrated and that I was wasting my time. As a full-time student and with other priorities in life I do not have the time to play the game every day. I might only have the opportunity to play five matches in a month. I want to play random civilisations and I also want to minimise the repetition of some factors like the civilisation played. The frustrating experience of having to replay the same civilisation during my precious few five matches in a game that has 45(!) civilisations gave me the motivation to create a solution for this problem. Thus, the idea, work, and birth of this program came to.
+I got the idea to create this application when I was playing the game one day and got to play the same civilisation twice throughout five matches, despite the fact that I picked random every time and the fact that the game has 45 civilisations. This made me feel frustrated and that I was wasting my time. As a full-time student and with other priorities in life I do not have the time to play the game every day. I might only have the opportunity to play five matches in a month. I want to play random civilisations and I also want to minimise the repetition of some factors like the civilisation played. The frustrating experience of having to replay the same civilisation during my precious few five matches in a game that has 50(!) civilisations gave me the motivation to create a solution for this problem. Thus, the idea, work, and birth of this program came to.
 
 
 ## Acknowledgements
