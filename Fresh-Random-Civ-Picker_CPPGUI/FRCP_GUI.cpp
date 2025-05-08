@@ -1437,7 +1437,11 @@ void OpenTechTree()
 {
     PlayAudio(button);
     std::wstring techtree_path = L"https://aoe2techtree.net/#";
-    if (current_civ != L"Random") techtree_path += current_civ;
+
+    if (current_civ == L"Maya") techtree_path += L"Mayans";
+    else if (current_civ == L"Inca") techtree_path += L"Incas";
+    else if (current_civ != L"Random") techtree_path += current_civ;
+
     ShellExecute(NULL, L"open", techtree_path.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 
