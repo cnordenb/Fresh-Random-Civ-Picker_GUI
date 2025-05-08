@@ -18,6 +18,7 @@
 [Project Milestones](#Project-Milestones-Achieved)  
 [Origin Story](#Why-was-it-created)  
 [Known bugs](#Known-bugs-as-of-2025-05-08)  
+[Contact](#Contact)  
 [Acknowledgements](#Acknowledgements)  
 [Microsoft Assets](#Regarding-usage-of-Microsoft-assets-in-this-project)  
 
@@ -148,8 +149,11 @@ I got the idea to create this application when I was playing the game one day an
 
 ## Known bugs as of 2025-05-08
 
-Tracking and pending fix: The tech tree button for Maya and Inca not working
+Tracked and pending fix: The tech tree button for Maya and Inca not working  
 Solved: Icons and jingles of Maya and Inca not working
+
+## Contact  
+If you have inquiries about this application, you can contact me at @Hjoerleif (Telegram/Discord) or carl.nordenbrink@abo.fi (email).
 
 
 ## Acknowledgements
