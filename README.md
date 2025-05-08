@@ -24,7 +24,7 @@
 The user can randomly iterate through the entire civ pool or a user-defined civ pool without drawing the same civ twice.
 
 ## What is this application?
-This is an application which generates a randomly drawn civilisation out of the civilisations available to play in a computer game called "Age of Empires II: Definitive Edition" which is a real-time strategy game. What my application offers which the random civ generator in the game itself doesn't is the "freshness" which is that a civilisation is not repeated until all the civilisations have been iterated through.  
+This is an application which generates a randomly drawn civilisation out of the civilisations available to play in a computer game called "Age of Empires II: Definitive Edition" which is a real-time strategy game. What my application offers which the random civ generator in the game itself does not is the "freshness" which is that a civilisation is not repeated until all the civilisations have been iterated through.  
 
 ## Features
 - **Draw a fresh random civ!**
