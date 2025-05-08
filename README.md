@@ -141,17 +141,17 @@ Drive space: at least 71.3 megabytes available (Lite version requires only 500kb
 - Customisable civ pool, user options, persistent settings and optional logging ([v1.1](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.1.0), February 2025)  
 - Ctrl+Z/Ctrl+X undraw/redraw feature, ability to save and load presets, and to join AoE2DE lobbies using lobby code ([v1.2](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.2.0), March 2025)  
 - Quicksave and quickload feature, shortcut button to sustainability app ([v1.3](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.3.0), April 2025)  
-- Support for Three Kingdoms DLC, undo reset feature ([v1.3.4](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.3.4), May 2025)  
+- Support for Three Kingdoms DLC, undo reset feature ([v1.3.5](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.3.5), May 2025)  
 
 
 ## Why was Fresh Random Civ Picker created?
 I got the idea to create this application when I was playing the game one day and got to play the same civilisation twice throughout five matches, despite the fact that I picked random every time and the fact that the game has 50 civilisations. This made me feel frustrated and that I was wasting my time. As a full-time student and with other priorities in life I do not have the time to play the game every day. I might only have the opportunity to play five matches in a month. I want to play random civilisations and I also want to minimise the repetition of some factors like the civilisation played. The frustrating experience of having to replay the same civilisation during my precious few five matches in a game that has 50(!) civilisations gave me the motivation to create a solution for this problem. Thus, the idea, work, and birth of this program came to.
 
 ## Known bugs as of 2025-05-08
-
-Tracked and pending fix: The tech tree button for Maya and Inca not working  
   
 Tracked: Sound playback works poorly on slower computers
+  
+Solved: The tech tree button for Maya and Inca not working  
   
 Solved: Icons and jingles of Maya and Inca not working
 
