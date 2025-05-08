@@ -101,7 +101,7 @@ Instructions for Visual Studio on Windows
 4. Run or debug
 
 ## How to install and run a release
-**Step 1. Go to Releases, located on this page in the right-hand sidebar below About and above Packages**
+**Step 1. Go to [Releases](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases), located on this page in the right-hand sidebar below About and above Packages**
 
 ![step 1](https://github.com/user-attachments/assets/c8340f36-7072-42e7-a3a3-15648a694656)
 
