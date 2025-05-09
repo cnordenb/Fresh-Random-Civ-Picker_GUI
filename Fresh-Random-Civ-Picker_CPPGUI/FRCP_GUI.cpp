@@ -1002,8 +1002,8 @@ void AddCiv(const std::wstring &civ)
 	if (custom_max_civs == MAX_CIVS) custom_civ_pool = false;
     UpdateRemainingLog(true);
     UpdateDrawnLog(false, false, false);
-
-	last_action = pool_change;
+    if (!batch_toggle) UpdateEnabledCivsCounter();
+    last_action = pool_change;
 }
 
 void RemoveCiv(const std::wstring &civ)
@@ -1019,8 +1019,8 @@ void RemoveCiv(const std::wstring &civ)
     SetWindowText(label_corner, label_text.c_str());
     UpdateRemainingLog(true);
 	UpdateDrawnLog(false, false, false);
-
-    last_action = pool_change;    
+    if (!batch_toggle) UpdateEnabledCivsCounter();
+    last_action = pool_change;
 }
 
 void InitialiseCivStates() { for (int i = 0; i < MAX_CIVS; i++) civ[i].SetEnabled(true); }
@@ -1045,46 +1045,59 @@ void HideCustomPoolCheckboxes()
 
 void EnableAll(HWND hWnd, bool sound_acceptable)
 {
+	batch_toggle = true;
+
 	if (sound_acceptable) PlayAudio(button);
 	custom_civ_pool = false;
 
-    if (edition_state == DE)
+    switch (edition_state)
     {
-        
-        for (int i = 0; i < MAX_CIVS; i++)
-        {        
-            SendMessage(civ[i].checkbox, BM_SETCHECK, BST_CHECKED, 0);
-            AddCiv(civ[i].name);
+        case DE:
+        {
+
+            for (int i = 0; i < MAX_CIVS; i++)
+            {
+                SendMessage(civ[i].checkbox, BM_SETCHECK, BST_CHECKED, 0);
+                AddCiv(civ[i].name);
+            }
+            break;
         }
-	}
-	else if (edition_state == HD)
-    {
-		for (int i = 0; i < MAX_CIVS; i++)
-        {            
-			if (civ[i].edition != DE)
+        case HD:
+        {
+            for (int i = 0; i < MAX_CIVS; i++)
             {
-				SendMessage(civ[i].checkbox, BM_SETCHECK, BST_CHECKED, 0);
-				AddCiv(civ[i].name);
-			}
-		}
-	}
-	else if (edition_state == AOK)
-    {
-		for (int i = 0; i < MAX_CIVS; i++)
-        {            
-			if (civ[i].edition == AOK)
+                if (civ[i].edition != DE)
+                {
+                    SendMessage(civ[i].checkbox, BM_SETCHECK, BST_CHECKED, 0);
+                    AddCiv(civ[i].name);
+                }
+            }
+            break;
+        }
+        case AOK:
+        {
+            for (int i = 0; i < MAX_CIVS; i++)
             {
-				SendMessage(civ[i].checkbox, BM_SETCHECK, BST_CHECKED, 0);
-				AddCiv(civ[i].name);
-			}
-		}
-	}    
+                if (civ[i].edition == AOK)
+                {
+                    SendMessage(civ[i].checkbox, BM_SETCHECK, BST_CHECKED, 0);
+                    AddCiv(civ[i].name);
+                }
+            }
+            break;
+        }
+    }
+
     if (autoreset_enabled) ResetProgram(true);
     ValidateAllDlcToggles(hWnd);
+    UpdateEnabledCivsCounter();
+	batch_toggle = false;
 }
 
 void DisableAll(HWND hWnd, bool sound_acceptable)
 {
+	batch_toggle = true;
+
     if (sound_acceptable) PlayAudio(button);
 	custom_civ_pool = true;
     for (int i = 0; i < MAX_CIVS; i++)
@@ -1094,6 +1107,8 @@ void DisableAll(HWND hWnd, bool sound_acceptable)
     }
     if (autoreset_enabled) ResetProgram(true);
     ValidateAllDlcToggles(hWnd);
+    UpdateEnabledCivsCounter();
+    batch_toggle = false;
 }
 
 void ShowDrawTab(bool showing_enabled, HWND hWnd)
@@ -1179,6 +1194,7 @@ void ShowCustomTab(bool showing_enabled)
         ShowWindow(checkbox_autoreset, SW_SHOW);
         ShowWindow(checkbox_autotoggle, SW_SHOW);
 		ShowWindow(edition_icon, SW_SHOW);
+		ShowWindow(label_enabledcount, SW_SHOW);
 
         if (edition_state == DE) ShowDEDLCCheckboxes(true);
 		else if (edition_state == HD) ShowHDDLCCheckboxes(true);
@@ -1187,6 +1203,7 @@ void ShowCustomTab(bool showing_enabled)
     else if (!showing_enabled)
     {
         ShowWindow(edition_icon, SW_HIDE);
+		ShowWindow(label_enabledcount, SW_HIDE);
         HideCustomPoolCheckboxes();
         ShowWindow(button_enableall, SW_HIDE);
         ShowWindow(button_disableall, SW_HIDE);
@@ -1283,6 +1300,7 @@ void ShowAOCCheckbox(bool aok_state)
 
 void ToggleDlc(dlc civ_dlc, HWND hWnd)
 {
+	batch_toggle = true;
     if (!startup) PlayAudio(button);
 	int check_id = GetDlcCheckboxId(civ_dlc);
 
@@ -1314,6 +1332,8 @@ void ToggleDlc(dlc civ_dlc, HWND hWnd)
             }
         }
     }
+    UpdateEnabledCivsCounter();
+	batch_toggle = false;
 }
 
 void EnableDlc(dlc civ_dlc, HWND hWnd)
@@ -1510,6 +1530,7 @@ void UpdateTooltipText(HWND hwndTool, HWND hwndTip, LPCWSTR newText)
 
 void SetEditionState(HWND hWnd, edition edition)
 {
+	batch_toggle = true;
     if (!startup) PlayAudio(view);
     switch (edition)
     {
@@ -1565,6 +1586,8 @@ void SetEditionState(HWND hWnd, edition edition)
     }
     edition_state = edition;
     ValidateAllDlcToggles(hWnd);
+    UpdateEnabledCivsCounter();
+    batch_toggle = false;
 }
        
 void ToggleRemainLog()
@@ -2139,6 +2162,7 @@ void CreateLabels(HWND hWnd)
     label_centre = CreateWindow(L"STATIC", L"?", WS_VISIBLE | WS_CHILD, 0, 0, 90, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     label_drawncount = CreateWindow(L"STATIC", L"", WS_VISIBLE | WS_CHILD, 100, 25, 100, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     label_remainingcount = CreateWindow(L"STATIC", L"", WS_VISIBLE | WS_CHILD, 0, 25, 100, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+	label_enabledcount = CreateWindow(L"STATIC", StringCleaner(L"Enabled: " + enabledcount), WS_VISIBLE | WS_CHILD, 200, 140, 100, 15, hWnd, NULL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
 }
 
 void CreateTextfields(HWND hWnd)
@@ -2482,6 +2506,7 @@ void UnloadSounds() { for (int i = 0; i < SOUND_AMOUNT; ++i) UnloadSound(soundRe
 
 void LoadJingles()
 {
+
     int j = 0;
     for (int i = 0; i < MAX_CIVS; i++)
     {
@@ -2501,4 +2526,20 @@ void UnloadJingles()
 {
     for (int i = 0; i < MAX_CIVS; i++) UnloadSound(jingleResource[i]);
 	for (int i = 0; i < LEGACY_JINGLE_AMOUNT; i++) UnloadSound(legacyJingle[i]);
+}
+
+void UpdateEnabledCivsCounter()
+{
+    switch (edition_state)
+    {
+    case DE:
+        SetWindowText(label_enabledcount, (L"Enabled: " + std::to_wstring(custom_max_civs) + L"/" + std::to_wstring(MAX_CIVS)).c_str());
+        return;
+    case HD:
+        SetWindowText(label_enabledcount, (L"Enabled: " + std::to_wstring(custom_max_civs) + L"/" + std::to_wstring(MAX_CIVS_HD)).c_str());
+        return;
+    case AOK:
+        SetWindowText(label_enabledcount, (L"Enabled: " + std::to_wstring(custom_max_civs) + L"/" + std::to_wstring(MAX_CIVS_AOK)).c_str());
+        return;
+    }
 }

@@ -37,6 +37,8 @@
 #define VERSION L"1.3.5"
 
 #define MAX_CIVS 50
+#define MAX_CIVS_HD 31
+#define MAX_CIVS_AOK 18
 #define DLC_AMOUNT 11
 #define EDITION_AMOUNT 3
 #define MAX_LOADSTRING 100
@@ -171,7 +173,7 @@ WCHAR title[MAX_LOADSTRING];
 WCHAR window_class[MAX_LOADSTRING];
 
 
-HWND label_corner, label_centre, label_drawncount, label_remainingcount;
+HWND label_corner, label_centre, label_drawncount, label_remainingcount, label_enabledcount;
 
 HWND button_draw, button_reset, button_enableall, button_disableall, button_clearlog, button_techtree, button_options, button_survapp;
 
@@ -240,6 +242,7 @@ std::wstring log_entry;
 std::wstring drawnlog_text, remaininglog_text;
 std::wstring hlabel_default;
 std::wstring current_civ = L"Random";
+std::wstring enabledcount = std::to_wstring(custom_max_civs);
 
 
 bool startup = true;
@@ -261,6 +264,7 @@ bool redrawable = false;
 bool undrawable = false;
 bool cache_loading = false;
 bool cache_available = false;
+bool batch_toggle = false;
 
 enum sound_type
 {
@@ -532,6 +536,7 @@ void ShowAOCCheckbox(bool);
 int GetDlcCheckboxId(dlc);
 HWND GetCivCheckbox(const std::wstring &);
 
+void UpdateEnabledCivsCounter();
 void UpdateDrawnLog(bool, bool, bool);
 void UpdateRemainingLog(bool);
 void ToggleRemainLog();
