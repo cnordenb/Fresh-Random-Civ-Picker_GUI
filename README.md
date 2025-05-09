@@ -134,7 +134,7 @@ When you run the executable, Microsoft Defender Smart Screen will give you a pop
 ## System requirements
 OS: Windows x64 (Lite version supports x86)
 
-Drive space: at least 71.3 megabytes available (Lite version requires only 500kb)
+Drive space: at least 150 megabytes available (Lite version requires only 500kb)
 
 ## Project Milestones Achieved  
 - GUI with simple log ([v1.0](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.0.0), January 2025)  
