@@ -15,16 +15,16 @@
   - [Tips and tricks](#Tips-and-tricks)
 - About  
   - [Purpose](#Purpose)  
-  - [Application Description](#What-is-this-application)  
+  - [Application description](#What-is-this-application)  
   - [Features](#Features)  
-  - [GUI Description](#GUI-description)  
+  - [GUI description](#GUI-description)  
   - [System requirements](#System-requirements)  
-  - [Project Milestones](#Project-milestones-achieved)  
-  - [Origin Story](#Why-was-it-created)  
+  - [Project milestones](#Project-milestones-achieved)  
+  - [Origin story](#Why-was-it-created)  
   - [Known bugs](#Known-bugs-as-of-2025-05-08)  
   - [Contact](#Contact)  
   - [Acknowledgements](#Acknowledgements)  
-  - [Microsoft Assets](#Regarding-usage-of-Microsoft-assets-in-this-project)  
+  - [Microsoft assets](#Regarding-usage-of-Microsoft-assets-in-this-project)  
 
 ## Purpose
 The user can randomly iterate through the entire civ pool or a user-defined civ pool without drawing the same civ twice.
