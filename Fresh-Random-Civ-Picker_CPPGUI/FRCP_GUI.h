@@ -575,6 +575,8 @@ int GetWindowHeight(HWND);
 void JoinLobby(HWND);
 bool IsValidLobbyCode(const std::wstring &);
 
+bool FileExists(const std::wstring &filePath);
+
 std::string ConvertToString(const std::wstring &);
 HWND CreateCheckbox(HWND hWnd, HINSTANCE hInstance, int x, int y, int width, int height, int id, LPCWSTR text);
 

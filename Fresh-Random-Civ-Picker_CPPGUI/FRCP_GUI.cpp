@@ -1831,9 +1831,13 @@ void LoadLog(HWND hWnd, savetype type)
 
         if (type == quick)
         {
+
             PathAppend(exePath, L"quicksave.txt");
 
             loadFilePath = exePath;
+
+			if (!FileExists(loadFilePath))return;
+
         }
         else if (type == manual)
         {
@@ -2545,4 +2549,11 @@ void UpdateEnabledCivsCounter()
         SetWindowText(label_enabledcount, (L"Enabled: " + std::to_wstring(custom_max_civs) + L"/" + std::to_wstring(MAX_CIVS_AOK)).c_str());
         return;
     }
+}
+
+bool FileExists(const std::wstring &filePath)
+{
+    DWORD fileAttributes = GetFileAttributes(filePath.c_str());
+    return (fileAttributes != INVALID_FILE_ATTRIBUTES &&
+        !(fileAttributes & FILE_ATTRIBUTE_DIRECTORY));
 }
