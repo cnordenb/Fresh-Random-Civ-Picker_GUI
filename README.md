@@ -7,26 +7,30 @@
 ![demo gif](https://github.com/user-attachments/assets/04f98b24-e096-4030-825b-c0cd147f80bf)
 
 ### Table of Contents (click to jump)  
-[Purpose](#Purpose)  
-[Application Description](#What-is-this-application)  
-[Features](#Features)  
-[GUI Description](#GUI-Description)  
-[Usage](#How-do-I-use-this-application)   
-[Compilation](#How-to-compile-in-IDE)  
-[Installation](#How-to-install-and-run-a-release)  
-[System requirements](#System-requirements)  
-[Project Milestones](#Project-Milestones-Achieved)  
-[Origin Story](#Why-was-it-created)  
-[Known bugs](#Known-bugs-as-of-2025-05-08)  
-[Contact](#Contact)  
-[Acknowledgements](#Acknowledgements)  
-[Microsoft Assets](#Regarding-usage-of-Microsoft-assets-in-this-project)  
+- Getting Started
+  - [Installation](#How-to-install-and-run-a-release)
+  - [Compilation](#How-to-compile-in-IDE)  
+- Usage
+  - [Using the Fresh Random Civ Picker](#How-do-I-use-this-application)
+  - [Tips and tricks](#Tips-and-tricks)
+- About  
+  - [Purpose](#Purpose)  
+  - [Application Description](#What-is-this-application)  
+  - [Features](#Features)  
+  - [GUI Description](#GUI-Description)  
+  - [System requirements](#System-requirements)  
+  - [Project Milestones](#Project-Milestones-Achieved)  
+  - [Origin Story](#Why-was-it-created)  
+  - [Known bugs](#Known-bugs-as-of-2025-05-08)  
+  - [Contact](#Contact)  
+  - [Acknowledgements](#Acknowledgements)  
+  - [Microsoft Assets](#Regarding-usage-of-Microsoft-assets-in-this-project)  
 
 ## Purpose
 The user can randomly iterate through the entire civ pool or a user-defined civ pool without drawing the same civ twice.
 
 ## What is this application?
-This is an application which generates a randomly drawn civilisation out of the civilisations available to play in a computer game called "Age of Empires II: Definitive Edition" which is a real-time strategy game. What my application offers which the random civ generator in the game itself does not is the "freshness" which is that a civilisation is not repeated until all the civilisations have been iterated through.  
+This - the Fresh Random Civ Picker or FRCP for short - is an application which generates a randomly drawn civilisation out of the civilisations available to play in a computer game called [Age of Empires II: Definitive Edition](https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/) which is a real-time strategy game. What my application offers which the random civ generator in the game itself does not is the "freshness" which is that a civilisation is not repeated until all the civilisations have been iterated through.  
 
 ## Features
 - **Draw a fresh random civ!**
@@ -87,14 +91,6 @@ On the "Civ Pool" tab, the user can customise which civs are part of the civ poo
 ![civpool demo gif](https://github.com/user-attachments/assets/66256e41-59f8-4cc6-9961-2dca608e435e)
 
 
-
-## How do I use this application?
-How to use: the user can click the "Draw" button (or press spacebar) to have the centre label display a fresh random civ. There is an indicator at the bottom right which tells how many civs have been drawn so far. If the user wishes to see the tech tree of the drawn civ, they can click the Tech Tree button near the bottom right corner of the window.
-
-
-Once all civs have been drawn, the next draw will reset the program and all civs are once again available to draw. The user can at any time reset the program manually by clicking the "Reset" button (or pressing Return). The user can at any time navigate to the "Log" tab (by either clicking it or pressing Tab) to view the history of drawn civs. The user can at any time navigate to the "Civ Pool" tab to customise which civs are enabled in the pool. Disabled civs are never drawn.
-
-
 ## How to compile in IDE
 Instructions for Visual Studio on Windows
 1. Clone this repository
@@ -130,6 +126,34 @@ Instructions for Visual Studio on Windows
 
 ### Why does Microsoft Defender want to protect my PC against this program?
 When you run the executable, Microsoft Defender Smart Screen will give you a popup telling you your PC has been protected. This doesn’t mean that it has scanned the executable, in fact you can go ahead and scan it with Microsoft Defender by right-clicking the executable and clicking "Scan with Microsoft Defender...". The popup only means that it has found that the application application is not digitally signed with a Microsoft-approved certificate. The smart screen popup is warning you that I have not acquired a certificate under the [Microsoft Authenticode](https://learn.microsoft.com/en-us/windows-hardware/drivers/install/authenticode) programme which requires some [hundreds of euros](https://www.sslshopper.com/microsoft-authenticode-certificates.html) in digital signature services per year which I cannot afford at this point in time.
+
+
+
+## How do I use this application?  
+After you've started FRCP (see [Installation](#How-to-install-and-run-a-release)), simply press spacebar or click the Draw button to receive your fresh random civ. You can track the drawn and remaining civs in the log tab or alter the civ pool in the custom civ pool tab. To reset - undrawing all drawn civs - press enter or click the Reset button. Draw and Reset cannot be used while in the custom civ pool tab.
+
+## Tips and tricks
+There's more to FRCP than simply drawing fresh random civs.
+### Quick access
+I personally like to have FRCP pinned to the taskbar in the first (leftmost spot). This means I can open FRCP at any time (such as in-game) simply by pressing Windows Key + 1. Tell FRCP to scram simply by pressing escape. It will shut down completely yet still pick things back up effortlessly next time you call it with Windows Key + 1 (unless you toggle off automatic civ pool logging in options). You can also have FRCP to draw a civ for you automatically on startup if you want. That is togglable in options.
+### Lobby joining
+AoE2DE has a nifty lobby joining feature which is the lobby code. Windows's run prompt (Windows Key + R) offers a quick and easy way to execute a lobby code and joining a lobby. FRCP offers the same function with Ctrl + F with the added benefit that it does not require the aoe2de://0/ prefix (unlike Windows's run prompt). This comes in handy if your friend just gave you the bare code or if you are copying the lobby code from a third party lobby browser which only gives it without prefix (such as aoe2insights.com).
+### Saving and loading
+FRCP allows you to save and load any amount of presets of civ pool and drawn civs. With the default automatic civ pool logging, FRCP remembers what civs you have enabled and drawn since last time you used it. You can save separate presets manually by Save Preset (from File dropdown menu top left or by pressing Ctrl + S). FRCP also has a quicksave feature, you can use it by pressing F5 and load the quicksave by pressing F9.
+### Change your mind
+Accidentally reset? Don't like the civ you drew? Ctrl + Z has your back! Double-change your mind? Redraw an undrawn civ with Ctrl + X. Reset can only be undone if automatic civ pool logging is enabled but undrawing and redrawing civs works regardless.
+### Use FRCP as a quiz app
+Did you know you can toggle icon, jingle, or/and civ name on and off whenever you want? Either in options or with a hotkey (hotkeys can be viewed with F2 or from the Help dropdown menu), you can toggle eg. the civ name label off. Drawing a civ would then only give you the jingle and icon. You and your friends can pass the time by guessing which civ the jingle and emblem belongs to.
+### Enjoy the civ jingles
+Without needing to redraw a civ, you can always listen to its jingle again by clicking the civ icon. If it's a legacy civ (eg. Spanish), you can switch between the definitive and classic jingles in the Jingle Type dropdown menu in options.
+### Use FRCP as a shortcut to Survivalist's sustainability app
+Sometimes we just need to know how many villagers are needed on what. FRCP helps you get to Survivalist's nifty app quickly. There is a dedicated button in the Draw tab which will take you to the https://aoe2-de-tools.herokuapp.com/villagers-required/ webpage. You can also use hotkey R (when in draw tab) or Ctrl + T. 
+### Orient yourself with the civilisations of Age of Empires II using FRCP
+There are now half a hundred civs in the game which have been released in a dozen different editions and DLC's in the past 26 years. Keeping track of them all can be daunting, especially for someone returning. The Civ Pool tab allows you to easily overview which civs belong to which DLC and edition. See instantly how many civs which edition has and batch toggle any DLC or edition for your civ pool. FRCP also offers shortcut to the tech tree.
+
+![civ pool gif](https://github.com/user-attachments/assets/ac8ce463-8829-4eaa-b9dd-44d8a7ff2806)
+
+
 
 ## System requirements
 OS: Windows x64 (Lite version supports x86)
