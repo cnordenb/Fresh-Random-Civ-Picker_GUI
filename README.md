@@ -6,7 +6,7 @@
 **This is the Fresh Random Civ Picker.**  
 ![demo gif](https://github.com/user-attachments/assets/04f98b24-e096-4030-825b-c0cd147f80bf)
 
-### Table of Contents (click to jump)  
+### Table of contents (click to jump)  
 - Getting Started
   - [Installation](#How-to-install-and-run-a-release)
   - [Compilation](#How-to-compile-in-IDE)  
@@ -17,9 +17,9 @@
   - [Purpose](#Purpose)  
   - [Application Description](#What-is-this-application)  
   - [Features](#Features)  
-  - [GUI Description](#GUI-Description)  
+  - [GUI Description](#GUI-description)  
   - [System requirements](#System-requirements)  
-  - [Project Milestones](#Project-Milestones-Achieved)  
+  - [Project Milestones](#Project-milestones-achieved)  
   - [Origin Story](#Why-was-it-created)  
   - [Known bugs](#Known-bugs-as-of-2025-05-08)  
   - [Contact](#Contact)  
@@ -75,7 +75,7 @@ This - the Fresh Random Civ Picker or FRCP for short - is an application which g
 - **Use hotkeys!**  
 *Most of the program is entirely controllable with key bindings. To see which hotkeys there are and what they do, navigate to Hotkeys from either Options or the Help menu.*
 
-## GUI Description  
+## GUI description  
 The program has a graphical user interface which is a window. This window contains three tabs: "Draw Civ", "Log", and "Civ Pool".  
 ![tabs gif](https://github.com/user-attachments/assets/97fc3d9d-7ffe-4455-9a60-3cb42a53002f)
 
@@ -160,7 +160,7 @@ OS: Windows x64 (Lite version supports x86)
 
 Drive space: at least 150 megabytes available (Lite version requires only 500kb)
 
-## Project Milestones Achieved  
+## Project milestones achieved  
 - GUI with simple log ([v1.0](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.0.0), January 2025)  
 - Customisable civ pool, user options, persistent settings and optional logging ([v1.1](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.1.0), February 2025)  
 - Ctrl+Z/Ctrl+X undraw/redraw feature, ability to save and load presets, and to join AoE2DE lobbies using lobby code ([v1.2](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.2.0), March 2025)  
