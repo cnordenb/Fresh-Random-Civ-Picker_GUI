@@ -34,7 +34,7 @@
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-#define VERSION L"1.3.5"
+#define VERSION L"1.3.6"
 
 #define MAX_CIVS 50
 #define MAX_CIVS_HD 31

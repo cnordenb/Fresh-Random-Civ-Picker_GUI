@@ -25,7 +25,6 @@ void CreateTabs(HWND hWnd)
 void ShowTabComponents(int tabIndex, HWND hWnd)
 {
     if (!startup) PlayAudio(tabsound);
-    else if (startup && jingles_enabled && current_tab != 2) PlayJingle(current_civ);    
     current_tab = tabIndex;
     if (tabIndex == 0)
     {        
@@ -173,7 +172,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (persistent_logging) {LoadLog(hWnd, automatic); ValidateAllDlcToggles(hWnd);}           
 			ShowTabComponents(0, hWnd);            
             EnableHotkeys(hWnd);
-            if (draw_on_startup) DrawCiv(false, L"");
+            if (draw_on_startup)
+            {
+                DrawCiv(false, L"");
+				if (jingles_enabled) PlayJingle(current_civ);
+            }
 			else if (!persistent_logging) ResetProgram(false);      
             startup = false;
             break;
@@ -924,7 +927,7 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
 /*
     std::thread sound_thread(PlayJingle, current_civ);
     sound_thread.detach();*/
-    PlayJingle(current_civ);
+    if (!startup) PlayJingle(current_civ);
     
 
     UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
