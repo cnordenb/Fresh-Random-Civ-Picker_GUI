@@ -182,6 +182,8 @@ Solved: Icons and jingles of Maya and Inca not working
 ## Contact  
 If you have inquiries about this application, you can contact me at @Hjoerleif (Telegram/Discord) or carl.nordenbrink@abo.fi (email).
 
+You can also submit bug reports or feature requests by creating an issue [here](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/issues).
+
 
 ## Acknowledgements
 
