@@ -1940,9 +1940,16 @@ void LoadLog(HWND hWnd, savetype type)
 		}
 		else if (readingEditionState)
 		{
+            bool temp_toggleoff = false;
+            if (autotoggle_enabled)
+            {
+                temp_toggleoff = true;
+                autotoggle_enabled = false;
+            }
 			if (line == L"DE") SetEditionState(hWnd, DE);			
 			else if (line == L"HD") SetEditionState(hWnd, HD);			
-			else if (line == L"AOK") SetEditionState(hWnd, AOK);			
+			else if (line == L"AOK") SetEditionState(hWnd, AOK);
+            if (temp_toggleoff && !autotoggle_enabled) autotoggle_enabled = true;
 		}
 		i++;
     }
