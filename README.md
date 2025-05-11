@@ -6,7 +6,7 @@
 **This is the Fresh Random Civ Picker.**  
 ![demo gif](https://github.com/user-attachments/assets/04f98b24-e096-4030-825b-c0cd147f80bf)
 
-### Table of Contents (click to jump)  
+### Table of contents (click to jump)  
 - Getting Started
   - [Installation](#How-to-install-and-run-a-release)
   - [Compilation](#How-to-compile-in-IDE)  
@@ -15,16 +15,16 @@
   - [Tips and tricks](#Tips-and-tricks)
 - About  
   - [Purpose](#Purpose)  
-  - [Application Description](#What-is-this-application)  
+  - [Application description](#What-is-this-application)  
   - [Features](#Features)  
-  - [GUI Description](#GUI-Description)  
+  - [GUI description](#GUI-description)  
   - [System requirements](#System-requirements)  
-  - [Project Milestones](#Project-Milestones-Achieved)  
-  - [Origin Story](#Why-was-it-created)  
+  - [Project milestones](#Project-milestones-achieved)  
+  - [Origin story](#Why-was-it-created)  
   - [Known bugs](#Known-bugs-as-of-2025-05-08)  
   - [Contact](#Contact)  
   - [Acknowledgements](#Acknowledgements)  
-  - [Microsoft Assets](#Regarding-usage-of-Microsoft-assets-in-this-project)  
+  - [Microsoft assets](#Regarding-usage-of-Microsoft-assets-in-this-project)  
 
 ## Purpose
 The user can randomly iterate through the entire civ pool or a user-defined civ pool without drawing the same civ twice.
@@ -75,7 +75,7 @@ This - the Fresh Random Civ Picker or FRCP for short - is an application which g
 - **Use hotkeys!**  
 *Most of the program is entirely controllable with key bindings. To see which hotkeys there are and what they do, navigate to Hotkeys from either Options or the Help menu.*
 
-## GUI Description  
+## GUI description  
 The program has a graphical user interface which is a window. This window contains three tabs: "Draw Civ", "Log", and "Civ Pool".  
 ![tabs gif](https://github.com/user-attachments/assets/97fc3d9d-7ffe-4455-9a60-3cb42a53002f)
 
@@ -149,7 +149,7 @@ Without needing to redraw a civ, you can always listen to its jingle again by cl
 ### Use FRCP as a shortcut to Survivalist's sustainability app
 Sometimes we just need to know how many villagers are needed on what. FRCP helps you get to Survivalist's nifty app quickly. There is a dedicated button in the Draw tab which will take you to the https://aoe2-de-tools.herokuapp.com/villagers-required/ webpage. You can also use hotkey R (when in draw tab) or Ctrl + T. 
 ### Orient yourself with the civilisations of Age of Empires II using FRCP
-There are now half a hundred civs in the game which have been released in a dozen different editions and DLC's in the past 26 years. Keeping track of them all can be daunting, especially for someone returning. The Civ Pool tab allows you to easily overview which civs belong to which DLC and edition. See instantly how many civs which edition has and batch toggle any DLC or edition for your civ pool. FRCP also offers shortcut to the tech tree.
+There are now half a hundred civs in the game which have been released in a dozen different editions and DLC's in the past 26 years. Keeping track of them all can be daunting, especially for someone new or returning. The Civ Pool tab allows you to easily overview which civs belong to which DLC and edition. See instantly how many civs which edition has and batch toggle any DLC or edition for your civ pool. FRCP also offers shortcut to the tech tree.
 
 ![civ pool gif](https://github.com/user-attachments/assets/ac8ce463-8829-4eaa-b9dd-44d8a7ff2806)
 
@@ -160,7 +160,7 @@ OS: Windows x64 (Lite version supports x86)
 
 Drive space: at least 150 megabytes available (Lite version requires only 500kb)
 
-## Project Milestones Achieved  
+## Project milestones achieved  
 - GUI with simple log ([v1.0](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.0.0), January 2025)  
 - Customisable civ pool, user options, persistent settings and optional logging ([v1.1](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.1.0), February 2025)  
 - Ctrl+Z/Ctrl+X undraw/redraw feature, ability to save and load presets, and to join AoE2DE lobbies using lobby code ([v1.2](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.2.0), March 2025)  
