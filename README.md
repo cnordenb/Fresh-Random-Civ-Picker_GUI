@@ -184,6 +184,8 @@ If you have inquiries about this application, you can contact me at @Hjoerleif (
 
 You can also submit bug reports or feature requests by creating an issue [here](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/issues).
 
+Join the [the Fresh Random Civ Picker discord server](https://discord.gg/rcFqrBdVUN) to receive notifications about updates and new releases.
+
 
 ## Acknowledgements
 
