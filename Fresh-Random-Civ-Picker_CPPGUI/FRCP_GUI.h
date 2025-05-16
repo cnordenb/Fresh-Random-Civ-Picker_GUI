@@ -39,6 +39,7 @@
 #define MAX_CIVS 50
 #define MAX_CIVS_HD 31
 #define MAX_CIVS_AOK 18
+#define MAX_DRAWNLOG_LINECOUNT 5
 #define DLC_AMOUNT 11
 #define EDITION_AMOUNT 3
 #define MAX_LOADSTRING 100
@@ -265,6 +266,11 @@ bool undrawable = false;
 bool cache_loading = false;
 bool cache_available = false;
 bool batch_toggle = false;
+bool contfresh_enabled = true;
+
+std::wstring contfresh_civ = L"";
+int contfresh_max = (custom_max_civs / 2) - 1;
+int contfresh_strength = 1;
 
 enum sound_type
 {
@@ -444,12 +450,16 @@ bool custom_civ_pool = false;
 Civ& GetCiv(const std::wstring &name);
 
 std::wstring drawn_civs[MAX_CIVS] = { L"" };
+std::wstring contfresh_array[MAX_CIVS] = { L"" };
+int contfresh_count = 0;
 
 bool accessor_out_of_bounds = false;
 int times_drawn[MAX_CIVS] = { 0 };
 HFONT font_underline = NULL;
 HWND tab;
 std::vector<std::wstring> civs;
+
+int drawn_log_linecount = 0;
 
 enum savetype { automatic, manual, quick };
 
@@ -492,6 +502,8 @@ void StopSound();
 void PlayAudio(sound_type);
 void PlayJingle(const std::wstring &);
 bool IsLegacyCiv(const std::wstring &);
+bool IsContfreshCiv(const std::wstring&);
+void SetContfreshStrength();
 
 void InitialiseCivs();
 void InitialiseCivStates();
@@ -541,6 +553,9 @@ void UpdateDrawnLog(bool, bool, bool);
 void UpdateRemainingLog(bool);
 void ToggleRemainLog();
 void ClearDrawnLog();
+void UpdateContfresh(const std::wstring &);
+void CheckDrawnLogLength();
+
 
 bool IsDlcEmpty(dlc);
 void ToggleDlc(dlc, HWND);
