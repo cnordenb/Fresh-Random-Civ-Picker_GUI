@@ -156,6 +156,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 MessageBox(hWnd, L"Failed to initialize common controls.", L"Error", MB_OK | MB_ICONERROR);
                 return -1;
             }
+            for (int i = 0; i < MAX_CIVS; ++i) civ_name_to_index[civ[i].name] = i;            
             LoadImages();
             CreateTabs(hWnd);        
             CreateImages(hWnd);
@@ -870,18 +871,23 @@ void ResetProgram(bool auto_reset)
 
     current_civ = L"Random";
     iterator = 0;
+	remaining = custom_max_civs;
     
     UpdateDrawnLog(false, false, true);
 
     if (custom_civ_pool)
     {
-        civs.clear();
+        //civs.clear();
+        
         custom_max_civs = 0;
         for (int i = 0; i < MAX_CIVS; i++)
         {
+			available_civs[i] = false;
             if (civ[i].enabled)
             {
-                civs.push_back(civ[i].name);
+				available_civs[i] = true;
+				civ_list[i] = civ[i].name;
+                //civs.push_back(civ[i].name);
                 custom_max_civs++;
             }
         }
@@ -944,7 +950,7 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
         return;
     }
 
-    if (civs.empty() || iterator == custom_max_civs || iterator == 0)
+    if (iterator == custom_max_civs || iterator == 0)
     {
         ResetProgram(true);
         reset_state = false;
@@ -953,27 +959,45 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
     if (rigged)
     {
         current_civ = civ_name;
-        civs.erase(std::remove(civs.begin(), civs.end(), civ_name), civs.end());
+		available_civs[GetCivIndex(current_civ)] = false;
+
+        //civs.erase(std::remove(civs.begin(), civs.end(), civ_name), civs.end());
     }    
     else
     {
+        int given_index = GetRandomInt(remaining);
 
 
         if (contfresh_enabled)
         {
-			std::vector <std::wstring> civs_copy = civs;
+			//std::vector <std::wstring> civs_copy;
+   //         civs_copy.reserve(MAX_CIVS);
+
+   //         civs_copy = civs;
             do
             {
-                std::random_device rd;
-                std::mt19937 mt(rd());
+                int given_index = GetRandomInt(remaining);
+
+                int j = 0;
+                for (int i = 0; i < custom_max_civs; i++)
+                {
+                    while (!available_civs[j]) j++;
+                    if (i == given_index)
+                    {
+                        given_index = j;
+                        break;
+                    }
+                    j++;
+                }
+                current_civ = civ[given_index].name;
 
 
-                std::shuffle(civs_copy.begin(), civs_copy.end(), mt);
-                current_civ = civs_copy.back();
-                civs_copy.pop_back();
+                //std::shuffle(civs_copy.begin(), civs_copy.end(), mt);
+                //current_civ = civs_copy.back();
+                //civs_copy.pop_back();
                 if (IsContfreshCiv(current_civ))
                 {
-                    civs.erase(std::remove(civs.begin(), civs.end(), current_civ), civs.end());
+                    //civs.erase(std::remove(civs.begin(), civs.end(), current_civ), civs.end());
                     //MessageBox(NULL, StringCleaner(current_civ + L" is a cont fresh civ!"), L"Contfresh", MB_OK | MB_ICONINFORMATION);
                 }
 
@@ -988,17 +1012,24 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
 
         else
         {
-            std::random_device rd;
-            std::mt19937 mt(rd());
 
-
-            std::shuffle(civs.begin(), civs.end(), mt);
-            current_civ = civs.back();
-            civs.pop_back();
+            int j = 0;
+            for (int i = 0; i < custom_max_civs; i++)
+            {
+                while (!available_civs[j]) j++;
+                if (i == given_index)
+                {
+                    given_index = j;
+                    break;
+                }
+                j++;
+            }
+			current_civ = civ[given_index].name;
 
         }
             
-
+		civ_list[given_index] = L"";
+        available_civs[given_index] = false;
 
     }
 
@@ -1009,6 +1040,7 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
     std::string civ_name_str = ConvertToString(current_civ);
 
     iterator++;
+    remaining--;
 
     label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
     SetWindowText(label_corner, label_text.c_str());
@@ -1018,6 +1050,8 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
 
     HBITMAP drawn_civ_icon = FetchCivIcon(current_civ);
     SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
+    
+    for (int i = 0; i < MAX_CIVS; i++) if (civ_list[i] == current_civ) civ_list[i] = L"";
 
     UpdateDrawnLog(false, true, false);
     UpdateRemainingLog(false);
@@ -1098,7 +1132,9 @@ void AddCiv(const std::wstring &civ)
 {
     if (GetCiv(civ).enabled) return;
 
-    civs.push_back(civ);
+    //civs.push_back(civ);
+	civ_list[GetCivIndex(civ)] = civ;
+    available_civs[GetCivIndex(civ)] = true;
 	GetCiv(civ).SetEnabled(true);
 	custom_max_civs++;
     label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
@@ -1114,9 +1150,13 @@ void RemoveCiv(const std::wstring &civ)
 {
     if (!GetCiv(civ).enabled) return;
     
-    if (std::find(civs.begin(), civs.end(), civ) == civs.end()) iterator--;
+    if (!available_civs[GetCivIndex(civ)]) iterator--;
+
     custom_civ_pool = true;
-	civs.erase(std::remove(civs.begin(), civs.end(), civ), civs.end());
+
+	civ_list[GetCivIndex(civ)] = L"";
+	available_civs[GetCivIndex(civ)] = false;
+	//civs.erase(std::remove(civs.begin(), civs.end(), civ), civs.end());
 	GetCiv(civ).SetEnabled(false);
 	custom_max_civs--;
     label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
@@ -1481,9 +1521,7 @@ void ValidateDlcToggle(HWND hWnD, dlc civ_dlc)
 void ValidateAllDlcToggles(HWND hWnd) { for (int i = 0; i < DLC_AMOUNT; i++) ValidateDlcToggle(hWnd, every_dlc[i]); }
 
 void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted)
-{   
-
-
+{
     std::wstring drawn_label = L"Drawn: " + std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
     SetWindowText(label_drawncount, drawn_label.c_str());
 
@@ -1496,38 +1534,46 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted)
     {
         if (drawnlog_text.substr(0, 2) == L"\r\n")
         {
-            drawnlog_text.erase(0, 2);
-            SetWindowText(drawn_log, drawnlog_text.c_str());
-            drawn_log_linecount--;
+            //drawnlog_text.erase(0, 2);
+            //SetWindowText(drawn_log, drawnlog_text.c_str());
+            //drawn_log_linecount--;
+            log_removelastentry();
         }
         return;
     }
-    
-
-
 
     if (drawn)
     {        
-        CheckDrawnLogLength();
+
         log_entry = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs) + L" - " + std::wstring(current_civ.begin(), current_civ.end()) + L"\r\n";
-        drawnlog_text = log_entry + drawnlog_text;
-        if (iterator == custom_max_civs) drawnlog_text += L"\r\n";
-        SetWindowText(drawn_log, drawnlog_text.c_str());
-        if (drawn_log_linecount < MAX_DRAWNLOG_LINECOUNT) drawn_log_linecount++;
+        //drawnlog_text = log_entry + drawnlog_text;
+        //if (iterator == custom_max_civs)
+        //{
+        //    //drawnlog_text += L"\r\n";
+        //    //drawn_log_linecount++;
+        //    //CheckDrawnLogLength();
+
+        //}            
+        //drawn_log_linecount++;
+        //CheckDrawnLogLength();
+        //SetWindowText(drawn_log, drawnlog_text.c_str());
+        log_addentry(log_entry);
         if (!start_state || start_state && GetCiv(current_civ).enabled) drawn_civs[iterator-1] = current_civ;
+
     }    
     else if (!reset_state && blankline_wanted)
     {
         if (drawnlog_text.substr(0, 2) != L"\r\n")
         {
-            CheckDrawnLogLength();
-            drawnlog_length = GetWindowTextLength(drawn_log);
-            drawnlog_text.resize(drawnlog_length + 1);
-            GetWindowText(drawn_log, &drawnlog_text[0], drawnlog_length + 1);
-            drawnlog_text.pop_back();
-            drawnlog_text = L"\r\n" + drawnlog_text;
-            SetWindowText(drawn_log, drawnlog_text.c_str());
-            if (drawn_log_linecount < MAX_DRAWNLOG_LINECOUNT) drawn_log_linecount++;
+            //drawnlog_length = GetWindowTextLength(drawn_log);
+            //drawnlog_text.resize(drawnlog_length + 1);
+            //GetWindowText(drawn_log, &drawnlog_text[0], drawnlog_length + 1);
+            //drawnlog_text.pop_back();
+            //drawnlog_text = L"\r\n" + drawnlog_text;
+            ////drawn_log_linecount++;
+            ////CheckDrawnLogLength();
+            //SetWindowText(drawn_log, drawnlog_text.c_str());
+			log_addentry(L"\r\n");
         }        
     }
 
@@ -1547,9 +1593,14 @@ void UpdateRemainingLog(bool refresh)
 {
     if (refresh)
     {
-        std::sort(civs.begin(), civs.end());
         remaininglog_text.clear();
-        for (const auto& civ : civs) remaininglog_text += civ + L"\r\n";        
+        for (int i = 0; i < MAX_CIVS; i++)
+        {
+			if (GetCiv(civ_list[i]).enabled && civ_list[i] != L"")
+			{
+                remaininglog_text += civ_list[i] + L"\r\n";
+			}
+        }
     }
     else
     {
@@ -2158,8 +2209,10 @@ HWND GetCivCheckbox(const std::wstring &civ_name) { for (int i = 0; i < MAX_CIVS
 
 void InitialiseCivs()
 {
-    if (!civs.empty()) civs.clear();
-    for (int i = 0; i < MAX_CIVS; i++) civs.push_back(civ[i].name);
+    for (int i = 0; i < MAX_CIVS; i++) civ_list[i] = civ[i].name;
+	for (int i = 0; i < MAX_CIVS; i++) available_civs[i] = true;
+    //if (!civs.empty()) civs.clear();
+    //for (int i = 0; i < MAX_CIVS; i++) civs.push_back(civ[i].name);
 }
 
 void OpenOptions(HWND hWnd) { PlayAudio(button); DialogBox(instance, MAKEINTRESOURCE(IDD_OPTIONS), hWnd, OptionsDlgProc); }
@@ -2385,7 +2438,7 @@ void PositionComponents(LPARAM lParam)
     SetWindowPos(edition_icon, NULL, 190, 30, 128, 93, SWP_NOZORDER);
 }
 
-void ClearDrawnLog() { if (!startup) PlayAudio(button); SetWindowText(drawn_log, L""); }
+void ClearDrawnLog() { if (!startup) drawn_log_linecount = 0; PlayAudio(button); SetWindowText(drawn_log, L""); }
 
 void JoinLobby(HWND hWnd)
 {
@@ -2529,7 +2582,7 @@ void UndrawCiv()
         {
             drawnlog_text = drawnlog_text.substr(pos + 2);
             SetWindowText(drawn_log, drawnlog_text.c_str());
-            if (drawn_log_linecount < MAX_DRAWNLOG_LINECOUNT) drawn_log_linecount++;
+            //drawn_log_linecount++;
         }
     }
     UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
@@ -2547,6 +2600,7 @@ void RedrawCiv()
         return;
     }
     current_civ = drawn_civs[iterator];
+
 	civs.erase(std::remove(civs.begin(), civs.end(), current_civ), civs.end());
     iterator++;
 	HBITMAP drawn_civ_icon = FetchCivIcon(current_civ);
@@ -2810,10 +2864,9 @@ void SetContfreshStrength()
 
 void CheckDrawnLogLength()
 {
-    if (drawn_log_linecount == MAX_DRAWNLOG_LINECOUNT)
+    if (drawn_log_linecount > MAX_DRAWNLOG_LINECOUNT)
     {
         size_t last_newline = drawnlog_text.rfind(L"\r");
-
         
         if (last_newline != std::wstring::npos)
         {
@@ -2827,4 +2880,55 @@ void CheckDrawnLogLength()
         }
         
     }
+}
+
+
+void log_addentry(std::wstring message)
+{
+    drawnlog_text = message + drawnlog_text;
+    if (drawn_log_linecount == MAX_DRAWNLOG_LINECOUNT)
+    {
+        size_t last_newline = drawnlog_text.rfind(L"\r");
+
+        if (last_newline != std::wstring::npos)
+        {
+            drawnlog_text.erase(last_newline);
+        }
+        SetWindowText(drawn_log, drawnlog_text.c_str());
+    }
+	else
+	{
+		SetWindowText(drawn_log, drawnlog_text.c_str());
+		drawn_log_linecount++;
+		//MessageBox(NULL, StringCleaner(L"drawn_log_linecount: " + std::to_wstring(drawn_log_linecount)), L"Error", MB_OK | MB_ICONINFORMATION);
+	}
+}
+
+void log_removelastentry() {
+	size_t last_newline = drawnlog_text.rfind(L"\r");
+	if (last_newline != std::wstring::npos)
+	{
+		drawnlog_text.erase(last_newline);
+		SetWindowText(drawn_log, drawnlog_text.c_str());
+	}
+	drawn_log_linecount--;
+}
+
+int GetRandomInt(int max)
+{
+    std::random_device rd;
+    std::mt19937 mt(rd());
+	std::uniform_int_distribution<> dis(0, max - 1);
+	return dis(mt);
+}
+
+int GetCivIndex(const std::wstring& civ_name)
+{
+    auto it = civ_name_to_index.find(civ_name);
+    if (it != civ_name_to_index.end())
+    {
+        int index = it->second;
+        return index;
+    }
+	return -1;
 }

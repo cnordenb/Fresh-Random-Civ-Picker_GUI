@@ -23,6 +23,7 @@
 #include <thread>
 #include <iomanip>
 #include <libloaderapi.h>
+#include <unordered_map>
 
 
 
@@ -39,7 +40,7 @@
 #define MAX_CIVS 50
 #define MAX_CIVS_HD 31
 #define MAX_CIVS_AOK 18
-#define MAX_DRAWNLOG_LINECOUNT 5
+#define MAX_DRAWNLOG_LINECOUNT 500
 #define DLC_AMOUNT 11
 #define EDITION_AMOUNT 3
 #define MAX_LOADSTRING 100
@@ -122,7 +123,6 @@
 #define TOOLTIP_SURVAPP			    23
 #define TOOLTIP_KINGDOMS            24
 
-
 class Hotkey
 {
 public:
@@ -160,6 +160,11 @@ public:
 
     void SetEnabled(bool enabled) { this->enabled = enabled; }
 };
+
+
+std::unordered_map<std::wstring, int> civ_name_to_index;
+std::wstring civ_list[MAX_CIVS] = { L"" };
+bool available_civs[MAX_CIVS] = { true };
 
 wchar_t INI_FILE_PATH[MAX_PATH];
 wchar_t LOG_FILE_PATH[MAX_PATH];
@@ -234,6 +239,7 @@ HBITMAP icon_survapp, icon_techtree, icon_options;
 
 
 int iterator = 0;
+int remaining = MAX_CIVS;
 int drawnlog_length = GetWindowTextLength(drawn_log);
 int remaininglog_length = GetWindowTextLength(remaining_log);
 int current_tab = 0;
@@ -463,6 +469,9 @@ int drawn_log_linecount = 0;
 
 enum savetype { automatic, manual, quick };
 
+int GetRandomInt(int);
+int GetCivIndex(const std::wstring&);
+
 void CreateBoldFont();
 HBITMAP FetchCivIcon(const std::wstring &);
 void CreateTabs(HWND);
@@ -555,6 +564,8 @@ void ToggleRemainLog();
 void ClearDrawnLog();
 void UpdateContfresh(const std::wstring &);
 void CheckDrawnLogLength();
+void log_addentry(std::wstring);
+void log_removelastentry();
 
 
 bool IsDlcEmpty(dlc);
