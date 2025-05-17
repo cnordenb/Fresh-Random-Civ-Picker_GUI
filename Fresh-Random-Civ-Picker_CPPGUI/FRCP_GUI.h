@@ -40,7 +40,7 @@
 #define MAX_CIVS 50
 #define MAX_CIVS_HD 31
 #define MAX_CIVS_AOK 18
-#define MAX_DRAWNLOG_LINECOUNT 500
+#define MAX_DRAWNLOG_LINECOUNT 256
 #define DLC_AMOUNT 11
 #define EDITION_AMOUNT 3
 #define MAX_LOADSTRING 100
@@ -163,8 +163,11 @@ public:
 
 
 std::unordered_map<std::wstring, int> civ_name_to_index;
-std::wstring civ_list[MAX_CIVS] = { L"" };
-bool available_civs[MAX_CIVS] = { true };
+std::wstring civ_list[MAX_CIVS];
+bool available_civs[MAX_CIVS];
+
+std::wstring civ_list_copy[MAX_CIVS];
+bool available_civs_copy[MAX_CIVS];
 
 wchar_t INI_FILE_PATH[MAX_PATH];
 wchar_t LOG_FILE_PATH[MAX_PATH];
@@ -472,6 +475,8 @@ enum savetype { automatic, manual, quick };
 int GetRandomInt(int);
 int GetCivIndex(const std::wstring&);
 
+
+void ValidateRemainCount();
 void CreateBoldFont();
 HBITMAP FetchCivIcon(const std::wstring &);
 void CreateTabs(HWND);

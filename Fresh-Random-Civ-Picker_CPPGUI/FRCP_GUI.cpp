@@ -882,6 +882,7 @@ void ResetProgram(bool auto_reset)
         custom_max_civs = 0;
         for (int i = 0; i < MAX_CIVS; i++)
         {
+			civ_list[i] = L"";
 			available_civs[i] = false;
             if (civ[i].enabled)
             {
@@ -950,7 +951,7 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
         return;
     }
 
-    if (iterator == custom_max_civs || iterator == 0)
+    if (remaining == 0 || iterator == custom_max_civs || iterator == 0)
     {
         ResetProgram(true);
         reset_state = false;
@@ -959,29 +960,39 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
     if (rigged)
     {
         current_civ = civ_name;
+		civ_list[GetCivIndex(current_civ)] = L"";
 		available_civs[GetCivIndex(current_civ)] = false;
 
         //civs.erase(std::remove(civs.begin(), civs.end(), civ_name), civs.end());
     }    
     else
     {
+		ValidateRemainCount();
+        if (remaining == 0) MessageBox(NULL, StringCleaner(L"remaining == 0 at line 971."), L"Error", MB_OK | MB_ICONERROR);
         int given_index = GetRandomInt(remaining);
+        
 
 
         if (contfresh_enabled)
         {
+
+            int r_delta = 0;
+			for (int i = 0; i < MAX_CIVS; i++) civ_list_copy[i] = civ_list[i];
+			for (int i = 0; i < MAX_CIVS; i++) available_civs_copy[i] = available_civs[i];
 			//std::vector <std::wstring> civs_copy;
    //         civs_copy.reserve(MAX_CIVS);
 
    //         civs_copy = civs;
             do
             {
-                int given_index = GetRandomInt(remaining);
+				ValidateRemainCount();
+                if (remaining == 0) MessageBox(NULL, StringCleaner(L"remaining == 0 at line 989."), L"Error", MB_OK | MB_ICONERROR);
+                given_index = GetRandomInt(remaining - r_delta);
 
                 int j = 0;
-                for (int i = 0; i < custom_max_civs; i++)
+                for (int i = 0; i < MAX_CIVS; i++)
                 {
-                    while (!available_civs[j]) j++;
+                    while (!available_civs_copy[j]) j++;
                     if (i == given_index)
                     {
                         given_index = j;
@@ -989,24 +1000,41 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
                     }
                     j++;
                 }
+                if (given_index < 0 || given_index >= MAX_CIVS)
+                {
+                    MessageBox(NULL, StringCleaner(L"Invalid index! Given index currently: " + std::to_wstring(given_index)), L"Error", MB_OK | MB_ICONERROR);
+                    return;
+                }
+                //else
+                //{
+                //    MessageBox(NULL, StringCleaner(L"Valid index! Given index currently: " + std::to_wstring(given_index)), L"Success", MB_OK | MB_ICONINFORMATION);
+                //}
                 current_civ = civ[given_index].name;
 
 
-                //std::shuffle(civs_copy.begin(), civs_copy.end(), mt);
-                //current_civ = civs_copy.back();
-                //civs_copy.pop_back();
-                if (IsContfreshCiv(current_civ))
-                {
-                    //civs.erase(std::remove(civs.begin(), civs.end(), current_civ), civs.end());
-                    //MessageBox(NULL, StringCleaner(current_civ + L" is a cont fresh civ!"), L"Contfresh", MB_OK | MB_ICONINFORMATION);
-                }
 
-                else
+                civ_list_copy[given_index] = L"";
+                if (given_index < 0 || given_index >= MAX_CIVS)
                 {
-                    //MessageBox(NULL, StringCleaner(current_civ + L" is not a cont fresh civ! drawing again."), L"Contfresh", MB_OK | MB_ICONINFORMATION);
-                    
+					MessageBox(NULL, StringCleaner(L"Invalid index! Given index currently: " + std::to_wstring(given_index)), L"Error", MB_OK | MB_ICONERROR);
+					return;
                 }
-                    
+				available_civs_copy[given_index] = false;
+
+                //std::shuffle(civs_copy.begin(), civs_copy.end(), mt);
+                // 
+                //current_civ = civs_copy.back();
+                
+                //civs_copy.pop_back();
+
+                //if (IsContfreshCiv(current_civ))
+                //{
+                //    break;
+                //    //civs.erase(std::remove(civs.begin(), civs.end(), current_civ), civs.end());
+                //    //MessageBox(NULL, StringCleaner(current_civ + L" is a cont fresh civ!"), L"Contfresh", MB_OK | MB_ICONINFORMATION);
+                //}
+                //else 
+                r_delta++;
 			} while (!IsContfreshCiv(current_civ));
         }
 
@@ -1014,7 +1042,7 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
         {
 
             int j = 0;
-            for (int i = 0; i < custom_max_civs; i++)
+            for (int i = 0; i < MAX_CIVS; i++)
             {
                 while (!available_civs[j]) j++;
                 if (i == given_index)
@@ -1028,8 +1056,12 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
 
         }
             
-		civ_list[given_index] = L"";
-        available_civs[given_index] = false;
+
+        civ_list[GetCivIndex(current_civ)] = L"";
+        available_civs[GetCivIndex(current_civ)] = false;
+
+
+
 
     }
 
@@ -1057,7 +1089,7 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
     UpdateRemainingLog(false);
 
 
-/*
+    /*
     std::thread sound_thread(PlayJingle, current_civ);
     sound_thread.detach();*/
     if (!startup) PlayJingle(current_civ);
@@ -1150,7 +1182,11 @@ void RemoveCiv(const std::wstring &civ)
 {
     if (!GetCiv(civ).enabled) return;
     
-    if (!available_civs[GetCivIndex(civ)]) iterator--;
+    if (!available_civs[GetCivIndex(civ)])
+    {
+        iterator--;
+		remaining++;
+    }
 
     custom_civ_pool = true;
 
@@ -1608,7 +1644,8 @@ void UpdateRemainingLog(bool refresh)
         if (pos != std::wstring::npos) remaininglog_text.erase(pos, current_civ.length() + 2);
     }
 
-	std::wstring remain_label = L"Remaining: " + std::to_wstring(custom_max_civs - iterator) + L"/" + std::to_wstring(custom_max_civs);
+	ValidateRemainCount();
+	std::wstring remain_label = L"Remaining: " + std::to_wstring(remaining) + L"/" + std::to_wstring(custom_max_civs);
     SetWindowText(remaining_log, remaininglog_text.c_str());
 	SetWindowText(label_remainingcount, remain_label.c_str());
 }
@@ -2209,8 +2246,12 @@ HWND GetCivCheckbox(const std::wstring &civ_name) { for (int i = 0; i < MAX_CIVS
 
 void InitialiseCivs()
 {
-    for (int i = 0; i < MAX_CIVS; i++) civ_list[i] = civ[i].name;
-	for (int i = 0; i < MAX_CIVS; i++) available_civs[i] = true;
+    for (int i = 0; i < MAX_CIVS; i++)
+    {
+        civ_list[i] = civ[i].name;
+        available_civs[i] = true;
+    }
+        
     //if (!civs.empty()) civs.clear();
     //for (int i = 0; i < MAX_CIVS; i++) civs.push_back(civ[i].name);
 }
@@ -2916,6 +2957,8 @@ void log_removelastentry() {
 
 int GetRandomInt(int max)
 {
+    while (max < 1) max++;
+	if (max == 0) MessageBox(NULL, L"Error: max is 0", L"Error", MB_OK | MB_ICONERROR);
     std::random_device rd;
     std::mt19937 mt(rd());
 	std::uniform_int_distribution<> dis(0, max - 1);
@@ -2932,3 +2975,5 @@ int GetCivIndex(const std::wstring& civ_name)
     }
 	return -1;
 }
+
+void ValidateRemainCount() { remaining = custom_max_civs - iterator; }
