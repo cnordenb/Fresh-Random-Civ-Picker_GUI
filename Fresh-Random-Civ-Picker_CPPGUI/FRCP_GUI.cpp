@@ -882,14 +882,17 @@ void ResetProgram(bool auto_reset)
         custom_max_civs = 0;
         for (int i = 0; i < MAX_CIVS; i++)
         {
-			civ_list[i] = L"";
-			available_civs[i] = false;
             if (civ[i].enabled)
             {
 				available_civs[i] = true;
 				civ_list[i] = civ[i].name;
                 //civs.push_back(civ[i].name);
                 custom_max_civs++;
+            }
+            else
+            {
+                available_civs[i] = false;
+                civ_list[i] = L"";
             }
         }
     }
@@ -962,7 +965,6 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
         current_civ = civ_name;
 		civ_list[GetCivIndex(current_civ)] = L"";
 		available_civs[GetCivIndex(current_civ)] = false;
-
         //civs.erase(std::remove(civs.begin(), civs.end(), civ_name), civs.end());
     }    
     else
@@ -985,6 +987,11 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
    //         civs_copy = civs;
             do
             {
+                if ((remaining - r_delta) < 2)
+                {
+                    for (int i = 0; i < MAX_CIVS; i++) if (available_civs_copy[i]) current_civ = civ_list_copy[i];
+                    break;
+                }
 				ValidateRemainCount();
                 if (remaining == 0) MessageBox(NULL, StringCleaner(L"remaining == 0 at line 989."), L"Error", MB_OK | MB_ICONERROR);
                 given_index = GetRandomInt(remaining - r_delta);
@@ -1037,7 +1044,6 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
                 r_delta++;
 			} while (!IsContfreshCiv(current_civ));
         }
-
         else
         {
 
@@ -1055,14 +1061,8 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
 			current_civ = civ[given_index].name;
 
         }
-            
-
         civ_list[GetCivIndex(current_civ)] = L"";
         available_civs[GetCivIndex(current_civ)] = false;
-
-
-
-
     }
 
 
@@ -1083,7 +1083,7 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
     HBITMAP drawn_civ_icon = FetchCivIcon(current_civ);
     SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
     
-    for (int i = 0; i < MAX_CIVS; i++) if (civ_list[i] == current_civ) civ_list[i] = L"";
+	civ_list[GetCivIndex(current_civ)] = L"";
 
     UpdateDrawnLog(false, true, false);
     UpdateRemainingLog(false);
@@ -1570,10 +1570,9 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted)
     {
         if (drawnlog_text.substr(0, 2) == L"\r\n")
         {
-            //drawnlog_text.erase(0, 2);
-            //SetWindowText(drawn_log, drawnlog_text.c_str());
-            //drawn_log_linecount--;
-            log_removelastentry();
+            drawnlog_text.erase(0, 2);
+            SetWindowText(drawn_log, drawnlog_text.c_str());
+            drawn_log_linecount--;
         }
         return;
     }
@@ -1606,8 +1605,6 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted)
             //GetWindowText(drawn_log, &drawnlog_text[0], drawnlog_length + 1);
             //drawnlog_text.pop_back();
             //drawnlog_text = L"\r\n" + drawnlog_text;
-            ////drawn_log_linecount++;
-            ////CheckDrawnLogLength();
             //SetWindowText(drawn_log, drawnlog_text.c_str());
 			log_addentry(L"\r\n");
         }        
@@ -2598,8 +2595,14 @@ void UndrawCiv()
         return;
     }
 	PlayAudio(button);
-    if (iterator > 0) iterator--; else return;
-    civs.push_back(current_civ);
+    if (iterator > 0)
+    {
+        iterator--;
+        remaining++;
+    }
+    else return;
+    civ_list[GetCivIndex(current_civ)] = current_civ;
+    available_civs[GetCivIndex(current_civ)] = true;
     if (iterator >= 1) current_civ = drawn_civs[iterator - 1];
     else current_civ = L"Random";
 	HBITMAP drawn_civ_icon = FetchCivIcon(current_civ);
@@ -2623,11 +2626,11 @@ void UndrawCiv()
         {
             drawnlog_text = drawnlog_text.substr(pos + 2);
             SetWindowText(drawn_log, drawnlog_text.c_str());
+            drawn_log_linecount--;
             //drawn_log_linecount++;
         }
     }
     UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
-
 
 	UpdateRemainingLog(true);
     redrawable = true;
@@ -2635,15 +2638,16 @@ void UndrawCiv()
 
 void RedrawCiv()
 {
-    if (!redrawable || drawn_civs[iterator] == L"")
+    if (!redrawable || drawn_civs[iterator] == L"" || !available_civs[GetCivIndex(drawn_civs[iterator])])
     {
 		PlayAudio(error);
         return;
     }
     current_civ = drawn_civs[iterator];
-
-	civs.erase(std::remove(civs.begin(), civs.end(), current_civ), civs.end());
+    civ_list[GetCivIndex(current_civ)] = L"";
+    available_civs[GetCivIndex(current_civ)] = false;
     iterator++;
+    remaining--;
 	HBITMAP drawn_civ_icon = FetchCivIcon(current_civ);
 	SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)drawn_civ_icon);
     PlayJingle(current_civ);
