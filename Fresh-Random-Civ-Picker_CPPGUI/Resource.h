@@ -8,6 +8,7 @@
 #define IDD_ABOUTBOX                    103
 #define IDM_ABOUT                       104
 #define IDM_EXIT                        105
+#define IDD_HISTORY_DIALOG				106
 #define IDM_SAVELOG						129
 #define IDM_LOADLOG						130
 #define IDM_JOINLOBBY					131
@@ -52,6 +53,10 @@
 #define IDC_CHECKBOX_CONTFRESH			1013
 #define IDC_SLIDER_CONTFRESHSTRENGTH    1014
 #define IDC_STATIC_CONTFRESHVALUE       1015
+#define IDC_STATIC_CFA					1016
+#define IDC_STATIC_CFB					1017
+#define IDC_STATIC_CFC					1018
+#define IDC_STATIC_JT					1019
 #define IDC_CHECKBOX_AUTORESET			7750
 #define IDC_CHECKBOX_AUTOTOGGLE			7764
 #define	IDC_RADIO_DE					7751
@@ -76,6 +81,9 @@
 #define IDC_BUTTON_DISABLEALL			4
 #define IDC_BUTTON_TECHTREE				7767
 #define IDC_BUTTON_SURVAPP				7771
+#define IDC_BUTTON_HISTORY				7773
+#define IDC_HISTORY_COMBO   			7774
+#define IDC_HISTORY_EDIT				7775
 #define IDC_ICON_CIV					7768
 #define IDC_ICON_EDITION				7769
 #define IDC_BUTTON_OPTIONS				7770

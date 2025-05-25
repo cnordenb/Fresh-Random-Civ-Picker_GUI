@@ -1,4 +1,5 @@
-﻿#include "FRCP_GUI.h" 
+﻿#include "FRCP_GUI.h"
+#include "History.h"
 
 void CreateTabs(HWND hWnd)
 {
@@ -169,7 +170,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             CreateTooltips(hWnd);
             AddTooltips();
             SetEditionState(hWnd, DE);
-            civs.reserve(MAX_CIVS);
             if (persistent_logging) {LoadLog(hWnd, automatic); ValidateAllDlcToggles(hWnd);}           
 			ShowTabComponents(0, hWnd);            
             EnableHotkeys(hWnd);
@@ -523,6 +523,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				case IDM_SURVAPP:
 					OpenSurvapp();
 					break;
+                case IDC_BUTTON_HISTORY:
+                    History::Show(hWnd);
+                    break;
 				case IDM_XBOX:
                     PlayAudio(button);
                     ShellExecute(0, 0, L"https://www.xbox.com/games/store/age-of-empires-ii-definitive-edition/9N42SSSX2MTG/0010", 0, 0, SW_SHOW);
@@ -698,15 +701,29 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		    if (persistent_logging) CheckRadioButton(hDlg, IDC_RADIO_LOGGING, IDC_RADIO_STARTRESET, IDC_RADIO_LOGGING);
 		    else CheckRadioButton(hDlg, IDC_RADIO_LOGGING, IDC_RADIO_STARTRESET, IDC_RADIO_STARTRESET);
 
-            HWND hComboBox = GetDlgItem(hDlg, IDC_LEGACY_OPTION);
+            hComboBox = GetDlgItem(hDlg, IDC_LEGACY_OPTION);
             SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Definitive Edition");
             SendMessage(hComboBox, CB_ADDSTRING, 0, (LPARAM)L"Legacy");
             SendMessage(hComboBox, CB_SETCURSEL, legacy_jingle_enabled ? 1 : 0, 0);
 
-            HWND hSlider = GetDlgItem(hDlg, IDC_SLIDER_CONTFRESHSTRENGTH);
+            if (!jingles_enabled)
+            {
+                ShowWindow(hComboBox, SW_HIDE);
+                ShowWindow(GetDlgItem(hDlg, IDC_STATIC_JT), SW_HIDE);
+            }
+
+            hSlider = GetDlgItem(hDlg, IDC_SLIDER_CONTFRESHSTRENGTH);
             SendMessage(hSlider, TBM_SETRANGE, TRUE, MAKELPARAM(1, 10));
             SendMessage(hSlider, TBM_SETPOS, TRUE, contfresh_strength);
 
+            if (!contfresh_enabled)
+            {
+                ShowWindow(hSlider, SW_HIDE);
+                ShowWindow(GetDlgItem(hDlg, IDC_STATIC_CONTFRESHVALUE), SW_HIDE);
+                ShowWindow(GetDlgItem(hDlg, IDC_STATIC_CFA), SW_HIDE);
+                ShowWindow(GetDlgItem(hDlg, IDC_STATIC_CFB), SW_HIDE);
+                ShowWindow(GetDlgItem(hDlg, IDC_STATIC_CFC), SW_HIDE);
+            }
 
             int pos = (int)SendMessage(hSlider, TBM_GETPOS, 0, 0);
 
@@ -764,14 +781,46 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
             civ_labels_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_LABELS) == BST_CHECKED;
             iteration_label_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_CORNERLABEL) == BST_CHECKED;
 		    icons_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_ICONS) == BST_CHECKED;
+
             jingles_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_JINGLES) == BST_CHECKED;
+            if (!jingles_enabled)
+            {
+                ShowWindow(hComboBox, SW_HIDE);
+                ShowWindow(GetDlgItem(hDlg, IDC_STATIC_JT), SW_HIDE);
+            }
+			else
+			{
+				ShowWindow(hComboBox, SW_SHOW);
+				ShowWindow(GetDlgItem(hDlg, IDC_STATIC_JT), SW_SHOW);
+			}
+
             tooltips_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_TOOLTIPS) == BST_CHECKED;
 		    draw_on_startup = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_STARTDRAW) == BST_CHECKED;
-			contfresh_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_CONTFRESH) == BST_CHECKED;
 
-            HWND hComboBox = GetDlgItem(hDlg, IDC_LEGACY_OPTION);
+			contfresh_enabled = IsDlgButtonChecked(hDlg, IDC_CHECKBOX_CONTFRESH) == BST_CHECKED;
+            if (!contfresh_enabled)
+            {
+                ShowWindow(hSlider, SW_HIDE);
+				ShowWindow(GetDlgItem(hDlg, IDC_STATIC_CONTFRESHVALUE), SW_HIDE);
+				ShowWindow(GetDlgItem(hDlg, IDC_STATIC_CFA), SW_HIDE);
+				ShowWindow(GetDlgItem(hDlg, IDC_STATIC_CFB), SW_HIDE);
+				ShowWindow(GetDlgItem(hDlg, IDC_STATIC_CFC), SW_HIDE);
+			}
+            else
+            {
+                ShowWindow(hSlider, SW_SHOW);
+				ShowWindow(GetDlgItem(hDlg, IDC_STATIC_CONTFRESHVALUE), SW_SHOW);
+				ShowWindow(GetDlgItem(hDlg, IDC_STATIC_CFA), SW_SHOW);
+				ShowWindow(GetDlgItem(hDlg, IDC_STATIC_CFB), SW_SHOW);
+				ShowWindow(GetDlgItem(hDlg, IDC_STATIC_CFC), SW_SHOW);
+            }
+                
+
+
             int selectedIndex = static_cast<int>(SendMessage(hComboBox, CB_GETCURSEL, 0, 0));
             legacy_jingle_enabled = (selectedIndex == 1);
+
+
 
             if (icons_enabled && current_tab != 2) ShowWindow(civ_icon, SW_SHOW);            
             else ShowWindow(civ_icon, SW_HIDE);                    
@@ -2393,6 +2442,9 @@ void CreateImages(HWND hWnd)
 
 void CreateButtons(HWND hWnd)
 {
+    button_history = CreateWindow(L"BUTTON", L"History", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+        50, 50, 40, 40, hWnd, (HMENU)IDC_BUTTON_HISTORY, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+
     button_draw = CreateWindow(L"BUTTON", L"Draw", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | TTF_TRACK, 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_DRAW, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     button_reset = CreateWindow(L"BUTTON", L"Reset", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 200, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_RESET, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     button_survapp = CreateWindow(L"BUTTON", L"", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP, 0, 0, 50, 50, hWnd, (HMENU)IDC_BUTTON_SURVAPP, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
@@ -2682,7 +2734,16 @@ void PlayJingle(const std::wstring& civ_name)
 
     //TODO: make jingle a member variable of Civ so loops in this function are redundant
 
+
+
     if (!jingles_enabled) return;
+
+    if (civ_name == L"Random")
+    {
+        if (legacy_jingle_enabled) PlayResource(random_legacy_jingle);
+        else PlayResource(random_jingle);
+        return;
+    }
 
     if (legacy_jingle_enabled && GetCiv(civ_name).legacy)
     {
@@ -2779,12 +2840,18 @@ void LoadJingles()
             j++;
         }
     }
+	random_jingle = { NULL, NULL, NULL, L"Random" };
+	random_legacy_jingle = { NULL, NULL, NULL, L"l_Random" };
+    LoadSound(random_jingle);
+	LoadSound(random_legacy_jingle);
 }
 
 void UnloadJingles()
 {
     for (int i = 0; i < MAX_CIVS; i++) UnloadSound(jingleResource[i]);
 	for (int i = 0; i < LEGACY_JINGLE_AMOUNT; i++) UnloadSound(legacyJingle[i]);
+    UnloadSound(random_jingle);
+    UnloadSound(random_legacy_jingle);
 }
 
 void UpdateEnabledCivsCounter()
