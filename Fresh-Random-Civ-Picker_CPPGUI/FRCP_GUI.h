@@ -86,6 +86,7 @@ bool available_civs_copy[MAX_CIVS];
 
 wchar_t INI_FILE_PATH[MAX_PATH];
 wchar_t LOG_FILE_PATH[MAX_PATH];
+wchar_t HIS_FILE_PATH[MAX_PATH];
 
 std::map<HWND, WNDPROC> originalButtonProcs;
 
@@ -532,6 +533,9 @@ std::string ConvertToString(const std::wstring &);
 HWND CreateCheckbox(HWND hWnd, HINSTANCE hInstance, int x, int y, int width, int height, int id, LPCWSTR text);
 
 void GenerateFilePaths();
+void OpenHistory(HWND);
+std::wstring NormaliseLineEndings(const std::wstring& input);
+std::wstring FetchHistory(const std::wstring& civ_name);
 
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -542,3 +546,4 @@ INT_PTR CALLBACK    HotkeysDlgProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    JoinLobbyDlgProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK    HyperlinkProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK    ButtonProc(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK DialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);

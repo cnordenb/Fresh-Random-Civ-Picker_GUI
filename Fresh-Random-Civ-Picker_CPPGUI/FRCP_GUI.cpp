@@ -1,5 +1,4 @@
 ﻿#include "FRCP_GUI.h"
-#include "History.h"
 
 void CreateTabs(HWND hWnd)
 {
@@ -524,7 +523,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					OpenSurvapp();
 					break;
                 case IDC_BUTTON_HISTORY:
-                    History::Show(hWnd);
+                    OpenHistory(hWnd);
                     break;
 				case IDM_XBOX:
                     PlayAudio(button);
@@ -2273,19 +2272,25 @@ void GenerateFilePaths()
 {
     wchar_t exePathS[MAX_PATH];
     wchar_t exePathL[MAX_PATH];
+	wchar_t exePathH[MAX_PATH];
     GetModuleFileName(NULL, exePathS, MAX_PATH);
     GetModuleFileName(NULL, exePathL, MAX_PATH);
+	GetModuleFileName(NULL, exePathH, MAX_PATH);
 
     wchar_t *lastSlashS = wcsrchr(exePathS, L'\\');
     if (lastSlashS != NULL) *lastSlashS = L'\0';
     wchar_t *lastSlashL = wcsrchr(exePathL, L'\\');
     if (lastSlashL != NULL) *lastSlashL = L'\0';
+	wchar_t* lastSlash = wcsrchr(exePathH, L'\\');
+	if (lastSlash != NULL) *lastSlash = L'\0';
     
     wcscat_s(exePathS, MAX_PATH, L"\\settings.ini");
     wcscat_s(exePathL, MAX_PATH, L"\\log.txt");
+	wcscat_s(exePathH, MAX_PATH, L"\\Histories\\");
 
     wcscpy_s(INI_FILE_PATH, exePathS);
     wcscpy_s(LOG_FILE_PATH, exePathL);
+	wcscpy_s(HIS_FILE_PATH, exePathH);
 }
 
 HWND GetCivCheckbox(const std::wstring &civ_name) { for (int i = 0; i < MAX_CIVS; i++) if (civ[i].name == civ_name) return civ[i].checkbox; return NULL; }
@@ -3048,3 +3053,81 @@ int GetCivIndex(const std::wstring& civ_name)
 }
 
 void ValidateRemainCount() { remaining = custom_max_civs - iterator; }
+
+INT_PTR CALLBACK DialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    HWND hist_combo_box;
+    std::wstring selected_civ = current_civ;
+
+    switch (message) {
+    case WM_INITDIALOG:
+        SetDlgItemText(hDlg, IDC_HISTORY_EDIT, StringCleaner(FetchHistory(selected_civ)));
+
+        hist_combo_box = GetDlgItem(hDlg, IDC_HISTORY_COMBO);
+        for (int i = 0; i < MAX_CIVS; i++) SendMessage(hist_combo_box, CB_ADDSTRING, 0, (LPARAM)reinterpret_cast<LPARAM>(civ[i].name.c_str()));
+		SendMessage(hist_combo_box, CB_SETCURSEL, GetCivIndex(selected_civ), 0);
+        return (INT_PTR)TRUE;
+    case WM_COMMAND:
+
+
+        // fill text field with txt contents from /Histories/ of selected civ, eg. Armenians.txt
+		if (LOWORD(wParam) == IDC_HISTORY_COMBO && HIWORD(wParam) == CBN_SELCHANGE) {
+			hist_combo_box = GetDlgItem(hDlg, IDC_HISTORY_COMBO);
+			int selected_index = SendMessage(hist_combo_box, CB_GETCURSEL, 0, 0);
+			if (selected_index != CB_ERR) {
+				wchar_t buffer[256];
+				SendMessage(hist_combo_box, CB_GETLBTEXT, selected_index, reinterpret_cast<LPARAM>(buffer));
+				selected_civ = buffer;
+
+                SetDlgItemText(hDlg, IDC_HISTORY_EDIT, StringCleaner(FetchHistory(selected_civ)));
+
+			}
+		}
+
+
+        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+        }
+        break;
+    }
+    return (INT_PTR)FALSE;
+}
+
+void OpenHistory(HWND hParent) { DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_HISTORY_DIALOG), hParent, DialogProc); }
+
+std::wstring NormaliseLineEndings(const std::wstring& input) {
+    std::wstring output;
+    output.reserve(input.size());
+    for (size_t i = 0; i < input.size(); ++i) {
+        if (input[i] == L'\n') {
+            if (i == 0 || input[i - 1] != L'\r')
+                output += L"\r\n";
+            else
+                output += L"\n";
+        }
+        else {
+            output += input[i];
+        }
+    }
+    return output;
+}
+
+std::wstring FetchHistory(const std::wstring& civ_name)
+{
+    wchar_t path[MAX_PATH];
+    //copy HIS_FILE_PATH to path and append selected_civ + L".txt"
+    wcscpy_s(path, HIS_FILE_PATH);
+    std::wstring history_file_path = std::wstring(path) + civ_name + L".txt";
+
+    //MessageBox(hDlg, StringCleaner(history_file_path), L"Info", MB_OK | MB_ICONINFORMATION);
+    if (FileExists(history_file_path)) {
+        std::wifstream file(history_file_path);
+        std::wstring history_content((std::istreambuf_iterator<wchar_t>(file)), std::istreambuf_iterator<wchar_t>());
+        history_content = NormaliseLineEndings(history_content); // Normalise line endings
+        return history_content;
+    }
+    else {
+        return L"History not found.";
+    }
+}

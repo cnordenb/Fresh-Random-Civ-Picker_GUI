@@ -131,14 +131,12 @@
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="GlobalConstants.h" />
-    <ClInclude Include="History.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="FRCP_GUI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FRCP_GUI.cpp" />
-    <ClCompile Include="History.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="civ_icons\armenians.bmp" />
@@ -196,6 +194,10 @@
   <ItemGroup>
     <None Include="formatting_notes.md" />
     <None Include="settings.ini" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\..\..\..\..\..\Program Files %28x86%29\Steam\steamapps\common\AoE2DE\resources\en\strings\history\Armenians.txt" />
+    <Text Include="..\..\..\..\..\..\..\Program Files %28x86%29\Steam\steamapps\common\AoE2DE\resources\en\strings\history\Aztecs.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

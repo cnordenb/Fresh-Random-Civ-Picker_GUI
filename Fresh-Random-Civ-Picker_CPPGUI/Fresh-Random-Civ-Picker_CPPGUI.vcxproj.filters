@@ -1806,50 +1806,6 @@
     <ClCompile Include="civ_icons\turks.png" />
     <ClCompile Include="civ_icons\vietnamese.png" />
     <ClCompile Include="civ_icons\vikings.png" />
-    <ClCompile Include="civ_icons\aztecs.png" />
-    <ClCompile Include="civ_icons\bengalis.png" />
-    <ClCompile Include="civ_icons\berber.png" />
-    <ClCompile Include="civ_icons\bohemians.png" />
-    <ClCompile Include="civ_icons\britons.png" />
-    <ClCompile Include="civ_icons\bulgarians.png" />
-    <ClCompile Include="civ_icons\burgundians.png" />
-    <ClCompile Include="civ_icons\burmese.png" />
-    <ClCompile Include="civ_icons\byzantines.png" />
-    <ClCompile Include="civ_icons\celts.png" />
-    <ClCompile Include="civ_icons\chinese.png" />
-    <ClCompile Include="civ_icons\cumans.png" />
-    <ClCompile Include="civ_icons\dravidians.png" />
-    <ClCompile Include="civ_icons\ethiopians.png" />
-    <ClCompile Include="civ_icons\franks.png" />
-    <ClCompile Include="civ_icons\georgians.png" />
-    <ClCompile Include="civ_icons\goths.png" />
-    <ClCompile Include="civ_icons\gurjaras.png" />
-    <ClCompile Include="civ_icons\huns.png" />
-    <ClCompile Include="civ_icons\inca.png" />
-    <ClCompile Include="civ_icons\indians.png" />
-    <ClCompile Include="civ_icons\italians.png" />
-    <ClCompile Include="civ_icons\japanese.png" />
-    <ClCompile Include="civ_icons\khmer.png" />
-    <ClCompile Include="civ_icons\koreans.png" />
-    <ClCompile Include="civ_icons\lithuanians.png" />
-    <ClCompile Include="civ_icons\magyars.png" />
-    <ClCompile Include="civ_icons\malay.png" />
-    <ClCompile Include="civ_icons\malians.png" />
-    <ClCompile Include="civ_icons\mayans.png" />
-    <ClCompile Include="civ_icons\mongols.png" />
-    <ClCompile Include="civ_icons\persians.png" />
-    <ClCompile Include="civ_icons\poles.png" />
-    <ClCompile Include="civ_icons\portuguese.png" />
-    <ClCompile Include="civ_icons\romans.png" />
-    <ClCompile Include="civ_icons\saracens.png" />
-    <ClCompile Include="civ_icons\sicilians.png" />
-    <ClCompile Include="civ_icons\slavs.png" />
-    <ClCompile Include="civ_icons\spanish.png" />
-    <ClCompile Include="civ_icons\tatars.png" />
-    <ClCompile Include="civ_icons\teutons.png" />
-    <ClCompile Include="civ_icons\turks.png" />
-    <ClCompile Include="civ_icons\vietnamese.png" />
-    <ClCompile Include="civ_icons\vikings.png" />
     <ClCompile Include="civ_icons\aztecs.png">
       <Filter>civ_icons</Filter>
     </ClCompile>
@@ -7790,14 +7746,12 @@
     <ClCompile Include="civ_icons\vikings.png">
       <Filter>civ_icons</Filter>
     </ClCompile>
-    <ClCompile Include="History.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="FRCP_GUI.h" />
-    <ClInclude Include="History.h" />
     <ClInclude Include="GlobalConstants.h" />
   </ItemGroup>
   <ItemGroup>
@@ -7951,5 +7905,16 @@
     <Filter Include="civ_icons">
       <UniqueIdentifier>{0cc48d46-cd9e-47bd-be5b-aaf3fd0a5c2b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Histories">
+      <UniqueIdentifier>{873cc985-37b0-40b1-9e85-6a9f1fec2dea}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\..\..\..\..\..\Program Files %28x86%29\Steam\steamapps\common\AoE2DE\resources\en\strings\history\Armenians.txt">
+      <Filter>Histories</Filter>
+    </Text>
+    <Text Include="..\..\..\..\..\..\..\Program Files %28x86%29\Steam\steamapps\common\AoE2DE\resources\en\strings\history\Aztecs.txt">
+      <Filter>Histories</Filter>
+    </Text>
   </ItemGroup>
 </Project>
