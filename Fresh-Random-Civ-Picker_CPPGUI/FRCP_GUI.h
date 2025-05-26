@@ -160,7 +160,7 @@ HBITMAP icon_khans, icon_dukes, icon_west, icon_india, icon_rome, icon_royals, i
 icon_forgotten, icon_africans, icon_rajas,
 icon_aoc;
 
-HBITMAP icon_survapp, icon_techtree, icon_options;
+HBITMAP icon_survapp, icon_techtree, icon_options, icon_history;
 
 
 int iterator = 0;
@@ -536,6 +536,8 @@ void GenerateFilePaths();
 void OpenHistory(HWND);
 std::wstring NormaliseLineEndings(const std::wstring& input);
 std::wstring FetchHistory(const std::wstring& civ_name);
+
+void UpdateTooltips(bool);
 
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);

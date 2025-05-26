@@ -228,20 +228,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 RECT rect;
 
                 bool tooltipActivated = false;
-
                 HWND button[] = { button_draw, button_reset, button_techtree, button_options, button_clearlog,
                                     button_enableall, button_disableall, checkbox_showremainlog,
                                     radiobutton_de, radiobutton_hd, radiobutton_aok, de_dlc_checkbox[0],
                                 de_dlc_checkbox[1], de_dlc_checkbox[2], de_dlc_checkbox[3], de_dlc_checkbox[4], de_dlc_checkbox[5], de_dlc_checkbox[6],
                                 hd_dlc_checkbox[0], hd_dlc_checkbox[1], hd_dlc_checkbox[2], checkbox_aoc,
-                                checkbox_autotoggle, checkbox_autoreset, button_survapp };
+                                checkbox_autotoggle, checkbox_autoreset, button_survapp, button_history };
 
                 int tooltip_id[] = { TOOLTIP_DRAW, TOOLTIP_RESET, TOOLTIP_TECHTREE, TOOLTIP_OPTIONS, TOOLTIP_CLEAR,
                                         TOOLTIP_ENABLEALL, TOOLTIP_DISABLEALL, TOOLTIP_REMAININGTOGGLE,
                                         TOOLTIP_DE, TOOLTIP_HD, TOOLTIP_AOK, de_dlc_tipid[0], de_dlc_tipid[1],
                                     de_dlc_tipid[2], de_dlc_tipid[3], de_dlc_tipid[4], de_dlc_tipid[5], de_dlc_tipid[6],
                                     hd_dlc_tipid[0], hd_dlc_tipid[1], hd_dlc_tipid[2], TOOLTIP_AOC,
-                                    TOOLTIP_AUTOTOGGLE, TOOLTIP_AUTORESET, TOOLTIP_SURVAPP };
+                                    TOOLTIP_AUTOTOGGLE, TOOLTIP_AUTORESET, TOOLTIP_SURVAPP, TOOLTIP_HISTORY };
                 
 				for (int i = 0; i < sizeof(button) / sizeof(button[0]); i++)
 				{
@@ -296,6 +295,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (wParam == HOTKEY_ID_R) OpenSurvapp();
                 if (wParam == HOTKEY_ID_Q) OpenOptions(hWnd);
                 if (wParam == HOTKEY_ID_T) OpenTechTree();
+                if (wParam == HOTKEY_ID_H) OpenHistory(hWnd);
             }
             if (current_tab != 2)
             {
@@ -618,14 +618,14 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                                     radiobutton_de, radiobutton_hd, radiobutton_aok, de_dlc_checkbox[0],
                                 de_dlc_checkbox[1], de_dlc_checkbox[2], de_dlc_checkbox[3], de_dlc_checkbox[4], de_dlc_checkbox[5], de_dlc_checkbox[6],
                                 hd_dlc_checkbox[0], hd_dlc_checkbox[1], hd_dlc_checkbox[2], checkbox_aoc,
-                                checkbox_autotoggle, checkbox_autoreset, button_survapp };
+                                checkbox_autotoggle, checkbox_autoreset, button_survapp, button_history };
 
                 int tooltip_id[] = { TOOLTIP_DRAW, TOOLTIP_RESET, TOOLTIP_TECHTREE, TOOLTIP_OPTIONS, TOOLTIP_CLEAR,
                                         TOOLTIP_ENABLEALL, TOOLTIP_DISABLEALL, TOOLTIP_REMAININGTOGGLE,
                                         TOOLTIP_DE, TOOLTIP_HD, TOOLTIP_AOK, de_dlc_tipid[0], de_dlc_tipid[1],
                                     de_dlc_tipid[2], de_dlc_tipid[3], de_dlc_tipid[4], de_dlc_tipid[5], de_dlc_tipid[6],
                                     hd_dlc_tipid[0], hd_dlc_tipid[1], hd_dlc_tipid[2], TOOLTIP_AOC,
-                                    TOOLTIP_AUTOTOGGLE, TOOLTIP_AUTORESET, TOOLTIP_SURVAPP };
+                                    TOOLTIP_AUTOTOGGLE, TOOLTIP_AUTORESET, TOOLTIP_SURVAPP, TOOLTIP_HISTORY };
 
                 for (int i = 0; i < sizeof(button) / sizeof(button[0]); i++)
 			    {
@@ -959,7 +959,7 @@ void ResetProgram(bool auto_reset)
     reset_state = true;
 
     UpdateRemainingLog(true);
-    UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
+    UpdateTooltips(false);
     undrawable = false;
 
     last_action = reset;
@@ -1143,7 +1143,7 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
     if (!startup) PlayJingle(current_civ);
     
 
-    UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
+    UpdateTooltips(true);
     redrawable = false;
     undrawable = true;
 
@@ -1187,8 +1187,9 @@ void LoadImages()
 
     icon_techtree = (HBITMAP)LoadImageW(NULL, L"images\\civ_icons\\techtree.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	icon_survapp = (HBITMAP)LoadImageW(NULL, L"images\\survivalist.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	icon_options = (HBITMAP)LoadImageW(NULL, L"images\\civ_icons\\options.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);    
-    
+    icon_options = (HBITMAP)LoadImageW(NULL, L"images\\civ_icons\\options.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    icon_history = (HBITMAP)LoadImageW(NULL, L"images\\history.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+
     icon_random = (HBITMAP)LoadImageW(NULL, L"images\\civ_icons\\random.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
 	icon_de = (HBITMAP)LoadImageW(NULL, L"images\\edition_icons\\aoe2de.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -1353,6 +1354,7 @@ void ShowDrawTab(bool showing_enabled, HWND hWnd)
 	    if (iteration_label_enabled) ShowWindow(label_corner, SW_SHOW);
         ShowWindow(button_survapp, SW_SHOW);
 		ShowWindow(button_techtree, SW_SHOW);
+        ShowWindow(button_history, SW_SHOW);
         UpdateTooltipText(button_options, hwndTooltip[TOOLTIP_OPTIONS], StringCleaner(L"Opens options\nHotkey: Q (Draw tab only) / F1"));
 	}
     else if (!showing_enabled)
@@ -1368,6 +1370,7 @@ void ShowDrawTab(bool showing_enabled, HWND hWnd)
         ShowWindow(label_corner, SW_HIDE);
 		ShowWindow(button_survapp, SW_HIDE);
 		ShowWindow(button_techtree, SW_HIDE);
+        ShowWindow(button_history, SW_HIDE);
         UpdateTooltipText(button_options, hwndTooltip[TOOLTIP_OPTIONS], StringCleaner(L"Opens options\nHotkey: F1"));
     }	
 }
@@ -2247,12 +2250,12 @@ void LoadLog(HWND hWnd, savetype type)
 
     if (type == automatic && current_civ == L"Random")
     {
-        UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T (Draw tab only) / F4"));
+        UpdateTooltips(false);
         SetWindowText(label_centre, L"?");
     }        
     else
     {
-        UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T (Draw tab only) / F4"));
+        UpdateTooltips(true);
         SetWindowText(label_centre, current_civ.c_str());		
     }
     if (!civ_labels_enabled) ShowWindow(label_centre, SW_HIDE);
@@ -2354,6 +2357,7 @@ void SubclassButtons()
     SubclassButton(button_techtree);
     SubclassButton(button_survapp);
 	SubclassButton(button_options);
+    SubclassButton(button_history);
 
     SubclassButton(button_enableall);
     SubclassButton(button_disableall);
@@ -2389,6 +2393,7 @@ void AddTooltips()
     AddTooltip(button_options, hwndTooltip[TOOLTIP_OPTIONS], StringCleaner(L"Opens options\nHotkey: F1"));
     AddTooltip(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T (Draw tab only) / F4"));
     AddTooltip(button_survapp, hwndTooltip[TOOLTIP_SURVAPP], StringCleaner(L"Opens Survivalist's webapp to calculate villagers required for sustainable production\nHotkey: R (Draw tab only) / Ctrl + T"));
+    AddTooltip(button_history, hwndTooltip[TOOLTIP_HISTORY], StringCleaner(L"Opens the game's History info\nHotkey: H (Draw tab only)"));
 
     AddTooltip(button_clearlog, hwndTooltip[TOOLTIP_CLEAR], StringCleaner(L"Clears the log of previously drawn civs\nHotkey: Q"));
     AddTooltip(checkbox_showremainlog, hwndTooltip[TOOLTIP_REMAININGTOGGLE], StringCleaner(L"Toggles the display of the remaining civs log\nHotkey: W"));
@@ -2447,8 +2452,10 @@ void CreateImages(HWND hWnd)
 
 void CreateButtons(HWND hWnd)
 {
-    button_history = CreateWindow(L"BUTTON", L"History", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-        50, 50, 40, 40, hWnd, (HMENU)IDC_BUTTON_HISTORY, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    button_history = CreateWindow(L"BUTTON", L"History", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP,
+        60, 60, 83, 60, hWnd, (HMENU)IDC_BUTTON_HISTORY, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    SendMessageW(button_history, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_history);
+
 
     button_draw = CreateWindow(L"BUTTON", L"Draw", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | TTF_TRACK, 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_DRAW, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     button_reset = CreateWindow(L"BUTTON", L"Reset", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 200, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_RESET, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
@@ -2687,7 +2694,7 @@ void UndrawCiv()
             //drawn_log_linecount++;
         }
     }
-    UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
+    UpdateTooltips(true);
 
 	UpdateRemainingLog(true);
     redrawable = true;
@@ -2714,7 +2721,7 @@ void RedrawCiv()
     UpdateDrawnLog(false, true, false);
     UpdateRemainingLog(false);
 
-    UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
+    UpdateTooltips(true);
 
 
     if (iterator == custom_max_civs) redrawable = false;
@@ -3061,6 +3068,7 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 
     switch (message) {
     case WM_INITDIALOG:
+        if (selected_civ == L"Random") selected_civ = L"Armenians";
         SetDlgItemText(hDlg, IDC_HISTORY_EDIT, StringCleaner(FetchHistory(selected_civ)));
 
         hist_combo_box = GetDlgItem(hDlg, IDC_HISTORY_COMBO);
@@ -3129,5 +3137,19 @@ std::wstring FetchHistory(const std::wstring& civ_name)
     }
     else {
         return L"History not found.";
+    }
+}
+
+void UpdateTooltips(bool drawn)
+{
+    if (drawn)
+    {
+        UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree for the " + current_civ + L"\nHotkey: T"));
+        UpdateTooltipText(button_history, hwndTooltip[TOOLTIP_HISTORY], StringCleaner(L"Opens the game's history info for the " + current_civ + L"\nHotkey: H"));
+    }
+    else
+    {
+        UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
+        UpdateTooltipText(button_history, hwndTooltip[TOOLTIP_HISTORY], StringCleaner(L"Opens the game's history info\nHotkey: H"));
     }
 }

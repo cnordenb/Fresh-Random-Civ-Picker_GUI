@@ -8,7 +8,7 @@
 #define EDITION_AMOUNT 3
 #define MAX_LOADSTRING 100
 #define HOTKEY_AMOUNT 38
-#define TOOLTIP_AMOUNT 25
+#define TOOLTIP_AMOUNT 26
 #define SOUND_AMOUNT 5
 #define LEGACY_JINGLE_AMOUNT 18
 
@@ -85,3 +85,4 @@
 #define TOOLTIP_OPTIONS             22
 #define TOOLTIP_SURVAPP			    23
 #define TOOLTIP_KINGDOMS            24
+#define TOOLTIP_HISTORY				25
