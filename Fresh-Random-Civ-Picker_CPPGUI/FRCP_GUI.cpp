@@ -3094,33 +3094,74 @@ void ValidateRemainCount() { remaining = custom_max_civs - iterator; }
 INT_PTR CALLBACK DialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     HWND hist_combo_box;
+    HWND hBanner = GetDlgItem(hDlg, IDC_CIV_ICON);
     std::wstring selected_civ = current_civ;
 
     switch (message) {
     case WM_INITDIALOG:
         if (selected_civ == L"Random") selected_civ = L"Armenians";
+        UpdateCivAddedInfo(hDlg, GetCiv(selected_civ).dlc);
         SetDlgItemText(hDlg, IDC_HISTORY_EDIT, StringCleaner(FetchHistory(selected_civ)));
 
         hist_combo_box = GetDlgItem(hDlg, IDC_HISTORY_COMBO);
         for (int i = 0; i < MAX_CIVS; i++) SendMessage(hist_combo_box, CB_ADDSTRING, 0, (LPARAM)reinterpret_cast<LPARAM>(civ[i].name.c_str()));
-		SendMessage(hist_combo_box, CB_SETCURSEL, GetCivIndex(selected_civ), 0);
+        SendMessage(hBanner, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)GetCiv(selected_civ).icon);
+        SetWindowPos(hBanner, NULL, 230, 8, 50, 50, SWP_NOZORDER);
+        SendMessage(hist_combo_box, CB_SETCURSEL, GetCivIndex(selected_civ), 0);
         return (INT_PTR)TRUE;
     case WM_COMMAND:
 
+        
 
         // fill text field with txt contents from /Histories/ of selected civ, eg. Armenians.txt
-		if (LOWORD(wParam) == IDC_HISTORY_COMBO && HIWORD(wParam) == CBN_SELCHANGE) {
+		if (LOWORD(wParam) == IDC_HISTORY_COMBO && HIWORD(wParam) == CBN_SELCHANGE)
+        {
+            SetWindowPos(hBanner, NULL, 230, 8, 50, 50, SWP_NOZORDER);
 			hist_combo_box = GetDlgItem(hDlg, IDC_HISTORY_COMBO);
 			int selected_index = SendMessage(hist_combo_box, CB_GETCURSEL, 0, 0);
-			if (selected_index != CB_ERR) {
+			if (selected_index != CB_ERR)
+            {
+                
 				wchar_t buffer[256];
 				SendMessage(hist_combo_box, CB_GETLBTEXT, selected_index, reinterpret_cast<LPARAM>(buffer));
 				selected_civ = buffer;
-
+				UpdateCivAddedInfo(hDlg, GetCiv(selected_civ).dlc);
+                ShowWindow(hBanner, SW_HIDE);
+                SendMessage(hBanner, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)GetCiv(selected_civ).icon);
+                
+                SetWindowPos(hBanner, NULL, 230, 8, 50, 50, SWP_NOZORDER);
+                ShowWindow(hBanner, SW_SHOW);
+                // make sure it downsizes to fit 50x50
+                
+                
                 SetDlgItemText(hDlg, IDC_HISTORY_EDIT, StringCleaner(FetchHistory(selected_civ)));
-
+                
+                /*SetWindowPos(hBanner, NULL, 225, 8, 50, 50, SWP_NOZORDER);
+                SetWindowPos(hBanner, NULL, 230, 8, 50, 50, SWP_NOZORDER);*/
 			}
+            //SetWindowPos(hBanner, NULL, 225, 8, 50, 50, SWP_NOZORDER);
+
 		}
+
+        if (LOWORD(wParam) == IDC_HIS_SEARCH && HIWORD(wParam) == EN_CHANGE) {
+            HWND hSearch = GetDlgItem(hDlg, IDC_HIS_SEARCH);
+            HWND hCombo = GetDlgItem(hDlg, IDC_HISTORY_COMBO);
+            wchar_t searchText[256];
+            GetWindowText(hSearch, searchText, 256);
+
+            // Search for civ name in combo box
+            int count = (int)SendMessage(hCombo, CB_GETCOUNT, 0, 0);
+            for (int i = 0; i < count; ++i) {
+                wchar_t itemText[256];
+                SendMessage(hCombo, CB_GETLBTEXT, i, (LPARAM)itemText);
+                if (_wcsnicmp(itemText, searchText, wcslen(searchText)) == 0) {
+                    SendMessage(hCombo, CB_SETCURSEL, i, 0);
+                    // Optionally trigger selection change
+                    SendMessage(hDlg, WM_COMMAND, MAKELONG(IDC_HISTORY_COMBO, CBN_SELCHANGE), (LPARAM)hCombo);
+                    break;
+                }
+            }
+        }
 
 
         if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
@@ -3181,5 +3222,48 @@ void UpdateTooltips(bool drawn)
     {
         UpdateTooltipText(button_techtree, hwndTooltip[TOOLTIP_TECHTREE], StringCleaner(L"Opens the tech tree\nHotkey: T"));
         UpdateTooltipText(button_history, hwndTooltip[TOOLTIP_HISTORY], StringCleaner(L"Opens the game's history info\nHotkey: H"));
+    }
+}
+
+void UpdateCivAddedInfo(HWND hDlg, dlc dlc)
+{
+    switch (dlc)
+    {
+    case aok:
+        SetDlgItemText(hDlg, IDC_HIS_INFO, L"1999-09-27 (Age of Kings)");
+        break;
+    case aoc:
+        SetDlgItemText(hDlg, IDC_HIS_INFO, L"2000-08-25 (The Conquerors)");
+        break;
+    case forgotten:
+        SetDlgItemText(hDlg, IDC_HIS_INFO, L"2013-11-07 (The Forgotten)");
+        break;
+    case africans:
+        SetDlgItemText(hDlg, IDC_HIS_INFO, L"2015-11-05 (The African Kingdoms)");
+        break;
+    case rajas:
+        SetDlgItemText(hDlg, IDC_HIS_INFO, L"2016-12-19 (Rise of the Rajas)");
+        break;
+    case khans:
+        SetDlgItemText(hDlg, IDC_HIS_INFO, L"2019-11-14 (The Last Khans)");
+        break;
+    case west:
+        SetDlgItemText(hDlg, IDC_HIS_INFO, L"2021-01-26 (Lords of the West)");
+        break;
+    case dukes:
+        SetDlgItemText(hDlg, IDC_HIS_INFO, L"2021-08-10 (Dawn of the Dukes)");
+        break;
+    case india:
+        SetDlgItemText(hDlg, IDC_HIS_INFO, L"2022-04-28 (Dynasties of India)");
+        break;
+    case rome:
+        SetDlgItemText(hDlg, IDC_HIS_INFO, L"2023-05-16 (Return of Rome)");
+        break;
+    case royals:
+        SetDlgItemText(hDlg, IDC_HIS_INFO, L"2023-10-31 (The Mountain Royals)");
+        break;
+    case kingdoms:
+        SetDlgItemText(hDlg, IDC_HIS_INFO, L"2025-05-06 (The Three Kingdoms)");
+        break;
     }
 }

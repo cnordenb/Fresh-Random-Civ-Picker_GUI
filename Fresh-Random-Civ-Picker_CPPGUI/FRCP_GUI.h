@@ -538,6 +538,7 @@ std::wstring NormaliseLineEndings(const std::wstring& input);
 std::wstring FetchHistory(const std::wstring& civ_name);
 
 void UpdateTooltips(bool);
+void UpdateCivAddedInfo(HWND, dlc);
 
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
