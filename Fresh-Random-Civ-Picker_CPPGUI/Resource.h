@@ -57,6 +57,7 @@
 #define IDC_STATIC_CFB					1017
 #define IDC_STATIC_CFC					1018
 #define IDC_STATIC_JT					1019
+#define IDC_BUTTON_SPEC			        1020
 #define IDC_CHECKBOX_AUTORESET			7750
 #define IDC_CHECKBOX_AUTOTOGGLE			7764
 #define	IDC_RADIO_DE					7751

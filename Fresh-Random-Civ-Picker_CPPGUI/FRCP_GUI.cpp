@@ -2546,12 +2546,28 @@ void JoinLobby(HWND hWnd)
 {
     PlayAudio(button);
     std::wstring lobbyCode;
-    if (DialogBoxParam(instance, MAKEINTRESOURCE(IDD_JOINLOBBY_DIALOG), hWnd, JoinLobbyDlgProc, reinterpret_cast<LPARAM>(&lobbyCode)) == IDC_BUTTON_OK)
+    int result = DialogBoxParam(instance, MAKEINTRESOURCE(IDD_JOINLOBBY_DIALOG), hWnd, JoinLobbyDlgProc, reinterpret_cast<LPARAM>(&lobbyCode));
+    if (result == IDC_BUTTON_OK)
     {
 		if (lobbyCode.length() == 9) ShellExecute(NULL, L"open", StringCleaner(L"aoe2de://0/" + lobbyCode), NULL, NULL, SW_SHOWNORMAL);
-		else ShellExecute(NULL, L"open", lobbyCode.c_str(), NULL, NULL, SW_SHOWNORMAL);     
+        else
+        {
+			if (lobbyCode.substr(0, 11) == L"aoe2de://1/") lobbyCode.replace(0, 11, L"aoe2de://0/");
+            ShellExecute(NULL, L"open", lobbyCode.c_str(), NULL, NULL, SW_SHOWNORMAL);
+        }
+    }
+    else if (result == IDC_BUTTON_SPEC)
+    {
+        if (lobbyCode.length() == 9) ShellExecute(NULL, L"open", StringCleaner(L"aoe2de://1/" + lobbyCode), NULL, NULL, SW_SHOWNORMAL);
+        else
+        {
+            if (lobbyCode.substr(0, 11) == L"aoe2de://0/") lobbyCode.replace(0, 11, L"aoe2de://1/");
+            ShellExecute(NULL, L"open", lobbyCode.c_str(), NULL, NULL, SW_SHOWNORMAL);
+        }
     }
 }
+
+
 
 INT_PTR CALLBACK JoinLobbyDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -2586,6 +2602,20 @@ INT_PTR CALLBACK JoinLobbyDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
                 EndDialog(hDlg, LOWORD(wParam));
                 return (INT_PTR)TRUE;
             }
+            else if (LOWORD(wParam) == IDC_BUTTON_SPEC)
+            {
+				PlayAudio(button);
+				wchar_t buffer[256];
+				GetDlgItemText(hDlg, IDC_EDIT_LOBBYCODE, buffer, 256);
+				*lobby_code = buffer;
+				if (!IsValidLobbyCode(*lobby_code))
+				{
+					MessageBox(hDlg, L"Invalid lobby code entered.\n\nInput code must be of a format which is either 'aoe2de://1/123456789' or '123456789'. ", L"Error: invalid input", MB_OK | MB_ICONERROR);
+					return (INT_PTR)FALSE;
+				}
+				EndDialog(hDlg, LOWORD(wParam));
+				return (INT_PTR)TRUE;
+            }
             else if (LOWORD(wParam) == IDC_BUTTON_CANCEL)
             {
                 PlayAudio(button);
@@ -2611,7 +2641,7 @@ bool IsValidLobbyCode(const std::wstring &lobby_code)
 
     if (lngth == 20)
     {
-        if (lobby_code.substr(0, 11) != L"aoe2de://0/") return false;
+        if (lobby_code.substr(0, 11) != L"aoe2de://0/" && lobby_code.substr(0, 11) != L"aoe2de://1/") return false;
         std::wstring numbers = lobby_code.substr(12, 20);
         if (numbers.find_first_not_of(L"0123456789") != std::wstring::npos) return false;
     }
