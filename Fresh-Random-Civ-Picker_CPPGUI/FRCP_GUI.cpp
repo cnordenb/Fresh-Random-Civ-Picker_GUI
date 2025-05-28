@@ -3101,7 +3101,7 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
     case WM_INITDIALOG:
         if (selected_civ == L"Random") selected_civ = L"Armenians";
         UpdateCivAddedInfo(hDlg, GetCiv(selected_civ).dlc);
-        SetDlgItemText(hDlg, IDC_HISTORY_EDIT, StringCleaner(FetchHistory(selected_civ)));
+        SetDlgItemTextW(hDlg, IDC_HISTORY_EDIT, StringCleaner(FetchHistory(selected_civ)));
 
         hist_combo_box = GetDlgItem(hDlg, IDC_HISTORY_COMBO);
         for (int i = 0; i < MAX_CIVS; i++) SendMessage(hist_combo_box, CB_ADDSTRING, 0, (LPARAM)reinterpret_cast<LPARAM>(civ[i].name.c_str()));
@@ -3194,21 +3194,25 @@ std::wstring NormaliseLineEndings(const std::wstring& input) {
 
 std::wstring FetchHistory(const std::wstring& civ_name)
 {
-    wchar_t path[MAX_PATH];
-    //copy HIS_FILE_PATH to path and append selected_civ + L".txt"
-    wcscpy_s(path, HIS_FILE_PATH);
-    std::wstring history_file_path = std::wstring(path) + civ_name + L".txt";
+    // get filename from civ name
+	std::wstring filename = HIS_FILE_PATH + civ_name + L".txt";
+    std::ifstream file(filename, std::ios::binary);
+    if (!file) return L"History not found.";
 
-    //MessageBox(hDlg, StringCleaner(history_file_path), L"Info", MB_OK | MB_ICONINFORMATION);
-    if (FileExists(history_file_path)) {
-        std::wifstream file(history_file_path);
-        std::wstring history_content((std::istreambuf_iterator<wchar_t>(file)), std::istreambuf_iterator<wchar_t>());
-        history_content = NormaliseLineEndings(history_content); // Normalise line endings
-        return history_content;
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    std::string utf8str = buffer.str();
+
+    // Remove BOM if present
+    if (utf8str.size() >= 3 &&
+        (unsigned char)utf8str[0] == 0xEF &&
+        (unsigned char)utf8str[1] == 0xBB &&
+        (unsigned char)utf8str[2] == 0xBF) {
+        utf8str = utf8str.substr(3);
     }
-    else {
-        return L"History not found.";
-    }
+
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
+    return conv.from_bytes(utf8str);
 }
 
 void UpdateTooltips(bool drawn)
