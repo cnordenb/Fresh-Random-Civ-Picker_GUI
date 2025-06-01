@@ -39,28 +39,28 @@ In this youtube video (10 minutes) I explain the need for fresh random and demon
 [![YouTube video describing the need for and use of fresh random](https://img.youtube.com/vi/mDj5id8GE2g/0.jpg)](https://www.youtube.com/watch?v=mDj5id8GE2g)
 
 ## Features
-- **Draw a fresh random civ!**
+- **Draw a fresh random civ!**  
 *Never draw the same civ twice within the civ pool. Click the Draw button or press the spacebar.*
 
 - **Freshness even over civ pools!**  
 *Ensure continuous freshness once you've iterated through the whole civ pool. Enable continuous freshness setting in options to hardcode the program to exclude recently drawn civs. Adjustable to count anything from just one previous to previous half of current civ pool length.*
 
-- **Reset the drawn civ pool at any time!**
+- **Reset the drawn civ pool at any time!**  
 *Whenever you want, reset the program and render all enabled civs drawable. Click the Reset button or press Enter.*
 
-- **Shortcut to the tech tree!**
+- **Shortcut to the tech tree!**  
 *At any time, go to the [tech tree](https://aoe2techtree.net/) (made by [Siege Engineers](https://siegeengineers.org/)) of the drawn civ. Click the Tech Tree button or press T (global hotkey F4).*
 
-- **Shortcut to the sustainability webapp!**
+- **Shortcut to the sustainability webapp!**  
 *At any time, go to the [sustainability app](https://aoe2-de-tools.herokuapp.com/villagers-required/) (made by [Survivalist](https://www.youtube.com/channel/UCmFJUeU8Oubp5Neldbq0JRA)) to see how many villagers are required for a production. Click the S button or press R (global hotkey Ctrl+T).*
 
-- **Track drawn and remaining civs!**
+- **Track drawn and remaining civs!**  
 *See which civs have been drawn and which are remaining on the log tab. Navigate to the log by clicking the Log tab, or by pressing 2 or tab.*
 
-- **Customise your own civ pool!**
+- **Customise your own civ pool!**  
 *Tailor the exact civ pool you want using the civ pool tab. Navigate to the civ pool by clicking the Civ Pool tab or pressing 3 or tab. Toggle civs by clicking their corresponding checkbox.*
 
-- **Save your custom civ pool preset!**
+- **Save your custom civ pool preset!**  
 *Save your civ pools to a file which can be loadable at any time. Press Ctrl+S or click Save Preset from the File menu. To load, press Ctrl+R or click Load Preset from the File menu. To quicksave and quickload, press F5 and F9.*
 
 - **Autosave pool and preset; pick up where you left off!**  
@@ -76,7 +76,7 @@ In this youtube video (10 minutes) I explain the need for fresh random and demon
 *Hear the civ jingle of the civ you draw. Legacy jingles toggleable. Civ jingles can be toggled off or on in options.*
 
 - **Join an AoE2DE lobby straight from the app!**  
-*Works the same as Windows run prompt but only accepts AoE2DE lobby code inputs. To open lobby code prompt, press Ctrl+F or click Join Lobby from the Lobbies menu.*
+*Works the same as Windows run prompt but only accepts AoE2DE lobby code inputs. To open lobby code prompt, press Ctrl+F or click Join Lobby from the Lobbies menu. It's also possible to spectate games with game ID using this function.*
 
 - **Undraw a drawn civ!**  
 *Go back and undraw the civ you drew with Ctrl+Z. If you change your mind again right away, redraw the undrawn civ with Ctrl+X. If you have automatic logging enabled, you can also undo a reset.*
