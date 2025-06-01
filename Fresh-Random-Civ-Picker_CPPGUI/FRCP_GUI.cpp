@@ -2548,7 +2548,8 @@ void JoinLobby(HWND hWnd)
 {
     PlayAudio(button);
     std::wstring lobbyCode;
-    int result = DialogBoxParam(instance, MAKEINTRESOURCE(IDD_JOINLOBBY_DIALOG), hWnd, JoinLobbyDlgProc, reinterpret_cast<LPARAM>(&lobbyCode));
+    int result = static_cast<int>(DialogBoxParam(instance, MAKEINTRESOURCE(IDD_JOINLOBBY_DIALOG), hWnd, JoinLobbyDlgProc, reinterpret_cast<LPARAM>(&lobbyCode)));
+
     if (result == IDC_BUTTON_OK)
     {
 		if (lobbyCode.length() == 9) ShellExecute(NULL, L"open", StringCleaner(L"aoe2de://0/" + lobbyCode), NULL, NULL, SW_SHOWNORMAL);
@@ -3178,7 +3179,7 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 				selected_civ = buffer;
 
                 if (last_index_played != GetCivIndex(selected_civ))
-                {
+                {                    
                     if (hist_jingle) PlayJingle(selected_civ);
                     else PlayAudio(view);
                     ShowWindow(hist_civ_icon, SW_HIDE);
@@ -3188,54 +3189,51 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
                 }
                 
 
-				//MessageBox(NULL, StringCleaner(L"Selected civ: " + selected_civ + L"\nPreviously selected civ: " + prev_sel_civ), L"Info", MB_OK | MB_ICONINFORMATION);
-
-
-
-
-
-
 
 
 				UpdateCivAddedInfo(hDlg, GetCiv(selected_civ).dlc);
                 if (show_pool_info) UpdateCivPoolInfo(hDlg, selected_civ);
                 else HidePoolInfo(hDlg);
 
-
-
-                // make sure it downsizes to fit 50x50
-                
-                
                 SetDlgItemText(hDlg, IDC_HISTORY_EDIT, StringCleaner(FetchHistory(selected_civ)));
-                
-                /*SetWindowPos(hBanner, NULL, 225, 8, 50, 50, SWP_NOZORDER);
-                SetWindowPos(hBanner, NULL, 230, 8, 50, 50, SWP_NOZORDER);*/
+
 			}
-            //SetWindowPos(hBanner, NULL, 225, 8, 50, 50, SWP_NOZORDER);
+
 
 
 
 		}
 
+        // search bar functionality
         if (LOWORD(wParam) == IDC_HIS_SEARCH && HIWORD(wParam) == EN_CHANGE) {
+            static int prevLength = 0;
             HWND hSearch = GetDlgItem(hDlg, IDC_HIS_SEARCH);
             HWND hCombo = GetDlgItem(hDlg, IDC_HISTORY_COMBO);
             wchar_t searchText[256];
             GetWindowText(hSearch, searchText, 256);
 
-            // Search for civ name in combo box
-            int count = (int)SendMessage(hCombo, CB_GETCOUNT, 0, 0);
-            for (int i = 0; i < count; ++i) {
-                wchar_t itemText[256];
-                SendMessage(hCombo, CB_GETLBTEXT, i, (LPARAM)itemText);
-                if (_wcsnicmp(itemText, searchText, wcslen(searchText)) == 0) {
-                    SendMessage(hCombo, CB_SETCURSEL, i, 0);
-                    // Optionally trigger selection change
-                    SendMessage(hDlg, WM_COMMAND, MAKELONG(IDC_HISTORY_COMBO, CBN_SELCHANGE), (LPARAM)hCombo);
-                    break;
+            int currLength = lstrlenW(searchText);
+
+
+            if (currLength > prevLength) {
+                int count = (int)SendMessage(hCombo, CB_GETCOUNT, 0, 0);
+                for (int i = 0; i < count; ++i) {
+                    wchar_t itemText[256];
+					itemText[30] = L'\0';
+                    SendMessage(hCombo, CB_GETLBTEXT, i, (LPARAM)itemText);
+                    if (_wcsnicmp(itemText, searchText, wcslen(searchText)) == 0) {
+                        SendMessage(hCombo, CB_SETCURSEL, i, 0);
+                        // Optionally trigger selection change
+                        SendMessage(hDlg, WM_COMMAND, MAKELONG(IDC_HISTORY_COMBO, CBN_SELCHANGE), (LPARAM)hCombo);
+                        break;
+                    }
                 }
             }
+
+            prevLength = currLength;
         }
+
+        if (HIWORD(wParam) == CBN_DROPDOWN) SetWindowText(GetDlgItem(hDlg, IDC_HIS_SEARCH), L"");
 
         //switch (HIWORD(wParam))
         //{
