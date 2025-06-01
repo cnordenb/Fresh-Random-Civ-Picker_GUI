@@ -15,7 +15,8 @@
   - [Tips and tricks](#Tips-and-tricks)
 - About  
   - [Purpose](#Purpose)  
-  - [Application description](#What-is-this-application)  
+  - [Application description](#What-is-this-application)
+  - [Proof of concept](#Proof-of-concept)
   - [Features](#Features)  
   - [GUI description](#GUI-description)  
   - [System requirements](#System-requirements)  
@@ -32,9 +33,15 @@ The user can randomly iterate through the entire civ pool or a user-defined civ 
 ## What is this application?
 This - the Fresh Random Civ Picker or FRCP for short - is an application which generates a randomly drawn civilisation out of the civilisations available to play in a computer game called [Age of Empires II: Definitive Edition](https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/) which is a real-time strategy game. What my application offers which the random civ generator in the game itself does not is the "freshness" which is that a civilisation is not repeated until all the civilisations have been iterated through.  
 
+## Proof of concept
+[![YouTube video describing the need for and use of fresh random](https://img.youtube.com/vi/mDj5id8GE2g/0.jpg)](https://www.youtube.com/watch?v=mDj5id8GE2g)
+
 ## Features
 - **Draw a fresh random civ!**
 *Never draw the same civ twice within the civ pool. Click the Draw button or press the spacebar.*
+
+- **Freshness even over civ pools!**  
+*Ensure continuous freshness once you've iterated through the whole civ pool. Enable continuous freshness setting in options to hardcode the program to exclude recently drawn civs. Adjustable to count anything from just one previous to previous half of current civ pool length.*
 
 - **Reset the drawn civ pool at any time!**
 *Whenever you want, reset the program and render all enabled civs drawable. Click the Reset button or press Enter.*
@@ -71,6 +78,9 @@ This - the Fresh Random Civ Picker or FRCP for short - is an application which g
 
 - **Undraw a drawn civ!**  
 *Go back and undraw the civ you drew with Ctrl+Z. If you change your mind again right away, redraw the undrawn civ with Ctrl+X. If you have automatic logging enabled, you can also undo a reset.*
+
+- **Read the histories!**  
+*Browse the histories of the civs and see any civ's pool status as well as the time and game edition it was added to the game. Both search bar and dropdown menu available. Click the history button or press H while on Draw tab.*
 
 - **Use hotkeys!**  
 *Most of the program is entirely controllable with key bindings. To see which hotkeys there are and what they do, navigate to Hotkeys from either Options or the Help menu.*
@@ -158,14 +168,15 @@ There are now half a hundred civs in the game which have been released in a doze
 ## System requirements
 OS: Windows x64 (Lite version supports x86)
 
-Drive space: at least 150 megabytes available (Lite version requires only 500kb)
+Drive space: at least 160mb available (Lite version requires only 500kb)
 
 ## Project milestones achieved  
-- GUI with simple log ([v1.0](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.0.0), January 2025)  
-- Customisable civ pool, user options, persistent settings and optional logging ([v1.1](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.1.0), February 2025)  
-- Ctrl+Z/Ctrl+X undraw/redraw feature, ability to save and load presets, and to join AoE2DE lobbies using lobby code ([v1.2](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.2.0), March 2025)  
-- Quicksave and quickload feature, shortcut button to sustainability app ([v1.3](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.3.0), April 2025)  
-- Support for Three Kingdoms DLC, undo reset feature ([v1.3.5](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.3.5), May 2025)  
+- GUI with simple log ([v1.0.0](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.0.0), January 2025)  
+- Customisable civ pool, user options, persistent settings and optional logging ([v1.1.0](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.1.0), February 2025)  
+- Ctrl+Z/Ctrl+X undraw/redraw feature, ability to save and load presets, and to join AoE2DE lobbies using lobby code ([v1.2.0](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.2.0), March 2025)  
+- Quicksave and quickload feature, shortcut button to sustainability app ([v1.3.0](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.3.0), April 2025)  
+- Support for Three Kingdoms DLC, undo reset feature ([v1.3.5](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.3.5), May 2025)
+- Continuous freshness setting, history window, spectate option in lobby joining feature ([v1.4.0](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases/tag/v1.4.0), June 2025)  
 
 
 ## Why was Fresh Random Civ Picker created?
