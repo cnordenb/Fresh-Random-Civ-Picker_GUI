@@ -34,6 +34,8 @@ The user can randomly iterate through the entire civ pool or a user-defined civ 
 This - the Fresh Random Civ Picker or FRCP for short - is an application which generates a randomly drawn civilisation out of the civilisations available to play in a computer game called [Age of Empires II: Definitive Edition](https://store.steampowered.com/app/813780/Age_of_Empires_II_Definitive_Edition/) which is a real-time strategy game. What my application offers which the random civ generator in the game itself does not is the "freshness" which is that a civilisation is not repeated until all the civilisations have been iterated through.  
 
 ## Proof of concept
+In this youtube video (10 minutes) I explain the need for fresh random and demonstrate how it's different from the game's random. Click the image below to go the video.  
+
 [![YouTube video describing the need for and use of fresh random](https://img.youtube.com/vi/mDj5id8GE2g/0.jpg)](https://www.youtube.com/watch?v=mDj5id8GE2g)
 
 ## Features
