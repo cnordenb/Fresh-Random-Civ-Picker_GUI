@@ -61,6 +61,12 @@
 #define IDC_CIV_ICON                    1021
 #define IDC_HIS_SEARCH                  1022
 #define IDC_HIS_INFO                    1023
+#define IDC_HIS_INFO_EN                 1024
+#define IDC_HIS_INFO_DR                 1025
+#define IDC_HIS_INFO_EN1                1026
+#define IDC_HIS_INFO_DR1                1027
+#define IDC_POOL_CHECKBOX               1028
+#define IDC_HIST_JINGLE                 1029
 #define IDC_CHECKBOX_AUTORESET			7750
 #define IDC_CHECKBOX_AUTOTOGGLE			7764
 #define	IDC_RADIO_DE					7751

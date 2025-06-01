@@ -736,6 +736,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
         case WM_HSCROLL:
         {
             if ((HWND)lParam == GetDlgItem(hDlg, IDC_SLIDER_CONTFRESHSTRENGTH)) {
+				
                 int pos = (int)SendMessage((HWND)lParam, TBM_GETPOS, 0, 0);
 
                 // Convert the value to a string
@@ -843,6 +844,7 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
                 case IDC_CHECKBOX_SOUNDS:
                 case IDC_CHECKBOX_TOOLTIPS:
 			    case IDC_CHECKBOX_STARTDRAW:
+                case IDC_CHECKBOX_CONTFRESH:
                     PlayAudio(button);
                     break;
 			    case IDC_RADIO_LOGGING:
@@ -906,7 +908,7 @@ LRESULT CALLBACK HyperlinkProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 void ResetProgram(bool auto_reset)
 {
 
-    if (!auto_reset && reset_state) return;
+    if (!startup && !auto_reset && reset_state) return;
 
     if (persistent_logging && !auto_reset && !reset_state && !startup)
     {
@@ -954,7 +956,7 @@ void ResetProgram(bool auto_reset)
 	if (!civ_labels_enabled) ShowWindow(label_centre, SW_HIDE);
     SendMessageW(civ_icon, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_random);
 
-    if (!auto_reset && jingles_enabled && current_tab != 2) PlayJingle(current_civ);
+    if (!startup && !auto_reset && jingles_enabled && current_tab != 2) PlayJingle(current_civ);
 
     reset_state = true;
 
@@ -3094,43 +3096,113 @@ void ValidateRemainCount() { remaining = custom_max_civs - iterator; }
 INT_PTR CALLBACK DialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     HWND hist_combo_box;
-    HWND hBanner = GetDlgItem(hDlg, IDC_CIV_ICON);
-    std::wstring selected_civ = current_civ;
+    HWND hist_civ_icon = GetDlgItem(hDlg, IDC_CIV_ICON);
+	HWND hist_pool_checkbox = GetDlgItem(hDlg, IDC_POOL_CHECKBOX);
+    HWND hist_jingle_toggle = GetDlgItem(hDlg, IDC_HIST_JINGLE);
+    bool show_pool_info = true;
+    bool hist_jingle = false;
+    static int last_index_played = -1;
+    static std::wstring selected_civ;
 
     switch (message) {
     case WM_INITDIALOG:
+
+        selected_civ = current_civ;
         if (selected_civ == L"Random") selected_civ = L"Armenians";
+
         UpdateCivAddedInfo(hDlg, GetCiv(selected_civ).dlc);
+        UpdateCivPoolInfo(hDlg, selected_civ);
         SetDlgItemTextW(hDlg, IDC_HISTORY_EDIT, StringCleaner(FetchHistory(selected_civ)));
 
         hist_combo_box = GetDlgItem(hDlg, IDC_HISTORY_COMBO);
         for (int i = 0; i < MAX_CIVS; i++) SendMessage(hist_combo_box, CB_ADDSTRING, 0, (LPARAM)reinterpret_cast<LPARAM>(civ[i].name.c_str()));
-        SendMessage(hBanner, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)GetCiv(selected_civ).icon);
-        SetWindowPos(hBanner, NULL, 230, 8, 50, 50, SWP_NOZORDER);
+        
+        //SetWindowPos(hist_pool_checkbox, NULL, 280, 20, 60, 10, SWP_NOZORDER);
+
+        SendMessage(hist_civ_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)GetCiv(selected_civ).icon);
+        SetWindowPos(hist_civ_icon, NULL, 230, 8, 50, 50, SWP_NOZORDER);
+        
         SendMessage(hist_combo_box, CB_SETCURSEL, GetCivIndex(selected_civ), 0);
+
+        CheckDlgButton(hDlg, IDC_POOL_CHECKBOX, show_pool_info ? BST_CHECKED : BST_UNCHECKED);
+        CheckDlgButton(hDlg, IDC_HIST_JINGLE, hist_jingle ? BST_CHECKED : BST_UNCHECKED);
+
+        if (!jingles_enabled) ShowWindow(hist_jingle_toggle, SW_HIDE);
+
         return (INT_PTR)TRUE;
     case WM_COMMAND:
-
         
+
+        show_pool_info = IsDlgButtonChecked(hDlg, IDC_POOL_CHECKBOX) == BST_CHECKED;
+		if (LOWORD(wParam) == IDC_POOL_CHECKBOX && HIWORD(wParam) == BN_CLICKED) {
+            PlayAudio(button);
+			if (show_pool_info) UpdateCivPoolInfo(hDlg, selected_civ);			
+			else HidePoolInfo(hDlg);			
+		}
+
+        hist_jingle = IsDlgButtonChecked(hDlg, IDC_HIST_JINGLE) == BST_CHECKED;
+        if (LOWORD(wParam) == IDC_HIST_JINGLE && HIWORD(wParam) == BN_CLICKED) {
+            if (hist_jingle) PlayJingle(selected_civ);
+            else StopSound();
+        }
+
+        if (HIWORD(wParam) == CBN_DROPDOWN) PlayAudio(hover);
+
 
         // fill text field with txt contents from /Histories/ of selected civ, eg. Armenians.txt
 		if (LOWORD(wParam) == IDC_HISTORY_COMBO && HIWORD(wParam) == CBN_SELCHANGE)
         {
-            SetWindowPos(hBanner, NULL, 230, 8, 50, 50, SWP_NOZORDER);
+            SetWindowPos(hist_civ_icon, NULL, 230, 8, 50, 50, SWP_NOZORDER);
 			hist_combo_box = GetDlgItem(hDlg, IDC_HISTORY_COMBO);
-			int selected_index = SendMessage(hist_combo_box, CB_GETCURSEL, 0, 0);
+
+			//int selected_index = SendMessage(hist_combo_box, CB_GETCURSEL, 0, 0);
+
+            int selected_index = static_cast<int>(SendMessage(hist_combo_box, CB_GETCURSEL, 0, 0));
+
 			if (selected_index != CB_ERR)
             {
                 
 				wchar_t buffer[256];
 				SendMessage(hist_combo_box, CB_GETLBTEXT, selected_index, reinterpret_cast<LPARAM>(buffer));
-				selected_civ = buffer;
-				UpdateCivAddedInfo(hDlg, GetCiv(selected_civ).dlc);
-                ShowWindow(hBanner, SW_HIDE);
-                SendMessage(hBanner, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)GetCiv(selected_civ).icon);
+				for (int i = 0; i < 256; i++) {
+					if (buffer[i] == L'\0') break;
+					if (!iswalpha(buffer[i])) {
+						buffer[i] = L'\0';
+						break;
+					}
+				}
+				
+
                 
-                SetWindowPos(hBanner, NULL, 230, 8, 50, 50, SWP_NOZORDER);
-                ShowWindow(hBanner, SW_SHOW);
+                last_index_played = GetCivIndex(selected_civ);
+				selected_civ = buffer;
+
+                if (last_index_played != GetCivIndex(selected_civ))
+                {
+                    if (hist_jingle) PlayJingle(selected_civ);
+                    else PlayAudio(view);
+                    ShowWindow(hist_civ_icon, SW_HIDE);
+                    SendMessage(hist_civ_icon, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)GetCiv(selected_civ).icon);
+                    SetWindowPos(hist_civ_icon, NULL, 230, 8, 50, 50, SWP_NOZORDER);
+                    ShowWindow(hist_civ_icon, SW_SHOW);
+                }
+                
+
+				//MessageBox(NULL, StringCleaner(L"Selected civ: " + selected_civ + L"\nPreviously selected civ: " + prev_sel_civ), L"Info", MB_OK | MB_ICONINFORMATION);
+
+
+
+
+
+
+
+
+				UpdateCivAddedInfo(hDlg, GetCiv(selected_civ).dlc);
+                if (show_pool_info) UpdateCivPoolInfo(hDlg, selected_civ);
+                else HidePoolInfo(hDlg);
+
+
+
                 // make sure it downsizes to fit 50x50
                 
                 
@@ -3140,6 +3212,8 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
                 SetWindowPos(hBanner, NULL, 230, 8, 50, 50, SWP_NOZORDER);*/
 			}
             //SetWindowPos(hBanner, NULL, 225, 8, 50, 50, SWP_NOZORDER);
+
+
 
 		}
 
@@ -3163,8 +3237,24 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
             }
         }
 
+        //switch (HIWORD(wParam))
+        //{
+        //case CBN_DROPDOWN:
+        //{
+        //    PlayAudio(hover);
+        //    break;
+        //}
+        //case CBN_SELCHANGE:
+        //{
+        //    if (jingles_enabled) PlayJingle(selected_civ);
+        //    else PlayAudio(view);
+        //    break;
+        //}
+        //}
+
 
         if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
+            PlayAudio(button);
             EndDialog(hDlg, LOWORD(wParam));
             return (INT_PTR)TRUE;
         }
@@ -3173,7 +3263,7 @@ INT_PTR CALLBACK DialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
     return (INT_PTR)FALSE;
 }
 
-void OpenHistory(HWND hParent) { DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_HISTORY_DIALOG), hParent, DialogProc); }
+void OpenHistory(HWND hParent) { PlayAudio(button); DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_HISTORY_DIALOG), hParent, DialogProc); }
 
 std::wstring NormaliseLineEndings(const std::wstring& input) {
     std::wstring output;
@@ -3270,4 +3360,36 @@ void UpdateCivAddedInfo(HWND hDlg, dlc dlc)
         SetDlgItemText(hDlg, IDC_HIS_INFO, L"2025-05-06 (The Three Kingdoms)");
         break;
     }
+}
+void UpdateCivPoolInfo(HWND hDlg, const std::wstring &civ_name)
+{
+	std::wstring civ = civ_name;
+	if (civ_name == L"Random") civ = L"Armenians";
+    
+
+	if (GetDlgItemText(hDlg, IDC_HIS_INFO_EN1, NULL, 0) == 0)
+	{
+		SetDlgItemText(hDlg, IDC_HIS_INFO_EN1, L"Enabled:");
+		SetDlgItemText(hDlg, IDC_HIS_INFO_DR1, L"Drawn:");
+	}
+
+    if (!GetCiv(civ).enabled) SetDlgItemText(hDlg, IDC_HIS_INFO_EN, L"No");
+    else SetDlgItemText(hDlg, IDC_HIS_INFO_EN, L"Yes");
+    for (int i = 0; i < MAX_CIVS; i++)
+    {
+        if (drawn_civs[i] == civ_name)
+        {
+            SetDlgItemText(hDlg, IDC_HIS_INFO_DR, L"Yes");
+            return;
+        }
+    }
+    SetDlgItemText(hDlg, IDC_HIS_INFO_DR, L"No");
+}
+
+void HidePoolInfo(HWND hDlg)
+{
+    SetDlgItemText(hDlg, IDC_HIS_INFO_EN, L"");
+    SetDlgItemText(hDlg, IDC_HIS_INFO_DR, L"");
+    SetDlgItemText(hDlg, IDC_HIS_INFO_EN1, L"");
+    SetDlgItemText(hDlg, IDC_HIS_INFO_DR1, L"");
 }

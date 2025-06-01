@@ -1,4 +1,4 @@
-#define VERSION L"1.4"
+#define VERSION L"1.4.0"
 
 #define MAX_CIVS 50
 #define MAX_CIVS_HD 31

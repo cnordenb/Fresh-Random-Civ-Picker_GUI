@@ -541,6 +541,8 @@ std::wstring FetchHistory(const std::wstring& civ_name);
 
 void UpdateTooltips(bool);
 void UpdateCivAddedInfo(HWND, dlc);
+void UpdateCivPoolInfo(HWND, const std::wstring &);
+void HidePoolInfo(HWND);
 
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
