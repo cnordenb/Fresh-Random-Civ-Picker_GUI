@@ -2547,25 +2547,25 @@ void ClearDrawnLog() { if (!startup) drawn_log_linecount = 0; PlayAudio(button);
 void JoinLobby(HWND hWnd)
 {
     PlayAudio(button);
-    std::wstring lobbyCode;
-    int result = static_cast<int>(DialogBoxParam(instance, MAKEINTRESOURCE(IDD_JOINLOBBY_DIALOG), hWnd, JoinLobbyDlgProc, reinterpret_cast<LPARAM>(&lobbyCode)));
+    std::wstring lobby_code;
+    int result = static_cast<int>(DialogBoxParam(instance, MAKEINTRESOURCE(IDD_JOINLOBBY_DIALOG), hWnd, JoinLobbyDlgProc, reinterpret_cast<LPARAM>(&lobby_code)));
 
     if (result == IDC_BUTTON_OK)
     {
-		if (lobbyCode.length() == 9) ShellExecute(NULL, L"open", StringCleaner(L"aoe2de://0/" + lobbyCode), NULL, NULL, SW_SHOWNORMAL);
+		if (lobby_code.length() == 9) ShellExecute(NULL, L"open", StringCleaner(L"aoe2de://0/" + lobby_code), NULL, NULL, SW_SHOWNORMAL);
         else
         {
-			if (lobbyCode.substr(0, 11) == L"aoe2de://1/") lobbyCode.replace(0, 11, L"aoe2de://0/");
-            ShellExecute(NULL, L"open", lobbyCode.c_str(), NULL, NULL, SW_SHOWNORMAL);
+			if (lobby_code.substr(0, 11) == L"aoe2de://1/") lobby_code.replace(0, 11, L"aoe2de://0/");
+            ShellExecute(NULL, L"open", lobby_code.c_str(), NULL, NULL, SW_SHOWNORMAL);
         }
     }
     else if (result == IDC_BUTTON_SPEC)
     {
-        if (lobbyCode.length() == 9) ShellExecute(NULL, L"open", StringCleaner(L"aoe2de://1/" + lobbyCode), NULL, NULL, SW_SHOWNORMAL);
+        if (lobby_code.length() == 9) ShellExecute(NULL, L"open", StringCleaner(L"aoe2de://1/" + lobby_code), NULL, NULL, SW_SHOWNORMAL);
         else
         {
-            if (lobbyCode.substr(0, 11) == L"aoe2de://0/") lobbyCode.replace(0, 11, L"aoe2de://1/");
-            ShellExecute(NULL, L"open", lobbyCode.c_str(), NULL, NULL, SW_SHOWNORMAL);
+            if (lobby_code.substr(0, 11) == L"aoe2de://0/") lobby_code.replace(0, 11, L"aoe2de://1/");
+            ShellExecute(NULL, L"open", lobby_code.c_str(), NULL, NULL, SW_SHOWNORMAL);
         }
     }
 }
