@@ -2500,8 +2500,8 @@ void DeactivateTooltips(TTTOOLINFOW toolinfo) { for (int i = 0; i < hwnd_length;
 void CreateBoldFont()
 {
     LOGFONT lf;
-    HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
-    GetObject(hFont, sizeof(LOGFONT), &lf);
+    HFONT bold_font = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+    GetObject(bold_font, sizeof(LOGFONT), &lf);
     lf.lfWeight = FW_BOLD;
     font_bold = CreateFontIndirect(&lf);
 }
