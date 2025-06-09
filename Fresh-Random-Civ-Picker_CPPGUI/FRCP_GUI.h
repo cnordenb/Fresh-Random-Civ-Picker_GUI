@@ -492,8 +492,8 @@ void ToggleRemainLog();
 void ClearDrawnLog();
 void UpdateContfresh(const std::wstring &);
 void CheckDrawnLogLength();
-void log_addentry(std::wstring);
-void log_removelastentry();
+void AddDrawnLogEntry(std::wstring);
+void RemovePreviousDrawnLogEntry();
 
 
 bool IsDlcEmpty(dlc);

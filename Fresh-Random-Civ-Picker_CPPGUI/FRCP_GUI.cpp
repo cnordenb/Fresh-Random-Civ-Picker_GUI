@@ -1645,7 +1645,7 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted)
         //drawn_log_linecount++;
         //CheckDrawnLogLength();
         //SetWindowText(drawn_log, drawnlog_text.c_str());
-        log_addentry(log_entry);
+        AddDrawnLogEntry(log_entry);
         if (!start_state || start_state && GetCiv(current_civ).enabled) drawn_civs[iterator-1] = current_civ;
 
     }    
@@ -1659,7 +1659,7 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted)
             //drawnlog_text.pop_back();
             //drawnlog_text = L"\r\n" + drawnlog_text;
             //SetWindowText(drawn_log, drawnlog_text.c_str());
-			log_addentry(L"\r\n");
+			AddDrawnLogEntry(L"\r\n");
         }        
     }
 
@@ -3040,7 +3040,7 @@ void CheckDrawnLogLength()
 }
 
 
-void log_addentry(std::wstring message)
+void AddDrawnLogEntry(std::wstring message)
 {
     drawnlog_text = message + drawnlog_text;
     if (drawn_log_linecount == MAX_DRAWNLOG_LINECOUNT)
@@ -3061,7 +3061,7 @@ void log_addentry(std::wstring message)
 	}
 }
 
-void log_removelastentry() {
+void RemovePreviousDrawnLogEntry() {
 	size_t last_newline = drawnlog_text.rfind(L"\r");
 	if (last_newline != std::wstring::npos)
 	{
