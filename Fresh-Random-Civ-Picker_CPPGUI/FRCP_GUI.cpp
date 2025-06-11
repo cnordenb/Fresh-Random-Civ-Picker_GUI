@@ -156,7 +156,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 MessageBox(hWnd, L"Failed to initialize common controls.", L"Error", MB_OK | MB_ICONERROR);
                 return -1;
             }
-            for (int i = 0; i < MAX_CIVS; ++i) civ_name_to_index[civ[i].name] = i;            
+            for (uint8_t i = 0; i < MAX_CIVS; ++i) civ_name_to_index[civ[i].name] = i;            
             LoadImages();
             CreateTabs(hWnd);        
             CreateImages(hWnd);
@@ -3071,9 +3071,15 @@ void RemovePreviousDrawnLogEntry() {
 	drawn_log_linecount--;
 }
 
-int GetRandomInt(int max)
+uint8_t GetRandomInt(uint8_t max)
 {
-    while (max < 1) max++;
+    //while (max < 1) max++;
+	if (max < 1)
+    {
+		MessageBox(NULL, L"Error: GetRandomInt (line 3074) called and max is less than 1", L"Error", MB_OK | MB_ICONERROR);
+        PostQuitMessage(-1);
+		return MAX_CIVS;
+	}
 	if (max == 0) MessageBox(NULL, L"Error: max is 0", L"Error", MB_OK | MB_ICONERROR);
     std::random_device rd;
     std::mt19937 mt(rd());
@@ -3081,15 +3087,17 @@ int GetRandomInt(int max)
 	return dis(mt);
 }
 
-int GetCivIndex(const std::wstring& civ_name)
+uint8_t GetCivIndex(const std::wstring& civ_name)
 {
     auto it = civ_name_to_index.find(civ_name);
     if (it != civ_name_to_index.end())
     {
-        int index = it->second;
+        uint8_t index = it->second;
         return index;
     }
-	return -1;
+	MessageBox(NULL, StringCleaner(L"Error: GetCivIndex (line 3090) called and civ name '" + civ_name + L"' was not found in index map."), L"Error", MB_OK | MB_ICONERROR);
+    PostQuitMessage(-1);
+	return MAX_CIVS;
 }
 
 void ValidateRemainCount() { remaining = custom_max_civs - iterator; }

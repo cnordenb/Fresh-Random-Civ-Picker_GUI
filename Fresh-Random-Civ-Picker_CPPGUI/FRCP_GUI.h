@@ -165,12 +165,12 @@ icon_aoc;
 HBITMAP icon_survapp, icon_techtree, icon_options, icon_history;
 
 
-int iterator = 0;
-int remaining = MAX_CIVS;
+uint8_t iterator = 0;
+uint8_t remaining = MAX_CIVS;
 int drawnlog_length = GetWindowTextLength(drawn_log);
 int remaininglog_length = GetWindowTextLength(remaining_log);
-int current_tab = 0;
-int custom_max_civs = MAX_CIVS;
+uint8_t current_tab = 0;
+uint8_t custom_max_civs = MAX_CIVS;
 std::wstring label_text = std::to_wstring(iterator + 1) + L"/" + std::to_wstring(MAX_CIVS);
 std::wstring log_entry;
 std::wstring drawnlog_text, remaininglog_text;
@@ -202,8 +202,8 @@ bool batch_toggle = false;
 bool contfresh_enabled = true;
 
 std::wstring contfresh_civ = L"";
-int contfresh_max = (custom_max_civs / 2) - 1;
-int contfresh_strength = 1;
+uint8_t contfresh_max = (custom_max_civs / 2) - 1;
+uint8_t contfresh_strength = 1;
 
 enum sound_type
 {
@@ -384,10 +384,10 @@ Civ& GetCiv(const std::wstring &name);
 
 std::wstring drawn_civs[MAX_CIVS] = { L"" };
 std::wstring contfresh_array[MAX_CIVS] = { L"" };
-int contfresh_count = 0;
+uint8_t contfresh_count = 0;
 
 bool accessor_out_of_bounds = false;
-int times_drawn[MAX_CIVS] = { 0 };
+uint8_t times_drawn[MAX_CIVS] = { 0 };
 HFONT font_underline = NULL;
 HWND tab;
 
@@ -395,8 +395,8 @@ int drawn_log_linecount = 0;
 
 enum savetype { automatic, manual, quick };
 
-int GetRandomInt(int);
-int GetCivIndex(const std::wstring&);
+uint8_t GetRandomInt(uint8_t);
+uint8_t GetCivIndex(const std::wstring&);
 
 
 void ValidateRemainCount();
