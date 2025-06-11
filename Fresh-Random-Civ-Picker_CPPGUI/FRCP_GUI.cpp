@@ -3078,7 +3078,6 @@ uint8_t GetRandomInt(uint8_t max)
     {
 		MessageBox(NULL, L"Error: GetRandomInt (line 3074) called and max is less than 1", L"Error", MB_OK | MB_ICONERROR);
         PostQuitMessage(-1);
-		return MAX_CIVS;
 	}
 	if (max == 0) MessageBox(NULL, L"Error: max is 0", L"Error", MB_OK | MB_ICONERROR);
     std::random_device rd;

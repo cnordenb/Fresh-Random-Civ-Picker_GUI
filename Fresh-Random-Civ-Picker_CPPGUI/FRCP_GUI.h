@@ -167,8 +167,8 @@ HBITMAP icon_survapp, icon_techtree, icon_options, icon_history;
 
 uint8_t iterator = 0;
 uint8_t remaining = MAX_CIVS;
-int drawnlog_length = GetWindowTextLength(drawn_log);
-int remaininglog_length = GetWindowTextLength(remaining_log);
+uint16_t drawnlog_length = GetWindowTextLength(drawn_log);
+uint16_t remaininglog_length = GetWindowTextLength(remaining_log);
 uint8_t current_tab = 0;
 uint8_t custom_max_civs = MAX_CIVS;
 std::wstring label_text = std::to_wstring(iterator + 1) + L"/" + std::to_wstring(MAX_CIVS);
@@ -289,8 +289,8 @@ HBITMAP hd_dlc_bmp[] = { icon_rajas, icon_africans, icon_forgotten };
 HWND de_dlc_icon[] = { kingdoms_icon, royals_icon, rome_icon, india_icon, dukes_icon, west_icon, khans_icon };
 HWND hd_dlc_icon[] = { rajas_icon, africans_icon, forgotten_icon };
 
-const int de_dlc_amount = 7;
-const int hd_dlc_amount = 3;
+const uint8_t de_dlc_amount = 7;
+const uint8_t hd_dlc_amount = 3;
 
 dlc old_dlc[] = { aok, aoc, forgotten, africans, rajas };
 dlc every_dlc[] = { aoc, forgotten, africans, rajas, khans, west, dukes, india, royals, rome, kingdoms };
@@ -391,7 +391,7 @@ uint8_t times_drawn[MAX_CIVS] = { 0 };
 HFONT font_underline = NULL;
 HWND tab;
 
-int drawn_log_linecount = 0;
+uint16_t drawn_log_linecount = 0;
 
 enum savetype { automatic, manual, quick };
 
