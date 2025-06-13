@@ -22,23 +22,23 @@ void CreateTabs(HWND hWnd)
     TabCtrl_InsertItem(tab, 2, &tie);    
 }
 
-void ShowTabComponents(int tabIndex, HWND hWnd)
+void ShowTabComponents(int tab_index, HWND hWnd)
 {
     if (!startup) PlayAudio(tabsound);
-    current_tab = tabIndex;
-    if (tabIndex == 0)
+    current_tab = tab_index;
+    if (tab_index == 0)
     {        
 		ShowLogTab(false);
 		ShowCustomTab(false);
         ShowDrawTab(true, hWnd);
     }
-    else if (tabIndex == 1)
+    else if (tab_index == 1)
     {        
 		ShowDrawTab(false, hWnd);
 		ShowCustomTab(false);
         ShowLogTab(true);
     }
-    else if (tabIndex == 2)
+    else if (tab_index == 2)
     {        
 		ShowDrawTab(false, hWnd);
 		ShowLogTab(false);
