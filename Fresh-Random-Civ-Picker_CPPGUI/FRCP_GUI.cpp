@@ -739,17 +739,12 @@ INT_PTR CALLBACK OptionsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 				
                 int pos = (int)SendMessage((HWND)lParam, TBM_GETPOS, 0, 0);
 
-                // Convert the value to a string
                 wchar_t valueStr[16];
                 swprintf_s(valueStr, L"%d", pos);
 
-                // Update the static label
                 SetDlgItemText(hDlg, IDC_STATIC_CONTFRESHVALUE, valueStr);
 
                 contfresh_strength = pos;
-				//MessageBox(hDlg, StringCleaner(L"Continent Freshness Strength set to: " + std::to_wstring(pos)), L"Continent Freshness Strength", MB_OK);
-                // Use 'pos' as needed, e.g., update a variable or label
-                //MessageBox(hDlg, StringCleaner(L"Continent Freshness Strength set to: " + std::to_wstring(pos)), L"Continent Freshness Strength", MB_OK);
 
             }
             break;
@@ -926,9 +921,7 @@ void ResetProgram(bool auto_reset)
     UpdateDrawnLog(false, false, true);
 
     if (custom_civ_pool)
-    {
-        //civs.clear();
-        
+    {        
         custom_max_civs = 0;
         for (int i = 0; i < MAX_CIVS; i++)
         {
@@ -936,7 +929,6 @@ void ResetProgram(bool auto_reset)
             {
 				available_civs[i] = true;
 				civ_list[i] = civ[i].name;
-                //civs.push_back(civ[i].name);
                 custom_max_civs++;
             }
             else
@@ -966,30 +958,6 @@ void ResetProgram(bool auto_reset)
 
     last_action = reset;
 
-
-
-    //if (!auto_reset)
-    //{
-    //    int tenth = (custom_max_civs / 2) / 10;
-    //    int factor = (10 * tenth) - (tenth * contfresh_strength);
-
-
-    //    std::wstring mb_text = L"";
-    //    for (int i = 0; i < MAX_CIVS; i++)
-    //    {
-    //        if (contfresh_array[i] != L"") mb_text += contfresh_array[i] + L"\n";
-    //    }
-
-    //    if (contfresh_strength == 1)
-    //    {
-    //        factor = 1;
-    //        mb_text = contfresh_civ;
-    //        MessageBox(NULL, StringCleaner(L"Contfresh civ amount: " + std::to_wstring(factor) + L"\nContfresh civ: " + mb_text), L"contresh info", MB_OK | MB_ICONINFORMATION);
-    //    }
-    //    else MessageBox(NULL, StringCleaner(L"Contfresh civ amount: " + std::to_wstring(factor) + L"\nContfresh civs:\n" + mb_text), L"contresh info", MB_OK | MB_ICONINFORMATION);
-
-    //}
-
 }
 
 void DrawCiv(bool rigged, const std::wstring &civ_name)
@@ -1015,7 +983,6 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
         current_civ = civ_name;
 		civ_list[GetCivIndex(current_civ)] = L"";
 		available_civs[GetCivIndex(current_civ)] = false;
-        //civs.erase(std::remove(civs.begin(), civs.end(), civ_name), civs.end());
     }    
     else
     {
@@ -1031,10 +998,6 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
             int r_delta = 0;
 			for (int i = 0; i < MAX_CIVS; i++) civ_list_copy[i] = civ_list[i];
 			for (int i = 0; i < MAX_CIVS; i++) available_civs_copy[i] = available_civs[i];
-			//std::vector <std::wstring> civs_copy;
-   //         civs_copy.reserve(MAX_CIVS);
-
-   //         civs_copy = civs;
             do
             {
                 if ((remaining - r_delta) < 2)
@@ -1062,10 +1025,7 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
                     MessageBox(NULL, StringCleaner(L"Invalid index! Given index currently: " + std::to_wstring(given_index)), L"Error", MB_OK | MB_ICONERROR);
                     return;
                 }
-                //else
-                //{
-                //    MessageBox(NULL, StringCleaner(L"Valid index! Given index currently: " + std::to_wstring(given_index)), L"Success", MB_OK | MB_ICONINFORMATION);
-                //}
+
                 current_civ = civ[given_index].name;
 
 
@@ -1078,19 +1038,6 @@ void DrawCiv(bool rigged, const std::wstring &civ_name)
                 }
 				available_civs_copy[given_index] = false;
 
-                //std::shuffle(civs_copy.begin(), civs_copy.end(), mt);
-                // 
-                //current_civ = civs_copy.back();
-                
-                //civs_copy.pop_back();
-
-                //if (IsContfreshCiv(current_civ))
-                //{
-                //    break;
-                //    //civs.erase(std::remove(civs.begin(), civs.end(), current_civ), civs.end());
-                //    //MessageBox(NULL, StringCleaner(current_civ + L" is a cont fresh civ!"), L"Contfresh", MB_OK | MB_ICONINFORMATION);
-                //}
-                //else 
                 r_delta++;
 			} while (!IsContfreshCiv(current_civ));
         }
@@ -1215,7 +1162,6 @@ void AddCiv(const std::wstring &civ)
 {
     if (GetCiv(civ).enabled) return;
 
-    //civs.push_back(civ);
 	civ_list[GetCivIndex(civ)] = civ;
     available_civs[GetCivIndex(civ)] = true;
 	GetCiv(civ).SetEnabled(true);
@@ -1243,7 +1189,6 @@ void RemoveCiv(const std::wstring &civ)
 
 	civ_list[GetCivIndex(civ)] = L"";
 	available_civs[GetCivIndex(civ)] = false;
-	//civs.erase(std::remove(civs.begin(), civs.end(), civ), civs.end());
 	GetCiv(civ).SetEnabled(false);
 	custom_max_civs--;
     label_text = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs);
@@ -1634,17 +1579,7 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted)
     {        
 
         log_entry = std::to_wstring(iterator) + L"/" + std::to_wstring(custom_max_civs) + L" - " + std::wstring(current_civ.begin(), current_civ.end()) + L"\r\n";
-        //drawnlog_text = log_entry + drawnlog_text;
-        //if (iterator == custom_max_civs)
-        //{
-        //    //drawnlog_text += L"\r\n";
-        //    //drawn_log_linecount++;
-        //    //CheckDrawnLogLength();
 
-        //}            
-        //drawn_log_linecount++;
-        //CheckDrawnLogLength();
-        //SetWindowText(drawn_log, drawnlog_text.c_str());
         AddDrawnLogEntry(log_entry);
         if (!start_state || start_state && GetCiv(current_civ).enabled) drawn_civs[iterator-1] = current_civ;
 
@@ -1653,12 +1588,7 @@ void UpdateDrawnLog(bool start_state, bool drawn, bool blankline_wanted)
     {
         if (drawnlog_text.substr(0, 2) != L"\r\n")
         {
-            //drawnlog_length = GetWindowTextLength(drawn_log);
-            //drawnlog_text.resize(drawnlog_length + 1);
-            //GetWindowText(drawn_log, &drawnlog_text[0], drawnlog_length + 1);
-            //drawnlog_text.pop_back();
-            //drawnlog_text = L"\r\n" + drawnlog_text;
-            //SetWindowText(drawn_log, drawnlog_text.c_str());
+
 			AddDrawnLogEntry(L"\r\n");
         }        
     }
@@ -2308,8 +2238,6 @@ void InitialiseCivs()
         available_civs[i] = true;
     }
         
-    //if (!civs.empty()) civs.clear();
-    //for (int i = 0; i < MAX_CIVS; i++) civs.push_back(civ[i].name);
 }
 
 void OpenOptions(HWND hWnd) { PlayAudio(button); DialogBox(instance, MAKEINTRESOURCE(IDD_OPTIONS), hWnd, OptionsDlgProc); }
@@ -2724,7 +2652,6 @@ void UndrawCiv()
             drawnlog_text = drawnlog_text.substr(pos + 2);
             SetWindowText(drawn_log, drawnlog_text.c_str());
             drawn_log_linecount--;
-            //drawn_log_linecount++;
         }
     }
     UpdateTooltips(true);
@@ -2777,9 +2704,7 @@ void PlayAudio(sound_type type)
 void PlayJingle(const std::wstring& civ_name)
 {
 
-    //TODO: make jingle a member variable of Civ so loops in this function are redundant
-
-
+    //TODO: find a way to make this function more efficient
 
     if (!jingles_enabled) return;
 
@@ -2806,16 +2731,6 @@ void PlayJingle(const std::wstring& civ_name)
     }
     else for (int i = 0; i < MAX_CIVS; i++) if (civ[i].name == civ_name) PlayResource(jingleResource[i]);
 
-
-
-    //std::wstring processed_civ_name = civ_name;
-    //processed_civ_name[0] = std::tolower(processed_civ_name[0]);
-    //std::wstring jingle_path;
-
-    //if (legacy_jingle_enabled && GetCiv(civ_name).legacy) jingle_path = L"sounds\\civ_jingles\\legacy\\" + processed_civ_name + L".wav";
-    //else jingle_path = L"sounds\\civ_jingles\\" + processed_civ_name + L".wav";
-
-    //PlaySound(jingle_path.c_str(), NULL, SND_FILENAME | SND_ASYNC);
 }
 
 void StopSound() { PlaySound(NULL, NULL, 0); }
@@ -2968,21 +2883,6 @@ void UpdateContfresh(const std::wstring& civ)
     }
     contfresh_count++;
 
-    // text string which prints out whole array below
-	//std::wstring mb_text = L"";
-	//for (int i = 0; i < MAX_CIVS; i++)
-	//{
-	//	if (contfresh_array[i] != L"") mb_text += contfresh_array[i] + L"\n";
-	//}
-	// MessageBox to show the contents of the contfresh array
-    //if (!startup)
-    //{
-    //    contfresh_civ = current_civ;
-    //    if (contfresh_strength == 1) MessageBox(NULL, StringCleaner(L"Contfresh civ: " + contfresh_civ), L"Info", MB_OK | MB_ICONINFORMATION);
-    //    else MessageBox(NULL, StringCleaner(L"Contfresh array:\n" + mb_text), L"Info", MB_OK | MB_ICONINFORMATION);
-
-    //}
-
 }
 
 bool IsContfreshCiv(const std::wstring& civ)
@@ -3025,16 +2925,7 @@ void CheckDrawnLogLength()
     {
         size_t last_newline = drawnlog_text.rfind(L"\r");
         
-        if (last_newline != std::wstring::npos)
-        {
-            drawnlog_text.erase(last_newline);
-            //if (reset_state) drawnlog_text.erase(last_newline);
-
-            //if (drawn_log_linecount > 0) drawn_log_linecount--;
-
-			//MessageBox(NULL, StringCleaner(L"drawn_log_linecount: " + std::to_wstring(drawn_log_linecount)), L"Error", MB_OK | MB_ICONINFORMATION);
-    
-        }
+        if (last_newline != std::wstring::npos) drawnlog_text.erase(last_newline);
         
     }
 }
