@@ -2948,7 +2948,6 @@ void AddDrawnLogEntry(std::wstring message)
 	{
 		SetWindowText(drawn_log, drawnlog_text.c_str());
 		drawn_log_linecount++;
-		//MessageBox(NULL, StringCleaner(L"drawn_log_linecount: " + std::to_wstring(drawn_log_linecount)), L"Error", MB_OK | MB_ICONINFORMATION);
 	}
 }
 
