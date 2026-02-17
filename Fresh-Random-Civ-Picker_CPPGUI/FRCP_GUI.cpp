@@ -231,14 +231,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 HWND button[] = { button_draw, button_reset, button_techtree, button_options, button_clearlog,
                                     button_enableall, button_disableall, checkbox_showremainlog,
                                     radiobutton_de, radiobutton_hd, radiobutton_aok, de_dlc_checkbox[0],
-                                de_dlc_checkbox[1], de_dlc_checkbox[2], de_dlc_checkbox[3], de_dlc_checkbox[4], de_dlc_checkbox[5], de_dlc_checkbox[6],
+                                de_dlc_checkbox[1], de_dlc_checkbox[2], de_dlc_checkbox[3], de_dlc_checkbox[4], de_dlc_checkbox[5], de_dlc_checkbox[6], de_dlc_checkbox[7],
                                 hd_dlc_checkbox[0], hd_dlc_checkbox[1], hd_dlc_checkbox[2], checkbox_aoc,
                                 checkbox_autotoggle, checkbox_autoreset, button_survapp, button_history };
 
                 int tooltip_id[] = { TOOLTIP_DRAW, TOOLTIP_RESET, TOOLTIP_TECHTREE, TOOLTIP_OPTIONS, TOOLTIP_CLEAR,
                                         TOOLTIP_ENABLEALL, TOOLTIP_DISABLEALL, TOOLTIP_REMAININGTOGGLE,
                                         TOOLTIP_DE, TOOLTIP_HD, TOOLTIP_AOK, de_dlc_tipid[0], de_dlc_tipid[1],
-                                    de_dlc_tipid[2], de_dlc_tipid[3], de_dlc_tipid[4], de_dlc_tipid[5], de_dlc_tipid[6],
+                                    de_dlc_tipid[2], de_dlc_tipid[3], de_dlc_tipid[4], de_dlc_tipid[5], de_dlc_tipid[6], de_dlc_tipid[7],
                                     hd_dlc_tipid[0], hd_dlc_tipid[1], hd_dlc_tipid[2], TOOLTIP_AOC,
                                     TOOLTIP_AUTOTOGGLE, TOOLTIP_AUTORESET, TOOLTIP_SURVAPP, TOOLTIP_HISTORY };
                 
@@ -314,13 +314,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (wParam == HOTKEY_ID_T) ToggleAutoReset(hWnd);                        
                 if (edition_state == DE)
                 {
-                    if (wParam == HOTKEY_ID_A) ToggleDlc(kingdoms, hWnd);
-					if (wParam == HOTKEY_ID_S) ToggleDlc(royals, hWnd);
-					if (wParam == HOTKEY_ID_D) ToggleDlc(rome, hWnd);
-					if (wParam == HOTKEY_ID_F) ToggleDlc(india, hWnd);
-					if (wParam == HOTKEY_ID_G) ToggleDlc(dukes, hWnd);
-					if (wParam == HOTKEY_ID_H) ToggleDlc(west, hWnd);
-					if (wParam == HOTKEY_ID_J) ToggleDlc(khans, hWnd);
+                    if (wParam == HOTKEY_ID_A) ToggleDlc(chieftains, hWnd);
+					if (wParam == HOTKEY_ID_S) ToggleDlc(kingdoms, hWnd);
+					if (wParam == HOTKEY_ID_D) ToggleDlc(royals, hWnd);
+					if (wParam == HOTKEY_ID_F) ToggleDlc(rome, hWnd);
+					if (wParam == HOTKEY_ID_G) ToggleDlc(india, hWnd);
+					if (wParam == HOTKEY_ID_H) ToggleDlc(dukes, hWnd);
+					if (wParam == HOTKEY_ID_J) ToggleDlc(west, hWnd);
+                    if (wParam == HOTKEY_ID_K) ToggleDlc(khans, hWnd);
 				}
 				else if (edition_state == HD)
 				{
@@ -616,14 +617,14 @@ LRESULT CALLBACK ButtonProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 HWND button[] = { button_draw, button_reset, button_techtree, button_options, button_clearlog,
                                     button_enableall, button_disableall, checkbox_showremainlog,
                                     radiobutton_de, radiobutton_hd, radiobutton_aok, de_dlc_checkbox[0],
-                                de_dlc_checkbox[1], de_dlc_checkbox[2], de_dlc_checkbox[3], de_dlc_checkbox[4], de_dlc_checkbox[5], de_dlc_checkbox[6],
+                                de_dlc_checkbox[1], de_dlc_checkbox[2], de_dlc_checkbox[3], de_dlc_checkbox[4], de_dlc_checkbox[5], de_dlc_checkbox[6], de_dlc_checkbox[7],
                                 hd_dlc_checkbox[0], hd_dlc_checkbox[1], hd_dlc_checkbox[2], checkbox_aoc,
                                 checkbox_autotoggle, checkbox_autoreset, button_survapp, button_history };
 
                 int tooltip_id[] = { TOOLTIP_DRAW, TOOLTIP_RESET, TOOLTIP_TECHTREE, TOOLTIP_OPTIONS, TOOLTIP_CLEAR,
                                         TOOLTIP_ENABLEALL, TOOLTIP_DISABLEALL, TOOLTIP_REMAININGTOGGLE,
                                         TOOLTIP_DE, TOOLTIP_HD, TOOLTIP_AOK, de_dlc_tipid[0], de_dlc_tipid[1],
-                                    de_dlc_tipid[2], de_dlc_tipid[3], de_dlc_tipid[4], de_dlc_tipid[5], de_dlc_tipid[6],
+                                    de_dlc_tipid[2], de_dlc_tipid[3], de_dlc_tipid[4], de_dlc_tipid[5], de_dlc_tipid[6], de_dlc_tipid[7],
                                     hd_dlc_tipid[0], hd_dlc_tipid[1], hd_dlc_tipid[2], TOOLTIP_AOC,
                                     TOOLTIP_AUTOTOGGLE, TOOLTIP_AUTORESET, TOOLTIP_SURVAPP, TOOLTIP_HISTORY };
 
@@ -2348,13 +2349,13 @@ void CreateCheckboxes(HWND hWnd)
     checkbox_showremainlog = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 230, 180, 20, IDC_CHECKBOX_REMAINLOG, L"Show");
     CheckDlgButton(hWnd, IDC_CHECKBOX_REMAINLOG, remainlog_enabled ? BST_CHECKED : BST_UNCHECKED);
 
-    int row[] = { 30, 50, 70, 90, 110, 130, 150, 170, 190, 210 };
+    int row[] = { 30, 50, 70, 90, 110, 130, 150, 170, 190, 210, 230 };
     int column[] = { 10, 112, 214, 316, 418 };
 
-    for (int i = 0; i < MAX_CIVS; i++) civ[i].checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), column[i % 5], row[i / 5] + 10, 100, 20, i + 5, civ[i].name.c_str());
+    for (int i = 0; i < MAX_CIVS; i++) civ[i].checkbox = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), column[i % 5], row[i / 5] + 30, 100, 20, i + 5, civ[i].name.c_str());
 
-    checkbox_autoreset = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 260, 180, 20, IDC_CHECKBOX_AUTORESET, L"Auto-reset upon change");
-    checkbox_autotoggle = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 10, 170, 20, IDC_CHECKBOX_AUTOTOGGLE, L"Auto-toggle older civs");
+    checkbox_autoreset = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 310, 310, 180, 20, IDC_CHECKBOX_AUTORESET, L"Auto-reset upon change");
+    checkbox_autotoggle = CreateCheckbox(hWnd, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), 10, 30, 170, 20, IDC_CHECKBOX_AUTOTOGGLE, L"Auto-toggle older civs");
 
     if (!autoreset_enabled) CheckDlgButton(hWnd, IDC_CHECKBOX_AUTORESET, BST_UNCHECKED);
     if (!autotoggle_enabled) CheckDlgButton(hWnd, IDC_CHECKBOX_AUTOTOGGLE, BST_UNCHECKED);
@@ -2396,8 +2397,8 @@ void CreateButtons(HWND hWnd)
     button_options = CreateWindow(L"BUTTON", L"", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON | BS_BITMAP, 0, 0, 25, 25, hWnd, (HMENU)IDC_BUTTON_OPTIONS, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
     SendMessageW(button_options, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)icon_options); 
     button_clearlog = CreateWindow(L"BUTTON", L"Clear Log", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_CLEARLOG, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-    button_enableall = CreateWindow(L"BUTTON", L"Enable All", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 380, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_ENABLEALL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
-    button_disableall = CreateWindow(L"BUTTON", L"Disable All", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 125, 380, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_DISABLEALL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    button_enableall = CreateWindow(L"BUTTON", L"Enable All", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 10, 430, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_ENABLEALL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
+    button_disableall = CreateWindow(L"BUTTON", L"Disable All", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON, 125, 430, BUTTON_WIDTH, BUTTON_HEIGHT, hWnd, (HMENU)IDC_BUTTON_DISABLEALL, (HINSTANCE)GetWindowLongPtr(hWnd, GWLP_HINSTANCE), NULL);
 }
 
 void CreateLabels(HWND hWnd)
@@ -2749,7 +2750,7 @@ bool LoadSound(SoundResource& soundResource)
     soundResource.hResInfo = FindResource(instance, soundResource.name, L"WAVE");
     if (soundResource.hResInfo == NULL)
     {
-        MessageBox(NULL, L"Failed to find resource.", L"Error", MB_OK | MB_ICONERROR);
+        MessageBox(NULL, StringCleaner(std::wstring(L"Failed to find resource: ") + soundResource.name), L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
 

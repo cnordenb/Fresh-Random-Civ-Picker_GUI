@@ -138,11 +138,11 @@ SoundResource legacyJingle[LEGACY_JINGLE_AMOUNT];
 SoundResource random_jingle;
 SoundResource random_legacy_jingle;
 
-HWND checkbox_khans, checkbox_dukes, checkbox_west, checkbox_india, checkbox_rome, checkbox_royals, checkbox_kingdoms,
+HWND checkbox_khans, checkbox_dukes, checkbox_west, checkbox_india, checkbox_rome, checkbox_royals, checkbox_kingdoms, checkbox_chieftains,
 checkbox_forgotten, checkbox_africans, checkbox_rajas,
 checkbox_aoc;
 
-HWND khans_icon, dukes_icon, west_icon, india_icon, rome_icon, royals_icon, kingdoms_icon,
+HWND khans_icon, dukes_icon, west_icon, india_icon, rome_icon, royals_icon, kingdoms_icon, chieftains_icon,
 forgotten_icon, africans_icon, rajas_icon,
 aoc_icon;
 
@@ -158,7 +158,7 @@ HBRUSH brush_black;
 
 HBITMAP icon_de, icon_hd, icon_aok;
 
-HBITMAP icon_khans, icon_dukes, icon_west, icon_india, icon_rome, icon_royals, icon_kingdoms,
+HBITMAP icon_khans, icon_dukes, icon_west, icon_india, icon_rome, icon_royals, icon_kingdoms, icon_chieftains,
 icon_forgotten, icon_africans, icon_rajas,
 icon_aoc;
 
@@ -236,7 +236,8 @@ enum dlc
     india,
     royals,
     rome,
-    kingdoms
+    kingdoms,
+    chieftains
 };
 
 enum last_action_type
@@ -248,55 +249,56 @@ enum last_action_type
 
 last_action_type last_action;
 
-int de_dlc_row[] = { 25, 45, 65, 85, 105, 125, 145 };
+int de_dlc_row[] = { 25, 45, 65, 85, 105, 125, 145, 165 };
 int hd_dlc_row[] = { 30, 65, 100 };
 
-int de_dlc_boxrow[] = { -96, -76, -56, -36, -16, 4, 24 };
+int de_dlc_boxrow[] = { -96, -76, -56, -36, -16, 4, 24, 44 };
 int hd_dlc_boxrow[] = { -85, -51, -16 };
 
-int de_dlc_id[] = { IDC_CHECKBOX_KINGDOMS, IDC_CHECKBOX_ROYALS, IDC_CHECKBOX_ROME, IDC_CHECKBOX_INDIA, IDC_CHECKBOX_DUKES, IDC_CHECKBOX_WEST, IDC_CHECKBOX_KHANS };
+int de_dlc_id[] = { IDC_CHECKBOX_CHIEFTAINS, IDC_CHECKBOX_KINGDOMS, IDC_CHECKBOX_ROYALS, IDC_CHECKBOX_ROME, IDC_CHECKBOX_INDIA, IDC_CHECKBOX_DUKES, IDC_CHECKBOX_WEST, IDC_CHECKBOX_KHANS };
 int hd_dlc_id[] = { IDC_CHECKBOX_RAJAS, IDC_CHECKBOX_AFRICANS, IDC_CHECKBOX_FORGOTTEN };
 
-HWND de_dlc_checkbox[] = { checkbox_kingdoms, checkbox_royals, checkbox_rome, checkbox_india, checkbox_dukes, checkbox_west, checkbox_khans };
+HWND de_dlc_checkbox[] = { checkbox_chieftains, checkbox_kingdoms, checkbox_royals, checkbox_rome, checkbox_india, checkbox_dukes, checkbox_west, checkbox_khans };
 HWND hd_dlc_checkbox[] = { checkbox_rajas, checkbox_africans, checkbox_forgotten };
 
-std::wstring de_dlc_name[] = { L"The Three Kingdoms", L"The Mountain Royals", L"Return of Rome", L"Dynasties of India", L"Dawn of the Dukes", L"Lords of the West", L"The Last Khans"};
+std::wstring de_dlc_name[] = { L"The Last Chieftains", L"The Three Kingdoms", L"The Mountain Royals", L"Return of Rome", L"Dynasties of India", L"Dawn of the Dukes", L"Lords of the West", L"The Last Khans"};
 std::wstring hd_dlc_name[] = { L"Rise of the Rajas", L"African Kingdoms", L"The Forgotten" };
 
-std::wstring de_dlc_tooltip[] = { L"Toggles The Three Kingdoms civilisations\n(Jurchens, Khitans, Shu, Wei, Wu)\nHotkey: A",
-                                    L"Toggles The Mountain Royals civilisations\n(Armenians, Georgians)\nHotkey: S",
-                                    L"Toggles Return of Rome civilisation\n(Romans)\nHotkey: D",
-                                    L"Toggles Dynasties of India civilisations\n(Bengalis, Dravidians, Gurjaras)\nHotkey: F",
-                                    L"Toggles Dawn of the Dukes civilisations\n(Bohemians, Poles)\nHotkey: G",
-                                    L"Toggles Lords of the West civilisations\n(Burgundians, Sicilians)\nHotkey: H",
-                                    L"Toggles The Last Khans civilisations\n(Bulgarians, Cumans, Lithuanians, Tatars)\nHotkey: J" };
+std::wstring de_dlc_tooltip[] = { L"Toggles the Last Chieftains civilisations\n(Mapuche, Muisca, Tupi)\nHotkey: A",
+                                    L"Toggles The Three Kingdoms civilisations\n(Jurchens, Khitans, Shu, Wei, Wu)\nHotkey: S",
+                                    L"Toggles The Mountain Royals civilisations\n(Armenians, Georgians)\nHotkey: D",
+                                    L"Toggles Return of Rome civilisation\n(Romans)\nHotkey: F",
+                                    L"Toggles Dynasties of India civilisations\n(Bengalis, Dravidians, Gurjaras)\nHotkey: G",
+                                    L"Toggles Dawn of the Dukes civilisations\n(Bohemians, Poles)\nHotkey: H",
+                                    L"Toggles Lords of the West civilisations\n(Burgundians, Sicilians)\nHotkey: J",
+                                    L"Toggles The Last Khans civilisations\n(Bulgarians, Cumans, Lithuanians, Tatars)\nHotkey: K" };
 std::wstring hd_dlc_tooltip[] = { L"Toggles Rise of Rajas civilisations\n(Burmese, Khmer, Malay, Vietnamese)\nHotkey: A",
                                    L"Toggles African Kingdoms civilisations\n(Berbers, Ethiopians, Malians, Portuguese)\nHotkey: S" ,
                                    L"Toggles The Forgotten civilisations\n(Incas, Hindustanis, Italians, Magyars, Slavs)\nHotkey: D" };
 
-int de_dlc_tipid[] = { TOOLTIP_KINGDOMS, TOOLTIP_ROYALS, TOOLTIP_ROME, TOOLTIP_INDIA, TOOLTIP_DUKES, TOOLTIP_WEST, TOOLTIP_KHANS };
+int de_dlc_tipid[] = { TOOLTIP_CHIEFTAINS, TOOLTIP_KINGDOMS, TOOLTIP_ROYALS, TOOLTIP_ROME, TOOLTIP_INDIA, TOOLTIP_DUKES, TOOLTIP_WEST, TOOLTIP_KHANS };
 int hd_dlc_tipid[] = { TOOLTIP_RAJAS, TOOLTIP_AFRICANS, TOOLTIP_FORGOTTEN };
 
-dlc de_dlc[] = { kingdoms, royals, rome, india, dukes, west, khans };
+dlc de_dlc[] = { chieftains, kingdoms, royals, rome, india, dukes, west, khans };
 dlc hd_dlc[] = { rajas, africans, forgotten };
 
-std::wstring de_dlc_bmpstring[] = { L"kingdoms.bmp", L"royals.bmp", L"rome.bmp", L"india.bmp", L"dukes.bmp", L"west.bmp", L"khans.bmp"};
+std::wstring de_dlc_bmpstring[] = { L"chieftains.bmp", L"kingdoms.bmp", L"royals.bmp", L"rome.bmp", L"india.bmp", L"dukes.bmp", L"west.bmp", L"khans.bmp"};
 std::wstring hd_dlc_bmpstring[] = { L"rajas.bmp", L"african.bmp", L"forgotten.bmp" };
 
-HBITMAP de_dlc_bmp[] = { icon_kingdoms, icon_royals, icon_rome, icon_india, icon_dukes, icon_west, icon_khans};
+HBITMAP de_dlc_bmp[] = { icon_chieftains, icon_kingdoms, icon_royals, icon_rome, icon_india, icon_dukes, icon_west, icon_khans};
 HBITMAP hd_dlc_bmp[] = { icon_rajas, icon_africans, icon_forgotten };
 
-HWND de_dlc_icon[] = { kingdoms_icon, royals_icon, rome_icon, india_icon, dukes_icon, west_icon, khans_icon };
+HWND de_dlc_icon[] = { chieftains_icon, kingdoms_icon, royals_icon, rome_icon, india_icon, dukes_icon, west_icon, khans_icon };
 HWND hd_dlc_icon[] = { rajas_icon, africans_icon, forgotten_icon };
 
-const uint8_t de_dlc_amount = 7;
+const uint8_t de_dlc_amount = 8;
 const uint8_t hd_dlc_amount = 3;
 
 dlc old_dlc[] = { aok, aoc, forgotten, africans, rajas };
-dlc every_dlc[] = { aoc, forgotten, africans, rajas, khans, west, dukes, india, royals, rome, kingdoms };
+dlc every_dlc[] = { aoc, forgotten, africans, rajas, khans, west, dukes, india, royals, rome, kingdoms, chieftains };
 int every_dlc_id[] = { IDC_CHECKBOX_AOC, IDC_CHECKBOX_FORGOTTEN, IDC_CHECKBOX_AFRICANS, IDC_CHECKBOX_RAJAS,
                         IDC_CHECKBOX_KHANS, IDC_CHECKBOX_WEST, IDC_CHECKBOX_DUKES, IDC_CHECKBOX_INDIA, IDC_CHECKBOX_ROYALS,
-                    IDC_CHECKBOX_ROME, IDC_CHECKBOX_KINGDOMS };
+                    IDC_CHECKBOX_ROME, IDC_CHECKBOX_KINGDOMS, IDC_CHECKBOX_CHIEFTAINS };
 
 edition every_edition[] = { AOK, HD, DE };
 int every_edition_id[] = { IDC_RADIO_AOK, IDC_RADIO_HD, IDC_RADIO_DE };
@@ -306,20 +308,20 @@ checkbox_britons, checkbox_bulgarians, checkbox_burgundians, checkbox_burmese, c
 checkbox_celts, checkbox_chinese, checkbox_cumans, checkbox_dravidians, checkbox_ethiopians,
 checkbox_franks, checkbox_georgians, checkbox_goths, checkbox_gurjaras, checkbox_huns, checkbox_incas,
 checkbox_hindustanis, checkbox_italians, checkbox_japanese, checkbox_jurchens, checkbox_khitans, checkbox_khmer, checkbox_koreans,
-checkbox_lithuanians, checkbox_magyars, checkbox_malay, checkbox_malians, checkbox_mayans,
-checkbox_mongols, checkbox_persians, checkbox_poles, checkbox_portuguese, checkbox_romans,
+checkbox_lithuanians, checkbox_magyars, checkbox_malay, checkbox_malians, checkbox_mapuche, checkbox_mayans,
+checkbox_mongols, checkbox_muisca, checkbox_persians, checkbox_poles, checkbox_portuguese, checkbox_romans,
 checkbox_saracens, checkbox_shu, checkbox_sicilians, checkbox_slavs, checkbox_spanish, checkbox_tatars,
-checkbox_teutons, checkbox_turks, checkbox_vietnamese, checkbox_vikings, checkbox_wei, checkbox_wu;
+checkbox_teutons, checkbox_tupi, checkbox_turks, checkbox_vietnamese, checkbox_vikings, checkbox_wei, checkbox_wu;
 
 HBITMAP icon_armenians, icon_aztecs, icon_bengalis, icon_berber, icon_bohemians,
 icon_britons, icon_bulgarians, icon_burgundians, icon_burmese, icon_byzantines,
 icon_celts, icon_chinese, icon_cumans, icon_dravidians, icon_ethiopians,
 icon_franks, icon_georgians, icon_goths, icon_gurjaras, icon_huns, icon_incas,
 icon_hindustanis, icon_italians, icon_japanese, icon_jurchens, icon_khitans, icon_khmer, icon_koreans,
-icon_lithuanians, icon_magyars, icon_malay, icon_malians, icon_mayans,
-icon_mongols, icon_persians, icon_poles, icon_portuguese, icon_romans,
+icon_lithuanians, icon_magyars, icon_malay, icon_malians, icon_mapuche, icon_mayans,
+icon_mongols, icon_muisca, icon_persians, icon_poles, icon_portuguese, icon_romans,
 icon_saracens, icon_shu, icon_sicilians, icon_slavs, icon_spanish, icon_tatars,
-icon_teutons, icon_turks, icon_vietnamese, icon_vikings, icon_wei, icon_wu, icon_random;
+icon_teutons, icon_tupi, icon_turks, icon_vietnamese, icon_vikings, icon_wei, icon_wu, icon_random;
 
 HWND placeholder_hwnd;
 Civ random(L"Random", false, AOK, aok, true, placeholder_hwnd, icon_random);
@@ -357,8 +359,10 @@ Civ(L"Lithuanians", true, DE, khans, false, checkbox_lithuanians, icon_lithuania
 Civ(L"Magyars", true, HD, forgotten, false, checkbox_magyars, icon_magyars), 
 Civ(L"Malay", true, HD, rajas, false, checkbox_malay, icon_malay), 
 Civ(L"Malians", true, HD, africans, false, checkbox_malians, icon_malians), 
+Civ(L"Mapuche", true, DE, chieftains, false, checkbox_mapuche, icon_mapuche),
 Civ(L"Maya", true, AOK, aoc, true, checkbox_mayans, icon_mayans), 
 Civ(L"Mongols", true, AOK, aok, true, checkbox_mongols, icon_mongols), 
+Civ(L"Muisca", true, DE, chieftains, false, checkbox_muisca, icon_muisca),
 Civ(L"Persians", true, AOK, aok, true, checkbox_persians, icon_persians), 
 Civ(L"Poles", true, DE, dukes, false, checkbox_poles, icon_poles), 
 Civ(L"Portuguese", true, HD, africans, false, checkbox_portuguese, icon_portuguese), 
@@ -370,6 +374,7 @@ Civ(L"Slavs", true, HD, forgotten, false, checkbox_slavs, icon_slavs),
 Civ(L"Spanish", true, AOK, aoc, true, checkbox_spanish, icon_spanish), 
 Civ(L"Tatars", true, DE, khans, false, checkbox_tatars, icon_tatars), 
 Civ(L"Teutons", true, AOK, aok, true, checkbox_teutons, icon_teutons), 
+Civ(L"Tupi", true, DE, chieftains, false, checkbox_tupi, icon_tupi),
 Civ(L"Turks", true, AOK, aok, true, checkbox_turks, icon_turks), 
 Civ(L"Vietnamese", true, HD, rajas, false, checkbox_vietnamese, icon_vietnamese), 
 Civ(L"Vikings", true, AOK, aok, true, checkbox_vikings, icon_vikings),
