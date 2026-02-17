@@ -137,7 +137,7 @@ Instructions for Visual Studio on Windows
 
 
 ### Why does Microsoft Defender want to protect my PC against this program?
-When you run the executable, Microsoft Defender Smart Screen will give you a popup telling you your PC has been protected. This doesn’t mean that it has scanned the executable, in fact you can go ahead and scan it with Microsoft Defender by right-clicking the executable and clicking "Scan with Microsoft Defender...". The popup only means that it has found that the application application is not digitally signed with a Microsoft-approved certificate. The smart screen popup is warning you that I have not acquired a certificate under the [Microsoft Authenticode](https://learn.microsoft.com/en-us/windows-hardware/drivers/install/authenticode) programme which requires some [hundreds of euros](https://www.sslshopper.com/microsoft-authenticode-certificates.html) in digital signature services per year which I cannot afford at this point in time.
+When you run the executable, Microsoft Defender Smart Screen will give you a popup telling you your PC has been protected. This doesn’t mean that it has scanned the executable, in fact you can go ahead and scan it with Microsoft Defender by right-clicking the executable and clicking "Scan with Microsoft Defender...". The popup only means that it has found that the application is not digitally signed with a Microsoft-approved certificate. The smart screen popup is warning you that I have not acquired a certificate under the [Microsoft Authenticode](https://learn.microsoft.com/en-us/windows-hardware/drivers/install/authenticode) programme which requires some [hundreds of euros](https://www.sslshopper.com/microsoft-authenticode-certificates.html) in digital signature services per year which I cannot afford at this point in time.
 
 
 
@@ -193,7 +193,7 @@ Solved: The tech tree button for Maya and Inca not working
 Solved: Icons and jingles of Maya and Inca not working
 
 ## Contact  
-If you have inquiries about this application, you can contact me at @Hjoerleif (Telegram/Discord) or carl.nordenbrink@abo.fi (email).
+If you have inquiries about this application, you can contact me at @Hjoerleif (Telegram/Discord) or cnordenb@abo.fi (email).
 
 You can also submit bug reports or feature requests by creating an issue [here](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/issues).
 
