@@ -3256,6 +3256,9 @@ void UpdateCivAddedInfo(HWND hDlg, dlc dlc)
     case kingdoms:
         SetDlgItemText(hDlg, IDC_HIS_INFO, L"2025-05-06 (The Three Kingdoms)");
         break;
+    case chieftains:
+        SetDlgItemText(hDlg, IDC_HIS_INFO, L"2026-02-17 (The Last Chieftains)");
+		break;
     }
 }
 void UpdateCivPoolInfo(HWND hDlg, const std::wstring &civ_name)

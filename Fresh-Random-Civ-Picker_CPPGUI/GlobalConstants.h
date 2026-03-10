@@ -1,4 +1,4 @@
-#define VERSION L"1.4.0"
+#define VERSION L"1.4.1"
 
 #define MAX_CIVS 53
 #define MAX_CIVS_HD 31
@@ -7,7 +7,7 @@
 #define DLC_AMOUNT 12
 #define EDITION_AMOUNT 3
 #define MAX_LOADSTRING 100
-#define HOTKEY_AMOUNT 38
+#define HOTKEY_AMOUNT 39
 #define TOOLTIP_AMOUNT 27
 #define SOUND_AMOUNT 5
 #define LEGACY_JINGLE_AMOUNT 18
