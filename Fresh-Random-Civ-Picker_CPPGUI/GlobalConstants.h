@@ -1,14 +1,14 @@
-#define VERSION L"1.4.1"
+#define VERSION L"1.4.2"
 
-#define MAX_CIVS 53
+#define MAX_CIVS 56
 #define MAX_CIVS_HD 31
 #define MAX_CIVS_AOK 18
 #define MAX_DRAWNLOG_LINECOUNT 256
-#define DLC_AMOUNT 12
+#define DLC_AMOUNT 13
 #define EDITION_AMOUNT 3
 #define MAX_LOADSTRING 100
-#define HOTKEY_AMOUNT 39
-#define TOOLTIP_AMOUNT 27
+#define HOTKEY_AMOUNT 40
+#define TOOLTIP_AMOUNT 28
 #define SOUND_AMOUNT 5
 #define LEGACY_JINGLE_AMOUNT 18
 
@@ -50,13 +50,14 @@
 #define HOTKEY_ID_CTRLT 36
 #define HOTKEY_ID_J 37
 #define HOTKEY_ID_K 38
+#define HOTKEY_ID_L 39
 
 
 #define DT_UNDERLINE 0x80000000
 #define MAX_LENGTH 15 
 
 #define MIN_WIDTH 550
-#define MIN_HEIGHT 530
+#define MIN_HEIGHT 570
 
 #define BUTTON_WIDTH 100
 #define BUTTON_HEIGHT 30
@@ -88,3 +89,4 @@
 #define TOOLTIP_KINGDOMS            24
 #define TOOLTIP_CHIEFTAINS			25
 #define TOOLTIP_HISTORY				26
+#define TOOLTIP_SAGAS				27
