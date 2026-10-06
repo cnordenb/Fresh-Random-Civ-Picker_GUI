@@ -304,7 +304,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             else if (current_tab == 2)
             {
-                if (wParam > 1 && wParam < 4 || wParam > 12 && wParam < 22) if (autoreset_enabled) ResetProgram(true);             
+                if (wParam > 1 && wParam < 4 || wParam > 12 && wParam < 22 || wParam >= 37 && wParam <= 39) if (autoreset_enabled) ResetProgram(true);             
                 if (wParam == HOTKEY_ID_SPACE) EnableAll(hWnd, true);           
                 if (wParam == HOTKEY_ID_RETURN) DisableAll(hWnd, true);
                 if (wParam == HOTKEY_ID_Q) SetEditionState(hWnd, DE);
@@ -439,7 +439,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 ValidateDlcToggle(hWnd, civ[i].dlc);
             }     
 
-            if (autoreset_enabled) if (wmId > 4 && wmId < (MAX_CIVS+5)) ResetProgram(true);
+            if (autoreset_enabled) if (wmId > 4 && wmId < (MAX_CIVS+5) || wmId >= 7800 && wmId <= 7850) ResetProgram(true);
             
             for (int i = 0; i < EDITION_AMOUNT; i++) if (wmId == every_edition_id[i]) SetEditionState(hWnd, every_edition[i]);
             for (int i = 0; i < DLC_AMOUNT; i++) if (wmId == every_dlc_id[i]) ToggleDlc(every_dlc[i], hWnd);
