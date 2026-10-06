@@ -6,10 +6,7 @@ Line numbers refer to commit `10b2ab4` and will drift. When an issue is fixed, m
 ## Tracked
 
 ### Behaviour
-- **Slavs checkbox doesn't trigger auto-reset.** `WM_COMMAND` only resets for control ids
-  `wmId > 4 && wmId < 50 || wmId > 50 && wmId < 65` (`FRCP_GUI.cpp:441`), a range left over from when there were
-  fewer civs. Civ checkbox ids are index + 5, so id 50 is whichever civ sits at index 45: Slavs since The Viking
-  Sagas (Tatars before that).
+
 - **DE DLC hotkeys J, K and L don't trigger auto-reset.** The Civ Pool tab's `WM_HOTKEY` reset range
   `wParam > 1 && wParam < 4 || wParam > 12 && wParam < 22` (`FRCP_GUI.cpp:307`) covers A–H but not `HOTKEY_ID_J` (37),
   `HOTKEY_ID_K` (38) or `HOTKEY_ID_L` (39), i.e. Dawn of the Dukes, Lords of the West and The Last Khans.
@@ -64,4 +61,7 @@ Line numbers refer to commit `10b2ab4` and will drift. When an issue is fixed, m
   `<Image>`/`<Text>` items in the `.vcxproj` that point at old `civ_icons\` paths and at a local Steam install.
 
 ## Fixed
-_Nothing yet._
+- **Slavs checkbox doesn't trigger auto-reset.** `WM_COMMAND` only resets for control ids
+  `wmId > 4 && wmId < 50 || wmId > 50 && wmId < 65` (`FRCP_GUI.cpp:441`), a range left over from when there were
+  fewer civs. Civ checkbox ids are index + 5, so id 50 is whichever civ sits at index 45: Slavs since The Viking
+  Sagas (Tatars before that). Fixed 2026-10-06.

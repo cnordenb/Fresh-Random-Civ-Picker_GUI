@@ -439,7 +439,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 ValidateDlcToggle(hWnd, civ[i].dlc);
             }     
 
-            if (autoreset_enabled) if (wmId > 4 && wmId < 50 || wmId > 50 && wmId < 65) ResetProgram(true);
+            if (autoreset_enabled) if (wmId > 4 && wmId < (MAX_CIVS+5)) ResetProgram(true);
             
             for (int i = 0; i < EDITION_AMOUNT; i++) if (wmId == every_edition_id[i]) SetEditionState(hWnd, every_edition[i]);
             for (int i = 0; i < DLC_AMOUNT; i++) if (wmId == every_dlc_id[i]) ToggleDlc(every_dlc[i], hWnd);
