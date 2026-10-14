@@ -23,11 +23,7 @@
 #define IDM_UPDATE						140
 #define IDM_TECHTREE					141
 #define IDM_STATS						142
-#define IDM_DESTEAM						143
-#define IDM_HDSTEAM						144
-#define IDM_VOOBLY						145
 #define IDM_SURVAPP						149
-#define IDM_XBOX						146
 #define IDM_UNDRAW						147
 #define IDM_REDRAW						148
 #define IDI_WINDOWSPROJECT1             107
@@ -67,6 +63,14 @@
 #define IDC_HIS_INFO_DR1                1027
 #define IDC_POOL_CHECKBOX               1028
 #define IDC_HIST_JINGLE                 1029
+#define IDC_LOBBY_ERROR                 1030
+#define IDC_EDIT_SHARELINK              1031
+#define IDC_SHARELINK_ERROR             1032
+#define IDC_BUTTON_OPENLINK             1033
+#define IDC_SHARE_POOL                  1034
+#define IDC_SHARE_ROUND                 1035
+#define IDC_COPY_POOL                   1036
+#define IDC_COPY_ROUND                  1037
 #define IDC_CHECKBOX_AUTORESET			7750
 #define IDC_CHECKBOX_AUTOTOGGLE			7764
 
@@ -74,23 +78,7 @@
 
 
 
-#define IDC_CHECKBOX_SAGAS				7800
-#define IDC_CHECKBOX_CHIEFTAINS			7801
-#define IDC_CHECKBOX_KINGDOMS			7802
-#define IDC_CHECKBOX_ROYALS				7803
-#define IDC_CHECKBOX_ROME				7804
-#define IDC_CHECKBOX_INDIA				7805
-#define IDC_CHECKBOX_DUKES				7806
-#define IDC_CHECKBOX_WEST				7807
-#define IDC_CHECKBOX_KHANS				7808
-#define IDC_CHECKBOX_RAJAS				7809
-#define IDC_CHECKBOX_AFRICANS			7810
-#define IDC_CHECKBOX_FORGOTTEN			7811
-#define IDC_CHECKBOX_AOC				7812
 
-#define	IDC_RADIO_DE					7813
-#define	IDC_RADIO_HD					7814
-#define	IDC_RADIO_AOK					7815
 
 #define IDC_BUTTON_ENABLEALL			7816
 #define IDC_BUTTON_DISABLEALL			7817
@@ -111,9 +99,27 @@
 #define IDC_ICON_CIV					7768
 #define IDC_ICON_EDITION				7769
 #define IDC_BUTTON_OPTIONS				7770
+#define IDC_TAB_STRIP					7780
+#define IDC_BUTTON_CLOSE				7781
+#define IDC_MENU_BAR					7782
+#define IDC_LOG_DRAWN					7783
+#define IDC_LOG_REMAINING				7784
+#define IDC_LABEL_CORNER				7785
+#define IDC_LABEL_CENTRE				7786
+#define IDC_LABEL_DRAWNCOUNT			7787
+#define IDC_LABEL_REMAININGCOUNT		7788
+#define IDC_LABEL_ENABLEDCOUNT			7789
+#define IDC_BUTTON_SHARE				7790
+#define IDC_BUTTON_POOLSHARE			7791
 #define IDM_GITHUB                      32772
 #define IDM_WEBVERSION                  32773
 #define IDM_OPTIONS                     32774
+#define IDM_QUICKSAVE                   32775
+#define IDM_QUICKLOAD                   32776
+#define IDM_USAGERULES                  32777
+#define IDM_COPYLINK                    32778
+#define IDM_SHARE                       32779
+#define IDM_OPENLINK                    32780
 #define IDC_STATIC                      -1
 #define IDC_STATIC_GLOBAL_HOTKEYS		-2
 #define IDC_STATIC_DRAW_CIV_HOTKEYS		-3
@@ -127,7 +133,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        130
-#define _APS_NEXT_COMMAND_VALUE         32775
+#define _APS_NEXT_COMMAND_VALUE         32781
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           110
 #endif

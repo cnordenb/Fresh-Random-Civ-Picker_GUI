@@ -52,7 +52,7 @@ In this youtube video (10 minutes) I explain the need for fresh random and demon
 *At any time, go to the [tech tree](https://aoe2techtree.net/) (made by [Siege Engineers](https://siegeengineers.org/)) of the drawn civ. Click the Tech Tree button or press T (global hotkey F4).*
 
 - **Shortcut to the sustainability webapp!**  
-*At any time, go to the [sustainability app](https://aoe2-de-tools.herokuapp.com/villagers-required/) (made by [Survivalist](https://www.youtube.com/channel/UCmFJUeU8Oubp5Neldbq0JRA)) to see how many villagers are required for a production. Click the S button or press R (global hotkey Ctrl+T).*
+*At any time, go to the sustainability app [aoe2vils.net](https://aoe2vils.net/) to see how many villagers are required for a production. Click the aoe2vils.net button or press R (global hotkey Ctrl+T).*
 
 - **Track drawn and remaining civs!**  
 *See which civs have been drawn and which are remaining on the log tab. Navigate to the log by clicking the Log tab, or by pressing 2 or tab.*
@@ -158,8 +158,8 @@ Accidentally reset? Don't like the civ you drew? Ctrl + Z has your back! Double-
 Did you know you can toggle icon, jingle, or/and civ name on and off whenever you want? Either in options or with a hotkey (hotkeys can be viewed with F2 or from the Help dropdown menu), you can toggle eg. the civ name label off. Drawing a civ would then only give you the jingle and icon. You and your friends can pass the time by guessing which civ the jingle and emblem belongs to.
 ### Enjoy the civ jingles
 Without needing to redraw a civ, you can always listen to its jingle again by clicking the civ icon. If it's a legacy civ (eg. Spanish), you can switch between the definitive and classic jingles in the Jingle Type dropdown menu in options.
-### Use FRCP as a shortcut to Survivalist's sustainability app
-Sometimes we just need to know how many villagers are needed on what. FRCP helps you get to Survivalist's nifty app quickly. There is a dedicated button in the Draw tab which will take you to the https://aoe2-de-tools.herokuapp.com/villagers-required/ webpage. You can also use hotkey R (when in draw tab) or Ctrl + T. 
+### Use FRCP as a shortcut to the aoe2vils.net sustainability app
+Sometimes we just need to know how many villagers are needed on what. FRCP helps you get to aoe2vils.net quickly. There is a dedicated button in the Draw tab which will take you to the https://aoe2vils.net/ webpage. You can also use hotkey R (when in draw tab) or Ctrl + T. 
 ### Orient yourself with the civilisations of Age of Empires II using FRCP
 There are now half a hundred civs in the game which have been released in a dozen different editions and DLC's in the past 26 years. Keeping track of them all can be daunting, especially for someone new or returning. The Civ Pool tab allows you to easily overview which civs belong to which DLC and edition. See instantly how many civs which edition has and batch toggle any DLC or edition for your civ pool. FRCP also offers shortcut to the tech tree.
 
@@ -203,7 +203,7 @@ Join the [the Fresh Random Civ Picker discord server](https://discord.gg/rcFqrBd
 
 - hszemi, Anda, exterkamp, paulirish, lalitpatel, Jineapple, TriRem, pip, and NkoDragaš over at [Siege Engineers](https://siegeengineers.org/) for their https://aoe2techtree.net/ website which my application links to for tech tree.
   
-- [Survivalist](https://www.youtube.com/channel/UCmFJUeU8Oubp5Neldbq0JRA) for his https://aoe2-de-tools.herokuapp.com/ webapp which my application links to for production sustainability calculations.
+- [Survivalist](https://www.youtube.com/channel/UCmFJUeU8Oubp5Neldbq0JRA) for his https://aoe2-de-tools.herokuapp.com/ webapp which early versions of FRCP linked to for production sustainability calculations and inspired aoe2vils.net.
 
 
 ## Regarding usage of Microsoft assets in this project

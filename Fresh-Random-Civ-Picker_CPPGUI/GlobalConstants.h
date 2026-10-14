@@ -1,16 +1,13 @@
+#pragma once
+
+#include "CivDataLimits.h"
+
 #define VERSION L"1.4.2"
 
-#define MAX_CIVS 56
-#define MAX_CIVS_HD 31
-#define MAX_CIVS_AOK 18
 #define MAX_DRAWNLOG_LINECOUNT 256
-#define DLC_AMOUNT 13
-#define EDITION_AMOUNT 3
 #define MAX_LOADSTRING 100
-#define HOTKEY_AMOUNT 40
-#define TOOLTIP_AMOUNT 28
+#define HOTKEY_AMOUNT 42
 #define SOUND_AMOUNT 5
-#define LEGACY_JINGLE_AMOUNT 18
 
 #define HOTKEY_ID_TAB 1
 #define HOTKEY_ID_SPACE 2
@@ -51,6 +48,8 @@
 #define HOTKEY_ID_J 37
 #define HOTKEY_ID_K 38
 #define HOTKEY_ID_L 39
+#define HOTKEY_ID_P 40
+#define HOTKEY_ID_U 41
 
 
 #define DT_UNDERLINE 0x80000000
@@ -62,31 +61,11 @@
 #define BUTTON_WIDTH 100
 #define BUTTON_HEIGHT 30
 
-#define TOOLTIP_DRAW                0
-#define TOOLTIP_RESET               1
-#define TOOLTIP_CLEAR               2
-#define TOOLTIP_ENABLEALL           3
-#define TOOLTIP_DISABLEALL          4
-#define TOOLTIP_TECHTREE            5
-#define TOOLTIP_REMAININGTOGGLE     6
-#define TOOLTIP_DE                  7
-#define TOOLTIP_HD                  8
-#define TOOLTIP_AOK                 9
-#define TOOLTIP_ROYALS			    10
-#define TOOLTIP_ROME				11
-#define TOOLTIP_INDIA				12
-#define TOOLTIP_DUKES				13
-#define TOOLTIP_WEST				14
-#define TOOLTIP_KHANS				15
-#define TOOLTIP_RAJAS				16
-#define TOOLTIP_AFRICANS			17
-#define TOOLTIP_FORGOTTEN			18
-#define TOOLTIP_AOC				    19
-#define TOOLTIP_AUTOTOGGLE  	    20
-#define TOOLTIP_AUTORESET  	        21
-#define TOOLTIP_OPTIONS             22
-#define TOOLTIP_SURVAPP			    23
-#define TOOLTIP_KINGDOMS            24
-#define TOOLTIP_CHIEFTAINS			25
-#define TOOLTIP_HISTORY				26
-#define TOOLTIP_SAGAS				27
+// The Civ Pool tab's hotkeys that pick an edition, by the edition's place in data.json, and that toggle a DLC, by
+// its toggle's place in the edition's list; with the keys the program shows for them.
+constexpr int EDITION_HOTKEY_IDS[MAX_EDITIONS] = { HOTKEY_ID_Q, HOTKEY_ID_W, HOTKEY_ID_E };
+constexpr const wchar_t* EDITION_HOTKEY_KEYS[MAX_EDITIONS] = { L"Q", L"W", L"E" };
+constexpr int DLC_SLOT_HOTKEY_IDS[MAX_DLC_TOGGLES] = { HOTKEY_ID_A, HOTKEY_ID_S, HOTKEY_ID_D, HOTKEY_ID_F, HOTKEY_ID_G,
+                                                       HOTKEY_ID_H, HOTKEY_ID_J, HOTKEY_ID_K, HOTKEY_ID_L };
+constexpr const wchar_t* DLC_SLOT_HOTKEY_KEYS[MAX_DLC_TOGGLES] = { L"A", L"S", L"D", L"F", L"G",
+                                                                   L"H", L"J", L"K", L"L" };

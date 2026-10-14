@@ -133,57 +133,60 @@
     <ClInclude Include="GlobalConstants.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="FRCP_GUI.h" />
+    <ClInclude Include="CivPickerModel.h" />
+    <ClInclude Include="CivPickerView.h" />
+    <ClInclude Include="CivPickerController.h" />
+    <ClInclude Include="ParchmentControl.h" />
+    <ClInclude Include="ParchmentButtons.h" />
+    <ClInclude Include="ParchmentWidgets.h" />
+    <ClInclude Include="ParchmentLog.h" />
+    <ClInclude Include="ParchmentShell.h" />
+    <ClInclude Include="ParchmentTooltip.h" />
+    <ClInclude Include="ParchmentMenu.h" />
+    <ClInclude Include="ParchmentDialogControls.h" />
+    <ClInclude Include="ParchmentDialog.h" />
+    <ClInclude Include="Assertions.h" />
+    <ClInclude Include="ParchmentGeometry.h" />
+    <ClInclude Include="ParchmentTheme.h" />
+    <ClInclude Include="PixelSurface.h" />
+    <ClInclude Include="ParchmentImages.h" />
+    <ClInclude Include="ParchmentFonts.h" />
+    <ClInclude Include="ParchmentRenderer.h" />
+    <ClInclude Include="JsonReader.h" />
+    <ClInclude Include="CivCatalog.h" />
+    <ClInclude Include="CivDataLimits.h" />
+    <ClInclude Include="ShareLink.h" />
+    <ClInclude Include="ParchmentToast.h" />
+    <ClInclude Include="DialogMetrics.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FRCP_GUI.cpp" />
+    <ClCompile Include="CivPickerModel.cpp" />
+    <ClCompile Include="CivPickerView.cpp" />
+    <ClCompile Include="CivPickerController.cpp" />
+    <ClCompile Include="ParchmentControl.cpp" />
+    <ClCompile Include="ParchmentButtons.cpp" />
+    <ClCompile Include="ParchmentWidgets.cpp" />
+    <ClCompile Include="ParchmentLog.cpp" />
+    <ClCompile Include="ParchmentShell.cpp" />
+    <ClCompile Include="ParchmentTooltip.cpp" />
+    <ClCompile Include="ParchmentMenu.cpp" />
+    <ClCompile Include="ParchmentDialogControls.cpp" />
+    <ClCompile Include="ParchmentDialog.cpp" />
+    <ClCompile Include="CivPickerViewLayout.cpp" />
+    <ClCompile Include="CivPickerDialogs.cpp" />
+    <ClCompile Include="Assertions.cpp" />
+    <ClCompile Include="ParchmentGeometry.cpp" />
+    <ClCompile Include="PixelSurface.cpp" />
+    <ClCompile Include="ParchmentImages.cpp" />
+    <ClCompile Include="ParchmentFonts.cpp" />
+    <ClCompile Include="ParchmentRenderer.cpp" />
+    <ClCompile Include="JsonReader.cpp" />
+    <ClCompile Include="CivCatalog.cpp" />
+    <ClCompile Include="ShareLink.cpp" />
+    <ClCompile Include="ParchmentToast.cpp" />
+    <ClCompile Include="CivPickerShare.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="civ_icons\armenians.bmp" />
-    <Image Include="civ_icons\aztecs.bmp" />
-    <Image Include="civ_icons\bengalis.bmp" />
-    <Image Include="civ_icons\berber.bmp" />
-    <Image Include="civ_icons\bohemians.bmp" />
-    <Image Include="civ_icons\britons.bmp" />
-    <Image Include="civ_icons\bulgarians.bmp" />
-    <Image Include="civ_icons\burgundians.bmp" />
-    <Image Include="civ_icons\burmese.bmp" />
-    <Image Include="civ_icons\byzantines.bmp" />
-    <Image Include="civ_icons\celts.bmp" />
-    <Image Include="civ_icons\chinese.bmp" />
-    <Image Include="civ_icons\cumans.bmp" />
-    <Image Include="civ_icons\dravidians.bmp" />
-    <Image Include="civ_icons\ethiopians.bmp" />
-    <Image Include="civ_icons\franks.bmp" />
-    <Image Include="civ_icons\georgians.bmp" />
-    <Image Include="civ_icons\goths.bmp" />
-    <Image Include="civ_icons\gurjaras.bmp" />
-    <Image Include="civ_icons\huns.bmp" />
-    <Image Include="civ_icons\inca.bmp" />
-    <Image Include="civ_icons\indians.bmp" />
-    <Image Include="civ_icons\italians.bmp" />
-    <Image Include="civ_icons\japanese.bmp" />
-    <Image Include="civ_icons\khmer.bmp" />
-    <Image Include="civ_icons\koreans.bmp" />
-    <Image Include="civ_icons\lithuanians.bmp" />
-    <Image Include="civ_icons\magyars.bmp" />
-    <Image Include="civ_icons\malay.bmp" />
-    <Image Include="civ_icons\malians.bmp" />
-    <Image Include="civ_icons\mayans.bmp" />
-    <Image Include="civ_icons\mongols.bmp" />
-    <Image Include="civ_icons\persians.bmp" />
-    <Image Include="civ_icons\poles.bmp" />
-    <Image Include="civ_icons\portuguese.bmp" />
-    <Image Include="civ_icons\romans.bmp" />
-    <Image Include="civ_icons\saracens.bmp" />
-    <Image Include="civ_icons\sicilians.bmp" />
-    <Image Include="civ_icons\slavs.bmp" />
-    <Image Include="civ_icons\spanish.bmp" />
-    <Image Include="civ_icons\tatars.bmp" />
-    <Image Include="civ_icons\teutons.bmp" />
-    <Image Include="civ_icons\turks.bmp" />
-    <Image Include="civ_icons\vietnamese.bmp" />
-    <Image Include="civ_icons\vikings.bmp" />
     <Image Include="Fresh Random Civ Picker.ico" />
     <Image Include="small_Fresh Random Civ Picker.ico" />
     <Image Include="social-preview.png" />
@@ -192,14 +195,33 @@
     <ResourceCompile Include="FRCP_GUI.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="CLAUDE2.md" />
+    <None Include="data.json" />
     <None Include="formatting_notes.md" />
     <None Include="settings.ini" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\..\..\..\..\..\..\Program Files %28x86%29\Steam\steamapps\common\AoE2DE\resources\en\strings\history\Armenians.txt" />
-    <Text Include="..\..\..\..\..\..\..\Program Files %28x86%29\Steam\steamapps\common\AoE2DE\resources\en\strings\history\Aztecs.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <!-- The program loads its images from the exe's own folder, so every build copies them next to the exe. -->
+  <Target Name="CopyImagesToOutDir" AfterTargets="Build">
+    <ItemGroup>
+      <ProgramImage Include="$(ProjectDir)images\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ProgramImage)"
+          DestinationFiles="@(ProgramImage->'$(OutDir)images\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
+  <!-- data.json (the editions, DLCs and civs) and the civ jingles named after them are read from the exe's
+       folder as well. -->
+  <Target Name="CopyProgramDataToOutDir" AfterTargets="Build">
+    <ItemGroup>
+      <ProgramData Include="$(ProjectDir)data.json" />
+      <ProgramJingle Include="$(ProjectDir)sounds\civ_jingles\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ProgramData)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(ProgramJingle)"
+          DestinationFiles="@(ProgramJingle->'$(OutDir)sounds\civ_jingles\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
 </Project>
