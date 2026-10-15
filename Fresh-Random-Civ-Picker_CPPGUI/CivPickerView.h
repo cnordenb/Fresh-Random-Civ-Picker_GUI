@@ -293,6 +293,7 @@ private:
     bool CreateFrameControls();
     bool CreateDrawTabControls();
     bool CreateLogTabControls();
+    bool ShowCivIconsInLogs();
     bool RaiseLogsOverCivName();
     bool CreatePoolTabControls();
     bool CreateEditionControls();
@@ -444,6 +445,7 @@ private:
     FramedIconButton button_survapp;
     ParchmentLog drawn_log;
     ParchmentLog remaining_log;
+    IconLabels civ_labels;
     PictureButton civ_icon;
     PictureButton edition_icon;
     Checkbox checkbox_showremainlog;

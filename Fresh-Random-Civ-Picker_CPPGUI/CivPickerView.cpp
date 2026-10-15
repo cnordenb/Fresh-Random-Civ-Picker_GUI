@@ -864,7 +864,7 @@ void CivPickerView::UpdateDrawnLog(DrawnLogUpdate update)
     }
 
     if (update == DrawnLogUpdate::entry)
-        AddDrawnLogEntry(log_text, IterationText() + L" - " + model.GetCurrentCiv() + L"\r\n");
+        AddDrawnLogEntry(log_text, model.GetCurrentCiv() + L" (" + IterationText() + L")\r\n");
     else if (update == DrawnLogUpdate::blank_line && !model.IsResetState() && !starts_with_blank_line)
         AddDrawnLogEntry(log_text, L"\r\n");
 }

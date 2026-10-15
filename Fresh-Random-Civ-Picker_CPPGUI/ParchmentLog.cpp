@@ -22,7 +22,11 @@ namespace
     constexpr UINT_PTR REPEAT_TIMER = 1;
     constexpr int COMMAND_COPY = 1;
     constexpr int COMMAND_SELECT_ALL = 2;
-    constexpr int LINE_STEP = 16; // one line of 16.2 px, in whole pixels
+    // .log-icon { width: 18px; height: 18px }, .log-row { gap: 4px }, and the parchment logs' line-height of 20px,
+    // which fits the icons.
+    constexpr int ICON_SIZE = 18;
+    constexpr int ICON_GAP = 4;
+    constexpr float ICON_LINE_HEIGHT = 20.0f;
 
     HMENU ControlId(int id) { return reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)); }
 
@@ -58,6 +62,19 @@ bool ParchmentLog::Create(const ControlContext& control_context, const ControlPl
                              ControlId(placement.id), instance, this);
     if (!c_assert(window != NULL)) return false;
     LayOutText();
+    return true;
+}
+
+// From now on every line that starts with one of the labels is led by its icon, in a column left of the text, and
+// the lines are tall enough for the icons.
+bool ParchmentLog::ShowIcons(const Icons& line_icons)
+{
+    if (!c_assert(window != NULL) || !c_assert(line_icons.labels != nullptr)) return false;
+    if (!c_assert(line_icons.columns > 0 && line_icons.cell_size > 0)) return false;
+    icons = line_icons;
+    line_height = ICON_LINE_HEIGHT;
+    LayOutText();
+    Redraw();
     return true;
 }
 
@@ -140,7 +157,7 @@ void ParchmentLog::LayOutText()
     if (!c_assert(text_length >= 0 && text_length <= MAX_TEXT_LENGTH)) return;
     const float* measured = context.renderer->MeasureAdvances({ text, text_length, FontId::ui });
     for (int i = 0; i < text_length && i < MAX_TEXT_LENGTH; i++) advances[i] = text[i] == L'\r' ? 0.0f : measured[i];
-    const int padding_width = size.width - 2 * BORDER - PADDING_LEFT;
+    const int padding_width = size.width - 2 * BORDER - PADDING_LEFT - IconColumn();
     layout.has_scrollbar = false;
     if (!WrapText(padding_width - PADDING_RIGHT)) return;
     if (NeedsScrollbar({ layout.content_height, ViewportHeight(size), 0 }))
@@ -155,10 +172,10 @@ bool ParchmentLog::WrapText(int text_width)
 {
     if (!c_assert(text_width > 0) || !c_assert(text_width < size.width)) return false;
     if (!lines.Wrap({ text, advances, text_length, static_cast<float>(text_width) })) return false;
-    const float lines_height = static_cast<float>(lines.Count()) * UI_LINE_HEIGHT;
+    const float lines_height = static_cast<float>(lines.Count()) * line_height;
     layout.content_height = static_cast<int>(std::ceil(lines_height)) + 2 * PADDING_TOP;
-    layout.text_area = { BORDER + PADDING_LEFT, BORDER + PADDING_TOP, BORDER + PADDING_LEFT + text_width,
-                         size.height - BORDER };
+    const int text_left = BORDER + PADDING_LEFT + IconColumn();
+    layout.text_area = { text_left, BORDER + PADDING_TOP, text_left + text_width, size.height - BORDER };
     return true;
 }
 
@@ -200,9 +217,10 @@ void ParchmentLog::PaintLines(ParchmentRenderer& renderer)
     const float first_top = static_cast<float>(layout.text_area.top - scroll_top);
     for (int i = 0; i < lines.Count() && i < MAX_WRAPPED_LINES; i++)
     {
-        const float top = first_top + static_cast<float>(i) * UI_LINE_HEIGHT;
-        if (top + UI_LINE_HEIGHT < 0.0f || top > static_cast<float>(size.height)) continue;
+        const float top = first_top + static_cast<float>(i) * line_height;
+        if (top + line_height < 0.0f || top > static_cast<float>(size.height)) continue;
         PaintSelection(renderer, i, top);
+        PaintIcon(renderer, i, top);
         PaintLine(renderer, i, top);
     }
 }
@@ -214,10 +232,28 @@ void ParchmentLog::PaintLine(ParchmentRenderer& renderer, int line_index, float 
     if (!c_assert(line.start >= 0 && line.length >= 0 && line.start + line.length <= text_length)) return;
     int length = line.length;
     if (length > 0 && text[line.start + length - 1] == L'\r') length--;
-    const float baseline = renderer.BaselineInLine(FontId::ui, top, UI_LINE_HEIGHT);
+    const float baseline = renderer.BaselineInLine(FontId::ui, top, line_height);
     const float left = static_cast<float>(layout.text_area.left);
     renderer.DrawText({ { text + line.start, length, FontId::ui }, LOG_TEXT_COLOUR, left,
                         static_cast<float>(size.width), baseline, TextAlign::left });
+}
+
+// The icon of the label a line of the text starts with, centred in the line left of the text (.log-icon). The
+// rest of a line that wrapped has none.
+void ParchmentLog::PaintIcon(ParchmentRenderer& renderer, int line_index, float top)
+{
+    if (icons.labels == nullptr) return;
+    if (!c_assert(line_index >= 0 && line_index < lines.Count())) return;
+    const TextLine line = lines.Line(line_index);
+    if (!c_assert(line.start >= 0 && line.start <= text_length)) return;
+    if (line.start > 0 && text[line.start - 1] != L'\n') return;
+    const int cell = icons.labels->CellOfLeadingLabel(text + line.start, text_length - line.start);
+    if (cell == IconLabels::NO_ICON) return;
+    const float left = static_cast<float>(layout.text_area.left - IconColumn());
+    const float icon_top = top + (line_height - static_cast<float>(ICON_SIZE)) / 2.0f;
+    const float side = static_cast<float>(ICON_SIZE);
+    renderer.DrawAtlasCell({ icons.atlas, cell, icons.columns, { icons.cell_size, icons.cell_size },
+                             { left, icon_top, left + side, icon_top + side } });
 }
 
 // The selected part of a line, in the system's highlight colours as in a browser.
@@ -233,8 +269,7 @@ void ParchmentLog::PaintSelection(ParchmentRenderer& renderer, int line_index, f
     if (start >= end) return;
     const COLORREF highlight = GetSysColor(COLOR_HIGHLIGHT);
     const Colour colour = { GetRValue(highlight), GetGValue(highlight), GetBValue(highlight), 1.0f };
-    renderer.FillRect({ CharacterX(line_index, start), top, CharacterX(line_index, end), top + UI_LINE_HEIGHT },
-                      colour);
+    renderer.FillRect({ CharacterX(line_index, start), top, CharacterX(line_index, end), top + line_height }, colour);
 }
 
 // The scrollbar over the log's right side: up button, stretched track, down button and the knob (.sb).
@@ -347,13 +382,25 @@ int ParchmentLog::ScrollStep(ScrollbarPart part) const
 {
     // The knob is dragged, not stepped.
     if (!c_assert(part != ScrollbarPart::knob)) return 0;
-    const int page = ViewportHeight(size) - LINE_STEP > LINE_STEP ? ViewportHeight(size) - LINE_STEP : LINE_STEP;
-    if (part == ScrollbarPart::up_button) return -LINE_STEP;
-    if (part == ScrollbarPart::down_button) return LINE_STEP;
+    const int step = LineStep();
+    const int page = ViewportHeight(size) - step > step ? ViewportHeight(size) - step : step;
+    if (part == ScrollbarPart::up_button) return -step;
+    if (part == ScrollbarPart::down_button) return step;
     if (part == ScrollbarPart::track_above_knob) return -page;
     if (part == ScrollbarPart::track_below_knob) return page;
     return 0;
 }
+
+// One line, in whole pixels.
+int ParchmentLog::LineStep() const
+{
+    const int step = static_cast<int>(line_height);
+    if (!c_assert(step > 0)) return 1;
+    return step;
+}
+
+// The room the icons take left of the text: none in a log without them.
+int ParchmentLog::IconColumn() const { return icons.labels != nullptr ? ICON_SIZE + ICON_GAP : 0; }
 
 bool ParchmentLog::ScrollBy(int distance)
 {
@@ -375,7 +422,7 @@ void ParchmentLog::OnWheel(WPARAM wParam)
     // SPI_GETWHEELSCROLLLINES only fails on a broken system; the default of 3 lines is then used.
     (void)SystemParametersInfoW(SPI_GETWHEELSCROLLLINES, 0, &lines_per_notch, 0);
     const int notches = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
-    (void)ScrollBy(-notches * static_cast<int>(lines_per_notch) * LINE_STEP);
+    (void)ScrollBy(-notches * static_cast<int>(lines_per_notch) * LineStep());
 }
 
 void ParchmentLog::OnKey(WPARAM key)
@@ -384,8 +431,8 @@ void ParchmentLog::OnKey(WPARAM key)
     if (control_held && key == 'C') CopySelection();
     if (control_held && key == 'A') SelectAll();
     const int page = ScrollStep(ScrollbarPart::track_below_knob);
-    if (key == VK_UP) (void)ScrollBy(-LINE_STEP);
-    if (key == VK_DOWN) (void)ScrollBy(LINE_STEP);
+    if (key == VK_UP) (void)ScrollBy(-LineStep());
+    if (key == VK_DOWN) (void)ScrollBy(LineStep());
     if (key == VK_PRIOR) (void)ScrollBy(-page);
     if (key == VK_NEXT) (void)ScrollBy(page);
     if (key == VK_HOME) (void)ScrollBy(-MaxScroll());
@@ -421,7 +468,7 @@ int ParchmentLog::CharacterAt(PixelPoint point) const
     if (!c_assert(text_length >= 0 && text_length <= MAX_TEXT_LENGTH)) return 0;
     if (lines.Count() == 0) return 0;
     const float content_y = static_cast<float>(point.y - layout.text_area.top + scroll_top);
-    const int line_index = static_cast<int>(std::floor(content_y / UI_LINE_HEIGHT));
+    const int line_index = static_cast<int>(std::floor(content_y / line_height));
     if (line_index < 0) return 0;
     if (line_index >= lines.Count()) return text_length;
     const TextLine line = lines.Line(line_index);

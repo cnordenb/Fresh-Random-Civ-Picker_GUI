@@ -191,6 +191,39 @@ private:
     int count = 0;
 };
 
+// --- Text: lines led by an icon, picked by the label (whole words) the line starts with ---
+
+constexpr int MAX_ICON_LABELS = 128;
+constexpr int MAX_ICON_LABEL_LENGTH = 64;
+
+struct IconLabel
+{
+    const wchar_t* text;
+    int cell;
+};
+
+class IconLabels
+{
+public:
+    static constexpr int NO_ICON = -1;
+
+    bool Add(const IconLabel& label);
+    int CellOfLeadingLabel(const wchar_t* line, int length) const;
+
+private:
+    struct StoredLabel
+    {
+        wchar_t text[MAX_ICON_LABEL_LENGTH + 1];
+        int length;
+        int cell;
+    };
+
+    static bool StartsLine(const StoredLabel& label, const wchar_t* line, int length);
+
+    StoredLabel labels[MAX_ICON_LABELS] = {};
+    int count = 0;
+};
+
 // --- Window shapes: the fully opaque runs of an alpha row, for a window region ---
 
 constexpr int MAX_RUNS_PER_ROW = 64;

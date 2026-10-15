@@ -134,6 +134,8 @@ constexpr Colour KEY_COLOUR = { 0xd7, 0xb3, 0x94, 1.0f };
 constexpr Colour KEY_BORDER_COLOUR = { 0xb4, 0xb4, 0xb4, 1.0f };
 constexpr Colour FOCUS_COLOUR = { 0, 0, 0, 1.0f };
 constexpr Colour BUTTON_FOCUS_COLOUR = { 0xf1, 0xde, 0xae, 1.0f };
+// Desktop only: what the parchment lies on under the main window's content, where its burnt edge reaches in.
+constexpr Colour CONTENT_UNDERLAY_COLOUR = { 0, 0, 0, 1.0f };
 
 // --- Line heights (CSS line-height), in the browser's layout units of 1/64 px ---
 

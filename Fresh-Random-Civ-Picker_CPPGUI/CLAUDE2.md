@@ -1043,6 +1043,43 @@ follows 6 px after it (`TITLE_ICON_SIZE`, `TITLE_ICON_GAP`). The icon is an opaq
 the white question mark, as on the taskbar. A failed load or draw is reported and leaves the title
 alone. Verified: zero warnings at /W4, zero /analyze findings, captured on a hidden desktop.
 
+### 12.7 The content never lies under the skin (2026-10-16)
+
+The user reported a piece of parchment over the drawn log that lagged behind the window as it
+moved. The original parchment's burnt edge reaches into the content: a notch over the drawn log
+(x 32 to 44, y 292 to 323, alpha 228 to 254), a smaller one at the remaining log's right edge, the
+client frame's sides and the close button's top right corner. Those pixels weren't fully opaque,
+so they fell outside the window region and the skin showed them, and the skin follows the window
+a moment late (it moves in WM_WINDOWPOSCHANGED). `BuildMainShell` now lays the parchment on an
+opaque underlay (`CONTENT_UNDERLAY_COLOUR`, black) under the title row, menu bar and client area,
+so all of the content is the window's own; where the edge reaches in it shows a little darker,
+like the backdrop the controls already copied. The burnt edge outside the content still belongs
+to the skin and still trails a moving window.
+- Verified: on the Log tab, content pixels outside the window region: 885 before (278 in the drawn
+  log, 38 in the remaining log), 0 after. Zero warnings at /W4 (Debug and Release x64), zero
+  /analyze findings, 78 unit tests pass.
+
+### 12.8 Civ icons in the logs (2026-10-16)
+
+The user asked for the civs' icons in the Log tab's logs, a drawn entry reading "[icon] Celts
+(1/56)", as the web version's logs show them (`drawnRows`, `fillLog`, `.log-row`).
+- Drawn entries are now "<civ> (<k>/<n>)" instead of "<k>/<n> - <civ>"; the remaining log is
+  unchanged. Only the display changed: log.txt stores names, and the drawn log is rebuilt from it.
+- `ParchmentLog::ShowIcons` turns a log's icons on: a line of the text that starts with one of the
+  labels as whole words is led by that label's atlas cell, 18 px, centred in a 20 px line, the text
+  4 px after it (.log-icon, gap: 4px, the parchment logs' line-height: 20px). The rest of a wrapped
+  line has none; the text keeps one column, so it lines up. Scrolling steps a line of 20 px.
+- The labels are the civs' names from the catalog (so from data.json), each with its own cell
+  (`CivPickerView::ShowCivIconsInLogs`); `IconLabels` (ParchmentGeometry) keeps copies and finds
+  the longest label a line starts with. Copying text from a log gives the text alone.
+- The History dialog's log keeps its 16.2 px lines and no icons (the web version has no such log).
+- Verified: on a 578 px wide window the rows sit where the web version's do (drawn log row 1 at
+  x 46, y 144, rows 20 px apart; remaining log at x 363), measured in headless Chrome against a
+  copy of frcp_html with the probe; icon and text baseline match in a side-by-side capture.
+  Zero warnings at /W4 (Debug x64 and Win32, Release x64), zero /analyze findings, 83 unit tests
+  (5 new: a label leads a line, only as whole words at its start, the longest wins, bad labels
+  are refused, a fixed capacity). ParchmentLog.cpp is now 528 lines, past CC's 500.
+
 ## 13. Waiting for the user (gathered 2026-10-15)
 
 Everything from the sessions of 2026-10-15 that needs a decision, a look or a hand. Older open

@@ -129,6 +129,12 @@ bool CivPickerView::BuildMainShell()
     const PixelSize size = { WINDOW_WIDTH, WINDOW_HEIGHT };
     if (!renderer.BeginFrame({ canvas.Dc(), size, ParchmentRenderer::SurfaceAlpha::premultiplied })) return false;
     renderer.Clear();
+    // The burnt edge reaches into the content here and there (the title row, the menu bar, the client area). The
+    // content lies on an opaque underlay, so all of it is the window's own and none of it the skin's, which
+    // follows the window a moment late when the window moves.
+    const PixelRect content = { WINDOW_PADDING, WINDOW_PADDING, WINDOW_WIDTH - WINDOW_PADDING,
+                                CLIENT_TOP + CLIENT_HEIGHT };
+    renderer.FillRect(ToFloatRect(content), CONTENT_UNDERLAY_COLOUR);
     const PixelRect visible_part = { BACKGROUND_VISIBLE_LEFT, BACKGROUND_VISIBLE_TOP, BACKGROUND_VISIBLE_RIGHT,
                                      BACKGROUND_VISIBLE_BOTTOM };
     renderer.DrawImage({ ImageId::background, visible_part, ToFloatRect({ 0, 0, size.width, size.height }), 1.0f,
@@ -265,7 +271,23 @@ bool CivPickerView::CreateLogTabControls()
            checkbox_showremainlog.Create(context,
                                          PlaceInClient(IDC_CHECKBOX_REMAINLOG, SHOW_REMAINING_AREA, L"Show")) &&
            remaining_log.Create(context, PlaceInClient(IDC_LOG_REMAINING, REMAINING_LOG_AREA, L"")) &&
-           button_share.Create(context, PlaceInClient(IDC_BUTTON_SHARE, SHARE_AREA, L"")) && RaiseLogsOverCivName();
+           ShowCivIconsInLogs() && button_share.Create(context, PlaceInClient(IDC_BUTTON_SHARE, SHARE_AREA, L"")) &&
+           RaiseLogsOverCivName();
+}
+
+// A log line that starts with a civ's name is led by the civ's icon, as in the web version's logs. The civ icon
+// atlas holds the civs in the order of their IDs.
+bool CivPickerView::ShowCivIconsInLogs()
+{
+    static_assert(MAX_CIVS <= MAX_ICON_LABELS, "every civ's name can lead a log line");
+    if (!c_assert(drawn_log.Window() != NULL && remaining_log.Window() != NULL)) return false;
+    const CivCatalog& catalog = model.Catalog();
+    for (int civ = 0; civ < catalog.CivCount() && civ < MAX_CIVS; civ++)
+    {
+        if (!civ_labels.Add({ catalog.CivAt(civ).name.c_str(), civ })) return false;
+    }
+    const ParchmentLog::Icons icons = { &civ_labels, ImageId::civ_atlas, CIV_ATLAS_COLUMNS, CIV_ATLAS_CELL };
+    return drawn_log.ShowIcons(icons) && remaining_log.ShowIcons(icons);
 }
 
 // On the Log tab the civ name reaches into the logs, which lie over it as in the web version.

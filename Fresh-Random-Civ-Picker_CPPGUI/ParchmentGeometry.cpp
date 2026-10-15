@@ -329,6 +329,58 @@ float WrappedLines::WidestLine() const
     return widest;
 }
 
+// --- Text: lines led by an icon ---
+
+// Keeps a copy of the label's text, so the caller's text needn't outlive it.
+bool IconLabels::Add(const IconLabel& label)
+{
+    if (!c_assert(count < MAX_ICON_LABELS) || !c_assert(label.text != nullptr)) return false;
+    if (!c_assert(label.cell >= 0)) return false;
+    StoredLabel& stored = labels[count];
+    int length = 0;
+    while (length < MAX_ICON_LABEL_LENGTH && label.text[length] != L'\0')
+    {
+        stored.text[length] = label.text[length];
+        length++;
+    }
+    if (!c_assert(length > 0) || !c_assert(label.text[length] == L'\0')) return false;
+    stored.text[length] = L'\0';
+    stored.length = length;
+    stored.cell = label.cell;
+    count++;
+    return true;
+}
+
+// The cell of the longest label the line starts with; NO_ICON when it starts with none.
+int IconLabels::CellOfLeadingLabel(const wchar_t* line, int length) const
+{
+    if (!c_assert(line != nullptr) || !c_assert(length >= 0)) return NO_ICON;
+    int cell = NO_ICON;
+    int longest = 0;
+    for (int i = 0; i < count && i < MAX_ICON_LABELS; i++)
+    {
+        if (labels[i].length <= longest || !StartsLine(labels[i], line, length)) continue;
+        cell = labels[i].cell;
+        longest = labels[i].length;
+    }
+    return cell;
+}
+
+// A label starts a line as whole words: a space, a line break or the line's end follows it.
+bool IconLabels::StartsLine(const StoredLabel& label, const wchar_t* line, int length)
+{
+    if (!c_assert(line != nullptr)) return false;
+    if (!c_assert(label.length > 0 && label.length <= MAX_ICON_LABEL_LENGTH)) return false;
+    if (label.length > length) return false;
+    for (int i = 0; i < label.length && i < MAX_ICON_LABEL_LENGTH; i++)
+    {
+        if (line[i] != label.text[i]) return false;
+    }
+    if (label.length == length) return true;
+    const wchar_t next = line[label.length];
+    return next == L' ' || next == L'\r' || next == L'\n';
+}
+
 // --- Window shapes ---
 
 bool OpaqueRuns::Scan(const uint8_t* alpha_row, int width)

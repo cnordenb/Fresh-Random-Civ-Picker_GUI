@@ -272,6 +272,53 @@ TEST(WordWrap, TheWidestLineIsMeasuredWithoutTrailingSpaces)
     EXPECT_FLOAT_EQ(lines.WidestLine(), 70.0f);
 }
 
+// .log-row: a log's line is led by the icon of the name it starts with.
+TEST(IconLabels, ALineThatStartsWithALabelGetsItsIcon)
+{
+    IconLabels labels;
+    ASSERT_TRUE(labels.Add({ L"Alpha", 3 }));
+    EXPECT_EQ(labels.CellOfLeadingLabel(L"Alpha (1/9)", 11), 3);
+    EXPECT_EQ(labels.CellOfLeadingLabel(L"Alpha", 5), 3);
+    EXPECT_EQ(labels.CellOfLeadingLabel(L"Alpha\r\nBeta", 11), 3);
+}
+
+TEST(IconLabels, ALabelCountsOnlyAsWholeWordsAtTheLinesStart)
+{
+    IconLabels labels;
+    ASSERT_TRUE(labels.Add({ L"Alpha", 3 }));
+    EXPECT_EQ(labels.CellOfLeadingLabel(L"Alphas (1/9)", 12), IconLabels::NO_ICON);
+    EXPECT_EQ(labels.CellOfLeadingLabel(L" Alpha", 6), IconLabels::NO_ICON);
+    EXPECT_EQ(labels.CellOfLeadingLabel(L"Alph", 4), IconLabels::NO_ICON);
+    EXPECT_EQ(labels.CellOfLeadingLabel(L"", 0), IconLabels::NO_ICON);
+}
+
+TEST(IconLabels, TheLongestLabelWins)
+{
+    IconLabels labels;
+    ASSERT_TRUE(labels.Add({ L"Alpha", 3 }));
+    ASSERT_TRUE(labels.Add({ L"Alpha Beta", 5 }));
+    EXPECT_EQ(labels.CellOfLeadingLabel(L"Alpha Beta (2/9)", 16), 5);
+    EXPECT_EQ(labels.CellOfLeadingLabel(L"Alpha Gamma", 11), 3);
+}
+
+TEST(IconLabels, RefusesEmptyOrOverlongLabelsAndCellsBelowZero)
+{
+    wchar_t overlong[MAX_ICON_LABEL_LENGTH + 2] = {};
+    for (int i = 0; i <= MAX_ICON_LABEL_LENGTH; i++) overlong[i] = L'a';
+    IconLabels labels;
+    EXPECT_FALSE(labels.Add({ L"", 1 }));
+    EXPECT_FALSE(labels.Add({ overlong, 1 }));
+    EXPECT_FALSE(labels.Add({ L"Alpha", -1 }));
+    EXPECT_EQ(labels.CellOfLeadingLabel(L"Alpha", 5), IconLabels::NO_ICON);
+}
+
+TEST(IconLabels, HoldsAFixedNumberOfLabels)
+{
+    IconLabels labels;
+    for (int i = 0; i < MAX_ICON_LABELS; i++) ASSERT_TRUE(labels.Add({ L"Alpha", i }));
+    EXPECT_FALSE(labels.Add({ L"Beta", 0 }));
+}
+
 TEST(OpaqueRuns, FindsTheFullyOpaqueStretchesOfARow)
 {
     const uint8_t alpha[] = { 0, 255, 255, 128, 255, 255, 255, 0 };

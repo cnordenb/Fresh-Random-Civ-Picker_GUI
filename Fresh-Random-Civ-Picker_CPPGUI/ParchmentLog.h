@@ -8,15 +8,24 @@
 // nine-slice, with the game's scrollbar over its right side while the text overflows. It takes the place of a
 // read-only multi-line EDIT control: its text is the window text (SetWindowText, GetWindowText), long lines wrap,
 // the wheel, the keys and the scrollbar scroll it, and text can be selected and copied (Ctrl+C, Ctrl+A or the
-// context menu).
+// context menu). A log may lead each line by an icon, picked by the label the line starts with (.log-row).
 class ParchmentLog final
 {
 public:
     static constexpr int MAX_TEXT_LENGTH = ParchmentFonts::MAX_MEASURED_LENGTH;
 
+    struct Icons
+    {
+        const IconLabels* labels;
+        ImageId atlas;
+        int columns;
+        int cell_size;
+    };
+
     static bool RegisterWindowClass(HINSTANCE instance);
 
     bool Create(const ControlContext& context, const ControlPlacement& placement);
+    bool ShowIcons(const Icons& line_icons);
     void Release();
     HWND Window() const;
 
@@ -40,6 +49,7 @@ private:
     void PaintLog(ParchmentRenderer& renderer, PixelSize size);
     void PaintLines(ParchmentRenderer& renderer);
     void PaintLine(ParchmentRenderer& renderer, int line_index, float top);
+    void PaintIcon(ParchmentRenderer& renderer, int line_index, float top);
     void PaintSelection(ParchmentRenderer& renderer, int line_index, float top);
     void PaintScrollbar(ParchmentRenderer& renderer);
 
@@ -57,6 +67,8 @@ private:
     bool StepScrollbar();
     bool ScrollBy(int distance);
     int ScrollStep(ScrollbarPart part) const;
+    int LineStep() const;
+    int IconColumn() const;
     int TrackLength() const;
     int MaxScroll() const;
     int CharacterAt(PixelPoint point) const;
@@ -69,6 +81,8 @@ private:
     HWND parent = NULL;
     ControlContext context = { nullptr, nullptr, NULL };
     PixelSize size = { 0, 0 };
+    Icons icons = { nullptr, ImageId::civ_atlas, 0, 0 };
+    float line_height = UI_LINE_HEIGHT;
     Layout layout = { { 0, 0, 0, 0 }, false, 0 };
     int scroll_top = 0;
     int selection_anchor = 0;
