@@ -136,7 +136,7 @@ bool CivPickerView::BuildMainShell()
     return renderer.EndFrame() && main_shell.Attach(main_window, size);
 }
 
-// The window's own drawing under its controls: the title (.titlebar h1) and the client area's frame.
+// The window's own drawing under its controls: the icon and title (.titlebar h1) and the client area's frame.
 bool CivPickerView::DecorateMainBackdrop()
 {
     if (!c_assert(main_window != NULL) || !c_assert(title[0] != L'\0')) return false;
@@ -147,7 +147,15 @@ bool CivPickerView::DecorateMainBackdrop()
     const TextSpan title_text = { title, static_cast<int>(wcslen(title)), FontId::ui };
     const float baseline = renderer.BaselineCentred(FontId::ui, static_cast<float>(WINDOW_PADDING),
                                                     static_cast<float>(TITLE_BAR_HEIGHT));
-    renderer.DrawText({ title_text, TEXT_COLOUR, static_cast<float>(WINDOW_PADDING + TITLE_TEXT_LEFT),
+    // The program's icon before the title, as in a window caption, scaled down from its 500 px picture.
+    const PixelSize icon = renderer.ImageSize(ImageId::program_icon);
+    const int icon_left = WINDOW_PADDING + TITLE_TEXT_LEFT;
+    const int icon_top = WINDOW_PADDING + (TITLE_BAR_HEIGHT - TITLE_ICON_SIZE) / 2;
+    renderer.DrawImage({ ImageId::program_icon, { 0, 0, icon.width, icon.height },
+                         ToFloatRect({ icon_left, icon_top, icon_left + TITLE_ICON_SIZE, icon_top + TITLE_ICON_SIZE }),
+                         1.0f, ParchmentRenderer::Smoothing::smooth });
+    const int title_left = icon_left + TITLE_ICON_SIZE + TITLE_ICON_GAP;
+    renderer.DrawText({ title_text, TEXT_COLOUR, static_cast<float>(title_left),
                         static_cast<float>(WINDOW_WIDTH - WINDOW_PADDING), baseline, TextAlign::left });
     const float left = static_cast<float>(CLIENT_LEFT);
     const float right = static_cast<float>(CLIENT_LEFT + CLIENT_WIDTH);

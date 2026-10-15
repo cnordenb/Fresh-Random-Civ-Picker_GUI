@@ -43,6 +43,7 @@ enum class ImageId
     text_field_frame, // ui/textfield_9slice.png, 15 px nine-slice
     close_button, // ui/x_button.png: normal and pressed side by side
     share_icon, // ui/share_icon.png, the share buttons' icon
+    program_icon, // ui/frcp.png, the program's icon (500 px), drawn small before the title (desktop only)
     civ_atlas, // civ/<civ>.png in the order of the civs' IDs, then civ/random.png: 104 px cells, 8 per row
     civ_atlas_grey, // the same, filtered grayscale(1) for disabled civs
     dlc_atlas, // dlc/<icon>.png: each edition's three looks, then the DLCs' icons; 128 px cells, 6 per row
@@ -163,6 +164,9 @@ constexpr int CLIENT_WIDTH = 534;
 constexpr int CLIENT_HEIGHT = 511;
 constexpr int CLIENT_FRAME_TOP = 21; // .frame { top: 21px }
 constexpr int TITLE_TEXT_LEFT = 10; // .titlebar { padding-left: 10px }
+// Desktop only: the program's small icon before the title, as in a window caption; the title follows it.
+constexpr int TITLE_ICON_SIZE = 16;
+constexpr int TITLE_ICON_GAP = 6;
 constexpr int CLOSE_BUTTON_WIDTH = 46;
 constexpr int CLOSE_BUTTON_IMAGE_SIZE = 17;
 

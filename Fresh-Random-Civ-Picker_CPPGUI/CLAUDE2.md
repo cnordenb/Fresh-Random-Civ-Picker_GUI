@@ -1002,12 +1002,7 @@ parchment.
 
 ### 12.4 Decisions and questions
 
-1. The parchment's extra 74 px of height went below the content. Keep it, or let the client area
-   (logs, civ grid, DLC list) use it?
-2. 64 civs is the next limit a DLC can hit (12.1). Raise it with a new share-link format version?
-3. Toggles after the ninth have no hotkey. Another key set for them?
-4. The 48 px cursors from 150 %; at 125 % the 32 px ones show unscaled (system cursors are 40 px).
-5. Windows 10 1607 or later is now required (it was effectively required by AoE2 DE already).
+Gathered with the rest of what waits for the user in section 13.
 
 ### 12.5 Continuous freshness counts civs (2026-10-15)
 
@@ -1031,9 +1026,71 @@ The user asked for the web version's slider, which steps in civs, in place of th
   short before, see ISSUES.md).
 - Unchanged: when every candidate sits out (only after the pool changes mid-round), the draw falls
   back as before rather than letting the oldest ones back in as the web version does; undo doesn't
-  take a civ out of the history.
+  take a civ out of the history (questions 13.1.6 and 13.1.7).
 - Verified: zero warnings at /W4 and zero /analyze findings; 78 unit tests (2 new: the last N civs
   of a round sit out the next round's first draws, repeated 500 times; the most follows the pool).
   On a hidden desktop: "Exclude the last 28 civs (the most)" with the full pool, 27 after a click on
   the left arrow, an old strength of 4 read as 11, and settings.ini saved with `ContFreshCivs=11`
   and without the old key.
+
+### 12.6 The program's icon in the title row (2026-10-15)
+
+The user asked for the icon before the window's title, "[icon] Fresh Random Civ Picker", as the
+window had before the parchment UI (the web version has none). `CivPickerView::DrawTitleIcon`
+draws the 16 px frame of the `IDI_SMALL` icon by GDI (DrawIconEx, which blends its alpha) onto the
+main window's backdrop, centred in the 30 px title row where the title used to start; the title
+follows 6 px after it (`TITLE_ICON_SIZE`, `TITLE_ICON_GAP`). The icon is an opaque black square with
+the white question mark, as on the taskbar. A failed load or draw is reported and leaves the title
+alone. Verified: zero warnings at /W4, zero /analyze findings, captured on a hidden desktop.
+
+## 13. Waiting for the user (gathered 2026-10-15)
+
+Everything from the sessions of 2026-10-15 that needs a decision, a look or a hand. Older open
+questions: 9.5 (1 to 8) and 10.4 (1 and 2).
+
+### 13.1 Decisions
+
+1. The parchment (12.2) made the window 74 px taller, and all of it is bare parchment below the
+   content. Keep it, or let the client area use it (taller logs, more civ grid rows, more DLC rows
+   before the list scrolls)?
+2. 64 civs is the next limit a DLC can hit (56 used; three more DLCs of three civs reach it). It is
+   set by the share-link format (a draw is one base64url digit) and the civ grid (13 rows of five).
+   Raise it with a new share-link format version, shared with the web version?
+3. An edition's DLC toggles after the ninth have no hotkey (A to L take the first nine, newest
+   first, so older DLCs lose theirs as new ones arrive). Another key set for them, or none?
+4. The 48 px cursors are used from 150 % display scaling on. At 125 % the 32 px ones show at their
+   own size, smaller than the system's 40 px cursors. Move the threshold, or let Windows enlarge the
+   32 px ones there?
+5. Windows 10 1607 or later is now required (SetThreadDpiAwarenessContext for the cursors). Fine,
+   or should the program still start on older Windows?
+6. Continuous freshness: when every civ left sits out (only after the pool changes mid-round), the
+   desktop draws as before; the web version lets the oldest ones back in first. Match the web?
+7. Continuous freshness: an undone draw stays in the desktop's history of recent civs, while the web
+   version's history is its log, which loses the undone draw. Match the web?
+8. The title icon is now drawn from `images\ui\frcp.png` (500 px, scaled down; 12.6 first used the
+   .ico's 16 px frame). It is cleaner at 100 %, but the program is DPI-unaware, so on a 175 % display
+   Windows enlarges the whole window, icon included, and it stays soft. Truly sharp needs either a
+   per-monitor DPI aware program (a large change) or a small per-monitor aware layered window for
+   the icon over the title row. Which, if any? (`frcp.png` is untracked: add it to git.)
+
+### 13.2 To check by hand
+
+A hidden desktop has no mouse pointer, so these could not be seen there:
+
+- The hover looks of the slider's arrows and handle (the active looks were checked).
+- Dragging the slider's handle and the DLC list's scrollbar knob.
+- The cursors on the 175 % 4K display: 48 px and sharp, not enlarged to about 84 px. If they are
+  too big, Windows scales cursors made on a per-monitor aware thread after all (12.2).
+- The window on a 1080p display at 150 %: 679 px tall, it only just fits the work area.
+
+### 13.3 Files to delete
+
+Unused since 12.2, but still copied next to the exe by every build. Deleting tracked files was
+refused to Claude, so they are left for the user:
+
+- `images\ui\New folder\` (the originals' staging folder; its files are copied into place)
+- `images\ui\cursor.png`, `cursor_pointing.png`, `slider.png`, `slider_knob.png`,
+  `panel_9slice.png`
+- `images\civ\civicon_atlas.png`, `images\dlc\dlc_atlas.png`, `images\dlc\edition_banners_atlas.png`
+
+Nothing of these sessions is committed.

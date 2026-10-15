@@ -226,8 +226,9 @@ LRESULT CivPickerView::OnCreate(HWND window)
     if (!BuildMainShell() || !DecorateMainBackdrop() || !CreateMainControls() || !tooltip.Create(window, renderer))
         return -1;
     if (!toast.Create(window, renderer)) return -1;
-    // The parchment image is in the window's shape and backdrop now and isn't drawn again.
+    // The parchment and the program's icon are in the window's shape and backdrop now and aren't drawn again.
     renderer.ForgetImage(ImageId::background);
+    renderer.ForgetImage(ImageId::program_icon);
     CollectTooltipTargets();
     controller.OnMainWindowCreated(window);
     NoteActivity();

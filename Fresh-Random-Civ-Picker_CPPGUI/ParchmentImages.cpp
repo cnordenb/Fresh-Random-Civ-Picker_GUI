@@ -52,6 +52,7 @@ namespace
         { ImageId::text_field_frame, L"ui\\textfield_9slice.png", Filter::none },
         { ImageId::close_button, L"ui\\x_button.png", Filter::none },
         { ImageId::share_icon, L"ui\\share_icon.png", Filter::none },
+        { ImageId::program_icon, L"ui\\frcp.png", Filter::none },
         { ImageId::civ_atlas, nullptr, Filter::none },
         { ImageId::civ_atlas_grey, nullptr, Filter::grayscale },
         { ImageId::dlc_atlas, nullptr, Filter::none },
