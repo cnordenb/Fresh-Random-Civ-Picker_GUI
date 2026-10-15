@@ -101,6 +101,27 @@ namespace
 
     void OpenUrl(const wchar_t* url) { ShellExecute(NULL, L"open", url, NULL, NULL, SW_SHOWNORMAL); }
 
+    // How many civs continuous freshness keeps out (ContFreshCivs), at least 1 and at most CONTFRESH_MOST. Settings
+    // saved before have a strength from 1 to 10 (ContFreshStrengthValue): 1 kept out the previous civ, 10 the most,
+    // and each step between a tenth of half the civs. Without either, the most, as in the web version.
+    uint8_t ReadFreshness(const wchar_t* ini_file, int civ_count)
+    {
+        constexpr int NOT_SAVED = -1;
+        constexpr int STRONGEST = 10;
+        if (!c_assert(ini_file != nullptr) || !c_assert(civ_count > 0)) return CONTFRESH_MOST;
+        int civs = static_cast<int>(GetPrivateProfileInt(L"Settings", L"ContFreshCivs", NOT_SAVED, ini_file));
+        if (civs == NOT_SAVED)
+        {
+            const int strength =
+                static_cast<int>(GetPrivateProfileInt(L"Settings", L"ContFreshStrengthValue", NOT_SAVED, ini_file));
+            const bool strongest = strength == NOT_SAVED || strength >= STRONGEST;
+            const int stepped = strength <= 1 ? 1 : civ_count / 2 * strength / STRONGEST;
+            civs = strongest ? CONTFRESH_MOST : stepped;
+        }
+        if (civs < 1) return 1;
+        return civs < CONTFRESH_MOST ? static_cast<uint8_t>(civs) : CONTFRESH_MOST;
+    }
+
     // Reads the editions, DLCs and civs from data.json in the exe's folder (the build copies it there). If the
     // program can't start with it, says why and returns false.
     bool LoadCatalog(CivCatalog& catalog)
@@ -136,6 +157,9 @@ int CivPickerController::Run(HINSTANCE app_instance, int show_command)
     if (!view.StartGraphics() || !view.CreateMainWindow(show_command))
     {
         view.StopGraphics();
+        // The program says that it stops rather than vanish; the debugger output names the check that failed.
+        (void)MessageBoxW(NULL, L"The program could not build its window and stops.", L"Fresh Random Civ Picker",
+                          MB_OK | MB_ICONERROR);
         return FALSE;
     }
 
@@ -224,8 +248,7 @@ void CivPickerController::LoadSettings()
     settings.autotoggle_enabled = GetPrivateProfileInt(L"Settings", L"AutoToggleEnabled", 0, ini_file) != 0;
     settings.legacy_jingle_enabled = GetPrivateProfileInt(L"Settings", L"LegacyJingleEnabled", 0, ini_file) != 0;
     settings.contfresh_enabled = GetPrivateProfileInt(L"Settings", L"ContFreshEnabled", 0, ini_file) != 0;
-    settings.contfresh_strength =
-        static_cast<uint8_t>(GetPrivateProfileInt(L"Settings", L"ContFreshStrengthValue", 0, ini_file));
+    settings.contfresh_civs = ReadFreshness(ini_file, model.Catalog().CivCount());
 }
 
 void CivPickerController::SaveSettings()
@@ -244,8 +267,10 @@ void CivPickerController::SaveSettings()
     WriteSetting(L"AutoToggleEnabled", settings.autotoggle_enabled);
     WriteSetting(L"LegacyJingleEnabled", settings.legacy_jingle_enabled);
     WriteSetting(L"ContFreshEnabled", settings.contfresh_enabled);
-    WritePrivateProfileString(L"Settings", L"ContFreshStrengthValue",
-                              std::to_wstring(settings.contfresh_strength).c_str(), settings_file_path.c_str());
+    WritePrivateProfileString(L"Settings", L"ContFreshCivs", std::to_wstring(settings.contfresh_civs).c_str(),
+                              settings_file_path.c_str());
+    // The strength the number of civs replaced goes; a key that is already gone leaves nothing to do.
+    (void)WritePrivateProfileString(L"Settings", L"ContFreshStrengthValue", nullptr, settings_file_path.c_str());
 }
 
 void CivPickerController::WriteSetting(const wchar_t* key, bool enabled) const
@@ -387,11 +412,11 @@ void CivPickerController::HandleEditionHotkey(WPARAM hotkey_id)
     }
 }
 
-// A to L toggle the DLCs listed in the current edition's dlcToggles, top to bottom.
+// A to L toggle the first DLCs listed in the current edition's dlcToggles, top to bottom.
 void CivPickerController::HandleDlcHotkey(WPARAM hotkey_id)
 {
     const EditionInfo& edition = model.Catalog().EditionAt(model.GetEdition());
-    for (int slot = 0; slot < edition.dlc_toggle_count && slot < MAX_DLC_TOGGLES; slot++)
+    for (int slot = 0; slot < edition.dlc_toggle_count && slot < DLC_HOTKEY_COUNT; slot++)
     {
         if (hotkey_id == static_cast<WPARAM>(DLC_SLOT_HOTKEY_IDS[slot])) ToggleDlc(edition.dlc_toggles[slot]);
     }
@@ -672,10 +697,7 @@ void CivPickerController::HandleOptionsClick(HWND dialog, int command_id)
     }
 }
 
-void CivPickerController::OnContfreshStrengthChanged(int strength)
-{
-    model.EditSettings().contfresh_strength = static_cast<uint8_t>(strength);
-}
+void CivPickerController::OnFreshnessChanged(int civs) { model.SetFreshness(civs); }
 
 // ---------------------------------------------------------------------------------------------------
 // Pool toggles, undo and the drawn log

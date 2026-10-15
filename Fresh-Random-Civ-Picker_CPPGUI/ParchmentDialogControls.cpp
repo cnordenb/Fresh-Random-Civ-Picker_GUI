@@ -9,7 +9,6 @@
 namespace
 {
     constexpr float DISABLED_OPACITY = 0.55f; // :disabled { opacity: .55 }
-    constexpr float KNOB_SIZE = static_cast<float>(SLIDER_KNOB_SIZE);
     constexpr int DROPDOWN_BUTTON_WIDTH = 16; // the wooden button fills the right 16 px
     constexpr float DROPDOWN_TEXT_LEFT = 5.0f; // border 1px + padding-left 4px
     constexpr float OPTION_PADDING_X = 6.0f; // option { padding: 3px 6px }
@@ -28,6 +27,23 @@ namespace
         if (!c_assert(range.maximum >= range.minimum)) return range.minimum;
         if (value < range.minimum) return range.minimum;
         return value > range.maximum ? range.maximum : value;
+    }
+
+    // A slider bar image over the target: its frame's ends keep their proportions, its middle stretches.
+    void DrawBarImage(ParchmentRenderer& renderer, ImageId image, const FloatRect& target)
+    {
+        if (!c_assert(HasArea(target))) return;
+        const float cap = static_cast<float>(SLIDER_BAR_IMAGE_CAP) * (target.bottom - target.top) /
+                          static_cast<float>(SLIDER_BAR_IMAGE_HEIGHT);
+        if (!c_assert(2.0f * cap < target.right - target.left)) return;
+        const int middle_end = SLIDER_BAR_IMAGE_WIDTH - SLIDER_BAR_IMAGE_CAP;
+        const ParchmentRenderer::Smoothing smooth = ParchmentRenderer::Smoothing::smooth;
+        renderer.DrawImage({ image, { 0, 0, SLIDER_BAR_IMAGE_CAP, SLIDER_BAR_IMAGE_HEIGHT },
+                             { target.left, target.top, target.left + cap, target.bottom }, 1.0f, smooth });
+        renderer.DrawImage({ image, { SLIDER_BAR_IMAGE_CAP, 0, middle_end, SLIDER_BAR_IMAGE_HEIGHT },
+                             { target.left + cap, target.top, target.right - cap, target.bottom }, 1.0f, smooth });
+        renderer.DrawImage({ image, { middle_end, 0, SLIDER_BAR_IMAGE_WIDTH, SLIDER_BAR_IMAGE_HEIGHT },
+                             { target.right - cap, target.top, target.right, target.bottom }, 1.0f, smooth });
     }
 
     // Paints a dropdown's closed box: dark brown with a 1 px border, the chosen text, and the wooden button, which
@@ -156,30 +172,57 @@ namespace
 
 // --- SliderControl ---
 
+// The bar with its fill up to the handle, the arrows over the bar's ends, and the handle on top.
 void SliderControl::Paint(ParchmentRenderer& renderer, const FloatRect& bounds)
 {
     if (!c_assert(HasArea(bounds)) || !c_assert(range.maximum >= range.minimum)) return;
     const Look look = CurrentLook();
-    const float width = bounds.right - bounds.left;
-    const float track_height = width * SLIDER_TRACK_HEIGHT / SLIDER_TRACK_WIDTH;
+    const SliderTrack track = Track();
+    const SliderLayout& layout = track.layout;
+    const float handle_centre = SliderHandleCentre(track);
     const float middle = (bounds.top + bounds.bottom) / 2.0f;
-    const FloatRect track = { bounds.left, middle - track_height / 2.0f, bounds.right, middle + track_height / 2.0f };
-    const float fill = SliderFill(range);
-    const float knob_centre = bounds.left + SliderKnobCentre(static_cast<int>(width), fill);
+    const float half_handle = layout.handle_size / 2.0f;
     const ParchmentRenderer::Smoothing smooth = ParchmentRenderer::Smoothing::smooth;
     if (!look.enabled) renderer.PushOpacity(DISABLED_OPACITY);
-    renderer.DrawImage({ ImageId::slider, { 0, 0, SLIDER_TRACK_WIDTH, SLIDER_TRACK_HEIGHT }, track, 1.0f, smooth });
-    renderer.PushClip({ track.left, track.top, knob_centre, track.bottom });
-    const PixelRect fill_source = { 0, SLIDER_TRACK_HEIGHT, SLIDER_TRACK_WIDTH, 2 * SLIDER_TRACK_HEIGHT };
-    renderer.DrawImage({ ImageId::slider, fill_source, track,
-                         1.0f, smooth });
-    renderer.PopClip();
-    renderer.DrawImage({ ImageId::slider_knob, { 0, 0, SLIDER_KNOB_IMAGE, SLIDER_KNOB_IMAGE },
-                         { knob_centre - KNOB_SIZE / 2.0f, middle - KNOB_SIZE / 2.0f, knob_centre + KNOB_SIZE / 2.0f,
-                           middle + KNOB_SIZE / 2.0f },
+    PaintBar(renderer, track);
+    const PixelRect arrow_source = { 0, 0, SLIDER_ARROW_IMAGE_WIDTH, SLIDER_ARROW_IMAGE_HEIGHT };
+    renderer.DrawImage({ ArrowImage(SliderPart::left_arrow), arrow_source, layout.left_arrow, 1.0f, smooth });
+    renderer.DrawImage({ ArrowImage(SliderPart::right_arrow), arrow_source, layout.right_arrow, 1.0f, smooth });
+    renderer.DrawImage({ HandleImage(), { 0, 0, SLIDER_HANDLE_IMAGE, SLIDER_HANDLE_IMAGE },
+                         { handle_centre - half_handle, middle - half_handle, handle_centre + half_handle,
+                           middle + half_handle },
                          1.0f, smooth });
     if (!look.enabled) renderer.PopOpacity();
     if (look.focused) renderer.DrawDottedFrame(bounds, FOCUS_COLOUR);
+}
+
+void SliderControl::PaintBar(ParchmentRenderer& renderer, const SliderTrack& track)
+{
+    const FloatRect& bar = track.layout.bar;
+    if (!c_assert(HasArea(bar))) return;
+    DrawBarImage(renderer, ImageId::slider_bar, bar);
+    renderer.PushClip({ bar.left, bar.top, SliderHandleCentre(track), bar.bottom });
+    DrawBarImage(renderer, ImageId::slider_progress, bar);
+    renderer.PopClip();
+}
+
+// An arrow is active while it is held and lit while the mouse is over it, as long as nothing else is held.
+ImageId SliderControl::ArrowImage(SliderPart arrow) const
+{
+    const bool left = arrow == SliderPart::left_arrow;
+    if (!c_assert(left || arrow == SliderPart::right_arrow)) return ImageId::slider_left_arrow;
+    if (IsPressed() && pressed_part == arrow)
+        return left ? ImageId::slider_left_arrow_active : ImageId::slider_right_arrow_active;
+    if (!IsPressed() && hovered_part == arrow)
+        return left ? ImageId::slider_left_arrow_hover : ImageId::slider_right_arrow_hover;
+    return left ? ImageId::slider_left_arrow : ImageId::slider_right_arrow;
+}
+
+ImageId SliderControl::HandleImage() const
+{
+    if (IsPressed() && pressed_part == SliderPart::handle) return ImageId::slider_handle_active;
+    if (!IsPressed() && hovered_part == SliderPart::handle) return ImageId::slider_handle_hover;
+    return ImageId::slider_handle;
 }
 
 CursorId SliderControl::CursorShape() const { return CursorId::arrow; }
@@ -203,17 +246,34 @@ bool SliderControl::OnKeyPressed(WPARAM key)
     }
 }
 
+// An arrow steps once; a press on the bar moves the handle there and drags it from there on, as one on the handle
+// drags it from where it is.
 void SliderControl::OnPointerPressed(PixelPoint point)
 {
-    if (!c_assert(Width() > 0)) return;
-    MoveTo(SliderValueAt({ Width(), range }, static_cast<float>(point.x)));
+    const SliderTrack track = Track();
+    pressed_part = HitTestSlider(track, point);
+    if (pressed_part == SliderPart::left_arrow) MoveTo(range.value - 1);
+    if (pressed_part == SliderPart::right_arrow) MoveTo(range.value + 1);
+    if (pressed_part != SliderPart::bar) return;
+    pressed_part = SliderPart::handle;
+    MoveTo(SliderValueAt(track, static_cast<float>(point.x)));
 }
 
 void SliderControl::OnPointerMoved(PixelPoint point)
 {
-    if (!c_assert(Width() > 0)) return;
-    if (IsPressed()) MoveTo(SliderValueAt({ Width(), range }, static_cast<float>(point.x)));
+    const SliderTrack track = Track();
+    if (IsPressed())
+    {
+        if (pressed_part == SliderPart::handle) MoveTo(SliderValueAt(track, static_cast<float>(point.x)));
+        return;
+    }
+    const SliderPart part = HitTestSlider(track, point);
+    if (part == hovered_part) return;
+    hovered_part = part;
+    Redraw();
 }
+
+void SliderControl::OnPointerLeft() { hovered_part = SliderPart::none; }
 
 // The trackbar messages the Options dialog uses.
 LRESULT SliderControl::OnOtherMessage(UINT message, WPARAM wParam, LPARAM lParam)
@@ -258,12 +318,13 @@ void SliderControl::MoveTo(int value)
     NotifyParent(WM_HSCROLL, MAKEWPARAM(TB_THUMBTRACK, static_cast<WORD>(clamped)));
 }
 
-int SliderControl::Width() const
+// The slider's layout at its window's size, with its range.
+SliderTrack SliderControl::Track() const
 {
-    if (!c_assert(Window() != NULL)) return 1;
-    RECT client = {};
-    if (!GetClientRect(Window(), &client)) return 1;
-    return client.right > 0 ? client.right : 1;
+    RECT client = { 0, 0, 1, 1 };
+    if (!c_assert(Window() != NULL) || !GetClientRect(Window(), &client) || client.right <= 0 || client.bottom <= 0)
+        client = { 0, 0, 1, 1 };
+    return { LayOutSlider({ client.right, client.bottom }), range };
 }
 
 // --- Dropdowns and text fields ---

@@ -119,7 +119,8 @@ struct ScrollbarHit
 
 ScrollbarPart HitTestScrollbar(const ScrollbarHit& hit);
 
-// --- The slider: a track image as wide as the slider, whose groove runs from 9.41% to 90.59% of it ---
+// --- The slider: the game's left arrow, bar and right arrow in a row, scaled so that the handle is as tall as the
+// slider; the handle travels along the bar between the arrows ---
 
 struct SliderRange
 {
@@ -128,15 +129,33 @@ struct SliderRange
     int value;
 };
 
+struct SliderLayout
+{
+    FloatRect left_arrow;
+    FloatRect right_arrow;
+    FloatRect bar;
+    float handle_size;
+    float groove_start; // the handle's centre at the minimum
+    float groove_end; // and at the maximum
+};
+
 struct SliderTrack
 {
-    int width;
+    SliderLayout layout;
     SliderRange range;
 };
 
+enum class SliderPart { none, left_arrow, right_arrow, handle, bar };
+
+SliderLayout LayOutSlider(PixelSize size);
 float SliderFill(const SliderRange& range);
-float SliderKnobCentre(int slider_width, float fill);
+float SliderHandleCentre(const SliderTrack& track);
 int SliderValueAt(const SliderTrack& track, float pointer_x);
+SliderPart HitTestSlider(const SliderTrack& track, PixelPoint point);
+
+// --- Images fitted into a box keeping their proportions (CSS object-fit: contain) ---
+
+PixelSize ContainedSize(PixelSize image, PixelSize box);
 
 // --- Text: word wrap at spaces and at the text's own line breaks (CSS white-space: pre-line) ---
 

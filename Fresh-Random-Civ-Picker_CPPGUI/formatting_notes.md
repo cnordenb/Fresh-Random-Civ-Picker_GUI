@@ -5,6 +5,7 @@ I work to make formatting and naming throughout my code coherent and easily unde
 This document is to track my progress in making the code convention compliant. I use this 
 document a guideline to return to.**
 
+- if there are any conflicts with newer standards, rules, or conventions (eg. CLAUDE2.md), the newer have overriding priority over this file.
 
 Goals:
 

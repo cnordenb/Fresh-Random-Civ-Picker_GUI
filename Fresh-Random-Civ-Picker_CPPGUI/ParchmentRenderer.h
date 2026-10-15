@@ -71,9 +71,10 @@ public:
         TextAlign align;
     };
 
-    bool Start(const wchar_t* image_folder);
+    bool Start(const ImageSources& image_sources);
     void Stop();
     void ForgetImage(ImageId image);
+    void SelectCursorSize(CursorSize size);
 
     bool BeginFrame(const FrameTarget& frame);
     bool EndFrame();
@@ -100,6 +101,8 @@ public:
     float UnderlineOffset(FontId font) const;
     PixelSize ImageSize(ImageId image) const;
     HCURSOR Cursor(CursorId cursor) const;
+    int MissingImageCount() const;
+    const wchar_t* FirstMissingImage() const;
 
 private:
     bool CreateTargets();

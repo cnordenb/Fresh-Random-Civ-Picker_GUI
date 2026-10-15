@@ -12,8 +12,8 @@
 class ShellWorkspace final
 {
 public:
-    static constexpr int MAX_CANVAS_PIXELS = 1000 * 660;
-    static constexpr int MAX_REGION_RECTS = 8192; // the main window's parchment needs about 660
+    static constexpr int MAX_CANVAS_PIXELS = 1000 * 700;
+    static constexpr int MAX_REGION_RECTS = 8192; // the main window's parchment needs about 700
 
     bool Create(PixelSize max_canvas_size);
     void Destroy();

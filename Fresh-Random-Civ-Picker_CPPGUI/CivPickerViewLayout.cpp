@@ -3,6 +3,7 @@
 #include <cwchar>
 
 #include "Assertions.h"
+#include "CivPickerLayout.h"
 #include "Resource.h"
 
 // Building the main window (CivPickerView): the parchment, the title and menus, and every control at the place
@@ -99,10 +100,9 @@ namespace
     // in its own place.
     constexpr int GRID_COLUMNS[] = { 10, 112, 214, 316, 418 };
     constexpr int GRID_COLUMN_COUNT = static_cast<int>(sizeof(GRID_COLUMNS) / sizeof(GRID_COLUMNS[0]));
-    constexpr int GRID_TOP = 210;
     constexpr int GRID_ROW = 20;
     constexpr int GRID_ROWS = (MAX_CIVS + GRID_COLUMN_COUNT - 1) / GRID_COLUMN_COUNT;
-    static_assert(GRID_TOP + GRID_ROWS * GRID_ROW <= ENABLE_ALL_AREA.top, "the civ grid fits above its buttons");
+    static_assert(CIV_GRID_TOP + GRID_ROWS * GRID_ROW <= ENABLE_ALL_AREA.top, "the civ grid fits above its buttons");
     constexpr int CIV_TOGGLE_WIDTH = 102;
     constexpr int CIV_ICON_SIZE = 18;
     constexpr int CIV_ICON_GAP = 2;
@@ -120,7 +120,8 @@ namespace
     }
 }
 
-// The parchment, stretched over the whole window as in the web version (.window { background-size: 100% 100% }).
+// The parchment over the whole window: the image's visible part, which has the window's proportions, so the
+// parchment isn't stretched.
 bool CivPickerView::BuildMainShell()
 {
     if (!c_assert(main_window != NULL)) return false;
@@ -128,10 +129,10 @@ bool CivPickerView::BuildMainShell()
     const PixelSize size = { WINDOW_WIDTH, WINDOW_HEIGHT };
     if (!renderer.BeginFrame({ canvas.Dc(), size, ParchmentRenderer::SurfaceAlpha::premultiplied })) return false;
     renderer.Clear();
-    const PixelSize image = renderer.ImageSize(ImageId::background);
-    renderer.DrawImage({ ImageId::background, { 0, 0, image.width, image.height },
-                         ToFloatRect({ 0, 0, size.width, size.height }),
-                         1.0f, ParchmentRenderer::Smoothing::smooth });
+    const PixelRect visible_part = { BACKGROUND_VISIBLE_LEFT, BACKGROUND_VISIBLE_TOP, BACKGROUND_VISIBLE_RIGHT,
+                                     BACKGROUND_VISIBLE_BOTTOM };
+    renderer.DrawImage({ ImageId::background, visible_part, ToFloatRect({ 0, 0, size.width, size.height }), 1.0f,
+                         ParchmentRenderer::Smoothing::smooth });
     return renderer.EndFrame() && main_shell.Attach(main_window, size);
 }
 
@@ -319,7 +320,7 @@ bool CivPickerView::CreateCivToggles()
     {
         const int civ = catalog.DisplayCiv(position);
         const int left = GRID_COLUMNS[position % GRID_COLUMN_COUNT];
-        const int top = GRID_TOP + GRID_ROW * (position / GRID_COLUMN_COUNT);
+        const int top = CIV_GRID_TOP + GRID_ROW * (position / GRID_COLUMN_COUNT);
         // The civ icon atlas holds the civs in the order of their IDs.
         civ_toggles[civ].SetIcon({ ImageId::civ_atlas, ImageId::civ_atlas_grey, CIV_ATLAS_COLUMNS, CIV_ATLAS_CELL, civ,
                                    CIV_ICON_SIZE, CIV_ICON_GAP, true });
@@ -330,44 +331,6 @@ bool CivPickerView::CreateCivToggles()
         if (!civ_toggles[civ].Create(context, placement)) return false;
     }
     return true;
-}
-
-// Each edition's DLC toggles, top to bottom where its dlcToggleLayout in data.json puts them.
-bool CivPickerView::CreateDlcToggles()
-{
-    if (!c_assert(main_window != NULL)) return false;
-    const CivCatalog& catalog = model.Catalog();
-    for (int edition = 0; edition < catalog.EditionCount() && edition < MAX_EDITIONS; edition++)
-    {
-        const EditionInfo& info = catalog.EditionAt(edition);
-        const DlcToggleLayout& layout = info.toggle_layout;
-        for (int slot = 0; slot < info.dlc_toggle_count && slot < MAX_DLC_TOGGLES; slot++)
-        {
-            const DlcToggleSpot spot = { layout.left, layout.top + layout.step * slot, layout.size, layout.gap };
-            if (!CreateDlcToggle(info.dlc_toggles[slot], spot)) return false;
-        }
-    }
-    return true;
-}
-
-// A DLC toggle is as wide as its icon, the gap and its name in bold, the widest the name gets.
-bool CivPickerView::CreateDlcToggle(int dlc, const DlcToggleSpot& spot)
-{
-    if (!c_assert(HasDlcToggle(dlc))) return false;
-    if (!c_assert(spot.size > 0 && spot.gap >= 0)) return false;
-    const CivCatalog& catalog = model.Catalog();
-    const DlcInfo& info = catalog.DlcAt(dlc);
-    if (!c_assert(info.icon_index != CivCatalog::NONE)) return false;
-    const TextSpan name = { info.name.c_str(), static_cast<int>(info.name.size()), FontId::ui_bold };
-    const int width = spot.size + spot.gap + static_cast<int>(renderer.MeasureText(name)) + 2;
-    const int atlas_cell = EDITION_LOOKS * catalog.EditionCount() + info.icon_index;
-    IconToggle& toggle = dlc_toggles[dlc];
-    toggle.SetIcon({ ImageId::dlc_atlas, ImageId::dlc_atlas_grey, DLC_ATLAS_COLUMNS, DLC_ATLAS_CELL, atlas_cell,
-                     spot.size, spot.gap, false });
-    toggle.SetChecked(true);
-    const PixelRect area = { spot.left, spot.top, spot.left + width, spot.top + spot.size };
-    const ControlContext context = { &renderer, &back_buffer, text_menu };
-    return toggle.Create(context, PlaceInClient(DLC_TOGGLE_BASE_ID + dlc, area, info.name.c_str()));
 }
 
 bool CivPickerView::CreateLabel(Label& label, const ControlPlacement& placement, const Label::Style& style)
@@ -386,16 +349,6 @@ void CivPickerView::MoveResetButton(int tab_index)
     // A button that couldn't move stays usable where it is.
     const UINT flags = SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE;
     (void)SetWindowPos(button_reset.Window(), NULL, area.left, area.top, 0, 0, flags);
-}
-
-void CivPickerView::ShowDlcToggles(int edition)
-{
-    const CivCatalog& catalog = model.Catalog();
-    if (!c_assert(edition >= 0 && edition < catalog.EditionCount())) return;
-    for (int dlc = 0; dlc < catalog.DlcCount() && dlc < MAX_DLCS; dlc++)
-    {
-        if (HasDlcToggle(dlc)) ShowControl(dlc_toggles[dlc].Window(), catalog.DlcAt(dlc).toggle_edition == edition);
-    }
 }
 
 // --- Tooltips ---
@@ -444,7 +397,7 @@ void CivPickerView::SetUpDataTooltips()
     }
 }
 
-// The DLC, its civs in the order of their IDs and its toggle's hotkey (the web version's dlcTip).
+// The DLC, its civs in the order of their IDs and its toggle's hotkey if it has one (the web version's dlcTip).
 std::wstring CivPickerView::DlcTooltipText(int dlc) const
 {
     if (!c_assert(HasDlcToggle(dlc))) return L"";
@@ -460,7 +413,9 @@ std::wstring CivPickerView::DlcTooltipText(int dlc) const
         civ_count++;
     }
     const wchar_t* const noun = civ_count == 1 ? L" civilisation\n(" : L" civilisations\n(";
-    return L"Toggles " + info.name + noun + names + L")\nHotkey: " + DLC_SLOT_HOTKEY_KEYS[info.toggle_slot];
+    const std::wstring text = L"Toggles " + info.name + noun + names + L")";
+    if (info.toggle_slot >= DLC_HOTKEY_COUNT) return text;
+    return text + L"\nHotkey: " + DLC_SLOT_HOTKEY_KEYS[info.toggle_slot];
 }
 
 void CivPickerView::SetTooltip(int tooltip_id, const wchar_t* text)

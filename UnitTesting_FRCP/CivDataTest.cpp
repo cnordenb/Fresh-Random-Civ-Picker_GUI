@@ -208,6 +208,76 @@ TEST(CivCatalog, EachDlcToggleKnowsItsPlace)
     EXPECT_EQ(dlcs_with_toggles, toggles);
 }
 
+// The icon files are named in data.json: every edition's icon and banner, and the icon of every DLC that has one.
+TEST(CivCatalog, NamesTheIconFilesOfEveryEditionAndDlc)
+{
+    CivCatalog catalog;
+    ASSERT_TRUE(catalog.Load(ReadProgramDataFile()));
+    for (int edition = 0; edition < catalog.EditionCount(); edition++)
+    {
+        EXPECT_FALSE(catalog.EditionAt(edition).icon.empty());
+        EXPECT_FALSE(catalog.EditionAt(edition).banner.empty());
+    }
+    for (int dlc = 0; dlc < catalog.DlcCount(); dlc++)
+    {
+        const DlcInfo& info = catalog.DlcAt(dlc);
+        EXPECT_EQ(info.icon.empty(), info.icon_index == CivCatalog::NONE) << dlc;
+    }
+}
+
+namespace
+{
+    // data.json with extra DLCs of the first edition, toggled at the top of its list, as a new DLC is added.
+    std::string ProgramDataFileWithNewDlcs(int count)
+    {
+        CivCatalog original;
+        EXPECT_TRUE(original.Load(ReadProgramDataFile()));
+        std::string edition_id;
+        for (wchar_t character : original.EditionAt(0).id) edition_id.push_back(static_cast<char>(character));
+        std::string dlcs;
+        std::string toggles;
+        for (int i = 0; i < count; i++)
+        {
+            const std::string key = "new-dlc-" + std::to_string(i);
+            dlcs += "\"" + key + "\": {\"name\": \"New " + std::to_string(i) + "\", \"edition\": \"" + edition_id +
+                    "\", \"icon\": \"" + key + "\", \"released\": \"2030-01-01\"}, ";
+            toggles += "\"" + key + "\", ";
+        }
+        std::string data = ProgramDataFileWith("\"dlcToggles\": [", "\"dlcToggles\": [" + toggles);
+        const std::string dlcs_start = "\"dlcs\": {";
+        const size_t found = data.find(dlcs_start);
+        if (found != std::string::npos) data.insert(found + dlcs_start.size(), dlcs);
+        return data;
+    }
+}
+
+TEST(CivCatalog, TakesDlcTogglesBeyondTheNineWithHotkeys)
+{
+    CivCatalog original;
+    ASSERT_TRUE(original.Load(ReadProgramDataFile()));
+    const int added = 10;
+    CivCatalog catalog;
+    ASSERT_TRUE(catalog.Load(ProgramDataFileWithNewDlcs(added))) << catalog.Error();
+    const EditionInfo& first = catalog.EditionAt(0);
+    ASSERT_EQ(first.dlc_toggle_count, original.EditionAt(0).dlc_toggle_count + added);
+    EXPECT_GT(first.dlc_toggle_count, 9);
+    for (int slot = 0; slot < first.dlc_toggle_count; slot++)
+        EXPECT_EQ(catalog.DlcAt(first.dlc_toggles[slot]).toggle_slot, slot);
+}
+
+TEST(CivCatalog, TakesAsManyDlcsAsItsLimitAndNoMore)
+{
+    CivCatalog original;
+    ASSERT_TRUE(original.Load(ReadProgramDataFile()));
+    const int room = MAX_DLCS - original.DlcCount();
+    CivCatalog full;
+    EXPECT_TRUE(full.Load(ProgramDataFileWithNewDlcs(room))) << full.Error();
+    EXPECT_EQ(full.DlcCount(), MAX_DLCS);
+    CivCatalog over;
+    EXPECT_FALSE(over.Load(ProgramDataFileWithNewDlcs(room + 1)));
+    EXPECT_TRUE(Contains(over.Error(), std::to_wstring(MAX_DLCS)));
+}
+
 TEST(CivCatalog, AnEditionHasTheCivsOfEveryOlderEdition)
 {
     CivCatalog catalog;
@@ -293,6 +363,8 @@ TEST(CivCatalog, RefusesAFileWithAProblem)
         { "\"id\": 0, \"name\": \"", "\"id\": 0, \"name\": \"Two words ", L"without spaces" },
         { "\"editions\": [", "\"editions\": [], \"x\": [", L"1 to" },
         { ", \"icon\": \"", ", \"no-icon\": \"", L"no \"icon\"" },
+        { "\"icon\": \"", "\"no-icon\": \"", L"needs \"icon\"" },
+        { "\"banner\": \"", "\"no-banner\": \"", L"needs \"banner\"" },
     };
     for (const Problem& problem : problems)
     {

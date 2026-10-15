@@ -149,18 +149,61 @@ TEST(Slider, FillRunsFromTheMinimumToTheMaximum)
     EXPECT_FLOAT_EQ(SliderFill({ 1, 10, 4 }), 1.0f / 3.0f);
 }
 
-TEST(Slider, KnobTravelsBetweenTheArrowheads)
+// The Options dialog's slider is 192 x 24: the 43 px handle drawn 24 px tall sets the scale, 24/43.
+TEST(Slider, ArrowsAndBarKeepTheImagesProportionsAtTheHandlesScale)
 {
-    // The groove runs from 32 to 308 px of the 340 px track: 9.41% to 90.59% of the slider width.
-    EXPECT_NEAR(SliderKnobCentre(200, 0.0f), 18.82f, 0.01f);
-    EXPECT_NEAR(SliderKnobCentre(200, 1.0f), 181.18f, 0.01f);
+    const SliderLayout layout = LayOutSlider({ 192, 24 });
+    EXPECT_FLOAT_EQ(layout.handle_size, 24.0f);
+    EXPECT_NEAR(layout.left_arrow.right, 35.0f * 24.0f / 43.0f, 0.001f);
+    EXPECT_NEAR(layout.right_arrow.left, 192.0f - 35.0f * 24.0f / 43.0f, 0.001f);
+    EXPECT_NEAR(layout.left_arrow.bottom - layout.left_arrow.top, 30.0f * 24.0f / 43.0f, 0.001f);
+    EXPECT_NEAR(layout.bar.bottom - layout.bar.top, 15.0f * 24.0f / 43.0f, 0.001f);
+    EXPECT_NEAR(layout.bar.top + layout.bar.bottom, 24.0f, 0.001f);
+}
+
+TEST(Slider, HandleStopsWhereItTouchesAnArrow)
+{
+    const SliderLayout layout = LayOutSlider({ 192, 24 });
+    EXPECT_NEAR(SliderHandleCentre({ layout, { 1, 10, 1 } }) - 12.0f, layout.left_arrow.right, 0.001f);
+    EXPECT_NEAR(SliderHandleCentre({ layout, { 1, 10, 10 } }) + 12.0f, layout.right_arrow.left, 0.001f);
 }
 
 TEST(Slider, ValueAtFollowsThePointerAndIsClamped)
 {
-    EXPECT_EQ(SliderValueAt({ 200, { 1, 10, 5 } }, 110.0f), 6);
-    EXPECT_EQ(SliderValueAt({ 200, { 1, 10, 5 } }, 0.0f), 1);
-    EXPECT_EQ(SliderValueAt({ 200, { 1, 10, 5 } }, 199.0f), 10);
+    const SliderTrack track = { LayOutSlider({ 192, 24 }), { 1, 10, 5 } };
+    EXPECT_EQ(SliderValueAt(track, SliderHandleCentre({ track.layout, { 1, 10, 7 } })), 7);
+    EXPECT_EQ(SliderValueAt(track, 89.0f), 5);
+    EXPECT_EQ(SliderValueAt(track, 0.0f), 1);
+    EXPECT_EQ(SliderValueAt(track, 191.0f), 10);
+}
+
+TEST(Slider, PointerFindsTheArrowsTheHandleAndTheBar)
+{
+    const SliderTrack track = { LayOutSlider({ 192, 24 }), { 1, 10, 1 } };
+    EXPECT_EQ(HitTestSlider(track, { 5, 12 }), SliderPart::left_arrow);
+    EXPECT_EQ(HitTestSlider(track, { 185, 12 }), SliderPart::right_arrow);
+    EXPECT_EQ(HitTestSlider(track, { 31, 12 }), SliderPart::handle);
+    EXPECT_EQ(HitTestSlider(track, { 100, 12 }), SliderPart::bar);
+    EXPECT_EQ(HitTestSlider(track, { -1, 12 }), SliderPart::none);
+    EXPECT_EQ(HitTestSlider(track, { 192, 12 }), SliderPart::none);
+}
+
+// object-fit: contain, for icon files of another size than their atlas cell.
+TEST(ContainedSize, KeepsTheImagesProportionsInTheBox)
+{
+    const PixelSize cell = { 128, 128 };
+    EXPECT_EQ(ContainedSize({ 128, 128 }, cell).width, 128);
+    EXPECT_EQ(ContainedSize({ 400, 300 }, cell).height, 96);
+    EXPECT_EQ(ContainedSize({ 400, 300 }, cell).width, 128);
+    EXPECT_EQ(ContainedSize({ 300, 400 }, cell).width, 96);
+    EXPECT_EQ(ContainedSize({ 300, 400 }, cell).height, 128);
+}
+
+TEST(ContainedSize, EnlargesSmallImagesAndKeepsAPixel)
+{
+    EXPECT_EQ(ContainedSize({ 52, 52 }, { 104, 104 }).width, 104);
+    EXPECT_EQ(ContainedSize({ 1000, 1 }, { 128, 128 }).height, 1);
+    EXPECT_EQ(ContainedSize({ 128, 93 }, { 128, 93 }).height, 93);
 }
 
 namespace

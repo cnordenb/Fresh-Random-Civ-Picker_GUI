@@ -97,6 +97,47 @@ TEST(ShareTest, AnUndrawnCivIsNotShared) {
 	EXPECT_EQ(catalog.CivAt(shared.draws[2]).name, model.GetCurrentCiv());
 }
 
+// Continuous freshness counts civs, as the web version does: the last N civs drawn sit out, N at most half the pool.
+TEST(FreshnessTest, TheLastCivsOfARoundSitOutTheNextRoundsFirstDraws) {
+	CivCatalog catalog;
+	ASSERT_TRUE(catalog.Load(ReadProgramDataFile()));
+	CivPickerModel model(catalog);
+	model.EditSettings().contfresh_enabled = true;
+	model.ResetProgram(false);
+	const int pool = model.GetCustomMaxCivs();
+	const int sitting_out = 5;
+	ASSERT_GT(pool, 2 * sitting_out);
+	model.SetFreshness(sitting_out);
+	ASSERT_EQ(model.FreshnessLimit(), sitting_out);
+	std::wstring round[MAX_CIVS];
+	for (int i = 0; i < pool; i++) {
+		model.DrawCiv(false, L"");
+		round[i] = model.GetCurrentCiv();
+	}
+	// Each draw of the next round moves the window on by one civ.
+	for (int draw = 0; draw < sitting_out; draw++) {
+		model.DrawCiv(false, L"");
+		for (int i = pool - sitting_out + draw; i < pool; i++) EXPECT_NE(model.GetCurrentCiv(), round[i]);
+	}
+}
+
+TEST(FreshnessTest, TheMostFollowsThePoolsSize) {
+	CivCatalog catalog;
+	ASSERT_TRUE(catalog.Load(ReadProgramDataFile()));
+	CivPickerModel model(catalog);
+	model.ResetProgram(false);
+	EXPECT_EQ(model.FreshnessMaximum(), model.GetCustomMaxCivs() / 2);
+	model.SetFreshness(model.FreshnessMaximum());
+	EXPECT_EQ(model.GetSettings().contfresh_civs, CONTFRESH_MOST);
+	for (int edition = 0; edition < catalog.EditionCount(); edition++) {
+		model.SetEdition(edition);
+		EXPECT_EQ(model.FreshnessLimit(), model.GetCustomMaxCivs() / 2);
+	}
+	model.SetFreshness(1);
+	EXPECT_EQ(model.FreshnessLimit(), 1);
+	EXPECT_EQ(model.GetSettings().contfresh_civs, 1);
+}
+
 int main(int argc, char **argv) {
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();

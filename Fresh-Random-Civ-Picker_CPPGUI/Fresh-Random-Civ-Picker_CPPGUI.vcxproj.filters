@@ -26,6 +26,9 @@
     <ClCompile Include="ShareLink.cpp" />
     <ClCompile Include="ParchmentToast.cpp" />
     <ClCompile Include="CivPickerShare.cpp" />
+    <ClCompile Include="ParchmentScrollBar.cpp" />
+    <ClCompile Include="CivPickerDlcToggles.cpp" />
+    <ClCompile Include="CivPickerViewImages.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
@@ -57,6 +60,8 @@
     <ClInclude Include="ShareLink.h" />
     <ClInclude Include="ParchmentToast.h" />
     <ClInclude Include="DialogMetrics.h" />
+    <ClInclude Include="ParchmentScrollBar.h" />
+    <ClInclude Include="CivPickerLayout.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FRCP_GUI.rc" />
@@ -71,6 +76,7 @@
     <None Include="data.json" />
     <None Include="formatting_notes.md" />
     <None Include="settings.ini" />
+    <None Include="TODO.md" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Histories">

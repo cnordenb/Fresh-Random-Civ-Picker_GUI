@@ -17,7 +17,8 @@ namespace
     const Civ NO_CIV = { L"", false, CivCatalog::NONE, CivCatalog::NONE, false };
 
     const int LOG_SECTION_AMOUNT = 4;
-    const int LOG_LINE_LIMIT = MAX_CIVS * 2 + 4;
+    // A civ state and a draw for every civ, the edition, and continuous freshness's history of half the civs.
+    const int LOG_LINE_LIMIT = MAX_CIVS + MAX_CIVS + 1 + MAX_CIVS / 2;
     const int INVALID_INDEX = -1;
 
     // Special Case object (CC ch. 7) that lets the model run without a view, e.g. in unit tests.
@@ -70,8 +71,6 @@ CivPickerModel::CivPickerModel(const CivCatalog& civ_catalog) :
     iterator(0),
     remaining(static_cast<uint8_t>(civ_catalog.CivCount())),
     custom_max_civs(static_cast<uint8_t>(civ_catalog.CivCount())),
-    contfresh_max(static_cast<uint8_t>((civ_catalog.CivCount() / 2) - 1)),
-    contfresh_count(0),
     edition_state(0),
     last_action(LastAction::draw),
     startup(true),
@@ -629,65 +628,64 @@ void CivPickerModel::SetAutoToggle(bool enabled)
     SetOldDlcsEnabled(edition_state, enabled);
 }
 
+// The history of recent draws, oldest first, keeps as many civs as can ever sit out of this pool: half of it. The
+// setting decides how many of the newest ones do (IsContfreshCiv), so a new setting holds from the next draw on.
 void CivPickerModel::UpdateContfresh(const std::wstring& drawn_civ)
 {
-    contfresh_civ = drawn_civ;
-    if (settings.contfresh_strength == 1 || custom_max_civs < 2) return;
-    SetContfreshStrength();
-
-    if (contfresh_count >= contfresh_max)
+    if (!c_assert(!drawn_civ.empty())) return;
+    const int capacity = FreshnessMaximum();
+    int length = ContfreshHistoryLength();
+    if (length >= capacity)
     {
-        int decrement = 0;
-        if (contfresh_count > contfresh_max)
-        {
-            decrement = contfresh_count - contfresh_max;
-            contfresh_count = contfresh_max;
-        }
-
-        std::wstring kept_civs[MAX_CIVS];
-        int kept_amount = 0;
-        for (int i = 0; i < MAX_CIVS; i++)
-        {
-            if (decrement > 0) decrement--;
-            else kept_civs[kept_amount++] = contfresh_array[i];
-            contfresh_array[i] = L"";
-        }
-        for (int i = 0; i < contfresh_max; i++) contfresh_array[i] = kept_civs[i];
+        // The oldest civs make room, so the newest capacity - 1 stay.
+        const int dropped = length - capacity + 1;
+        for (int i = 0; i + dropped < length && i < MAX_CIVS; i++)
+            contfresh_array[i].swap(contfresh_array[i + dropped]);
+        for (int i = length - dropped; i < length && i < MAX_CIVS; i++) contfresh_array[i].clear();
+        length -= dropped;
     }
-
-    for (int i = 0; i < MAX_CIVS; i++)
-    {
-        if (contfresh_array[i] != L"") continue;
-        contfresh_array[i] = drawn_civ;
-        break;
-    }
-    contfresh_count++;
+    if (!c_assert(length >= 0 && length < MAX_CIVS)) return;
+    contfresh_array[length] = drawn_civ;
 }
 
+// A civ may be drawn unless it is among the newest civs of the history, as many as the setting lets sit out.
 bool CivPickerModel::IsContfreshCiv(const std::wstring& candidate_civ) const
 {
     if (custom_max_civs < 2) return true;
-    if (settings.contfresh_strength == 1) return candidate_civ != contfresh_civ;
-
-    for (int i = 0; i < MAX_CIVS; i++)
+    const int length = ContfreshHistoryLength();
+    const int first_sitting_out = length > FreshnessLimit() ? length - FreshnessLimit() : 0;
+    for (int i = first_sitting_out; i < length && i < MAX_CIVS; i++)
     {
         if (contfresh_array[i] == candidate_civ) return false;
-        if (contfresh_array[i] == L"") break;
     }
     return true;
 }
 
-void CivPickerModel::SetContfreshStrength()
+int CivPickerModel::ContfreshHistoryLength() const
 {
-    if (settings.contfresh_strength == 10)
+    for (int i = 0; i < MAX_CIVS; i++)
     {
-        contfresh_max = static_cast<uint8_t>((custom_max_civs / 2) - 1);
-        return;
+        if (contfresh_array[i].empty()) return i;
     }
-    const float half = custom_max_civs / 2.0f;
-    const float tenth = half / 10.0f;
-    const float factor = tenth * settings.contfresh_strength;
-    contfresh_max = static_cast<uint8_t>(static_cast<int>(factor));
+    return MAX_CIVS;
+}
+
+// The most civs that can sit out: half the pool, and at least one.
+int CivPickerModel::FreshnessMaximum() const { return custom_max_civs / 2 > 1 ? custom_max_civs / 2 : 1; }
+
+// How many civs sit out: the setting, but no more than half the pool.
+int CivPickerModel::FreshnessLimit() const
+{
+    const int maximum = FreshnessMaximum();
+    if (!c_assert(settings.contfresh_civs >= 1)) return 1;
+    return settings.contfresh_civs < maximum ? settings.contfresh_civs : maximum;
+}
+
+// The Options slider's choice: a number of civs, where its top (half the pool) means the most.
+void CivPickerModel::SetFreshness(int civs)
+{
+    if (!c_assert(civs >= 1 && civs <= MAX_CIVS)) return;
+    settings.contfresh_civs = civs >= FreshnessMaximum() ? CONTFRESH_MOST : static_cast<uint8_t>(civs);
 }
 
 void CivPickerModel::DiscardRedoHistory()
@@ -799,6 +797,11 @@ bool CivPickerModel::ApplyLogLine(const std::wstring& line, LogReader& reader)
             break;
         case LogSection::contfresh:
             if (reader.section_line >= MAX_CIVS) return false;
+            // The saved history takes the place of the one the replayed draws built.
+            if (reader.section_line == 0)
+            {
+                for (std::wstring& entry : contfresh_array) entry.clear();
+            }
             contfresh_array[reader.section_line] = line;
             break;
         case LogSection::drawn_civs:

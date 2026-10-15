@@ -62,10 +62,12 @@
 #define BUTTON_HEIGHT 30
 
 // The Civ Pool tab's hotkeys that pick an edition, by the edition's place in data.json, and that toggle a DLC, by
-// its toggle's place in the edition's list; with the keys the program shows for them.
+// its toggle's place in the edition's list; with the keys the program shows for them. Toggles after the first
+// DLC_HOTKEY_COUNT of an edition have no hotkey.
+constexpr int DLC_HOTKEY_COUNT = 9;
 constexpr int EDITION_HOTKEY_IDS[MAX_EDITIONS] = { HOTKEY_ID_Q, HOTKEY_ID_W, HOTKEY_ID_E };
 constexpr const wchar_t* EDITION_HOTKEY_KEYS[MAX_EDITIONS] = { L"Q", L"W", L"E" };
-constexpr int DLC_SLOT_HOTKEY_IDS[MAX_DLC_TOGGLES] = { HOTKEY_ID_A, HOTKEY_ID_S, HOTKEY_ID_D, HOTKEY_ID_F, HOTKEY_ID_G,
-                                                       HOTKEY_ID_H, HOTKEY_ID_J, HOTKEY_ID_K, HOTKEY_ID_L };
-constexpr const wchar_t* DLC_SLOT_HOTKEY_KEYS[MAX_DLC_TOGGLES] = { L"A", L"S", L"D", L"F", L"G",
-                                                                   L"H", L"J", L"K", L"L" };
+constexpr int DLC_SLOT_HOTKEY_IDS[DLC_HOTKEY_COUNT] = { HOTKEY_ID_A, HOTKEY_ID_S, HOTKEY_ID_D, HOTKEY_ID_F, HOTKEY_ID_G,
+                                                        HOTKEY_ID_H, HOTKEY_ID_J, HOTKEY_ID_K, HOTKEY_ID_L };
+constexpr const wchar_t* DLC_SLOT_HOTKEY_KEYS[DLC_HOTKEY_COUNT] = { L"A", L"S", L"D", L"F", L"G",
+                                                                    L"H", L"J", L"K", L"L" };

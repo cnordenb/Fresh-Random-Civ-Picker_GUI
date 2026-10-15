@@ -57,9 +57,9 @@ namespace
     }
 }
 
-bool ParchmentRenderer::Start(const wchar_t* image_folder)
+bool ParchmentRenderer::Start(const ImageSources& image_sources)
 {
-    if (!c_assert(image_folder != nullptr) || !c_assert(factory == nullptr)) return false;
+    if (!c_assert(image_sources.folder != nullptr) || !c_assert(factory == nullptr)) return false;
     const HRESULT com_result = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
     com_started = SUCCEEDED(com_result);
     D2D1_FACTORY_OPTIONS options = {};
@@ -71,7 +71,7 @@ bool ParchmentRenderer::Start(const wchar_t* image_folder)
     if (!c_assert(SUCCEEDED(result)) || !CreateTargets()) return false;
 
     // Images are checked one by one as they load; a missing one is drawn as nothing, so startup goes on.
-    (void)images.Load({ image_folder, opaque_target, decoder_factory });
+    (void)images.Load({ image_sources, opaque_target, decoder_factory });
     return fonts.Load();
 }
 
@@ -347,3 +347,9 @@ float ParchmentRenderer::UnderlineOffset(FontId font) const { return fonts.Under
 PixelSize ParchmentRenderer::ImageSize(ImageId image) const { return images.ImageSize(image); }
 
 HCURSOR ParchmentRenderer::Cursor(CursorId cursor) const { return images.Cursor(cursor); }
+
+void ParchmentRenderer::SelectCursorSize(CursorSize size) { images.SelectCursorSize(size); }
+
+int ParchmentRenderer::MissingImageCount() const { return images.MissingFileCount(); }
+
+const wchar_t* ParchmentRenderer::FirstMissingImage() const { return images.FirstMissingFile(); }

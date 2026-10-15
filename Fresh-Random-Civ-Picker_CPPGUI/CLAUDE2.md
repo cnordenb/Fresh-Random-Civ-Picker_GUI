@@ -667,9 +667,10 @@ commands and the new links. No commit has been made.
   (a frame costs about as much as drawing a control), and a window paints its waiting controls
   before itself, so a tab switch appears at once. A window that has just shown fills itself with
   its backdrop before its controls paint, so it never shows black where controls are still painting.
-- Assets: `tools/convert_web_assets.py` converts the web version's WebP images in
-  `..\frcp_html` to PNG (`images\ui`, `images\civ`, `images\dlc`). The CSS filters the web applies
-  (grey icons, dimmed tabs, tooltip tint) are applied once when the images load.
+- Assets: the game's original images where the program has them (section 12), otherwise
+  `tools/convert_web_assets.py` converts the web version's WebP images in `..\frcp_html` to PNG
+  (`images\ui`, `images\civ`, `images\dlc`). The CSS filters the web applies (grey icons, dimmed
+  tabs, tooltip tint) are applied once when the images load.
 - Memory: windows are shaped one at a time in one `ShellWorkspace` (canvas, shadow coverage, region
   rectangles) allocated at startup; a shell keeps only its window's backdrop, and the layered
   windows keep their own copies of their pictures. Images are decoded in strips of 48 K pixels
@@ -723,8 +724,8 @@ commands and the new links. No commit has been made.
 - Left out because they are web-only: the hotkey mode switch, "When the page opens" (the desktop
   says "When the program starts"). Share links were added later (section 11).
 - Options: the desktop's options with the web's wording where an option is the same (Show civ name,
-  Show round counter, Draw a civ, Show Hotkeys). The strength line reads "Continuous freshness
-  strength: N" because the desktop's setting is a strength, not the web's "Exclude the last N civs".
+  Show round counter, Draw a civ, Show Hotkeys). Continuous freshness counts civs as on the web
+  ("Exclude the last N civs", section 12.5; it was a strength from 1 to 10 until 2026-10-15).
   Options that don't apply are disabled instead of hidden, as on the web.
 - About and Hotkeys keep the desktop's content in the web's layout; message boxes (e.g. the Age of
   Kings store note) use the web's message dialog; an invalid lobby code shows the web's error line.
@@ -796,14 +797,16 @@ editions, DLCs and civs may reside.** It is the same file as the web version's
 
 - No edition, DLC or civ name, ID, key, count, list, per-civ or per-DLC constant, resource entry,
   control ID or layout in code, resources, project files or tests. Code reads them from `CivCatalog`
-  (model, plain C++) or derives them from it: a civ's jingle files are its name in lower case; the
-  civ icon atlas holds the civs in ID order and Random after them; the DLC atlas holds three looks of
-  each edition's icon in data.json's order, then the icons of the DLCs that have one; the edition
-  banners are stacked in data.json's order.
-- Limits are capacities, not data (`CivDataLimits.h`): 3 editions, 32 DLCs, 9 DLC toggles per
-  edition, 64 civs, 4 links per edition, set by the main window's room and the hotkeys (Q/W/E pick
-  the editions by their place, A to L the toggles by theirs). A file beyond them, or with a broken
-  reference, is refused at startup with a message that says what is wrong, and the program ends.
+  (model, plain C++) or derives them from it: a civ's jingle and icon files are its name in lower
+  case; an edition's and a DLC's icon files are named by their "icon" (and "banner"). The atlases are
+  built from those files at startup (section 12): the civ icon atlas holds the civs in ID order and
+  Random after them; the DLC atlas holds three looks of each edition's icon in data.json's order, then
+  the icons of the DLCs that have one; the edition banners are stacked in data.json's order.
+- Limits are capacities, not data (`CivDataLimits.h`): 3 editions, 128 DLCs, 128 DLC toggles per
+  edition, 64 civs, 4 links per edition, set by the main window's room (Q/W/E pick the editions by
+  their place; an edition's DLC toggles scroll once they don't fit, and A to L toggle its first nine
+  by their place). A file beyond them, or with a broken reference, is refused at startup with a
+  message that says what is wrong, and the program ends.
 - Files named after civs (jingles, history texts) are data files next to the exe, not code.
 - Unit tests use the real data.json; a file with a problem is data.json with one thing changed.
 
@@ -920,3 +923,117 @@ them. A link made by either version opens in the other with the same edition, ci
   uses the same calls as the drawn log's Ctrl+C.
 - Builds as in 9.2, the unit tests are 69 (10 new for links and sharing), idle memory unchanged.
 
+## 12. Original images and DLCs added in data.json alone (2026-10-15)
+
+The user asked: raise the DLC limit from 9 to 128, so that adding a DLC needs nothing but data.json,
+its jingles and its icons; use the game's original images instead of the converted WebPs as the
+user obtains them, starting with the cursors (32 and 48 px), the parchment, the slider (with hover
+and active looks for the arrows and the handle) and the dialogs' panel; never stretch or resize the
+parchment.
+
+### 12.1 Adding a DLC
+
+- data.json: the DLC in "dlcs" (with its "icon"), its key at the top of its edition's "dlcToggles",
+  its civs in "civs" with the next IDs. Files: `images\dlc\<icon>.png`, `images\civ\<civ in lower
+  case>.png`, `sounds\civ_jingles\<civ in lower case>.wav` (and in `legacy\` for an edition with
+  legacy jingles), `Histories\<Civ>.txt`. Nothing in code, resources or project files.
+- Icons are one file each, of any size: each is fitted into its atlas cell with its proportions kept
+  (`ContainedSize`, CSS object-fit: contain; WIC's Fant scaler on premultiplied pixels) when the
+  atlases are built at startup (`ParchmentImages::BuildAtlas`). A file that can't be loaded leaves
+  its cell empty, and a startup message names the first such file.
+- `MAX_DLCS` = `MAX_DLC_TOGGLES` = 128. An edition's toggles that don't fit above the civ grid
+  scroll (`CivPickerDlcToggles.cpp`): how many show follows from its dlcToggleLayout (the rows
+  between its top and 6 px above the civ grid, `CivPickerLayout.h`); a `ScrollBar` control (the
+  logs' look, counting rows) sits at the client area's right edge, and the wheel scrolls the list
+  under the mouse. A to L toggle an edition's first nine (`DLC_HOTKEY_COUNT`); later toggles have no
+  hotkey, their tooltips name none, and the Hotkeys dialog lists the nine.
+- Control IDs: DLC toggles moved to 8000 + DLC (7900 + 128 would have run into the edition rows at
+  7950); the scrollbars are 7960 + edition. static_asserts keep the ranges apart.
+- Still a limit: `MAX_CIVS` = 64 (56 used). The share-link format writes a draw as one base64url
+  digit and the civ grid has 13 rows of five, so three more DLCs of three civs reach it.
+- Fixed on the way: a 10th toggle crashed at startup (ISSUES.md, Fixed). A startup that fails
+  without crashing now says so in a message box instead of ending silently.
+
+### 12.2 The original images
+
+- `ui/background.png` (1024 x 1167): drawn unstretched. Its visible part (x 26 to 995, y 13 to 1151:
+  the paper and its burnt edge without the transparent margin, alpha above 3) fills the window's
+  578 px width, so the window is 679 px tall instead of 605 (`ParchmentTheme.h`). The content keeps
+  its place, so the 74 px it gained are all parchment below the client area (question 12.4.1).
+- Cursors: `ui/cursor_x1.png` and `ui/cursor_pointing_x1.png` (32 px), the `_x2` files (48 px);
+  hotspots (0, 0) for the arrow, (2, 0) and (3, 0) for the hand. They are created on a thread
+  switched to per-monitor DPI awareness, so Windows shows them at their own size instead of
+  enlarging them for the DPI-unaware window. The view asks for the real DPI of the window's monitor
+  (GetDpiForMonitor, again on a per-monitor aware thread) when the window is made and whenever it
+  moves to another monitor, and picks 48 px from 144 DPI (150 %) on. This needs Windows 10 1607
+  (SetThreadDpiAwarenessContext is linked directly).
+- Slider: `ui/slider/` (arrows, bar, progress, handle; the arrows and the handle in normal, hover and
+  active looks). `LayOutSlider` (ParchmentGeometry, unit-tested) scales the images so the handle is
+  as tall as the slider (24 px in Options): the arrows at the ends, the bar from arrow centre to
+  arrow centre under them, the handle travelling between the arrows. Bar and progress are drawn as
+  three-slices with unstretched 4 px ends; the progress is clipped at the handle's centre. An arrow
+  steps the value, a press on the bar moves the handle there, the handle drags. The old track's
+  groove percentages are gone.
+- Panel: `ui/9slice/boxstyle3a_*.png`, one file per tile (the same art as the old 192 px
+  `panel_9slice.png`, alpha identical), loaded by `ParchmentImages::CreatePanelSlices`; the inlay is
+  the panel's middle as before.
+- Icons: `images\civ\*.png` and `images\dlc\*.png` were cut losslessly from the old atlases, so they
+  look exactly as before until the originals replace them. `tools/convert_web_assets.py` no longer
+  lists the images that are originals now, and copies a web icon only where none of that name
+  exists, so it never overwrites an original.
+- `DrawScrollbar` (ParchmentScrollBar.cpp) draws the scrollbar for the logs and the DLC lists alike.
+
+### 12.3 Verification
+
+- Builds: x64 and Win32, Debug and Release, zero warnings at /W4; zero findings under /analyze
+  (x64 Debug, 28 analysis logs). Both were given through the `CL` environment variable: msbuild's
+  `/p:AdditionalOptions=` doesn't reach the compiler. A /Wall probe shows only the warnings of
+  question 4 of 9.5 and one in a Windows SDK header. Unit tests: 76 pass (7 new: slider layout and
+  hit test, contained size, icon file names, more than nine toggles, the 128 DLC limit, an edition's
+  icon and banner required).
+- On a hidden desktop (scratch harness, clicks and wheel posted to the windows): the Draw and Civ
+  Pool tabs and the Options and Hotkeys dialogs; with data.json alone (plus icon and jingle files)
+  12 DE toggles and 3 more civs, the list scrolled by wheel, buttons and track; 128 DLCs (123 DE
+  toggles); a missing icon named at startup; the author's failing data.json from 2026-10-15 starts.
+  The slider's arrows step the value and show their active look. No assertion fired.
+- Not verified here: the hover looks (a hidden desktop has no pointer, so controls get
+  WM_MOUSELEAVE at once), dragging the slider's handle and the scrollbar's knob, and the cursors on
+  a high-DPI display.
+
+### 12.4 Decisions and questions
+
+1. The parchment's extra 74 px of height went below the content. Keep it, or let the client area
+   (logs, civ grid, DLC list) use it?
+2. 64 civs is the next limit a DLC can hit (12.1). Raise it with a new share-link format version?
+3. Toggles after the ninth have no hotkey. Another key set for them?
+4. The 48 px cursors from 150 %; at 125 % the 32 px ones show unscaled (system cursors are 40 px).
+5. Windows 10 1607 or later is now required (it was effectively required by AoE2 DE already).
+
+### 12.5 Continuous freshness counts civs (2026-10-15)
+
+The user asked for the web version's slider, which steps in civs, in place of the strength from 1 to
+10 (each step a tenth of half the pool).
+
+- Setting `contfresh_civs`: how many of the civs drawn last sit out the next draws, at most half the
+  pool (`FreshnessMaximum`, at least 1; `FreshnessLimit` is the setting within it). The slider's top
+  stores `CONTFRESH_MOST` (= `MAX_CIVS`), "the most", which follows the pool's size, as the web
+  version's FRESH_MOST does. Default: the most, as on the web. settings.ini key `ContFreshCivs`;
+  `ContFreshStrengthValue` is read once more and turned into civs (1 is 1 civ, 10 the most, steps
+  between a tenth of half the civs) and deleted on the next save.
+- Options: the slider runs from 1 to half the pool, the label reads "Exclude the last N civs", with
+  "(the most)" at the top, or "Needs at least 2 civs in the pool" (slider greyed), and the hint is
+  the web's "When a round ends, these civs sit out the first draws of the next round."
+- Model: the history keeps the last half-pool's worth of draws, oldest first; the setting picks how
+  many of the newest sit out, so a new setting holds from the next draw on, in both directions. The
+  special case for strength 1 (the previous civ only) is gone: 1 civ does the same. Loading a log
+  replaces the history that the replayed draws built with the saved one, and the log may now hold
+  the whole history (`LOG_LINE_LIMIT` = civ states + draws + edition + half the civs; it was cut
+  short before, see ISSUES.md).
+- Unchanged: when every candidate sits out (only after the pool changes mid-round), the draw falls
+  back as before rather than letting the oldest ones back in as the web version does; undo doesn't
+  take a civ out of the history.
+- Verified: zero warnings at /W4 and zero /analyze findings; 78 unit tests (2 new: the last N civs
+  of a round sit out the next round's first draws, repeated 500 times; the most follows the pool).
+  On a hidden desktop: "Exclude the last 28 civs (the most)" with the full pool, 27 after a click on
+  the left arrow, an old strength of 4 read as 11, and settings.ini saved with `ContFreshCivs=11`
+  and without the old key.

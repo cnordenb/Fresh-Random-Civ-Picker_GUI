@@ -29,6 +29,11 @@ struct Civ
     bool legacy;
 };
 
+// Continuous freshness keeps the civs drawn last out of the next draws: as many as the setting says, but at most
+// half the pool. A setting of half the pool or more is "the most", which follows the pool's size (the web version's
+// FRESH_MOST); it is saved as CONTFRESH_MOST.
+constexpr uint8_t CONTFRESH_MOST = MAX_CIVS;
+
 struct Settings
 {
     bool persistent_logging = true;
@@ -44,7 +49,7 @@ struct Settings
     bool autotoggle_enabled = true;
     bool remainlog_enabled = true;
     bool contfresh_enabled = true;
-    uint8_t contfresh_strength = 1;
+    uint8_t contfresh_civs = CONTFRESH_MOST;
 };
 
 // Observer interface (HFDP ch. 2) through which the model announces its state changes.
@@ -109,6 +114,8 @@ public:
     std::wstring FetchHistory(const std::wstring& civ_name) const;
     SharedPool GetSharedPool() const;
     bool HasCustomState() const;
+    int FreshnessMaximum() const;
+    int FreshnessLimit() const;
 
     void SetCacheLoading(bool loading);
     void SetCacheAvailable(bool available);
@@ -127,6 +134,7 @@ public:
     void EnforceEditionPool();
     void LoadSharedPool(const SharedPool& shared);
     void SetAutoToggle(bool enabled);
+    void SetFreshness(int civs);
 
     void DiscardRedoHistory();
     bool WriteLogFile(const std::wstring& path) const;
@@ -163,7 +171,7 @@ private:
 
     void UpdateContfresh(const std::wstring& drawn_civ);
     bool IsContfreshCiv(const std::wstring& candidate_civ) const;
-    void SetContfreshStrength();
+    int ContfreshHistoryLength() const;
 
     void ParseLog(std::wistream& in_file);
     bool StartLogSection(const std::wstring& line, LogReader& reader) const;
@@ -183,7 +191,6 @@ private:
     bool available_civs[MAX_CIVS];
     std::wstring drawn_civs[MAX_CIVS];
     std::wstring contfresh_array[MAX_CIVS];
-    std::wstring contfresh_civ;
     std::wstring current_civ;
     std::wstring log_file_path;
     std::wstring history_folder_path;
@@ -191,8 +198,6 @@ private:
     uint8_t iterator;
     uint8_t remaining;
     uint8_t custom_max_civs;
-    uint8_t contfresh_max;
-    uint8_t contfresh_count;
     int edition_state;
     LastAction last_action;
 

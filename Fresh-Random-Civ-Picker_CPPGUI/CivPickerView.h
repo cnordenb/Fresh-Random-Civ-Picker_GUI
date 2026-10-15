@@ -10,6 +10,7 @@
 #include "ParchmentLog.h"
 #include "ParchmentMenu.h"
 #include "ParchmentRenderer.h"
+#include "ParchmentScrollBar.h"
 #include "ParchmentShell.h"
 #include "ParchmentToast.h"
 #include "ParchmentTooltip.h"
@@ -37,9 +38,13 @@ public:
     // The controls and menu items made from data.json have IDs from a base plus their number there: a civ toggle
     // its civ's ID, a DLC toggle its DLC's number, an edition row its edition's, a Game menu link its link's.
     static constexpr int CIV_CHECKBOX_BASE_ID = 5;
-    static constexpr int DLC_TOGGLE_BASE_ID = 7900;
     static constexpr int EDITION_ROW_BASE_ID = 7950;
+    static constexpr int DLC_SCROLLBAR_BASE_ID = 7960;
+    static constexpr int DLC_TOGGLE_BASE_ID = 8000;
     static constexpr int EDITION_LINK_BASE_ID = 32800;
+    static_assert(EDITION_ROW_BASE_ID + MAX_EDITIONS <= DLC_SCROLLBAR_BASE_ID, "edition rows and scrollbars apart");
+    static_assert(DLC_SCROLLBAR_BASE_ID + MAX_EDITIONS <= DLC_TOGGLE_BASE_ID, "scrollbars and DLC toggles apart");
+    static_assert(DLC_TOGGLE_BASE_ID + MAX_DLCS <= EDITION_LINK_BASE_ID, "DLC toggles and links apart");
 
     // A WM_COMMAND of the Options dialog together with the state of all its controls.
     struct OptionsEvent
@@ -176,7 +181,7 @@ private:
     static constexpr int MENU_COUNT = 6;
     static constexpr int MAX_GAME_ITEMS = MAX_EDITIONS * MAX_EDITION_LINKS + 1;
     static constexpr int MAX_MENU_LABEL = 64;
-    static constexpr int MAX_POOL_HOTKEYS = 4 + MAX_EDITIONS + MAX_DLC_TOGGLES;
+    static constexpr int MAX_POOL_HOTKEYS = 4 + MAX_EDITIONS + DLC_HOTKEY_COUNT;
     static constexpr int MAX_HOTKEY_TEXT = 96;
     static constexpr int MAX_ABOUT_LEGAL = 512;
     static constexpr UINT_PTR TOAST_TIMER = 2;
@@ -273,6 +278,8 @@ private:
     LRESULT OnHotkey(WPARAM hotkey_id);
     LRESULT OnCommand(WPARAM wParam, LPARAM lParam);
     LRESULT OnTimer(WPARAM timer_id);
+    LRESULT OnMouseWheel(WPARAM wParam, LPARAM lParam);
+    LRESULT OnScroll(LPARAM lParam);
     void NoteActivity();
     LRESULT OnMouseLeave();
     LRESULT OnMainWindowMouseMove();
@@ -290,8 +297,6 @@ private:
     bool CreatePoolTabControls();
     bool CreateEditionControls();
     bool CreateCivToggles();
-    bool CreateDlcToggles();
-    bool CreateDlcToggle(int dlc, const DlcToggleSpot& spot);
     bool CreateLabel(Label& label, const ControlPlacement& placement, const Label::Style& style);
     ControlPlacement PlaceInClient(int id, const PixelRect& client_bounds, const wchar_t* text) const;
     bool BuildMenus();
@@ -307,7 +312,6 @@ private:
     void ShowCustomTab(bool showing_enabled);
     void ShowPoolCheckboxes(int edition);
     void HideCustomPoolCheckboxes();
-    void ShowDlcToggles(int edition);
     void ShowEditionControls(int edition);
     void CheckEditionRow(int edition);
     void MoveResetButton(int tab_index);
@@ -326,6 +330,22 @@ private:
     void SetControlText(HWND control, const wchar_t* text);
     void ShowControl(HWND control, bool shown);
     bool HasDlcToggle(int dlc) const;
+
+    // --- The DLC toggles' lists, which scroll once they don't fit (CivPickerDlcToggles.cpp) ---
+    bool CreateDlcToggles();
+    bool CreateDlcToggle(int dlc, const DlcToggleSpot& spot);
+    bool CreateDlcScrollbar(int edition);
+    int VisibleDlcRows(int edition) const;
+    int DlcListHeight(int edition) const;
+    PixelRect DlcListArea(int edition) const;
+    void ShowDlcToggles(int edition);
+    void LayOutDlcToggles(int edition);
+    void HideDlcToggles(int edition);
+
+    // --- Images and cursors (CivPickerViewImages.cpp) ---
+    ImageSources CollectImageSources();
+    void ReportMissingImages() const;
+    void UpdateCursorSize();
 
     // --- Sounds and jingles ---
     void LoadSound(SoundResource& sound_resource);
@@ -354,7 +374,7 @@ private:
     void ShowHistoryCivIcon(HWND dialog);
     int HistoryListPosition(const std::wstring& civ_name) const;
     void InitialiseOptionsDialog(HWND dialog);
-    void SetContfreshValueText(HWND dialog, int value) const;
+    void SetFreshnessText(HWND dialog, int civs) const;
     void OnContfreshSlider(HWND dialog, HWND slider);
     bool OnOptionsCommand(HWND dialog, int command_id, int notification);
     bool SubmitLobbyCode(HWND dialog, int command_id);
@@ -432,6 +452,11 @@ private:
     EditionRow edition_rows[MAX_EDITIONS];
     IconToggle civ_toggles[MAX_CIVS];
     IconToggle dlc_toggles[MAX_DLCS];
+    ScrollBar dlc_scrollbars[MAX_EDITIONS];
+    HMONITOR cursor_monitor = NULL;
+    ImageFile civ_icon_files[MAX_CIVS + 1] = {};
+    ImageFile dlc_icon_files[EDITION_LOOKS * MAX_EDITIONS + MAX_DLCS] = {};
+    ImageFile edition_banner_files[MAX_EDITIONS] = {};
     TooltipTarget tooltip_targets[TOOLTIP_AMOUNT] = {};
     Tooltip tooltips[TOOLTIP_AMOUNT] = {};
     int shown_tooltip = -1;

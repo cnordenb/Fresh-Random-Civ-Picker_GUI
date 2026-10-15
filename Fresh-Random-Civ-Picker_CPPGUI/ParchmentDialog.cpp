@@ -15,7 +15,6 @@ namespace
     constexpr int PANEL_PADDING = 13;
     constexpr int TITLE_HEIGHT = 30;
     constexpr int TITLE_LEFT = 10;
-    constexpr int PANEL_SLICE = 64;
     constexpr float PANEL_BORDER = 38.0f;
     // .group { border: 1px } and its legend { padding: 0 3px }, 11 px in from the group's edge.
     constexpr int LEGEND_LEFT = 11;
@@ -184,7 +183,8 @@ bool ParchmentDialogs::RenderPanel(Level& level)
     const FloatRect panel =
         ToFloatRect({ origin.x, origin.y, origin.x + level.size.width, origin.y + level.size.height });
     const float inlay = PANEL_BORDER / 2.0f;
-    renderer.DrawImage({ ImageId::panel_frame, { PANEL_SLICE, PANEL_SLICE, 2 * PANEL_SLICE, 2 * PANEL_SLICE },
+    const PixelSize middle = renderer.ImageSize(ImageId::panel_inlay);
+    renderer.DrawImage({ ImageId::panel_inlay, { 0, 0, middle.width, middle.height },
                          { panel.left + inlay, panel.top + inlay, panel.right - inlay, panel.bottom - inlay }, 1.0f,
                          ParchmentRenderer::Smoothing::smooth });
     renderer.DrawNineSlice({ NineSliceId::panel_frame, panel, PANEL_BORDER, TileRule::round, TileRule::round, false });

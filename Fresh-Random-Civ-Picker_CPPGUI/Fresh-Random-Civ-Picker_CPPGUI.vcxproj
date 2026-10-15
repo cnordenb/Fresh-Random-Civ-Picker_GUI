@@ -158,6 +158,8 @@
     <ClInclude Include="ShareLink.h" />
     <ClInclude Include="ParchmentToast.h" />
     <ClInclude Include="DialogMetrics.h" />
+    <ClInclude Include="ParchmentScrollBar.h" />
+    <ClInclude Include="CivPickerLayout.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CivPickerModel.cpp" />
@@ -185,6 +187,9 @@
     <ClCompile Include="ShareLink.cpp" />
     <ClCompile Include="ParchmentToast.cpp" />
     <ClCompile Include="CivPickerShare.cpp" />
+    <ClCompile Include="ParchmentScrollBar.cpp" />
+    <ClCompile Include="CivPickerDlcToggles.cpp" />
+    <ClCompile Include="CivPickerViewImages.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Fresh Random Civ Picker.ico" />
@@ -199,6 +204,7 @@
     <None Include="data.json" />
     <None Include="formatting_notes.md" />
     <None Include="settings.ini" />
+    <None Include="TODO.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
@@ -208,9 +214,7 @@
     <ItemGroup>
       <ProgramImage Include="$(ProjectDir)images\**\*" />
     </ItemGroup>
-    <Copy SourceFiles="@(ProgramImage)"
-          DestinationFiles="@(ProgramImage->'$(OutDir)images\%(RecursiveDir)%(Filename)%(Extension)')"
-          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(ProgramImage)" DestinationFiles="@(ProgramImage->'$(OutDir)images\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
   <!-- data.json (the editions, DLCs and civs) and the civ jingles named after them are read from the exe's
        folder as well. -->
@@ -220,8 +224,6 @@
       <ProgramJingle Include="$(ProjectDir)sounds\civ_jingles\**\*" />
     </ItemGroup>
     <Copy SourceFiles="@(ProgramData)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(ProgramJingle)"
-          DestinationFiles="@(ProgramJingle->'$(OutDir)sounds\civ_jingles\%(RecursiveDir)%(Filename)%(Extension)')"
-          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(ProgramJingle)" DestinationFiles="@(ProgramJingle->'$(OutDir)sounds\civ_jingles\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
 </Project>

@@ -5,6 +5,7 @@
 #include <windowsx.h>
 
 #include "Assertions.h"
+#include "ParchmentScrollBar.h"
 
 namespace
 {
@@ -241,24 +242,10 @@ void ParchmentLog::PaintScrollbar(ParchmentRenderer& renderer)
 {
     if (!c_assert(layout.has_scrollbar) || !c_assert(TrackLength() >= SCROLLBAR_KNOB_SIZE)) return;
     const float left = static_cast<float>(size.width - BORDER - SCROLLBAR_WIDTH);
-    const float top = static_cast<float>(BORDER);
-    const float bottom = static_cast<float>(size.height - BORDER);
-    const float button = static_cast<float>(SCROLLBAR_BUTTON_LENGTH);
-    const float right = left + static_cast<float>(SCROLLBAR_WIDTH);
-    const ParchmentRenderer::Smoothing smooth = ParchmentRenderer::Smoothing::smooth;
-    const PixelRect up_source = { 0, 0, SCROLLBAR_SLICE, SCROLLBAR_SLICE };
-    renderer.DrawImage({ ImageId::scrollbar, up_source, { left, top, right, top + button },
-                         1.0f, smooth });
-    renderer.DrawImage({ ImageId::scrollbar, { 0, SCROLLBAR_SLICE, SCROLLBAR_SLICE, 2 * SCROLLBAR_SLICE },
-                         { left, top + button, right, bottom - button }, 1.0f, smooth });
-    renderer.DrawImage({ ImageId::scrollbar, { 0, 2 * SCROLLBAR_SLICE, SCROLLBAR_SLICE, 3 * SCROLLBAR_SLICE },
-                         { left, bottom - button, right, bottom }, 1.0f, smooth });
+    const FloatRect bar = { left, static_cast<float>(BORDER), left + static_cast<float>(SCROLLBAR_WIDTH),
+                            static_cast<float>(size.height - BORDER) };
     const int knob_offset = KnobOffset({ layout.content_height, ViewportHeight(size), scroll_top }, TrackLength());
-    const float knob_left = left + static_cast<float>(SCROLLBAR_KNOB_INSET);
-    const float knob_top = top + button + static_cast<float>(knob_offset);
-    const float knob = static_cast<float>(SCROLLBAR_KNOB_SIZE);
-    renderer.DrawImage({ ImageId::scrollbar_knob, { 0, 0, SCROLLBAR_KNOB_SIZE, SCROLLBAR_KNOB_SIZE },
-                         { knob_left, knob_top, knob_left + knob, knob_top + knob }, 1.0f, smooth });
+    DrawScrollbar(renderer, { bar, knob_offset });
 }
 
 void ParchmentLog::OnButtonDown(LPARAM lParam)

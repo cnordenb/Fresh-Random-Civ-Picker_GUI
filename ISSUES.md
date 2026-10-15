@@ -14,12 +14,6 @@ Line numbers refer to commit `10b2ab4` and will drift. When an issue is fixed, m
   `:59`. Careful when fixing: `DisableHotkeys()` (`FRCP_GUI.cpp:1108`) unregisters ids `1..HOTKEY_AMOUNT-1`, so if
   `HOTKEY_AMOUNT` is simply decremented, the highest id (currently L, 39) would stay registered system-wide after
   FRCP loses focus.
-- **Loading a save can drop the newest continuous-freshness entries.** `LoadLog` stops after `MAX_CIVS*2+4` (110)
-  data lines (`FRCP_GUI.cpp:2083`, `:2086`). 53 civ states + drawn civs + the edition line + `ContfreshCivArray`
-  exceeds that once roughly 30+ civs are drawn at maximum strength, and the array is written oldest first, so the
-  most recent civs are the ones lost.
-- **`ContFreshStrengthValue` defaults to 0** in `LoadSettings` (`FRCP_GUI.cpp:1884`) although the slider range is
-  1–10 (`:717`). 0 behaves like 1 until the slider is moved.
 
 ### Latent (no visible effect today)
 - `if (IDC_LEGACY_OPTION)` in `OptionsDlgProc` (`FRCP_GUI.cpp:759`) is always true; it should compare `wmId`. Any
@@ -64,3 +58,16 @@ Line numbers refer to commit `10b2ab4` and will drift. When an issue is fixed, m
 - **DE DLC hotkeys J, K and L don't trigger auto-reset.** The Civ Pool tab's `WM_HOTKEY` reset range
   `wParam > 1 && wParam < 4 || wParam > 12 && wParam < 22` (`FRCP_GUI.cpp:307`) covers A–H but not `HOTKEY_ID_J` (37),
   `HOTKEY_ID_K` (38) or `HOTKEY_ID_L` (39), i.e. Dawn of the Dukes, Lords of the West and The Last Khans. Fixed 2026-10-06.
+- **A 10th DLC toggle made the program vanish at startup** (reported 2026-10-15: "When adding a civ, binary neither
+  opens nor throws error message"; reproduced with the `x64\Release` build and its `data.json`, which adds a DLC "new"
+  as the 10th DE toggle). With `MAX_DLC_TOGGLES` raised to 10, `CivPickerView::DlcTooltipText` appended
+  `DLC_SLOT_HOTKEY_KEYS[9]`, a null pointer (only A to L exist), to a `std::wstring`: an access violation while the
+  main window was built. Toggles after an edition's ninth now simply have no hotkey (`DLC_HOTKEY_COUNT`), an edition
+  may have up to 128 (`MAX_DLC_TOGGLES`) and they scroll, and a startup that fails without crashing now says so in a
+  message box. Fixed 2026-10-15.
+- **Loading a save could drop the newest continuous-freshness entries**: the log reader stopped after
+  `MAX_CIVS*2+4` lines, fewer than civ states + draws + edition + the freshness history, which is written oldest
+  first. `LOG_LINE_LIMIT` now covers all of them (`CivPickerModel.cpp`). Fixed 2026-10-15.
+- **`ContFreshStrengthValue` defaulted to 0** although the slider ran from 1 to 10. The strength is gone: the setting
+  is now a number of civs (`ContFreshCivs`, default the most, as on the web version), and an old strength is turned
+  into civs once. Fixed 2026-10-15.

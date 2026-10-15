@@ -226,8 +226,9 @@ void CivCatalog::ReadDlc(DataReader& reader, int key, int dlc)
     info.name = reader.Text(object, "name");
     info.short_name = reader.OptionalText(object, "short");
     info.released = reader.Text(object, "released");
+    info.icon = reader.OptionalText(object, "icon");
     // Numbered among the DLCs with icons by DeriveDlcs.
-    info.icon_index = reader.OptionalText(object, "icon").empty() ? NONE : 0;
+    info.icon_index = info.icon.empty() ? NONE : 0;
     info.edition = NONE;
     info.toggle_edition = NONE;
     info.toggle_slot = NONE;
@@ -270,6 +271,8 @@ void CivCatalog::ReadEdition(DataReader& reader, int object, int edition)
     info.short_name = reader.Text(object, "short");
     info.series = reader.Text(object, "series");
     info.year = reader.Integer(object, "year");
+    info.icon = reader.Text(object, "icon");
+    info.banner = reader.Text(object, "banner");
     info.url = reader.OptionalText(object, "url");
     info.store_note = reader.OptionalText(object, "storeNote");
     if (info.url.empty() && info.store_note.empty()) reader.Fail(where + L" needs a \"url\" or a \"storeNote\"");

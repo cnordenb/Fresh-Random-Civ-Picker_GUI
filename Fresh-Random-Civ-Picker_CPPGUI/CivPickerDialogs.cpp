@@ -25,7 +25,7 @@ namespace
         { DecorationKind::group, { 27, 222, 241, 339 }, L"When the program starts" },
         { DecorationKind::group, { 251, 222, 689, 339 }, L"Hotkeys" },
         { DecorationKind::text, { 262, 101, 330, 118 }, L"Jingle type" },
-        { DecorationKind::hint, { 486, 143, 678, 194 }, L"When a round ends, its last civs sit out the first draws of "
+        { DecorationKind::hint, { 486, 143, 678, 194 }, L"When a round ends, these civs sit out the first draws of "
                                                          L"the next round." },
     };
     const DialogPart OPTIONS_PARTS[] = {
@@ -356,8 +356,8 @@ bool CivPickerView::BuildHotkeysLayout()
                     size.height <= ParchmentDialogs::MAX_DIALOG_HEIGHT);
 }
 
-// The Civ Pool tab's keys: the fixed ones, one for each edition, and one for each place in the editions' lists of
-// DLC toggles, which toggles the DLCs in that place (the web version's dlcSlotText).
+// The Civ Pool tab's keys: the fixed ones, one for each edition, and one for each of the first places in the
+// editions' lists of DLC toggles, which toggles the DLCs in that place (the web version's dlcSlotText).
 bool CivPickerView::BuildPoolHotkeys()
 {
     const CivCatalog& catalog = model.Catalog();
@@ -368,7 +368,7 @@ bool CivPickerView::BuildPoolHotkeys()
         AddPoolHotkey(EDITION_HOTKEY_KEYS[edition], catalog.EditionAt(edition).short_name);
     AddPoolHotkey(L"R", L"Auto-toggle older civs");
     AddPoolHotkey(L"T", L"Auto-reset on change");
-    for (int slot = 0; slot < MAX_DLC_TOGGLES; slot++)
+    for (int slot = 0; slot < DLC_HOTKEY_COUNT; slot++)
     {
         const std::wstring names = DlcSlotNames(slot);
         if (!names.empty()) AddPoolHotkey(DLC_SLOT_HOTKEY_KEYS[slot], L"Toggle " + names);
@@ -580,29 +580,37 @@ void CivPickerView::InitialiseOptionsDialog(HWND dialog)
     SendMessage(jingle_type, CB_SETCURSEL, settings.legacy_jingle_enabled ? 1 : 0, 0);
     if (!settings.jingles_enabled) ShowJingleTypeOption(dialog, false);
 
-    HWND strength_slider = GetDlgItem(dialog, IDC_SLIDER_CONTFRESHSTRENGTH);
-    if (!c_assert(strength_slider != NULL)) return;
-    SendMessage(strength_slider, TBM_SETRANGE, TRUE, MAKELPARAM(1, 10));
-    SendMessage(strength_slider, TBM_SETPOS, TRUE, settings.contfresh_strength);
-    if (!settings.contfresh_enabled) ShowContfreshOptions(dialog, false);
-    SetContfreshValueText(dialog, static_cast<int>(SendMessage(strength_slider, TBM_GETPOS, 0, 0)));
+    // The freshness slider counts civs, from 1 to half the pool, as the web version's does.
+    HWND freshness_slider = GetDlgItem(dialog, IDC_SLIDER_CONTFRESHSTRENGTH);
+    if (!c_assert(freshness_slider != NULL)) return;
+    SendMessage(freshness_slider, TBM_SETRANGE, TRUE, MAKELPARAM(1, model.FreshnessMaximum()));
+    SendMessage(freshness_slider, TBM_SETPOS, TRUE, model.FreshnessLimit());
+    ShowContfreshOptions(dialog, settings.contfresh_enabled);
+    SetFreshnessText(dialog, model.FreshnessLimit());
 }
 
-void CivPickerView::SetContfreshValueText(HWND dialog, int value) const
+// "Exclude the last N civs", and "(the most)" at the slider's top (the web version's updateFreshLabel).
+void CivPickerView::SetFreshnessText(HWND dialog, int civs) const
 {
-    if (!c_assert(dialog != NULL) || !c_assert(value >= 1 && value <= 10)) return;
-    wchar_t value_text[64];
-    swprintf_s(value_text, L"Continuous freshness strength: %d", value);
-    SetDlgItemText(dialog, IDC_STATIC_CONTFRESHVALUE, value_text);
+    if (!c_assert(dialog != NULL) || !c_assert(civs >= 1 && civs <= model.FreshnessMaximum())) return;
+    wchar_t text[64] = L"Needs at least 2 civs in the pool";
+    if (model.GetCustomMaxCivs() >= 2)
+    {
+        const wchar_t* const noun = civs == 1 ? L"civ" : L"civs";
+        const wchar_t* const most = civs == model.FreshnessMaximum() ? L" (the most)" : L"";
+        // The longest text fits the buffer with room to spare; a cut-short one would still begin right.
+        (void)_snwprintf_s(text, _TRUNCATE, L"Exclude the last %d %ls%ls", civs, noun, most);
+    }
+    SetDlgItemText(dialog, IDC_STATIC_CONTFRESHVALUE, text);
 }
 
 void CivPickerView::OnContfreshSlider(HWND dialog, HWND slider)
 {
     if (!c_assert(dialog != NULL)) return;
     if (slider != GetDlgItem(dialog, IDC_SLIDER_CONTFRESHSTRENGTH)) return;
-    const int position = static_cast<int>(SendMessage(slider, TBM_GETPOS, 0, 0));
-    SetContfreshValueText(dialog, position);
-    controller.OnContfreshStrengthChanged(position);
+    const int civs = static_cast<int>(SendMessage(slider, TBM_GETPOS, 0, 0));
+    SetFreshnessText(dialog, civs);
+    controller.OnFreshnessChanged(civs);
 }
 
 bool CivPickerView::OnOptionsCommand(HWND dialog, int command_id, int notification)
@@ -633,10 +641,12 @@ void CivPickerView::ShowJingleTypeOption(HWND dialog, bool shown) const
     (void)EnableWindow(GetDlgItem(dialog, IDC_LEGACY_OPTION), shown ? TRUE : FALSE);
 }
 
+// The slider also stays grey while the pool has fewer than 2 civs, as there is nothing to keep out.
 void CivPickerView::ShowContfreshOptions(HWND dialog, bool shown) const
 {
     if (!c_assert(dialog != NULL)) return;
-    (void)EnableWindow(GetDlgItem(dialog, IDC_SLIDER_CONTFRESHSTRENGTH), shown ? TRUE : FALSE);
+    const bool usable = shown && model.GetCustomMaxCivs() >= 2;
+    (void)EnableWindow(GetDlgItem(dialog, IDC_SLIDER_CONTFRESHSTRENGTH), usable ? TRUE : FALSE);
 }
 
 INT_PTR CALLBACK CivPickerView::JoinLobbyDialogProc(HWND dialog, UINT message, WPARAM wParam,

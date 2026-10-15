@@ -4,12 +4,10 @@
 #include <cstddef>
 
 #include "Assertions.h"
+#include "ParchmentTheme.h"
 
 namespace
 {
-    // The slider groove of slider.png runs from 32 to 308 px of 340 px; the CSS rounds this to percentages.
-    constexpr float SLIDER_GROOVE_START = 0.0941f;
-    constexpr float SLIDER_GROOVE_LENGTH = 0.8118f;
     constexpr int TOOLTIP_OFFSET_X = 10;
     constexpr int TOOLTIP_OFFSET_Y = 20;
     constexpr int TOOLTIP_FLIP_GAP = 8;
@@ -179,6 +177,28 @@ ScrollbarPart HitTestScrollbar(const ScrollbarHit& hit)
 
 // --- The slider ---
 
+// The arrows and the bar keep the images' proportions at the handle's scale and sit centred on the slider's middle.
+// The bar's ends tuck under the arrows, and the handle stops where it touches an arrow.
+SliderLayout LayOutSlider(PixelSize size)
+{
+    SliderLayout layout = {};
+    if (!c_assert(size.width > 0 && size.height > 0)) return layout;
+    const float width = static_cast<float>(size.width);
+    const float height = static_cast<float>(size.height);
+    const float scale = height / static_cast<float>(SLIDER_HANDLE_IMAGE);
+    const float arrow_width = static_cast<float>(SLIDER_ARROW_IMAGE_WIDTH) * scale;
+    const float arrow_top = (height - static_cast<float>(SLIDER_ARROW_IMAGE_HEIGHT) * scale) / 2.0f;
+    const float bar_top = (height - static_cast<float>(SLIDER_BAR_IMAGE_HEIGHT) * scale) / 2.0f;
+    layout.left_arrow = { 0.0f, arrow_top, arrow_width, height - arrow_top };
+    layout.right_arrow = { width - arrow_width, arrow_top, width, height - arrow_top };
+    layout.bar = { arrow_width / 2.0f, bar_top, width - arrow_width / 2.0f, height - bar_top };
+    layout.handle_size = height;
+    layout.groove_start = arrow_width + height / 2.0f;
+    const float groove_end = width - arrow_width - height / 2.0f;
+    layout.groove_end = groove_end > layout.groove_start ? groove_end : layout.groove_start;
+    return layout;
+}
+
 float SliderFill(const SliderRange& range)
 {
     if (!c_assert(range.maximum >= range.minimum)) return 0.0f;
@@ -189,23 +209,59 @@ float SliderFill(const SliderRange& range)
     return fill > 1.0f ? 1.0f : fill;
 }
 
-float SliderKnobCentre(int slider_width, float fill)
+float SliderHandleCentre(const SliderTrack& track)
 {
-    if (!c_assert(slider_width >= 0) || !c_assert(fill >= 0.0f && fill <= 1.0f)) return 0.0f;
-    const float width = static_cast<float>(slider_width);
-    return width * SLIDER_GROOVE_START + width * SLIDER_GROOVE_LENGTH * fill;
+    const SliderLayout& layout = track.layout;
+    if (!c_assert(layout.groove_end >= layout.groove_start)) return layout.groove_start;
+    return layout.groove_start + (layout.groove_end - layout.groove_start) * SliderFill(track.range);
 }
 
 int SliderValueAt(const SliderTrack& track, float pointer_x)
 {
+    const SliderLayout& layout = track.layout;
     const SliderRange& range = track.range;
-    if (!c_assert(track.width > 0) || !c_assert(range.maximum >= range.minimum)) return range.minimum;
-    const float width = static_cast<float>(track.width);
-    float fill = (pointer_x - width * SLIDER_GROOVE_START) / (width * SLIDER_GROOVE_LENGTH);
+    if (!c_assert(range.maximum >= range.minimum)) return range.minimum;
+    if (!c_assert(layout.groove_end >= layout.groove_start)) return range.value;
+    const float groove = layout.groove_end - layout.groove_start;
+    if (groove <= 0.0f) return range.value;
+    float fill = (pointer_x - layout.groove_start) / groove;
     if (fill < 0.0f) fill = 0.0f;
     if (fill > 1.0f) fill = 1.0f;
     const float steps = fill * static_cast<float>(range.maximum - range.minimum);
     return range.minimum + static_cast<int>(std::lround(steps));
+}
+
+// The arrows take the slider's whole height at its ends; between them are the handle, where it is, and the bar.
+SliderPart HitTestSlider(const SliderTrack& track, PixelPoint point)
+{
+    const SliderLayout& layout = track.layout;
+    if (!c_assert(layout.handle_size > 0.0f)) return SliderPart::none;
+    const float x = static_cast<float>(point.x) + 0.5f;
+    if (x < 0.0f || x >= layout.right_arrow.right) return SliderPart::none;
+    if (x < layout.left_arrow.right) return SliderPart::left_arrow;
+    if (x >= layout.right_arrow.left) return SliderPart::right_arrow;
+    const float handle_centre = SliderHandleCentre(track);
+    const float half_handle = layout.handle_size / 2.0f;
+    if (x >= handle_centre - half_handle && x < handle_centre + half_handle) return SliderPart::handle;
+    return SliderPart::bar;
+}
+
+// --- Images fitted into a box ---
+
+// The largest size with the image's proportions that fits the box, compared and rounded in whole numbers.
+PixelSize ContainedSize(PixelSize image, PixelSize box)
+{
+    if (!c_assert(image.width > 0 && image.height > 0) || !c_assert(box.width > 0 && box.height > 0)) return box;
+    const long long image_width = image.width;
+    const long long image_height = image.height;
+    const bool fits_width = image_width * box.height >= image_height * box.width;
+    if (fits_width)
+    {
+        const long long height = (2LL * box.width * image_height + image_width) / (2LL * image_width);
+        return { box.width, height < 1 ? 1 : static_cast<int>(height) };
+    }
+    const long long width = (2LL * box.height * image_width + image_height) / (2LL * image_height);
+    return { width < 1 ? 1 : static_cast<int>(width), box.height };
 }
 
 // --- Text ---

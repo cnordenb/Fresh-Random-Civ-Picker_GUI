@@ -77,7 +77,8 @@ void CivPickerView::SetJingleFolder(const std::wstring& folder)
 // Builds everything the windows draw with, before any window exists (CLAUDE2.md I5: initialization).
 bool CivPickerView::StartGraphics()
 {
-    if (!c_assert(instance != NULL) || !renderer.Start(image_folder.c_str())) return false;
+    if (!c_assert(instance != NULL) || !renderer.Start(CollectImageSources())) return false;
+    ReportMissingImages();
     if (!back_buffer.Create(BACK_BUFFER_SIZE) || !shell_workspace.Create(SHELL_WORKSPACE_SIZE)) return false;
     if (!main_shell.Create({ { WINDOW_WIDTH, WINDOW_HEIGHT }, 0, &shell_workspace })) return false;
     text_menu = CreatePopupMenu();
@@ -199,6 +200,8 @@ LRESULT CivPickerView::HandleMainWindowMessage(const MSG& message)
         case WM_HOTKEY: return OnHotkey(wParam);
         case WM_COMMAND: return OnCommand(wParam, lParam);
         case WM_TIMER: return OnTimer(wParam);
+        case WM_MOUSEWHEEL: return OnMouseWheel(wParam, lParam);
+        case WM_VSCROLL: return OnScroll(lParam);
         default: return DefWindowProc(message.hwnd, message.message, wParam, lParam);
     }
 }
@@ -213,6 +216,7 @@ LRESULT CivPickerView::OnCreate(HWND window)
 {
     if (!c_assert(window != NULL) || !c_assert(main_window == NULL)) return -1;
     main_window = window;
+    UpdateCursorSize();
     INITCOMMONCONTROLSEX common_controls = { sizeof(INITCOMMONCONTROLSEX), ICC_STANDARD_CLASSES | ICC_WIN95_CLASSES };
     if (!InitCommonControlsEx(&common_controls))
     {
@@ -271,6 +275,7 @@ LRESULT CivPickerView::OnWindowMoved(WPARAM wParam, LPARAM lParam)
     if (!c_assert(main_window != NULL)) return 0;
     main_shell.Follow();
     menu_bar.Close();
+    UpdateCursorSize();
     return DefWindowProc(main_window, WM_WINDOWPOSCHANGED, wParam, lParam);
 }
 
@@ -528,11 +533,8 @@ void CivPickerView::HideCustomPoolCheckboxes()
 {
     const int civ_count = model.Catalog().CivCount();
     for (int i = 0; i < civ_count && i < MAX_CIVS; i++) ShowControl(civ_toggles[i].Window(), false);
-    const int dlc_count = model.Catalog().DlcCount();
-    for (int i = 0; i < dlc_count && i < MAX_DLCS; i++)
-    {
-        if (HasDlcToggle(i)) ShowControl(dlc_toggles[i].Window(), false);
-    }
+    const int edition_count = model.Catalog().EditionCount();
+    for (int edition = 0; edition < edition_count && edition < MAX_EDITIONS; edition++) HideDlcToggles(edition);
 }
 
 // The pool's controls follow the edition; they only show while the Civ Pool tab does. The banners are stacked in

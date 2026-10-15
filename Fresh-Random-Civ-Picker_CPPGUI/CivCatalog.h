@@ -35,6 +35,8 @@ struct EditionInfo
     std::wstring series;
     std::wstring url; // the store page; empty for an edition that has a store note instead
     std::wstring store_note;
+    std::wstring icon; // names its icon files: icon, icon_hover and icon_pressed
+    std::wstring banner; // names its banner file
     int year = 0;
     bool legacy_jingles = false; // its civs also have the original game's jingles
     int dlc_toggles[MAX_DLC_TOGGLES] = {};
@@ -52,6 +54,7 @@ struct DlcInfo
     std::wstring name;
     std::wstring short_name;
     std::wstring released;
+    std::wstring icon; // names its icon file; empty for a DLC without one
     int edition = 0;
     int icon_index = -1; // its place among the DLCs that have an icon, or -1
     int toggle_edition = -1; // the edition whose Civ Pool tab has a toggle for it, or -1

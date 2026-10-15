@@ -5,9 +5,12 @@
 // The parchment theme of the web version (frcp.net, style.css), which this program shares: the images, fonts,
 // colours and sizes every View component draws with. Values carry the CSS they come from.
 
+// The images are the game's originals where the program has them (the parchment, the cursors, the slider and the
+// dialogs' panel) and the web version's otherwise. The atlases are built at startup from one file per icon, which
+// data.json names: a civ's is its name in lower case, an edition's and a DLC's its "icon" (and "banner").
 enum class ImageId
 {
-    background, // ui/background.png, the parchment the whole window is drawn on
+    background, // ui/background.png, the parchment the whole window is drawn on, at its own aspect ratio
     text_button, // ui/button.png
     text_button_pressed, // ui/button_pressed.png
     icon_button_frame, // ui/button_9slice.png, 6 px nine-slice
@@ -20,22 +23,31 @@ enum class ImageId
     log_frame, // ui/log_9slice.png, 6 px nine-slice
     off_cross, // ui/off.png, drawn over a disabled civ or DLC
     options_button, // ui/options_button.png: normal, hover and pressed side by side
-    panel_frame, // ui/panel_9slice.png, 64 px nine-slice of the dialogs
+    panel_inlay, // ui/9slice/boxstyle3a_inlay.png, the middle of the dialogs' panel
     scrollbar, // ui/scrollbar_3slice.png: up button, track and down button
     scrollbar_knob, // ui/scrollbar_knob.png
-    slider, // ui/slider.png: the off track over the on track
-    slider_knob, // ui/slider_knob.png
+    slider_bar, // ui/slider/slider_bar.png, the slider's groove
+    slider_progress, // ui/slider/slider_bar_progress.png, the groove's fill up to the handle
+    slider_left_arrow, // ui/slider/arrow_left_normal.png
+    slider_left_arrow_hover, // ui/slider/arrow_left_hover.png
+    slider_left_arrow_active, // ui/slider/arrow_left_active.png, while pressed
+    slider_right_arrow, // ui/slider/arrow_right_normal.png
+    slider_right_arrow_hover,
+    slider_right_arrow_active,
+    slider_handle, // ui/slider/slider_handle_normal.png
+    slider_handle_hover,
+    slider_handle_active, // while dragged
     tabs, // ui/tabs.png: tab 1 over tab 2, normal left and hover right
     tabs_dimmed, // the same, filtered brightness(.88) for the tabs that aren't selected
     techtree_button, // ui/techtree_button.png: normal and pressed side by side
     text_field_frame, // ui/textfield_9slice.png, 15 px nine-slice
     close_button, // ui/x_button.png: normal and pressed side by side
     share_icon, // ui/share_icon.png, the share buttons' icon
-    civ_atlas, // civ/civicon_atlas.png: 104 px civ icons, 8 per row, Random last
+    civ_atlas, // civ/<civ>.png in the order of the civs' IDs, then civ/random.png: 104 px cells, 8 per row
     civ_atlas_grey, // the same, filtered grayscale(1) for disabled civs
-    dlc_atlas, // dlc/dlc_atlas.png: 128 px edition and DLC icons, 6 per row
+    dlc_atlas, // dlc/<icon>.png: each edition's three looks, then the DLCs' icons; 128 px cells, 6 per row
     dlc_atlas_grey,
-    edition_banners, // dlc/edition_banners_atlas.png: 128 x 93 banners in data.json's order of editions
+    edition_banners, // dlc/<banner>.png: 128 x 93 banners in data.json's order of editions
     history_book, // history.bmp, the History button (desktop only)
     aoe2vils_icon, // aoe2vils.png, 12 px pixel art for the aoe2vils.net button (desktop only)
     count
@@ -59,6 +71,13 @@ constexpr int NINE_SLICE_COUNT = static_cast<int>(NineSliceId::count);
 enum class CursorId { arrow, hand, count };
 
 constexpr int CURSOR_COUNT = static_cast<int>(CursorId::count);
+
+// The cursors come in 32 px (ui/cursor_x1.png, ui/cursor_pointing_x1.png) and, for displays scaled to 150 % or
+// more, 48 px (the _x2 files).
+enum class CursorSize { standard, large, count };
+
+constexpr int CURSOR_SIZE_COUNT = static_cast<int>(CursorSize::count);
+constexpr unsigned int LARGE_CURSOR_DPI = 144;
 
 enum class FontId
 {
@@ -124,8 +143,17 @@ constexpr float KEY_LINE_HEIGHT = 15.390625f; // 11px/1.4 = 15.4 px
 
 // --- The main window (.window, .titlebar, .menubar, .client) ---
 
+// The parchment is never stretched: the visible part of ui/background.png (1024 x 1167; the paper and its burnt edge
+// without the transparent margin around them) fills the window's width, and the window is as tall as that makes it.
+constexpr int BACKGROUND_VISIBLE_LEFT = 26;
+constexpr int BACKGROUND_VISIBLE_TOP = 13;
+constexpr int BACKGROUND_VISIBLE_RIGHT = 995;
+constexpr int BACKGROUND_VISIBLE_BOTTOM = 1151;
+constexpr int BACKGROUND_VISIBLE_WIDTH = BACKGROUND_VISIBLE_RIGHT - BACKGROUND_VISIBLE_LEFT;
+constexpr int BACKGROUND_VISIBLE_HEIGHT = BACKGROUND_VISIBLE_BOTTOM - BACKGROUND_VISIBLE_TOP;
 constexpr int WINDOW_WIDTH = 578;
-constexpr int WINDOW_HEIGHT = 605;
+constexpr int WINDOW_HEIGHT =
+    (WINDOW_WIDTH * BACKGROUND_VISIBLE_HEIGHT + BACKGROUND_VISIBLE_WIDTH / 2) / BACKGROUND_VISIBLE_WIDTH;
 constexpr int WINDOW_PADDING = 22;
 constexpr int TITLE_BAR_HEIGHT = 30;
 constexpr int MENU_BAR_HEIGHT = 20;
@@ -155,10 +183,12 @@ constexpr int CHECKBOX_SIZE = 16;
 constexpr int TAB_CELL_WIDTH = 329;
 constexpr int TAB_CELL_HEIGHT = 158;
 constexpr int SCROLLBAR_SLICE = 27;
-constexpr int SLIDER_TRACK_WIDTH = 340;
-constexpr int SLIDER_TRACK_HEIGHT = 25;
-constexpr int SLIDER_KNOB_IMAGE = 43;
-constexpr int SLIDER_KNOB_SIZE = 24;
+constexpr int SLIDER_BAR_IMAGE_WIDTH = 386;
+constexpr int SLIDER_BAR_IMAGE_HEIGHT = 15;
+constexpr int SLIDER_BAR_IMAGE_CAP = 4; // the bar's frame at each end, which isn't stretched with the bar
+constexpr int SLIDER_ARROW_IMAGE_WIDTH = 35;
+constexpr int SLIDER_ARROW_IMAGE_HEIGHT = 30;
+constexpr int SLIDER_HANDLE_IMAGE = 43;
 constexpr int DROPDOWN_BUTTON_CELL_WIDTH = 56;
 constexpr int DROPDOWN_BUTTON_CELL_HEIGHT = 78;
 constexpr int EXTERNAL_ICON_SIZE = 12;

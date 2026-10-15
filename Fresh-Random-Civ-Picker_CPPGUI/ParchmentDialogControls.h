@@ -5,8 +5,10 @@
 
 // The controls only dialogs have, drawn as the web version's (style.css).
 
-// The slider (.slider): the off track with the on track over it up to the knob, and the knob image. It answers
-// like a trackbar: TBM_SETRANGE, TBM_SETPOS and TBM_GETPOS, and WM_HSCROLL to the parent while it moves.
+// The slider: the game's left arrow, bar and right arrow, with the bar filled up to the handle. An arrow steps the
+// value down or up, a press on the bar moves the handle there, and the handle drags; the arrows and the handle show
+// their hover look under the mouse and their active look while pressed. It answers like a trackbar: TBM_SETRANGE,
+// TBM_SETPOS and TBM_GETPOS, and WM_HSCROLL to the parent while it moves.
 class SliderControl final : public ParchmentControl
 {
 public:
@@ -14,19 +16,25 @@ public:
 
 private:
     void Paint(ParchmentRenderer& renderer, const FloatRect& bounds) override;
+    void PaintBar(ParchmentRenderer& renderer, const SliderTrack& track);
+    ImageId ArrowImage(SliderPart arrow) const;
+    ImageId HandleImage() const;
     CursorId CursorShape() const override;
     LRESULT DialogCode() const override;
     bool NotifiesClicks() const override;
     bool OnKeyPressed(WPARAM key) override;
     void OnPointerPressed(PixelPoint point) override;
     void OnPointerMoved(PixelPoint point) override;
+    void OnPointerLeft() override;
     LRESULT OnOtherMessage(UINT message, WPARAM wParam, LPARAM lParam) override;
     LRESULT OnSetRange(LPARAM lParam);
     LRESULT OnSetPosition(LPARAM lParam);
     void MoveTo(int value);
-    int Width() const;
+    SliderTrack Track() const;
 
     SliderRange range = { 0, 10, 0 };
+    SliderPart hovered_part = SliderPart::none;
+    SliderPart pressed_part = SliderPart::none;
 };
 
 // Dropdowns and text fields stay the standard COMBOBOX and EDIT controls, which already behave as the user

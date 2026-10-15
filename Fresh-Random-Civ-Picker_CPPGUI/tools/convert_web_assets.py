@@ -5,6 +5,11 @@ WebP (the codec is an optional Store extension), so the desktop app ships the sa
 always decodes. Run after the web version's images change:
     python tools/convert_web_assets.py <path to frcp_html>
 Needs Pillow (pip install pillow).
+
+The program is moving to the game's original images. Those it already has (the parchment, the cursors, the slider
+and the dialogs' panel) are not listed here, so this never overwrites them. The civ, edition and DLC icons are one
+file each; a web icon is only copied where the project has no icon of that name yet, so an original is never
+replaced. The web version's atlases are left out: the program builds its own from the icon files at startup.
 """
 import sys
 from pathlib import Path
@@ -13,12 +18,17 @@ from PIL import Image
 
 PROJECT_IMAGES = Path(__file__).resolve().parent.parent / "images"
 WEB_IMAGES = [
-    "ui/background", "ui/button", "ui/button_pressed", "ui/button_9slice", "ui/button_pressed_9slice",
-    "ui/checkbox", "ui/cursor", "ui/cursor_pointing", "ui/dropdown_button", "ui/external", "ui/log_9slice",
-    "ui/off", "ui/options_button", "ui/panel_9slice", "ui/scrollbar_3slice", "ui/scrollbar_knob", "ui/slider",
-    "ui/share_icon", "ui/slider_knob", "ui/tabs", "ui/techtree_button", "ui/textfield_9slice", "ui/x_button",
-    "civ/civicon_atlas", "dlc/dlc_atlas", "dlc/edition_banners_atlas",
+    "ui/button", "ui/button_pressed", "ui/button_9slice", "ui/button_pressed_9slice", "ui/checkbox",
+    "ui/dropdown_button", "ui/external", "ui/log_9slice", "ui/off", "ui/options_button", "ui/scrollbar_3slice",
+    "ui/scrollbar_knob", "ui/share_icon", "ui/tabs", "ui/techtree_button", "ui/textfield_9slice", "ui/x_button",
 ]
+WEB_ICON_FOLDERS = ["civ", "dlc"]
+
+
+def convert(source, target):
+    target.parent.mkdir(parents=True, exist_ok=True)
+    Image.open(source).convert("RGBA").save(target, optimize=True)
+    print(f"{source.name} -> {target.relative_to(PROJECT_IMAGES.parent)}")
 
 
 def main():
@@ -26,11 +36,13 @@ def main():
         raise SystemExit("usage: python tools/convert_web_assets.py <path to frcp_html>")
     web_root = Path(sys.argv[1]) / "images"
     for name in WEB_IMAGES:
-        source = web_root / (name + ".webp")
-        target = PROJECT_IMAGES / (name + ".png")
-        target.parent.mkdir(parents=True, exist_ok=True)
-        Image.open(source).convert("RGBA").save(target, optimize=True)
-        print(f"{source.name} -> {target.relative_to(PROJECT_IMAGES.parent)}")
+        convert(web_root / (name + ".webp"), PROJECT_IMAGES / (name + ".png"))
+    for folder in WEB_ICON_FOLDERS:
+        for source in sorted((web_root / folder).glob("*.webp")):
+            target = PROJECT_IMAGES / folder / (source.stem + ".png")
+            if source.stem.endswith("_atlas") or target.exists():
+                continue
+            convert(source, target)
 
 
 if __name__ == "__main__":

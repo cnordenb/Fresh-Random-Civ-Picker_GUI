@@ -23,7 +23,7 @@ public:
     bool OnCommand(int command_id);
     void OnTabSelected(int tab_index);
     bool OnOptionsCommand(HWND dialog, const CivPickerView::OptionsEvent& options_event);
-    void OnContfreshStrengthChanged(int strength);
+    void OnFreshnessChanged(int civs);
     void OpenAuthorPage();
     void Quit();
     void OnFatalError();
