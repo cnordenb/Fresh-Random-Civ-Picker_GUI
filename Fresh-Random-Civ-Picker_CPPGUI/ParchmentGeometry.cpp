@@ -1,5 +1,6 @@
 #include "ParchmentGeometry.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 
@@ -38,7 +39,7 @@ namespace
     {
         const float ideal_width = std::sqrt(4.0f * sigma * sigma + 1.0f);
         const int radius = static_cast<int>(std::lround((ideal_width - 1.0f) / 2.0f));
-        return radius < 1 ? 1 : radius;
+        return std::max(radius, 1);
     }
 }
 
@@ -65,10 +66,10 @@ bool RectsOverlap(const PixelRect& first, const PixelRect& second)
 
 PixelRect BoundingRect(const PixelRect& first, const PixelRect& second)
 {
-    const int left = first.left < second.left ? first.left : second.left;
-    const int top = first.top < second.top ? first.top : second.top;
-    const int right = first.right > second.right ? first.right : second.right;
-    const int bottom = first.bottom > second.bottom ? first.bottom : second.bottom;
+    const int left = std::min(first.left, second.left);
+    const int top = std::min(first.top, second.top);
+    const int right = std::max(first.right, second.right);
+    const int bottom = std::max(first.bottom, second.bottom);
     return { left, top, right, bottom };
 }
 
@@ -102,7 +103,7 @@ TileSpan LayOutTiles(const TileRequest& request)
     if (request.rule == TileRule::round)
     {
         const long tile_count = std::lround(area / request.tile_length);
-        return { 0.0f, area / static_cast<float>(tile_count < 1 ? 1 : tile_count) };
+        return { 0.0f, area / static_cast<float>(std::max(tile_count, 1L)) };
     }
     // repeat: one tile is centred in the area, and the tiling starts at or before the area's start.
     const float centred_start = (area - request.tile_length) / 2.0f;
@@ -132,7 +133,7 @@ int MaxScrollTop(const ScrollMetrics& metrics)
 {
     if (!c_assert(metrics.viewport_height >= 0)) return 0;
     const int hidden = metrics.content_height - metrics.viewport_height;
-    return hidden > 0 ? hidden : 0;
+    return std::max(hidden, 0);
 }
 
 bool NeedsScrollbar(const ScrollMetrics& metrics) { return MaxScrollTop(metrics) > 0; }
@@ -141,7 +142,7 @@ int ClampScrollTop(const ScrollMetrics& metrics)
 {
     const int max_scroll_top = MaxScrollTop(metrics);
     if (metrics.scroll_top < 0) return 0;
-    return metrics.scroll_top > max_scroll_top ? max_scroll_top : metrics.scroll_top;
+    return std::min(metrics.scroll_top, max_scroll_top);
 }
 
 int KnobOffset(const ScrollMetrics& metrics, int track_length)
@@ -195,7 +196,7 @@ SliderLayout LayOutSlider(PixelSize size)
     layout.handle_size = height;
     layout.groove_start = arrow_width + height / 2.0f;
     const float groove_end = width - arrow_width - height / 2.0f;
-    layout.groove_end = groove_end > layout.groove_start ? groove_end : layout.groove_start;
+    layout.groove_end = std::max(groove_end, layout.groove_start);
     return layout;
 }
 
@@ -206,7 +207,7 @@ float SliderFill(const SliderRange& range)
     const float span = static_cast<float>(range.maximum - range.minimum);
     const float fill = static_cast<float>(range.value - range.minimum) / span;
     if (fill < 0.0f) return 0.0f;
-    return fill > 1.0f ? 1.0f : fill;
+    return std::min(fill, 1.0f);
 }
 
 float SliderHandleCentre(const SliderTrack& track)
@@ -542,7 +543,7 @@ PixelPoint PlaceTooltip(const TooltipRequest& request)
     {
         const int leftmost = request.bounds.left + TOOLTIP_MARGIN;
         const int fitted = request.bounds.right - request.size.width - TOOLTIP_MARGIN;
-        x = fitted > leftmost ? fitted : leftmost;
+        x = std::max(fitted, leftmost);
     }
     if (y + request.size.height > request.bounds.bottom - TOOLTIP_MARGIN)
         y = request.cursor.y - request.size.height - TOOLTIP_FLIP_GAP;

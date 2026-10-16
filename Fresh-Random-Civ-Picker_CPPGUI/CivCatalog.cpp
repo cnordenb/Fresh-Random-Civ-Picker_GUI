@@ -29,6 +29,7 @@ namespace
             case JsonType::string: return L"a text";
             case JsonType::number: return L"a number";
             case JsonType::literal: return L"true, false or null";
+            default: (void)c_assert(false); break;
         }
         return L"a value";
     }
@@ -44,6 +45,7 @@ namespace
             case JsonStatus::too_deep: return L"data.json: the file nests values too deeply" + at;
             case JsonStatus::syntax_error: return L"data.json: the file is not valid JSON" + at;
             case JsonStatus::ok: break;
+            default: (void)c_assert(false); break;
         }
         return L"data.json: the file could not be read";
     }
@@ -63,7 +65,7 @@ namespace
         if (name.empty() || name.size() > longest || name == NO_CIV_NAME) return false;
         for (size_t i = 0; i < name.size() && i < longest; i++)
         {
-            if (std::iswspace(name[i]) || std::iswcntrl(name[i])) return false;
+            if (std::iswspace(name[i]) != 0 || std::iswcntrl(name[i]) != 0) return false;
         }
         return true;
     }

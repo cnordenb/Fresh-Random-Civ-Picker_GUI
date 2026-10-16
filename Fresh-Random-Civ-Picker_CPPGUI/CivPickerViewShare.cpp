@@ -4,7 +4,6 @@
 #include <cwchar>
 
 #include "Assertions.h"
-#include "CivPickerController.h"
 #include "DialogMetrics.h"
 #include "Resource.h"
 

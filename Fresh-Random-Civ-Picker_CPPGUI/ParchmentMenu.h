@@ -40,7 +40,7 @@ public:
 
     static bool RegisterWindowClass(HINSTANCE instance);
 
-    bool Create(const ControlContext& context, const ControlPlacement& placement, const Menus& menus);
+    bool Create(const ControlContext& bar_context, const ControlPlacement& placement, const Menus& specs);
     void Destroy();
     HWND Window() const;
     bool IsOpen() const;

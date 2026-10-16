@@ -1,5 +1,6 @@
 #include "CivPickerModel.h"
 
+#include <algorithm>
 #include <codecvt>
 #include <fstream>
 #include <locale>
@@ -86,7 +87,6 @@ CivPickerModel::CivPickerModel(const CivCatalog& civ_catalog) :
     (void)c_assert(civ_count > 0 && civ_count <= MAX_CIVS);
     for (int i = 0; i < MAX_CIVS; i++)
     {
-        available_civs[i] = false;
         civ[i] = NO_CIV;
         if (i >= civ_count) continue;
         const CivInfo& info = catalog.CivAt(i);
@@ -375,7 +375,7 @@ bool CivPickerModel::DrawRandomCiv()
 bool CivPickerModel::DrawFreshCiv()
 {
     std::wstring civ_list_copy[MAX_CIVS];
-    bool available_civs_copy[MAX_CIVS];
+    bool available_civs_copy[MAX_CIVS] = {};
     for (int i = 0; i < MAX_CIVS; i++)
     {
         civ_list_copy[i] = civ_list[i];
@@ -671,14 +671,14 @@ int CivPickerModel::ContfreshHistoryLength() const
 }
 
 // The most civs that can sit out: half the pool, and at least one.
-int CivPickerModel::FreshnessMaximum() const { return custom_max_civs / 2 > 1 ? custom_max_civs / 2 : 1; }
+int CivPickerModel::FreshnessMaximum() const { return std::max(custom_max_civs / 2, 1); }
 
 // How many civs sit out: the setting, but no more than half the pool.
 int CivPickerModel::FreshnessLimit() const
 {
     const int maximum = FreshnessMaximum();
     if (!c_assert(settings.contfresh_civs >= 1)) return 1;
-    return settings.contfresh_civs < maximum ? settings.contfresh_civs : maximum;
+    return std::min(static_cast<int>(settings.contfresh_civs), maximum);
 }
 
 // The Options slider's choice: a number of civs, where its top (half the pool) means the most.
@@ -812,6 +812,9 @@ bool CivPickerModel::ApplyLogLine(const std::wstring& line, LogReader& reader)
             ApplyEditionLine(line);
             break;
         case LogSection::none:
+            break;
+        default:
+            (void)c_assert(false);
             break;
     }
     reader.section_line++;

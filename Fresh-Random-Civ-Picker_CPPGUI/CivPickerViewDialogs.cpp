@@ -1,9 +1,8 @@
 #include "CivPickerView.h"
 
 #include <commdlg.h>
-#include <cmath>
+#include <algorithm>
 #include <cwchar>
-#include <cwctype>
 
 #include "Assertions.h"
 #include "CivPickerController.h"
@@ -262,7 +261,7 @@ float CivPickerView::KeyWidth(const wchar_t* key)
 {
     if (!c_assert(key != nullptr)) return KEY_MIN_WIDTH;
     const float text = renderer.MeasureText({ key, TextLength(key), FontId::key });
-    return text + KEY_PADDING > KEY_MIN_WIDTH ? text + KEY_PADDING : KEY_MIN_WIDTH;
+    return std::max(text + KEY_PADDING, KEY_MIN_WIDTH);
 }
 
 float CivPickerView::HotkeyItemWidth(const HotkeyItemSpan& items)
@@ -308,7 +307,7 @@ float CivPickerView::AddHotkeySection(const HotkeySection& section)
                                 Rounded(top + ITEM_TEXT_DROP + DIALOG_LINE_HEIGHT) },
                               items[i].text });
     }
-    const int rows_used = section.items.count < section.rows ? section.items.count : section.rows;
+    const int rows_used = std::min(section.items.count, section.rows);
     return list_top + static_cast<float>(rows_used) * HOTKEY_ITEM_HEIGHT;
 }
 
@@ -327,10 +326,8 @@ bool CivPickerView::BuildHotkeysLayout()
                           L"Hotkeys work while the Fresh Random Civ Picker window is active." });
     const float grid_top = BODY_TOP + DIALOG_LINE_HEIGHT + PARAGRAPH_GAP;
     const float global_column = HotkeyItemWidth({ GLOBAL_HOTKEYS, CountOf(GLOBAL_HOTKEYS) });
-    const float tab_column = HotkeyItemWidth({ DRAW_TAB_HOTKEYS, CountOf(DRAW_TAB_HOTKEYS) }) >
-                                     HotkeyItemWidth({ LOG_TAB_HOTKEYS, CountOf(LOG_TAB_HOTKEYS) })
-                                 ? HotkeyItemWidth({ DRAW_TAB_HOTKEYS, CountOf(DRAW_TAB_HOTKEYS) })
-                                 : HotkeyItemWidth({ LOG_TAB_HOTKEYS, CountOf(LOG_TAB_HOTKEYS) });
+    const float tab_column = std::max(HotkeyItemWidth({ DRAW_TAB_HOTKEYS, CountOf(DRAW_TAB_HOTKEYS) }),
+                                      HotkeyItemWidth({ LOG_TAB_HOTKEYS, CountOf(LOG_TAB_HOTKEYS) }));
     const float pool_column = HotkeyItemWidth({ pool_hotkeys, pool_hotkey_count });
     const float tab_left = BODY_LEFT + 2.0f * global_column + 2.0f * HOTKEY_COLUMN_GAP;
     const float pool_left = tab_left + tab_column + HOTKEY_COLUMN_GAP;
@@ -344,7 +341,7 @@ bool CivPickerView::BuildHotkeysLayout()
                                                 CountOf(LOG_TAB_HOTKEYS) });
     const float pool_bottom = AddHotkeySection({ L"Civ Pool tab", { pool_hotkeys, pool_hotkey_count }, pool_left,
                                                  grid_top, pool_column, pool_hotkey_count });
-    float grid_bottom = global_bottom > log_bottom ? global_bottom : log_bottom;
+    float grid_bottom = std::max(global_bottom, log_bottom);
     if (pool_bottom > grid_bottom) grid_bottom = pool_bottom;
 
     const int width = Rounded(pool_left + pool_column) + BUTTON_ROW_PADDING + PANEL_PADDING;
@@ -513,7 +510,7 @@ INT_PTR CivPickerView::BeginDialog(HWND dialog)
 }
 
 INT_PTR CALLBACK CivPickerView::HotkeysDialogProc(HWND dialog, UINT message, WPARAM wParam,
-                                                LPARAM lParam) noexcept
+                                                  LPARAM lParam) noexcept
 {
     CivPickerView* view = AttachDialog(dialog, message, lParam);
     if (view == nullptr) return FALSE;
@@ -526,7 +523,7 @@ INT_PTR CALLBACK CivPickerView::HotkeysDialogProc(HWND dialog, UINT message, WPA
 }
 
 INT_PTR CALLBACK CivPickerView::MessageDialogProc(HWND dialog, UINT message, WPARAM wParam,
-                                                LPARAM lParam) noexcept
+                                                  LPARAM lParam) noexcept
 {
     CivPickerView* view = AttachDialog(dialog, message, lParam);
     if (view == nullptr) return FALSE;
@@ -539,7 +536,7 @@ INT_PTR CALLBACK CivPickerView::MessageDialogProc(HWND dialog, UINT message, WPA
 }
 
 INT_PTR CALLBACK CivPickerView::OptionsDialogProc(HWND dialog, UINT message, WPARAM wParam,
-                                                LPARAM lParam) noexcept
+                                                  LPARAM lParam) noexcept
 {
     CivPickerView* view = AttachDialog(dialog, message, lParam);
     if (view == nullptr) return FALSE;
@@ -616,7 +613,7 @@ void CivPickerView::OnContfreshSlider(HWND dialog, HWND slider)
 bool CivPickerView::OnOptionsCommand(HWND dialog, int command_id, int notification)
 {
     if (!c_assert(dialog != NULL)) return false;
-    OptionsEvent options_event;
+    OptionsEvent options_event = {};
     options_event.command_id = command_id;
     options_event.notification = notification;
     options_event.ui_sounds = IsDlgButtonChecked(dialog, IDC_CHECKBOX_SOUNDS) == BST_CHECKED;
@@ -650,7 +647,7 @@ void CivPickerView::ShowContfreshOptions(HWND dialog, bool shown) const
 }
 
 INT_PTR CALLBACK CivPickerView::JoinLobbyDialogProc(HWND dialog, UINT message, WPARAM wParam,
-                                                LPARAM lParam) noexcept
+                                                    LPARAM lParam) noexcept
 {
     CivPickerView* view = AttachDialog(dialog, message, lParam);
     if (view == nullptr) return FALSE;
@@ -675,7 +672,7 @@ bool CivPickerView::SubmitLobbyCode(HWND dialog, int command_id)
     if (!c_assert(dialog != NULL)) return false;
     if (!c_assert(command_id == IDC_BUTTON_OK || command_id == IDC_BUTTON_SPEC)) return false;
     PlayAudio(SoundType::button);
-    wchar_t entered_code[256];
+    wchar_t entered_code[256] = {};
     GetDlgItemText(dialog, IDC_EDIT_LOBBYCODE, entered_code, 256);
     lobby_code_input = entered_code;
 
@@ -696,7 +693,7 @@ bool CivPickerView::SubmitLobbyCode(HWND dialog, int command_id)
 }
 
 INT_PTR CALLBACK CivPickerView::HistoryDialogProc(HWND dialog, UINT message, WPARAM wParam,
-                                                LPARAM lParam) noexcept
+                                                  LPARAM lParam) noexcept
 {
     CivPickerView* view = AttachDialog(dialog, message, lParam);
     if (view == nullptr) return FALSE;
@@ -823,7 +820,7 @@ void CivPickerView::OnHistorySearchChanged(HWND dialog)
     if (!c_assert(dialog != NULL)) return;
     HWND search_box = GetDlgItem(dialog, IDC_HIS_SEARCH);
     HWND civ_list_box = GetDlgItem(dialog, IDC_HISTORY_COMBO);
-    wchar_t search_text[HISTORY_TEXT_LENGTH];
+    wchar_t search_text[HISTORY_TEXT_LENGTH] = {};
     GetWindowText(search_box, search_text, HISTORY_TEXT_LENGTH);
     const int search_length = lstrlenW(search_text);
 

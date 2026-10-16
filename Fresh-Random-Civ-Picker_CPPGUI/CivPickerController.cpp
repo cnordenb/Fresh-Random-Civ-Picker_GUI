@@ -2,15 +2,13 @@
 
 #include <shellapi.h>
 #include <shlwapi.h>
+#include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
 
 #include "Assertions.h"
-
 #include "Resource.h"
-
-#pragma comment(lib, "shlwapi.lib")
 
 namespace
 {
@@ -92,7 +90,7 @@ namespace
 
     std::wstring GetExeFolder()
     {
-        wchar_t exe_folder[MAX_PATH];
+        wchar_t exe_folder[MAX_PATH] = {};
         GetModuleFileName(NULL, exe_folder, MAX_PATH);
         wchar_t* last_slash = wcsrchr(exe_folder, L'\\');
         if (last_slash != NULL) *last_slash = L'\0';
@@ -119,22 +117,7 @@ namespace
             civs = strongest ? CONTFRESH_MOST : stepped;
         }
         if (civs < 1) return 1;
-        return civs < CONTFRESH_MOST ? static_cast<uint8_t>(civs) : CONTFRESH_MOST;
-    }
-
-    // Reads the editions, DLCs and civs from data.json in the exe's folder (the build copies it there). If the
-    // program can't start with it, says why and returns false.
-    bool LoadCatalog(CivCatalog& catalog)
-    {
-        const std::wstring path = GetExeFolder() + L"\\data.json";
-        std::ifstream file(path, std::ios::binary);
-        std::stringstream contents;
-        if (file) contents << file.rdbuf();
-        if (file && catalog.Load(contents.str())) return true;
-        const std::wstring problem = file ? catalog.Error() : L"data.json could not be read from " + path;
-        (void)MessageBoxW(NULL, (problem + L"\n\nThe program needs data.json to start.").c_str(),
-                          L"Fresh Random Civ Picker", MB_OK | MB_ICONERROR);
-        return false;
+        return static_cast<uint8_t>(std::min(civs, static_cast<int>(CONTFRESH_MOST)));
     }
 }
 
@@ -143,6 +126,21 @@ CivPickerController::CivPickerController(CivPickerModel& picker_model) :
     view(picker_model, *this)
 {
     model.SetObserver(view);
+}
+
+// Reads the editions, DLCs and civs from data.json in the exe's folder (the build copies it there). If the program
+// can't start with it, says why and returns false.
+bool CivPickerController::LoadCatalog(CivCatalog& catalog)
+{
+    const std::wstring path = GetExeFolder() + L"\\data.json";
+    std::ifstream file(path, std::ios::binary);
+    std::stringstream contents;
+    if (file) contents << file.rdbuf();
+    if (file && catalog.Load(contents.str())) return true;
+    const std::wstring problem = file ? catalog.Error() : L"data.json could not be read from " + path;
+    (void)MessageBoxW(NULL, (problem + L"\n\nThe program needs data.json to start.").c_str(),
+                      L"Fresh Random Civ Picker", MB_OK | MB_ICONERROR);
+    return false;
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -176,7 +174,7 @@ int CivPickerController::Run(HINSTANCE app_instance, int show_command)
 int CivPickerController::RunMessageLoop(HINSTANCE app_instance)
 {
     HACCEL accelerators = LoadAccelerators(app_instance, MAKEINTRESOURCE(IDC_WINDOWSPROJECT1));
-    MSG message;
+    MSG message = {};
     while (GetMessage(&message, nullptr, 0, 0))
     {
         if (view.PreTranslateMessage(message)) continue;
@@ -280,7 +278,7 @@ void CivPickerController::WriteSetting(const wchar_t* key, bool enabled) const
 
 std::wstring CivPickerController::SavesFolder() const
 {
-    wchar_t saves_folder[MAX_PATH];
+    wchar_t saves_folder[MAX_PATH] = {};
     wcscpy_s(saves_folder, GetExeFolder().c_str());
     PathAppend(saves_folder, L"saves");
     return saves_folder;
@@ -288,7 +286,7 @@ std::wstring CivPickerController::SavesFolder() const
 
 std::wstring CivPickerController::QuicksavePath() const
 {
-    wchar_t quicksave_path[MAX_PATH];
+    wchar_t quicksave_path[MAX_PATH] = {};
     wcscpy_s(quicksave_path, SavesFolder().c_str());
     PathAppend(quicksave_path, L"quicksave.txt");
     return quicksave_path;
@@ -297,7 +295,7 @@ std::wstring CivPickerController::QuicksavePath() const
 bool CivPickerController::FileExists(const std::wstring& path) const
 {
     const DWORD attributes = GetFileAttributes(path.c_str());
-    return attributes != INVALID_FILE_ATTRIBUTES && !(attributes & FILE_ATTRIBUTE_DIRECTORY);
+    return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY) == 0;
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -357,6 +355,7 @@ void CivPickerController::HandleGlobalHotkey(WPARAM hotkey_id)
         case HOTKEY_ID_CTRLT: OpenSurvapp(); break;
         case HOTKEY_ID_P: CopyRoundLink(); break;
         case HOTKEY_ID_U: OpenShareLink(); break;
+        default: break;
     }
 }
 
@@ -368,6 +367,7 @@ void CivPickerController::HandleDrawTabHotkey(WPARAM hotkey_id)
         case HOTKEY_ID_Q: OpenOptions(main_window); break;
         case HOTKEY_ID_T: OpenTechTree(); break;
         case HOTKEY_ID_H: OpenHistory(main_window); break;
+        default: break;
     }
 }
 
@@ -397,6 +397,7 @@ void CivPickerController::HandleCivPoolHotkey(WPARAM hotkey_id)
         case HOTKEY_ID_RETURN: DisableAll(true); break;
         case HOTKEY_ID_R: ToggleAutoToggle(); break;
         case HOTKEY_ID_T: ToggleAutoReset(); break;
+        default: break;
     }
     HandleEditionHotkey(hotkey_id);
     HandleDlcHotkey(hotkey_id);
@@ -569,6 +570,7 @@ bool CivPickerController::HandleMenuCommand(int command_id)
         case IDM_COPYLINK: CopyRoundLink(); return true;
         case IDM_SHARE: OpenShare(); return true;
         case IDM_OPENLINK: OpenShareLink(); return true;
+        default: break;
     }
     return false;
 }
@@ -596,6 +598,7 @@ bool CivPickerController::HandleButtonCommand(int command_id)
         case IDC_ICON_EDITION: OpenEditionPage(); return true;
         case IDC_BUTTON_SHARE: CopyRoundLink(); return true;
         case IDC_BUTTON_POOLSHARE: CopyPoolLink(); return true;
+        default: break;
     }
     return false;
 }
@@ -694,6 +697,8 @@ void CivPickerController::HandleOptionsClick(HWND dialog, int command_id)
             view.PlayAudio(SoundType::view);
             model.EditSettings().persistent_logging = false;
             break;
+        default:
+            break;
     }
 }
 
@@ -771,6 +776,9 @@ void CivPickerController::Undo()
             return;
         case LastAction::pool_change:
             return;
+        default:
+            (void)c_assert(false);
+            return;
     }
 }
 
@@ -803,7 +811,7 @@ void CivPickerController::SaveLog(SaveType type)
 CivPickerView::FileChoice CivPickerController::ChooseManualSaveFile()
 {
     view.PlayAudio(SoundType::button);
-    SYSTEMTIME now;
+    SYSTEMTIME now = {};
     GetLocalTime(&now);
 
     std::wstringstream file_name;
@@ -1010,20 +1018,4 @@ bool CivPickerController::IsValidLobbyCode(const std::wstring& lobby_code)
     }
     if (length == 9 && lobby_code.find_first_not_of(L"0123456789") != std::wstring::npos) return false;
     return true;
-}
-
-// Entry point. As in HFDP ch. 12, main creates the model and the controller; the controller creates the view.
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine,
-                      _In_ int nCmdShow)
-{
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
-
-    // Static storage keeps the program's state off the heap and the stack (P10 rule 3). The catalog of editions,
-    // DLCs and civs comes first, as everything else is made from it.
-    static CivCatalog catalog;
-    if (!LoadCatalog(catalog)) return FALSE;
-    static CivPickerModel model(catalog);
-    static CivPickerController controller(model);
-    return controller.Run(hInstance, nCmdShow);
 }

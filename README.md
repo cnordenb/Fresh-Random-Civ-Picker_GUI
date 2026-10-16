@@ -10,6 +10,7 @@
 - Getting Started
   - [Installation](#How-to-install-and-run-a-release)
   - [Compilation](#How-to-compile-in-IDE)  
+  - [Code organization](#How-the-code-is-organized)  
 - Usage
   - [Using the Fresh Random Civ Picker](#How-do-I-use-this-application)
   - [Tips and tricks](#Tips-and-tricks)
@@ -106,9 +107,25 @@ On the "Civ Pool" tab, the user can customise which civs are part of the civ poo
 ## How to compile in IDE
 Instructions for Visual Studio on Windows
 1. Clone this repository
-2. Open FRCP_GUI.cpp
-3. Select FRCP_GUI as single startup project in Solution Property Pages
+2. Open Fresh-Random-Civ-Picker_CPPGUI.sln
+3. Select Fresh-Random-Civ-Picker_CPPGUI as single startup project in Solution Property Pages
 4. Run or debug
+
+## How the code is organized
+The program is C++ on the Win32 API, drawn with Direct2D, in a Model-View-Controller design.
+- `Fresh-Random-Civ-Picker_CPPGUI/`: the program
+  - `Main.cpp`: the entry point, which loads the catalog and builds the model and the controller
+  - `CivCatalog`, `JsonReader`: the editions, DLCs and civs, read from `data.json`
+  - `CivPickerModel`: the civ pool, the draws, the histories and the settings, in plain C++
+  - `CivPickerView*.cpp`: the main window and the dialogs; `CivPickerController`: turns the user's input into
+    requests on the model
+  - `Parchment*`: the parchment look (controls, dialogs, logs, menus, the renderer)
+  - `ShareLink`: the share link format, the same as the web version's
+  - `data.json`, `images/`, `sounds/`: data and assets, copied next to the exe by every build
+  - `CLAUDE2.md`: the coding rules and the design notes
+- `UnitTesting_FRCP/`: the unit tests (Google Test)
+
+The code has no conditional compilation flags and no machine-dependent files.
 
 ## How to install and run a release
 **Step 1. Go to [Releases](https://github.com/cnordenb/Fresh-Random-Civ-Picker_GUI/releases), located on this page in the right-hand sidebar below About and above Packages**

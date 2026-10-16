@@ -4,7 +4,7 @@
 
 #include "TestData.h"
 
-#include "../Fresh-Random-Civ-Picker_CPPGUI/ShareLink.cpp"
+#include "ShareLink.cpp"
 
 // Share links as the web version writes and opens them, with the program's data.json; so the tests hold for any
 // editions and civs it lists.

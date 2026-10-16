@@ -1,9 +1,10 @@
 #include "ParchmentMenu.h"
 
+#include <windowsx.h>
+#include <algorithm>
 #include <cmath>
 #include <cwchar>
 #include <cwctype>
-#include <windowsx.h>
 
 #include "Assertions.h"
 #include "ParchmentShell.h"
@@ -127,7 +128,7 @@ bool ParchmentMenuBar::LayOutList(int menu_index)
     }
     const int frame = 2 * (LIST_BORDER + LIST_PADDING);
     const int fitted = static_cast<int>(std::ceil(widest)) + frame;
-    list.size = { fitted > LIST_MIN_WIDTH ? fitted : LIST_MIN_WIDTH,
+    list.size = { std::max(fitted, LIST_MIN_WIDTH),
                   static_cast<int>(std::lround(top)) + LIST_BORDER + LIST_PADDING };
     return c_assert(list.size.width <= MAX_LIST_SIZE.width && list.size.height <= MAX_LIST_SIZE.height);
 }

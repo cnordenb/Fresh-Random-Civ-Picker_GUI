@@ -313,12 +313,12 @@ bool CivPickerView::CreatePoolTabControls()
                        PlaceInClient(IDC_LABEL_ENABLEDCOUNT, ENABLED_COUNT_AREA, enabled_text.c_str()),
                        { FontId::ui_bold, TEXT_COLOUR, TextAlign::left, UI_LINE_HEIGHT }) &&
            checkbox_autotoggle.Create(context, PlaceInClient(IDC_CHECKBOX_AUTOTOGGLE, AUTO_TOGGLE_AREA,
-                                                            L"Auto-toggle older civs")) &&
+                                                             L"Auto-toggle older civs")) &&
            CreateCivToggles() && CreateDlcToggles() &&
            button_enableall.Create(context, PlaceInClient(IDC_BUTTON_ENABLEALL, ENABLE_ALL_AREA, L"Enable All")) &&
            button_disableall.Create(context, PlaceInClient(IDC_BUTTON_DISABLEALL, DISABLE_ALL_AREA, L"Disable All")) &&
            checkbox_autoreset.Create(context, PlaceInClient(IDC_CHECKBOX_AUTORESET, AUTO_RESET_AREA,
-                                                           L"Auto-reset upon change")) &&
+                                                            L"Auto-reset upon change")) &&
            button_poolshare.Create(context, PlaceInClient(IDC_BUTTON_POOLSHARE, POOL_SHARE_AREA, L""));
 }
 

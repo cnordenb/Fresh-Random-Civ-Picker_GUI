@@ -77,8 +77,8 @@ namespace
         if (text_length > ShareLink::MAX_INPUT_LENGTH) return false;
         int start = 0;
         int end = text_length;
-        while (start < end && std::iswspace(text[start])) start++;
-        while (end > start && std::iswspace(text[end - 1])) end--;
+        while (start < end && std::iswspace(text[start]) != 0) start++;
+        while (end > start && std::iswspace(text[end - 1]) != 0) end--;
         const wchar_t* hash = wmemchr(text + start, L'#', static_cast<size_t>(end - start));
         if (hash != nullptr) start = static_cast<int>(hash - text) + 1;
         if (end - start >= 2 && text[start] == L'p' && text[start + 1] == L'=') start += 2;

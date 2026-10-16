@@ -14,7 +14,7 @@
     <ClCompile Include="ParchmentDialogControls.cpp" />
     <ClCompile Include="ParchmentDialog.cpp" />
     <ClCompile Include="CivPickerViewLayout.cpp" />
-    <ClCompile Include="CivPickerDialogs.cpp" />
+    <ClCompile Include="CivPickerViewDialogs.cpp" />
     <ClCompile Include="Assertions.cpp" />
     <ClCompile Include="ParchmentGeometry.cpp" />
     <ClCompile Include="PixelSurface.cpp" />
@@ -25,10 +25,11 @@
     <ClCompile Include="CivCatalog.cpp" />
     <ClCompile Include="ShareLink.cpp" />
     <ClCompile Include="ParchmentToast.cpp" />
-    <ClCompile Include="CivPickerShare.cpp" />
+    <ClCompile Include="CivPickerViewShare.cpp" />
     <ClCompile Include="ParchmentScrollBar.cpp" />
-    <ClCompile Include="CivPickerDlcToggles.cpp" />
+    <ClCompile Include="CivPickerViewDlcToggles.cpp" />
     <ClCompile Include="CivPickerViewImages.cpp" />
+    <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />

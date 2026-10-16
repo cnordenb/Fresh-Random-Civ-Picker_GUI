@@ -1,5 +1,6 @@
 #include "JsonReader.h"
 
+#include <algorithm>
 #include <cstring>
 
 #include "Assertions.h"
@@ -78,7 +79,7 @@ JsonStatus JsonDocument::Parse(const std::string& utf8_text)
 JsonStatus JsonDocument::Fail(JsonStatus status, int offset)
 {
     (void)c_assert(status != JsonStatus::ok);
-    error_offset = offset >= 0 ? offset : 0;
+    error_offset = std::max(offset, 0);
     parsed = false;
     return status;
 }
@@ -88,7 +89,7 @@ int JsonDocument::ErrorLine() const
 {
     if (!c_assert(error_offset >= 0)) return 1;
     const int length = static_cast<int>(text.size());
-    const int limit = error_offset < length ? error_offset : length;
+    const int limit = std::min(error_offset, length);
     int line = 1;
     for (int i = 0; i < limit; i++)
     {

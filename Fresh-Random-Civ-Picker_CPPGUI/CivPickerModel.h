@@ -23,10 +23,10 @@ enum class SaveType { automatic, manual, quick };
 struct Civ
 {
     std::wstring name;
-    bool enabled;
-    int edition;
-    int dlc;
-    bool legacy;
+    bool enabled = false;
+    int edition = CivCatalog::NONE;
+    int dlc = CivCatalog::NONE;
+    bool legacy = false;
 };
 
 // Continuous freshness keeps the civs drawn last out of the next draws: as many as the setting says, but at most
@@ -75,16 +75,16 @@ public:
     virtual void OnModelError(const std::wstring& message, bool fatal) = 0;
 
 protected:
-    ~CivPickerObserver() = default;
+    virtual ~CivPickerObserver() = default;
 };
 
-class CivPickerModel
+class CivPickerModel final
 {
 public:
     explicit CivPickerModel(const CivCatalog& civ_catalog);
 
     const CivCatalog& Catalog() const;
-    bool BelongsToEdition(const Civ& civ, int edition) const;
+    bool BelongsToEdition(const Civ& candidate, int edition) const;
 
     void SetObserver(CivPickerObserver& new_observer);
     void SetFilePaths(const std::wstring& log_path, const std::wstring& history_folder);
@@ -188,7 +188,7 @@ private:
     Settings settings;
 
     std::wstring civ_list[MAX_CIVS];
-    bool available_civs[MAX_CIVS];
+    bool available_civs[MAX_CIVS] = {};
     std::wstring drawn_civs[MAX_CIVS];
     std::wstring contfresh_array[MAX_CIVS];
     std::wstring current_civ;

@@ -1,10 +1,9 @@
 #include "ParchmentDialogControls.h"
 
 #include <commctrl.h>
+#include <algorithm>
 
 #include "Assertions.h"
-
-#pragma comment(lib, "comctl32.lib")
 
 namespace
 {
@@ -20,13 +19,14 @@ namespace
     constexpr COLORREF PLACEHOLDER_COLOUR = RGB(0x9a, 0x9a, 0x9a); // rgba(255, 255, 255, .45) over #474747
     constexpr UINT_PTR DROPDOWN_SUBCLASS = 1;
     constexpr UINT_PTR FIELD_SUBCLASS = 2;
+    constexpr UINT_PTR DROPDOWN_LIST_SUBCLASS = 3;
     constexpr int MAX_ITEM_TEXT = 64;
 
     int ClampToRange(const SliderRange& range, int value)
     {
         if (!c_assert(range.maximum >= range.minimum)) return range.minimum;
         if (value < range.minimum) return range.minimum;
-        return value > range.maximum ? range.maximum : value;
+        return std::min(value, range.maximum);
     }
 
     // A slider bar image over the target: its frame's ends keep their proportions, its middle stretches.
@@ -166,6 +166,41 @@ namespace
         if (message == WM_NCDESTROY) (void)RemoveWindowSubclass(field, TextFieldProc, FIELD_SUBCLASS);
         const LRESULT result = DefSubclassProc(field, message, wParam, lParam);
         if (look != nullptr && message == WM_PAINT) PaintPlaceholder(field, *look);
+        return result;
+    }
+
+    // The open list's 1 px frame in the menus' border colour (the web version's list: border: 1px solid #3d2c1c),
+    // drawn over the system's, which the theme turns blue under the mouse.
+    void PaintListFrame(HWND list, HDC target)
+    {
+        if (!c_assert(list != NULL) || !c_assert(target != NULL)) return;
+        RECT frame = {};
+        // A frame that can't be painted keeps the system's look until the list's next paint.
+        if (!GetWindowRect(list, &frame)) return;
+        (void)OffsetRect(&frame, -frame.left, -frame.top);
+        (void)SetDCBrushColor(target, RGB(MENU_BORDER_COLOUR.red, MENU_BORDER_COLOUR.green, MENU_BORDER_COLOUR.blue));
+        (void)FrameRect(target, &frame, static_cast<HBRUSH>(GetStockObject(DC_BRUSH)));
+    }
+
+    void OnListFramePainted(HWND list)
+    {
+        if (!c_assert(list != NULL)) return;
+        const HDC target = GetWindowDC(list);
+        if (target == NULL) return;
+        PaintListFrame(list, target);
+        (void)ReleaseDC(list, target);
+    }
+
+    // Subclass procedure of a dropdown's list (CLAUDE2.md I2, as above). The system paints the frame first, and the
+    // scrollbar of a long list with it; then the frame gets the parchment colour, on the screen and in a printout.
+    LRESULT CALLBACK DropdownListProc(HWND list, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR,
+                                      DWORD_PTR) noexcept
+    {
+        if (message == WM_NCDESTROY) (void)RemoveWindowSubclass(list, DropdownListProc, DROPDOWN_LIST_SUBCLASS);
+        const LRESULT result = DefSubclassProc(list, message, wParam, lParam);
+        if (message == WM_NCPAINT) OnListFramePainted(list);
+        const bool prints_frame = message == WM_PRINT && (lParam & PRF_NONCLIENT) != 0;
+        if (prints_frame) PaintListFrame(list, reinterpret_cast<HDC>(wParam));
         return result;
     }
 }
@@ -333,8 +368,12 @@ bool StyleDropdown(HWND dropdown, const DropdownLook& look)
 {
     if (!c_assert(dropdown != NULL) || !c_assert(look.context.renderer != nullptr)) return false;
     if (!c_assert(look.backdrop != nullptr)) return false;
+    COMBOBOXINFO info = {};
+    info.cbSize = sizeof(info);
+    if (!c_assert(GetComboBoxInfo(dropdown, &info) != FALSE) || !c_assert(info.hwndList != NULL)) return false;
     return c_assert(SetWindowSubclass(dropdown, DropdownProc, DROPDOWN_SUBCLASS,
-                                      reinterpret_cast<DWORD_PTR>(&look)) != FALSE);
+                                      reinterpret_cast<DWORD_PTR>(&look)) != FALSE) &&
+           c_assert(SetWindowSubclass(info.hwndList, DropdownListProc, DROPDOWN_LIST_SUBCLASS, 0) != FALSE);
 }
 
 bool StyleTextField(HWND field, const FieldLook& look)

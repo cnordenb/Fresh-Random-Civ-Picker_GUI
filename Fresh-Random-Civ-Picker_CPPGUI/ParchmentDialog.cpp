@@ -1,9 +1,9 @@
 #include "ParchmentDialog.h"
 
-#include <cmath>
 #include <commctrl.h>
-#include <cwchar>
 #include <windowsx.h>
+#include <cmath>
+#include <cwchar>
 
 #include "Assertions.h"
 
@@ -35,7 +35,7 @@ namespace
 
     // Every dialog starts empty; its layout is built when it opens.
     alignas(4) const EmptyDialogTemplate EMPTY_DIALOG = { { WS_POPUP | WS_CLIPCHILDREN, 0, 0, 0, 0, 100, 100 },
-                                                         0, 0, 0, 0 };
+                                                          0, 0, 0, 0 };
 
     HMENU ControlId(int id) { return reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)); }
 
@@ -227,6 +227,7 @@ void ParchmentDialogs::DrawDecoration(Level& level, int index)
         case DecorationKind::hint: DrawParagraph(level, index); return;
         case DecorationKind::group: DrawGroup(decoration); return;
         case DecorationKind::key: DrawKey(decoration); return;
+        default: (void)c_assert(false); return;
     }
 }
 
@@ -376,6 +377,7 @@ bool ParchmentDialogs::CreatePart(Level& level, const DialogPart& part)
         case PartKind::dropdown:
         case PartKind::text_field:
         case PartKind::readonly_field: return CreateWindowPart(level, part);
+        default: (void)c_assert(false); break;
     }
     return false;
 }

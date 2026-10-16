@@ -18,7 +18,7 @@ public:
 
     bool Create(HWND owner_window, ParchmentRenderer& renderer);
     void Destroy();
-    bool Show(const wchar_t* text);
+    bool Show(const wchar_t* message);
     bool Tick();
     void Hide();
 
@@ -28,7 +28,7 @@ private:
     static constexpr int SHADOW_MARGIN = 14;
     static constexpr int MAX_FRAME_PIXELS = (MAX_BOX_WIDTH + 2 * SHADOW_MARGIN) * (MAX_BOX_HEIGHT + 2 * SHADOW_MARGIN);
 
-    bool LayOut(const wchar_t* text);
+    bool LayOut(const wchar_t* message);
     bool Render();
     void AddShadow();
     bool Present(BYTE opacity);

@@ -176,7 +176,7 @@ struct WrapRequest
     float max_width;
 };
 
-class WrappedLines
+class WrappedLines final
 {
 public:
     bool Wrap(const WrapRequest& request);
@@ -202,7 +202,7 @@ struct IconLabel
     int cell;
 };
 
-class IconLabels
+class IconLabels final
 {
 public:
     static constexpr int NO_ICON = -1;
@@ -234,7 +234,7 @@ struct PixelRun
     int end;
 };
 
-class OpaqueRuns
+class OpaqueRuns final
 {
 public:
     bool Scan(const uint8_t* alpha_row, int width);
@@ -258,7 +258,7 @@ struct BlurRequest
     float sigma;
 };
 
-class ShadowBlur
+class ShadowBlur final
 {
 public:
     bool Blur(const BlurRequest& request);
@@ -285,7 +285,7 @@ struct BoxShadowRequest
     float opacity;
 };
 
-class BoxShadow
+class BoxShadow final
 {
 public:
     bool Apply(const BoxShadowRequest& request);

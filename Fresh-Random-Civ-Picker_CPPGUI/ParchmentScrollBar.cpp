@@ -122,6 +122,7 @@ bool ScrollBar::Step()
         case ScrollbarPart::track_below_knob: return under_pointer == pressed_part && ScrollAndNotify(page);
         case ScrollbarPart::knob:
         case ScrollbarPart::none: return false;
+        default: (void)c_assert(false); break;
     }
     return false;
 }

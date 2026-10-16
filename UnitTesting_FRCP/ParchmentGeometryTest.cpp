@@ -1,7 +1,7 @@
 #include "pch.h"
 
-#include "../Fresh-Random-Civ-Picker_CPPGUI/Assertions.cpp"
-#include "../Fresh-Random-Civ-Picker_CPPGUI/ParchmentGeometry.cpp"
+#include "Assertions.cpp"
+#include "ParchmentGeometry.cpp"
 
 // The web version's CSS is the specification: each test names the rule it reproduces.
 

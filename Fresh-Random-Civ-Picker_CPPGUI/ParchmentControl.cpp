@@ -1,7 +1,7 @@
 #include "ParchmentControl.h"
 
-#include <cwchar>
 #include <windowsx.h>
+#include <cwchar>
 
 #include "Assertions.h"
 

@@ -47,7 +47,7 @@ public:
 
 protected:
     ParchmentControl() = default;
-    ~ParchmentControl() = default;
+    virtual ~ParchmentControl() = default;
     ParchmentControl(const ParchmentControl&) = delete;
     ParchmentControl& operator=(const ParchmentControl&) = delete;
 

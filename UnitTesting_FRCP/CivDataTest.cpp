@@ -2,8 +2,8 @@
 
 #include "TestData.h"
 
-#include "../Fresh-Random-Civ-Picker_CPPGUI/JsonReader.cpp"
-#include "../Fresh-Random-Civ-Picker_CPPGUI/CivCatalog.cpp"
+#include "CivCatalog.cpp"
+#include "JsonReader.cpp"
 
 // JsonDocument reads JSON as RFC 8259 defines it. CivCatalog reads the program's own data.json, so these tests hold
 // for whatever editions, DLCs and civs it lists; the files with problems are data.json with one thing changed.

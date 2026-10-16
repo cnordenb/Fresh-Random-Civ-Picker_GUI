@@ -5,8 +5,6 @@
 
 #include "Assertions.h"
 
-#pragma comment(lib, "shcore.lib")
-
 // The images the view draws with (CivPickerView): the icon files data.json names, a word about files that couldn't
 // be loaded, and the cursors' size for the display the window is on.
 

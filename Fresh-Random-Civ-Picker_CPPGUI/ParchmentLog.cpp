@@ -1,8 +1,9 @@
 #include "ParchmentLog.h"
 
+#include <windowsx.h>
+#include <algorithm>
 #include <cmath>
 #include <cwchar>
-#include <windowsx.h>
 
 #include "Assertions.h"
 #include "ParchmentScrollBar.h"
@@ -259,13 +260,13 @@ void ParchmentLog::PaintIcon(ParchmentRenderer& renderer, int line_index, float 
 // The selected part of a line, in the system's highlight colours as in a browser.
 void ParchmentLog::PaintSelection(ParchmentRenderer& renderer, int line_index, float top)
 {
-    const int first = selection_anchor < selection_caret ? selection_anchor : selection_caret;
-    const int last = selection_anchor < selection_caret ? selection_caret : selection_anchor;
+    const int first = std::min(selection_anchor, selection_caret);
+    const int last = std::max(selection_anchor, selection_caret);
     if (!c_assert(line_index >= 0 && line_index < lines.Count())) return;
     if (!c_assert(first >= 0 && last <= text_length)) return;
     const TextLine line = lines.Line(line_index);
-    const int start = first > line.start ? first : line.start;
-    const int end = last < line.start + line.length ? last : line.start + line.length;
+    const int start = std::max(first, line.start);
+    const int end = std::min(last, line.start + line.length);
     if (start >= end) return;
     const COLORREF highlight = GetSysColor(COLOR_HIGHLIGHT);
     const Colour colour = { GetRValue(highlight), GetGValue(highlight), GetBValue(highlight), 1.0f };
@@ -383,7 +384,7 @@ int ParchmentLog::ScrollStep(ScrollbarPart part) const
     // The knob is dragged, not stepped.
     if (!c_assert(part != ScrollbarPart::knob)) return 0;
     const int step = LineStep();
-    const int page = ViewportHeight(size) - step > step ? ViewportHeight(size) - step : step;
+    const int page = std::max(ViewportHeight(size) - step, step);
     if (part == ScrollbarPart::up_button) return -step;
     if (part == ScrollbarPart::down_button) return step;
     if (part == ScrollbarPart::track_above_knob) return -page;
@@ -502,8 +503,8 @@ void ParchmentLog::SelectAll()
 // allocation the platform demands here.
 void ParchmentLog::CopySelection() const
 {
-    const int first = selection_anchor < selection_caret ? selection_anchor : selection_caret;
-    const int last = selection_anchor < selection_caret ? selection_caret : selection_anchor;
+    const int first = std::min(selection_anchor, selection_caret);
+    const int last = std::max(selection_anchor, selection_caret);
     if (!c_assert(window != NULL)) return;
     if (!c_assert(first >= 0 && last <= text_length) || first == last || !OpenClipboard(window)) return;
     const SIZE_T bytes = static_cast<SIZE_T>(last - first + 1) * sizeof(wchar_t);

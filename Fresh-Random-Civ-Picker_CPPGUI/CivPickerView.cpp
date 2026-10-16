@@ -1,23 +1,16 @@
 #include "CivPickerView.h"
 
 #include <mmsystem.h>
-#include <cwchar>
 #include <windowsx.h>
+#include <algorithm>
+#include <cwchar>
 
 #include "Assertions.h"
 #include "CivPickerController.h"
 #include "Resource.h"
 
-#pragma comment(lib, "winmm.lib")
-#pragma comment(lib, "comctl32.lib")
-#pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' " \
-                        "version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-
 namespace
 {
-    // Controls are drawn at their places in their window, so the back buffer covers the largest window.
-    constexpr int Larger(int first, int second) { return first > second ? first : second; }
-
     // Seconds without input after which the program hands its unused memory back to Windows.
     constexpr UINT_PTR IDLE_TRIM_TIMER = 1;
     constexpr UINT IDLE_TRIM_DELAY_MS = 4000;
@@ -29,13 +22,14 @@ namespace
         return key || mouse || message == WM_HOTKEY;
     }
 
-    constexpr PixelSize BACK_BUFFER_SIZE = { Larger(WINDOW_WIDTH, ParchmentDialogs::MAX_DIALOG_WIDTH),
-                                             Larger(WINDOW_HEIGHT, ParchmentDialogs::MAX_DIALOG_HEIGHT) };
+    // Controls are drawn at their places in their window, so the back buffer covers the largest window.
+    constexpr PixelSize BACK_BUFFER_SIZE = { std::max(WINDOW_WIDTH, ParchmentDialogs::MAX_DIALOG_WIDTH),
+                                             std::max(WINDOW_HEIGHT, ParchmentDialogs::MAX_DIALOG_HEIGHT) };
     // Windows are shaped one at a time in one workspace, big enough for the largest window with its shadow.
     constexpr int DIALOG_MARGINS = 2 * ParchmentDialogs::SHADOW_MARGIN;
     constexpr PixelSize SHELL_WORKSPACE_SIZE = {
-        Larger(WINDOW_WIDTH, ParchmentDialogs::MAX_DIALOG_WIDTH + DIALOG_MARGINS),
-        Larger(WINDOW_HEIGHT, ParchmentDialogs::MAX_DIALOG_HEIGHT + DIALOG_MARGINS) };
+        std::max(WINDOW_WIDTH, ParchmentDialogs::MAX_DIALOG_WIDTH + DIALOG_MARGINS),
+        std::max(WINDOW_HEIGHT, ParchmentDialogs::MAX_DIALOG_HEIGHT + DIALOG_MARGINS) };
     static_assert(SHELL_WORKSPACE_SIZE.width * SHELL_WORKSPACE_SIZE.height <= ShellWorkspace::MAX_CANVAS_PIXELS,
                   "the shell workspace holds the largest window");
     constexpr int TEXT_MENU_COPY = 1;
@@ -1047,12 +1041,12 @@ void CivPickerView::UnloadSounds()
 
 void CivPickerView::UnloadSound(SoundResource& sound_resource)
 {
-    if (sound_resource.data)
+    if (sound_resource.data != nullptr)
     {
         UnlockResource(sound_resource.data);
-        sound_resource.data = NULL;
+        sound_resource.data = nullptr;
     }
-    if (sound_resource.handle)
+    if (sound_resource.handle != NULL)
     {
         FreeResource(sound_resource.handle);
         sound_resource.handle = NULL;
@@ -1082,6 +1076,7 @@ void CivPickerView::PlayAudio(SoundType type) const
         case SoundType::hover: PlayResource(sound_resources[2]); return;
         case SoundType::error: PlayResource(sound_resources[3]); return;
         case SoundType::view: PlayResource(sound_resources[4]); return;
+        default: (void)c_assert(false); return;
     }
 }
 

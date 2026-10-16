@@ -2,6 +2,8 @@
 
 #include <d2d1.h>
 #include <wincodec.h>
+#include <algorithm>
+#include <cstring>
 
 #include "Assertions.h"
 #include "CivDataLimits.h"
@@ -87,7 +89,7 @@ namespace
     // The most icons an atlas holds: every civ and Random, or every edition's three looks and every DLC's icon.
     constexpr int MAX_CIV_ICONS = MAX_CIVS + 1;
     constexpr int MAX_DLC_ICONS = EDITION_LOOKS * MAX_EDITIONS + MAX_DLCS;
-    constexpr int MAX_ATLAS_CELLS = MAX_CIV_ICONS > MAX_DLC_ICONS ? MAX_CIV_ICONS : MAX_DLC_ICONS;
+    constexpr int MAX_ATLAS_CELLS = std::max(MAX_CIV_ICONS, MAX_DLC_ICONS);
 
     struct NineSliceSource
     {
@@ -142,6 +144,7 @@ namespace
             case Filter::black: return Brightness(colour, 0.0f);
             case Filter::tooltip_tint: return Saturate(HueRotate(Brightness(colour, 0.15f), -54.0f), 3.1f);
             case Filter::none: return colour;
+            default: (void)c_assert(false); break;
         }
         return colour;
     }
@@ -184,6 +187,7 @@ namespace
             case AtlasContent::civ_icons: return sources.civ_icons;
             case AtlasContent::dlc_icons: return sources.dlc_icons;
             case AtlasContent::edition_banners: return sources.edition_banners;
+            default: (void)c_assert(false); break;
         }
         return { nullptr, 0 };
     }
@@ -307,7 +311,7 @@ bool ParchmentImages::FillBitmap(const OpenedImage& image, int image_index)
     const UINT stride = static_cast<UINT>(size.width) * 4;
     for (int top = 0; top < size.height && top < MAX_IMAGE_HEIGHT; top += strip_rows)
     {
-        const int rows = size.height - top < strip_rows ? size.height - top : strip_rows;
+        const int rows = std::min(size.height - top, strip_rows);
         const WICRect strip = { 0, top, size.width, rows };
         HRESULT result = image.converter->CopyPixels(&strip, stride, stride * static_cast<UINT>(rows),
                                                      reinterpret_cast<BYTE*>(scratch));
@@ -505,7 +509,7 @@ HCURSOR ParchmentImages::CreateCursorFromScratch(PixelSize size, PixelPoint hots
     HCURSOR cursor = NULL;
     if (colour != NULL && bits != nullptr && mask != NULL)
     {
-        memcpy(bits, scratch, static_cast<size_t>(size.width) * static_cast<size_t>(size.height) * 4);
+        std::memcpy(bits, scratch, static_cast<size_t>(size.width) * static_cast<size_t>(size.height) * 4);
         ICONINFO icon = { FALSE, static_cast<DWORD>(hotspot.x), static_cast<DWORD>(hotspot.y), mask, colour };
         cursor = CreateIconIndirect(&icon);
     }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "framework.h"
+
 #include <commctrl.h>
 #include <string>
 
@@ -332,7 +333,7 @@ private:
     void ShowControl(HWND control, bool shown);
     bool HasDlcToggle(int dlc) const;
 
-    // --- The DLC toggles' lists, which scroll once they don't fit (CivPickerDlcToggles.cpp) ---
+    // --- The DLC toggles' lists, which scroll once they don't fit (CivPickerViewDlcToggles.cpp) ---
     bool CreateDlcToggles();
     bool CreateDlcToggle(int dlc, const DlcToggleSpot& spot);
     bool CreateDlcScrollbar(int edition);
@@ -356,7 +357,7 @@ private:
     void PlayResource(const SoundResource& sound_resource) const;
     void PlayWave(const void* wave) const;
 
-    // --- Dialogs (CivPickerDialogs.cpp) ---
+    // --- Dialogs (CivPickerViewDialogs.cpp) ---
     INT_PTR RunDialog(const ParchmentDialogs::Run& run);
     INT_PTR BeginDialog(HWND dialog);
     bool BuildDialogLayouts();
@@ -388,7 +389,7 @@ private:
     void HidePoolInfo(HWND dialog) const;
     bool OnAboutCommand(HWND dialog, int command_id);
 
-    // --- Share links (CivPickerShare.cpp) ---
+    // --- Share links (CivPickerViewShare.cpp) ---
     bool BuildShareLayout(const ShareLinks& links);
     INT_PTR BeginShareDialog(HWND dialog);
     bool OnShareCommand(HWND dialog, int command_id);

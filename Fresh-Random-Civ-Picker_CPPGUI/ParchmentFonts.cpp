@@ -1,11 +1,10 @@
 #include "ParchmentFonts.h"
 
-#include <cmath>
 #include <dwrite_1.h>
+#include <algorithm>
+#include <cmath>
 
 #include "Assertions.h"
-
-#pragma comment(lib, "dwrite.lib")
 
 namespace
 {
@@ -189,7 +188,7 @@ bool ParchmentFonts::MeasureChunk(const TextSpan& span, int first)
     const int index = static_cast<int>(span.font);
     if (!c_assert(index >= 0 && index < FONT_COUNT) || !c_assert(faces[index] != nullptr)) return false;
     const int remaining = span.length - first;
-    const int count = remaining < MEASURE_CHUNK ? remaining : MEASURE_CHUNK;
+    const int count = std::min(remaining, MEASURE_CHUNK);
     UINT32 code_points[MEASURE_CHUNK] = {};
     UINT16 glyphs[MEASURE_CHUNK] = {};
     DWRITE_GLYPH_METRICS glyph_metrics[MEASURE_CHUNK] = {};

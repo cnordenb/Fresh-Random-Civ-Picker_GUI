@@ -10,7 +10,7 @@
 // it means and turns it into requests on the model, and tells the view when to change. It holds no
 // application logic of its own. As in HFDP, the controller creates its view; Run() is the startup
 // sequence that wires model, view and controller together and runs the message loop.
-class CivPickerController
+class CivPickerController final
 {
 public:
     explicit CivPickerController(CivPickerModel& picker_model);
@@ -29,6 +29,7 @@ public:
     void OnFatalError();
      
     static bool IsValidLobbyCode(const std::wstring& lobby_code);
+    static bool LoadCatalog(CivCatalog& catalog);
 
 private:
     int RunMessageLoop(HINSTANCE app_instance);

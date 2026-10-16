@@ -1,6 +1,7 @@
 #include "CivPickerView.h"
 
 #include <windowsx.h>
+#include <algorithm>
 
 #include "Assertions.h"
 #include "CivPickerLayout.h"
@@ -47,7 +48,7 @@ bool CivPickerView::CreateDlcToggle(int dlc, const DlcToggleSpot& spot)
     if (!c_assert(info.icon_index != CivCatalog::NONE)) return false;
     const TextSpan name = { info.name.c_str(), static_cast<int>(info.name.size()), FontId::ui_bold };
     const int width = spot.size + spot.gap + static_cast<int>(renderer.MeasureText(name)) + 2;
-    const int right = spot.left + width < DLC_TOGGLE_RIGHT ? spot.left + width : DLC_TOGGLE_RIGHT;
+    const int right = std::min(spot.left + width, DLC_TOGGLE_RIGHT);
     const int atlas_cell = EDITION_LOOKS * catalog.EditionCount() + info.icon_index;
     IconToggle& toggle = dlc_toggles[dlc];
     toggle.SetIcon({ ImageId::dlc_atlas, ImageId::dlc_atlas_grey, DLC_ATLAS_COLUMNS, DLC_ATLAS_CELL, atlas_cell,
@@ -85,7 +86,7 @@ int CivPickerView::VisibleDlcRows(int edition) const
     const int room_below_first_row = DLC_LIST_BOTTOM - layout.top - layout.size;
     const int fitting = layout.step > 0 && room_below_first_row >= 0 ? room_below_first_row / layout.step + 1 : 1;
     if (!c_assert(fitting >= 1)) return 1;
-    return info.dlc_toggle_count < fitting ? info.dlc_toggle_count : fitting;
+    return std::min(info.dlc_toggle_count, fitting);
 }
 
 // The height of the rows the edition's list shows, at least the height its scrollbar needs.
@@ -94,7 +95,7 @@ int CivPickerView::DlcListHeight(int edition) const
     const DlcToggleLayout& layout = model.Catalog().EditionAt(edition).toggle_layout;
     const int rows = VisibleDlcRows(edition);
     const int rows_height = rows > 0 ? layout.step * (rows - 1) + layout.size : 0;
-    return rows_height > SCROLLBAR_MIN_HEIGHT ? rows_height : SCROLLBAR_MIN_HEIGHT;
+    return std::max(rows_height, SCROLLBAR_MIN_HEIGHT);
 }
 
 // Where the edition's list lies in the main window, with its scrollbar.

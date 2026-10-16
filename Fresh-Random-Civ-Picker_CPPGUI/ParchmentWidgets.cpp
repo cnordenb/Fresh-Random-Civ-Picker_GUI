@@ -1,5 +1,6 @@
 #include "ParchmentWidgets.h"
 
+#include <algorithm>
 #include <cwchar>
 
 #include "Assertions.h"
@@ -204,7 +205,7 @@ void IconToggle::PaintIcon(ParchmentRenderer& renderer, const FloatRect& bounds)
     const PixelSize cross = renderer.ImageSize(ImageId::off_cross);
     if (cross.width <= 0 || cross.height <= 0) return;
     const float side = box.right - box.left;
-    const float fit = side / static_cast<float>(cross.width > cross.height ? cross.width : cross.height);
+    const float fit = side / static_cast<float>(std::max(cross.width, cross.height));
     const float width = static_cast<float>(cross.width) * fit * OFF_CROSS_SCALE;
     const float height = static_cast<float>(cross.height) * fit * OFF_CROSS_SCALE;
     const float centre_x = (box.left + box.right) / 2.0f;

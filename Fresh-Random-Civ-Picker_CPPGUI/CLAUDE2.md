@@ -1,7 +1,8 @@
 # CLAUDE2.md - Binding development rules for this project
 
 Every change to this project must follow these rules strictly. Compiled 2026-10-13 from three
-documents in `Fresh-Random-Civ-Picker_CPPGUI/`:
+documents in `Fresh-Random-Civ-Picker_CPPGUI/materials/` (not in git), with a fourth added on
+2026-10-16:
 
 - **P10**: `P10.pdf`, G. J. Holzmann, *The Power of Ten: Rules for Developing Safety Critical
   Code* (NASA/JPL). Read in full.
@@ -10,9 +11,13 @@ documents in `Fresh-Random-Civ-Picker_CPPGUI/`:
   heuristics J1/J2, the Java listings in the case studies and Appendix B.
 - **HF**: `hfdp.pdf`, Freeman & Robson, *Head First Design Patterns* (2nd ed.). Read: every design
   principle (ch. 1-11), the MVC part of ch. 12, all of ch. 13.
+- **GSFC**: `mab583.pdf`, *C++ Coding Standards and Style Guide*, NASA Goddard Space Flight
+  Center, Mission Applications Branch (Code 583), modified for the GMAT project by L. Jun and
+  W. Shoan, draft of 2005-05-24. A scan with an OCR text layer (the title page's text is lost),
+  read in full. Adopted only where it conflicts with none of the rules above (section 14).
 
 Source tags: `P10-n` = P10 rule n. `CCn` = CC chapter n. `CC-G5`, `CC-N3`, `CC-T1`, `CC-C5`,
-`CC-F2`, `CC-E1` = CC ch. 17 heuristics. `HFn` = HF chapter n.
+`CC-F2`, `CC-E1` = CC ch. 17 heuristics. `HFn` = HF chapter n. `GSFC-n.n` = GSFC section n.n.
 
 ---------------------------------------------------------------------------------------------------
 
@@ -27,6 +32,8 @@ Source tags: `P10-n` = P10 rule n. `CCn` = CC chapter n. `CC-G5`, `CC-N3`, `CC-T
 4. A rule may be broken only with the user's explicit approval, and the exception is justified
    in a comment at the place where it happens.
 5. The user's own rules for this project (section 10) bind like P10's and come before the books.
+6. GSFC (section 14) ranks below everything above: it was adopted only where it conflicts with
+   none of it, and a conflict found later is settled in favour of the earlier rule.
 
 ## 1. Conflicts between the books and how they are resolved (P10 wins)
 
@@ -582,6 +589,7 @@ Win32/P10 application:
 - [ ] Model/View/Controller separation respected (section 6).
 - [ ] Editions, DLCs and civs come from data.json only; no name, ID, count, list or layout of
       theirs in code, resources, project files or tests (section 10).
+- [ ] The GSFC rules of section 14.2 hold.
 - [ ] Boy Scout: the code I touched is a little cleaner than before.
 
 ## 8. Current state of the code (updated 2026-10-13, after the MVC split)
@@ -604,8 +612,8 @@ Still open (next incremental steps):
 - P10-3: `std::wstring` is used for run-time state, log text and labels, so the program still
   allocates on the heap after startup. The model's name index (`std::unordered_map`) is built once
   at startup and only read afterwards.
-- `GlobalConstants.h` still uses `#define` constants (CC J3); it has an include guard since the
-  data separation (section 10).
+- `GlobalConstants.h` used `#define` constants (CC J3) until 2026-10-16; they are `constexpr` now
+  (section 14.5).
 - Quirks kept on purpose because changing them would change behaviour; fix only when asked:
   - removing a civ before the pool was ever initialised underflows `iterator`
     (`CivPickerModel::RemoveCiv`);
@@ -658,8 +666,9 @@ commands and the new links. No commit has been made.
   bar with its popup lists, `ParchmentTooltip` the tooltip, `ParchmentDialogs` builds every dialog
   from a data layout (`DialogLayout`) over an empty in-memory template.
 - `CivPickerView` is split over `CivPickerView.cpp` (window, observer notifications, sounds; 985
-  lines), `CivPickerViewLayout.cpp` (the main window's controls and menus) and `CivPickerDialogs.cpp`
-  (dialog layouts and procedures; 811 lines). These two, `ParchmentDialog.cpp` (626) and
+  lines), `CivPickerViewLayout.cpp` (the main window's controls and menus) and
+  `CivPickerViewDialogs.cpp` (dialog layouts and procedures; 811 lines; `CivPickerDialogs.cpp` until
+  14.5). These two, `ParchmentDialog.cpp` (626) and
   `ParchmentMenu.cpp` (512) are above CC's desirable 500 lines, as the controller and model already
   were; the next split would move the observer notifications out of `CivPickerView.cpp`.
 - Painting: a control draws over a copy of its parent's backdrop into a shared back buffer and is
@@ -757,7 +766,7 @@ commands and the new links. No commit has been made.
   a `GlobalAlloc` block (the clipboard API requires it). The program's own code allocates nothing
   after startup; see question 3.
 - Not used: `EM_SETCUEBANNER` (the lobby field's placeholder is drawn by a subclass to get the web's
-  colour); the open dropdown list keeps the system's 1 px list border.
+  colour). The open dropdown list kept the system's 1 px list border until 12.9.
 
 ### 9.5 Questions for the user
 
@@ -900,7 +909,7 @@ them. A link made by either version opens in the other with the same edition, ci
   first, a civ left out, a draw, or anything in the drawn log. A loaded link's draws come in
   without their jingles; then the button sound and "Loaded the shared link".
 - New for this: `PartKind::readonly_field` in the dialogs, `DialogMetrics.h` (the dialog measures
-  CivPickerDialogs.cpp and CivPickerShare.cpp share), and a smooth or pixelated icon in
+  CivPickerViewDialogs.cpp and CivPickerViewShare.cpp share), and a smooth or pixelated icon in
   `FramedIconButton`.
 
 ### 11.3 Verification (2026-10-14)
@@ -942,7 +951,7 @@ parchment.
   atlases are built at startup (`ParchmentImages::BuildAtlas`). A file that can't be loaded leaves
   its cell empty, and a startup message names the first such file.
 - `MAX_DLCS` = `MAX_DLC_TOGGLES` = 128. An edition's toggles that don't fit above the civ grid
-  scroll (`CivPickerDlcToggles.cpp`): how many show follows from its dlcToggleLayout (the rows
+  scroll (`CivPickerViewDlcToggles.cpp`): how many show follows from its dlcToggleLayout (the rows
   between its top and 6 px above the civ grid, `CivPickerLayout.h`); a `ScrollBar` control (the
   logs' look, counting rows) sits at the client area's right edge, and the wheel scrolls the list
   under the mouse. A to L toggle an edition's first nine (`DLC_HOTKEY_COUNT`); later toggles have no
@@ -1080,6 +1089,22 @@ The user asked for the civs' icons in the Log tab's logs, a drawn entry reading 
   (5 new: a label leads a line, only as whole words at its start, the longest wins, bad labels
   are refused, a fixed capacity). ParchmentLog.cpp is now 528 lines, past CC's 500.
 
+### 12.9 The open dropdown list's frame (2026-10-16)
+
+The user saw a blue outline around an open dropdown in Options. The list (the combobox's
+`ComboLBox` popup, `WS_BORDER`) had the theme's list frame: #7a7a7a, #171717 while focused and
+#0078d7 while hot, which it is under the mouse whenever the user picks an item. `StyleDropdown` now
+also subclasses the list (`DropdownListProc`): after the system paints the non-client area (a long
+list's scrollbar included), the 1 px frame is painted over in `MENU_BORDER_COLOUR` (#3d2c1c), as
+the web version's open list has (`::picker(select) { border: 1px solid #3d2c1c }`), on WM_NCPAINT
+and in WM_PRINT.
+- Verified on a hidden desktop (Options' jingle dropdown and the History dialog's long list,
+  opened by a posted click): the frame reads #3d2c1c from the list's window DC and in PrintWindow,
+  #7a7a7a before; the long list keeps its scrollbar. The hot (blue) look itself can't be produced
+  there, since a hidden desktop has no pointer; the theme's colours per state were read with
+  DrawThemeBackground (Listbox, LBCP_BORDER_NOSCROLL). Zero warnings at /W4 (Debug and Release
+  x64), zero /analyze findings, 83 unit tests pass.
+
 ## 13. Waiting for the user (gathered 2026-10-15)
 
 Everything from the sessions of 2026-10-15 that needs a decision, a look or a hand. Older open
@@ -1131,3 +1156,232 @@ refused to Claude, so they are left for the user:
 - `images\civ\civicon_atlas.png`, `images\dlc\dlc_atlas.png`, `images\dlc\edition_banners_atlas.png`
 
 Nothing of these sessions is committed.
+
+## 14. GSFC: NASA Goddard's C++ standard (adopted 2026-10-16)
+
+The user asked for `mab583.pdf` to be added to these rules, leaving out anything that conflicts
+with the existing ones, and for the whole project to comply.
+
+### 14.1 How it was adopted
+
+- A GSFC rule is left out when it contradicts P10, CC, HF, the interpretations of section 2 or
+  the user's rules (section 10), or the project's own convention, which section 0.3 makes the
+  standard for details the books leave open. A convention here is one form used throughout the
+  code: `T* p` (246 to 0), unparenthesized conditions of `?:` (211 of 216). Where the code was
+  mixed (switches with and without a default case: 10 to 16), GSFC's rule was adopted.
+- What GSFC itself calls optional ("may", "suggested", "can") stays optional. Rules about GMAT,
+  CVS, C code and Doxygen don't apply here. Everything left out is listed in 14.3.
+- Rules that only restate one above are tagged with it and not repeated as new.
+
+### 14.2 The rules
+
+Names
+1. Names are meaningful and readable (GSFC-2, = CC 4.2). An abbreviation is written one way
+   throughout, all capitals or an initial capital, never both (`Dlc` everywhere, not `DLC` in
+   some names); UPPER_SNAKE_CASE constants are all capitals anyway (GSFC-2).
+2. Classes, structs, enum types, type aliases and named namespaces are PascalCase (GSFC-2.1,
+   2.6, 2.8, 2.9). Functions are verbs in PascalCase (GSFC-2.4). A method's name doesn't repeat
+   its class's name: `Vector::Normalize`, not `Vector::NormalizeVector` (GSFC-2.4). Is/Has/Can,
+   Get/Set, Initialize and Compute prefixes are suggested.
+3. Parameters are named like variables (GSFC-2.5; snake_case, section 0.3).
+4. No global variables and no extern variables (GSFC-2.7.2, 10.1, = P10-6); file-local state
+   lives in an anonymous namespace.
+5. Constants are UPPER_SNAKE_CASE, declared `constexpr`/`const` or as enumerators, never as
+   `#define` constants (GSFC-2.10). Exceptions: `Resource.h`, which the resource editor writes and
+   the resource compiler reads, and configuration macros the Windows headers read
+   (`WIN32_LEAN_AND_MEAN`; `NOMINMAX` is set in the project files).
+6. A struct holds only public data; a type with private data is a class (GSFC-2.11).
+7. Files a tool generates keep the names and the format the tool gives them: `Resource.h`, the
+   .rc file, the project files (GSFC-2.14).
+
+Formatting and statements
+8. Blank lines group statements into paragraphs; a complex statement becomes several simple ones
+   (GSFC-3, 3.6). One declaration per line (GSFC-3.1, = P10-4).
+9. Spaces (GSFC-3.3, 3.5): between a control keyword and its parenthesis (`if (`, `for (`,
+   `while (`, `switch (`, `catch (`); none between a function's name and its parenthesis, which
+   includes `sizeof(` and casts; one after each comma and each semicolon of a `for` header; around
+   assignment operators and around the `?` and `:` of the conditional operator; none between a
+   unary operator and its operand; none around `->`, `.` and `[]`.
+10. Indentation is four spaces (GSFC-3.4 allows three or four); no tabs (GSFC-3.5).
+11. Arguments that don't fit on one line continue aligned with the first argument; when that
+    still doesn't fit, under the function's name (GSFC-3.7).
+12. An `if` inside another `if` without braces between them is not allowed: nested ifs always
+    take braces (GSFC-3.8). Otherwise a single statement may go without braces.
+13. A value that isn't a boolean is compared explicitly: `pointer != nullptr`, `handle != NULL`,
+    `count != 0`, `(flags & BIT) == 0`, `std::iswspace(c) != 0` (C predicates return int), never
+    tested through an implicit conversion (GSFC-3.8). Booleans, including Win32 `BOOL`, are tested
+    directly, as P10-5's `if (!c_assert(...))` does.
+14. Every switch has a default case, and it comes last (GSFC-3.9). A default that can't be reached
+    fails a `c_assert` and takes the recovery, as GSFC's "fatal error exit". A case with statements
+    that falls through into the next says so in a comment; variables declared in a case go in a
+    block.
+15. The conditional operator only for simple choices, never nested (GSFC-3.13).
+16. Return an expression or a constructed value directly, not a local made only to be returned,
+    unless it is an explanatory variable (CC G19) or checked before the return (GSFC-3.14, 9).
+    `break` may leave a loop at a logical point; several returns are fine (GSFC-3.11, 3.14).
+    No `goto` (GSFC-3.12, = P10-1).
+
+Comments
+17. Comments use `//` only; no pseudo-code (PDL); no rows of asterisks (GSFC-4.5, 7).
+18. Code that implements a specification or a published algorithm names its source: here the web
+    version's CSS rule or script function it reproduces (`// .log { border: 6px }`) (GSFC-4.5).
+
+Classes
+19. No public data members in classes (GSFC-5.1); structs are data structures (CC 4.6).
+20. A class that can be derived from has a virtual destructor; every other class is `final` (I1);
+    a method is virtual only where it is overridden (GSFC-5.1).
+21. A declaration keeps its return type on the function name's line (GSFC-5.1).
+22. Class sections come in the order public, protected, private (GSFC-5.1.2).
+23. No function bodies inside class definitions; a header that must define a function does it
+    outside the class (GSFC-5.1.4).
+24. Constructors initialize the members and do nothing that can fail; work that can fail goes into
+    a function that reports failure, which the caller checks (GSFC-5.2.1). Every member is
+    initialized at construction (a default member initializer or the initializer list, in
+    declaration order) (GSFC-5.2.1, 5.2.3).
+25. Exceptions are caught by reference (GSFC-5.2.2), and only at boundaries (section 1 row 1).
+26. Every variable is initialized where it is declared, structs with `= {}` (GSFC-5.2.3).
+27. A definition's parameter names match its declaration's exactly (GSFC-5.2.3).
+
+Includes and files
+28. Every header guards against being included twice, with `#pragma once` (GSFC-5.1).
+29. Includes come at the top of a file only, grouped and sorted (GSFC-5.1.3): the file's own
+    header (or `pch.h`) alone; then a header that must be read before the others, alone
+    (`targetver.h` before `<windows.h>`, `framework.h` before the SDK's headers); then system
+    headers, lower levels first: the Windows SDK's, then the standard library's, each alphabetical;
+    then the project's headers, alphabetical (section 0.3); in tests, the included sources last.
+30. C++ headers instead of C headers: `<cstdlib>`, not `<stdlib.h>` (GSFC-5.1.3, 10.7). A file
+    includes only what it uses (GSFC-5.1.3).
+31. No directory names or absolute paths in include directives; the build sets the include
+    paths (GSFC-5.1.3). Third-party headers keep the form their library documents
+    (`"gtest/gtest.h"`).
+32. The main procedure (`wWinMain`) lives in a file of its own (GSFC-7). A file that defines the
+    members of one class is named after it (GSFC-2.13): `CivPickerView*.cpp`.
+33. The project file lists every source file (GSFC-10.6; MSBuild's project file is the makefile),
+    and the program links only the libraries it uses (GSFC-10.7).
+34. The README says what the program does and how its code is organized (GSFC-10.5).
+
+Portability, efficiency and libraries
+35. ISO C++ wherever it offers what an extension does (GSFC-8): libraries are linked through the
+    project file, not `#pragma comment`; a COM interface's ID comes from the SDK's `IID_` constant
+    where the SDK declares one, else `__uuidof` (Direct2D and DirectWrite declare none).
+36. Class and struct instances larger than 16 bytes, or with a non-trivial copy, are passed by
+    const reference when the function doesn't change them (GSFC-8, 9). Smaller trivially copyable
+    structs (`PixelRect`, `FloatRect`) may go by value, which costs less.
+37. Embedded assignments (`while ((c = Next()) != END)`) only where proven faster (GSFC-9).
+38. No using-directive at global scope in a header; in a source file, `using` for heavy use of a
+    namespace, the scope operator for a few uses (GSFC-2.2, 10.8).
+39. Standard library components instead of hand-written equivalents (GSFC-10.9), within P10-3
+    (nothing that allocates after startup) and P10-2 (a loop over a run-time count keeps its
+    written maximum, so hand-written bounded loops stay).
+
+### 14.3 Left out, and why
+
+| GSFC | Rule | Conflicts with |
+|------|------|----------------|
+| 2, 2.5, 2.7 | camelCase variables and parameters, no underscores | 0.3, naming case (snake_case) |
+| 2.9 | enumerators in capitals (`DARK_BLUE`) | 0.3, naming case (`ImageId::civ_atlas`) |
+| 2.1 | GUI classes named after their parent (`DisplayPanel : Panel`) | CC 4.2: no type encodings |
+| 2.1, 5.2.2, 10.10 | exception class names, exception use, catching `bad_alloc` | Section 1 row 1, P10-3 |
+| 2.6 | project name as a namespace prefix (suggested) | CC 4.2: no gratuitous context |
+| 2.7, 4.5 | comments on unclear declarations; units in comments | CC 4.2: rename, units in names |
+| 2.7 | variables used throughout declared at the top | CC 4.5, G10: just above first use |
+| 2.7, 8 | project typedefs for built-in types (`Integer`) | CC 4.11: standards with value only |
+| 2.7.1, 2.7.2 | `*` and `&` with the name (`T *p`) | 0.3 (`T* p`, `T& r` throughout) |
+| 2.7.1 | `NULL` for a null pointer | 0.3, GSFC-8 (`nullptr`; `NULL` for handles) |
+| 2.11 | struct names ending in `Type` | CC 4.2: no encodings |
+| 2.12, 10.3 | C function names, mixing C and C++ | Not applicable: no C code |
+| 2.13, 7 | `.hpp`; one class per file pair; constants in .cpp | 0.3, file layout |
+| 3.2 | first brace on the next line for every block | 0.3, brace style (one-line bodies) |
+| 3.4, 4.5 | variables and trailing comments lined up | CC 4.5: no alignment in columns |
+| 3.8 | explicit comparisons of booleans (`!= true`) | P10-5's `if (!c_assert(...))` |
+| 3.9 | a comment on stacked case labels | CC 4.4: noise |
+| 3.13 | the condition of `?:` in parentheses | 0.3 (211 of 216 without) |
+| 3.15 | 80 characters per line | CC 4.5: 120 |
+| 4, 4.1-4.4, App. B | file and method prologs, Doxygen | CC 4.4: mandated comments, bylines |
+| 4.5 | a block comment before each major section | CC 4.3: sections mean several things |
+| 5.1 | Get and Set methods for data | CC 4.6: no blind accessors |
+| 5.1 | include guard macros named after the class | P10-8: `#pragma once`, no `#ifndef` |
+| 5.1.1 | default and copy constructors, destructor, assignment in every class | CC G12: clutter |
+| 5.1.3 | a comment on each system include saying why | CC 4.4: mandated comments |
+| 5.1.5, 5.2.4, 10.4 | file layouts with banners and CVS keywords | 0.3, CC 4.4 banners, git |
+| 5.2.3 | definitions in declaration order | CC 4.3, 4.5: stepdown |
+| 6 | `template<...>` alone on its line, upper-case parameters | 0.3 (every template) |
+| 6 | template definitions behind conditional compilation | P10-8 |
+| 8 | modifiable arguments by reference | CC 4.3 F2: no output arguments |
+| 8 | optimizations considered from the start | CC 4.11: last responsible moment |
+| 2.4, 2.5, 4.5 | names matching a formal specification | Not applicable |
+| 10.2 | the `GMAT_API` define | Not applicable |
+
+### 14.4 Interpretations
+
+- GSFC-2.2 asks for namespaces against clashes between class libraries; the program is not a
+  library, so its classes stay at global scope, as before.
+- A single statement under an `if` or a loop is shown on its own line in GSFC's examples, but no
+  rule says so; the project's same-line form (`if (!c_assert(x)) return false;`) stays.
+- Win32 `BOOL` is a boolean by meaning, so rule 13 tests it directly (`if (!GetWindowRect(...))`).
+  A Win32 function that returns other values in a `BOOL` (TrackPopupMenu with TPM_RETURNCMD) is
+  compared explicitly.
+- Rule 14's comment is for a case with statements; stacked labels (`case A: case B:`) share one
+  body and don't fall through anything.
+- Returning a struct by value is GSFC's own advice (construct on return, GSFC-3.14), so rule 36
+  is about parameters only.
+- GSFC-10.9's components are the STL's containers, iterators and algorithms. C++14 has no
+  array-length function (`std::size` is C++17), so the `CountOf` helpers stay; hand-written
+  minimums and maximums became `std::min` and `std::max`.
+- The order of system headers was mixed (some files alphabetical, some SDK first), so GSFC's
+  "lower levels first" decides it (rule 29); the project's headers were alphabetical throughout.
+- Generated files (rule 7) keep their tool's format: `Resource.h` keeps its tabs and has no
+  `#pragma once`.
+- The test runner's `main` is a main procedure too (rule 32): `UnitTesting_FRCP/TestMain.cpp`,
+  named apart from the program's `Main.cpp` so that their objects can't collide in a shared
+  build folder.
+
+### 14.5 The compliance pass (2026-10-16)
+
+Every C++ file of the program and the tests was checked against 14.2: by a scratch checker for the
+mechanical rules (spacing, switches, includes, classes, comments, conditionals, nesting), by
+clang-tidy 22 (implicit conversions in conditions, uninitialized variables, parameter names,
+virtual destructors, large by-value parameters, unused includes), and by reading. Changes:
+
+- Switches: a default case in the 16 without one (rule 14).
+- Conditions: 7 implicit pointer, handle and integer tests made explicit (rule 13).
+- Initialization: 5 buffers, `MSG`, `SYSTEMTIME`, `OptionsEvent` and a local array initialized
+  where declared; `Civ`'s fields and `CivPickerModel::available_civs` given member initializers
+  (rules 24, 26). Four declarations renamed their parameters to match the definitions (rule 27).
+- Classes: `final` on CivPickerController, CivPickerModel, WrappedLines, IconLabels, OpaqueRuns,
+  ShadowBlur and BoxShadow; virtual destructors on the two base classes, ParchmentControl and
+  CivPickerObserver (rule 20). Every virtual method of ParchmentControl is overridden somewhere.
+- Constants: of `GlobalConstants.h`'s 52 `#define`s, 45 are `constexpr` now and 7 unused ones were
+  deleted (`DT_UNDERLINE`, `MAX_LENGTH`, `MIN_WIDTH`, `MIN_HEIGHT`, `BUTTON_WIDTH`, `BUTTON_HEIGHT`,
+  `HOTKEY_ID_F6`) (rule 5).
+- Standard library: 36 hand-written minimums and maximums, and the `Larger` helper with its 4 uses,
+  became `std::min` and `std::max`; `NOMINMAX` is defined in both project files so that
+  `<windows.h>` doesn't hide them (rule 39).
+- Includes: `framework.h` lost the template's four C runtime headers (`<stdlib.h>`, `<malloc.h>`,
+  `<memory.h>`, `<tchar.h>`; one `memcpy` became `std::memcpy` from `<cstring>`); unused includes
+  removed (`<cmath>`, `<cwctype>`, `CivPickerController.h`, `<d2d1_1helper.h>` where nothing used
+  them); system headers ordered by rule 29 in 8 files; the tests include the program's sources by
+  name, with the program's folder as an include directory of the test project (rules 29-31).
+- Files: `wWinMain` moved to `Main.cpp`, `LoadCatalog` became a static member of
+  CivPickerController; `CivPickerShare.cpp`, `CivPickerDialogs.cpp` and `CivPickerDlcToggles.cpp`
+  were renamed `CivPickerViewShare.cpp`, `CivPickerViewDialogs.cpp`, `CivPickerViewDlcToggles.cpp`
+  (rule 32). The test runner's `main` moved to `TestMain.cpp`; `test.cpp` lost its tabs and took
+  the project's brace style (rule 10).
+- Linking: the ten `#pragma comment` lines became the project file's `AdditionalDependencies` and
+  `AdditionalManifestDependencies`; the unused `gdiplus.lib` was removed; the WIC factory is created
+  with `IID_IWICImagingFactory` (rules 33, 35). The embedded manifest and the imported DLLs are
+  the same as before.
+- Formatting: 8 argument lines aligned with their first argument (rule 11).
+- README: a section on how the code is organized; the compile steps named a file that no longer
+  exists (rule 34).
+
+Found compliant without changes: names and abbreviations (`Dlc`, `Id` throughout; only the SDK's COM
+interfaces use capitals), class section order, no function bodies in class definitions, no public
+data in classes, no block comments, no embedded assignments, no `goto`, no global variables (the one
+mutable file-scope variable, `control_class_atom`, is file-local), no large by-value parameters, no
+real nesting of conditional operators, one declaration per line.
+
+Verified: zero warnings at /W4 in Debug and Release, x64 and Win32; zero /analyze findings (x64 and
+Win32); the /Wall probe shows no warning beyond the informational ones; 83 unit tests pass on x64
+and Win32; no data names in code; the 55 scripted steps against the build before the pass: no
+differences, no assertion fired; the three tabs on a fresh start are pixel-identical to it.

@@ -1,17 +1,12 @@
 #include "ParchmentRenderer.h"
 
-#include <cmath>
 #include <d2d1_1.h>
-#include <d2d1_1helper.h>
 #include <dwrite.h>
 #include <objbase.h>
 #include <wincodec.h>
+#include <cmath>
 
 #include "Assertions.h"
-
-#pragma comment(lib, "d2d1.lib")
-#pragma comment(lib, "windowscodecs.lib")
-#pragma comment(lib, "ole32.lib")
 
 namespace
 {
@@ -66,7 +61,7 @@ bool ParchmentRenderer::Start(const ImageSources& image_sources)
     HRESULT result = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory1), &options,
                                        reinterpret_cast<void**>(&factory));
     if (SUCCEEDED(result))
-        result = CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, __uuidof(IWICImagingFactory),
+        result = CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory,
                                   reinterpret_cast<void**>(&decoder_factory));
     if (!c_assert(SUCCEEDED(result)) || !CreateTargets()) return false;
 
