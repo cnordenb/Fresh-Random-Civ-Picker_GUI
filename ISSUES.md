@@ -42,15 +42,14 @@ Line numbers refer to commit `10b2ab4` and will drift. When an issue is fixed, m
 - Sound playback works poorly on slower computers (carried over from the README's known bugs).
 
 ### Tooling & housekeeping
-- `UnitTesting_FRCP` no longer compiles: `test.cpp` calls `ResetProgram()`/`DrawCiv()` without arguments and uses
-  the removed `civs` container. The solution builds it in every configuration, so **Build Solution fails**; build
-  the `FRCP_GUI` project on its own.
 - `Fresh-Random-Civ-Picker_CPPGUI/RCa23700` is a resource-compiler temp file that was committed by accident.
-- Stale project files: `Fresh-Random-Civ-Picker_CPPGUI.filters` (Visual Studio template leftover); ~3,800
-  duplicate `ClCompile` entries for non-existent `civ_icons\*.png` in `Fresh-Random-Civ-Picker_CPPGUI.vcxproj.filters`;
-  `<Image>`/`<Text>` items in the `.vcxproj` that point at old `civ_icons\` paths and at a local Steam install.
+- Stale project file: `Fresh-Random-Civ-Picker_CPPGUI.filters` (Visual Studio template leftover).
 
 ## Fixed
+- **`UnitTesting_FRCP` didn't compile, so Build Solution failed.** The tests were rewritten with the model in the
+  MVC split (2026-10-13), and the stale entries of the project files (duplicate `civ_icons\*.png` items in the
+  `.vcxproj.filters`, `<Image>`/`<Text>` items for old paths) went with the data separation (2026-10-14). Checked
+  2026-10-16: the solution builds as it stands (Debug, x64 and x86) and its 83 tests pass.
 - **Slavs checkbox doesn't trigger auto-reset.** `WM_COMMAND` only resets for control ids
   `wmId > 4 && wmId < 50 || wmId > 50 && wmId < 65` (`FRCP_GUI.cpp:441`), a range left over from when there were
   fewer civs. Civ checkbox ids are index + 5, so id 50 is whichever civ sits at index 45: Slavs since The Viking

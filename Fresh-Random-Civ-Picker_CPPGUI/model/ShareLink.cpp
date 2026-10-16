@@ -41,7 +41,7 @@ namespace
     class LinkOpener final
     {
     public:
-        explicit LinkOpener(const CivCatalog& civ_catalog) : catalog(civ_catalog) {}
+        explicit LinkOpener(const CivCatalog& civ_catalog);
         ShareLink::Opened Open(const wchar_t* text);
 
     private:
@@ -57,6 +57,11 @@ namespace
         int draws_start = 0;
         SharedPool pool = {};
     };
+
+    LinkOpener::LinkOpener(const CivCatalog& civ_catalog) :
+        catalog(civ_catalog)
+    {
+    }
 
     ShareLink::Opened LinkOpener::Open(const wchar_t* text)
     {

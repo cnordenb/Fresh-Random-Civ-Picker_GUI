@@ -1,68 +1,186 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="CivPickerModel.cpp" />
-    <ClCompile Include="CivPickerView.cpp" />
-    <ClCompile Include="CivPickerController.cpp" />
-    <ClCompile Include="ParchmentControl.cpp" />
-    <ClCompile Include="ParchmentButtons.cpp" />
-    <ClCompile Include="ParchmentWidgets.cpp" />
-    <ClCompile Include="ParchmentLog.cpp" />
-    <ClCompile Include="ParchmentShell.cpp" />
-    <ClCompile Include="ParchmentTooltip.cpp" />
-    <ClCompile Include="ParchmentMenu.cpp" />
-    <ClCompile Include="ParchmentDialogControls.cpp" />
-    <ClCompile Include="ParchmentDialog.cpp" />
-    <ClCompile Include="CivPickerViewLayout.cpp" />
-    <ClCompile Include="CivPickerViewDialogs.cpp" />
-    <ClCompile Include="Assertions.cpp" />
-    <ClCompile Include="ParchmentGeometry.cpp" />
-    <ClCompile Include="PixelSurface.cpp" />
-    <ClCompile Include="ParchmentImages.cpp" />
-    <ClCompile Include="ParchmentFonts.cpp" />
-    <ClCompile Include="ParchmentRenderer.cpp" />
-    <ClCompile Include="JsonReader.cpp" />
-    <ClCompile Include="CivCatalog.cpp" />
-    <ClCompile Include="ShareLink.cpp" />
-    <ClCompile Include="ParchmentToast.cpp" />
-    <ClCompile Include="CivPickerViewShare.cpp" />
-    <ClCompile Include="ParchmentScrollBar.cpp" />
-    <ClCompile Include="CivPickerViewDlcToggles.cpp" />
-    <ClCompile Include="CivPickerViewImages.cpp" />
+    <ClCompile Include="model\CivPickerModel.cpp">
+      <Filter>model</Filter>
+    </ClCompile>
+    <ClCompile Include="view\CivPickerView.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="controller\CivPickerController.cpp">
+      <Filter>controller</Filter>
+    </ClCompile>
+    <ClCompile Include="parchment\controls\ParchmentControl.cpp">
+      <Filter>parchment\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="parchment\controls\ParchmentButtons.cpp">
+      <Filter>parchment\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="parchment\controls\ParchmentWidgets.cpp">
+      <Filter>parchment\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="parchment\controls\ParchmentLog.cpp">
+      <Filter>parchment\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="parchment\windows\ParchmentShell.cpp">
+      <Filter>parchment\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="parchment\windows\ParchmentTooltip.cpp">
+      <Filter>parchment\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="parchment\windows\ParchmentMenu.cpp">
+      <Filter>parchment\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="parchment\controls\ParchmentDialogControls.cpp">
+      <Filter>parchment\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="parchment\windows\ParchmentDialog.cpp">
+      <Filter>parchment\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="view\CivPickerViewLayout.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="view\CivPickerViewDialogs.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="common\Assertions.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="parchment\graphics\ParchmentGeometry.cpp">
+      <Filter>parchment\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="parchment\graphics\PixelSurface.cpp">
+      <Filter>parchment\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="parchment\graphics\ParchmentImages.cpp">
+      <Filter>parchment\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="parchment\graphics\ParchmentFonts.cpp">
+      <Filter>parchment\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="parchment\graphics\ParchmentRenderer.cpp">
+      <Filter>parchment\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="model\JsonReader.cpp">
+      <Filter>model</Filter>
+    </ClCompile>
+    <ClCompile Include="model\CivCatalog.cpp">
+      <Filter>model</Filter>
+    </ClCompile>
+    <ClCompile Include="model\ShareLink.cpp">
+      <Filter>model</Filter>
+    </ClCompile>
+    <ClCompile Include="parchment\windows\ParchmentToast.cpp">
+      <Filter>parchment\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="view\CivPickerViewShare.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="parchment\controls\ParchmentScrollBar.cpp">
+      <Filter>parchment\controls</Filter>
+    </ClCompile>
+    <ClCompile Include="view\CivPickerViewDlcToggles.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="view\CivPickerViewImages.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="view\CivPickerViewObserver.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="controller\CivPickerControllerInput.cpp">
+      <Filter>controller</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="CivPickerModel.h" />
-    <ClInclude Include="CivPickerView.h" />
-    <ClInclude Include="CivPickerController.h" />
-    <ClInclude Include="ParchmentControl.h" />
-    <ClInclude Include="ParchmentButtons.h" />
-    <ClInclude Include="ParchmentWidgets.h" />
-    <ClInclude Include="ParchmentLog.h" />
-    <ClInclude Include="ParchmentShell.h" />
-    <ClInclude Include="ParchmentTooltip.h" />
-    <ClInclude Include="ParchmentMenu.h" />
-    <ClInclude Include="ParchmentDialogControls.h" />
-    <ClInclude Include="ParchmentDialog.h" />
-    <ClInclude Include="Assertions.h" />
-    <ClInclude Include="ParchmentGeometry.h" />
-    <ClInclude Include="ParchmentTheme.h" />
-    <ClInclude Include="PixelSurface.h" />
-    <ClInclude Include="ParchmentImages.h" />
-    <ClInclude Include="ParchmentFonts.h" />
-    <ClInclude Include="ParchmentRenderer.h" />
-    <ClInclude Include="GlobalConstants.h" />
-    <ClInclude Include="JsonReader.h" />
-    <ClInclude Include="CivCatalog.h" />
-    <ClInclude Include="CivDataLimits.h" />
-    <ClInclude Include="ShareLink.h" />
-    <ClInclude Include="ParchmentToast.h" />
-    <ClInclude Include="DialogMetrics.h" />
-    <ClInclude Include="ParchmentScrollBar.h" />
-    <ClInclude Include="CivPickerLayout.h" />
+    <ClInclude Include="model\CivPickerModel.h">
+      <Filter>model</Filter>
+    </ClInclude>
+    <ClInclude Include="view\CivPickerView.h">
+      <Filter>view</Filter>
+    </ClInclude>
+    <ClInclude Include="controller\CivPickerController.h">
+      <Filter>controller</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\controls\ParchmentControl.h">
+      <Filter>parchment\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\controls\ParchmentButtons.h">
+      <Filter>parchment\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\controls\ParchmentWidgets.h">
+      <Filter>parchment\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\controls\ParchmentLog.h">
+      <Filter>parchment\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\windows\ParchmentShell.h">
+      <Filter>parchment\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\windows\ParchmentTooltip.h">
+      <Filter>parchment\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\windows\ParchmentMenu.h">
+      <Filter>parchment\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\controls\ParchmentDialogControls.h">
+      <Filter>parchment\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\windows\ParchmentDialog.h">
+      <Filter>parchment\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Assertions.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\graphics\ParchmentGeometry.h">
+      <Filter>parchment\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\graphics\ParchmentTheme.h">
+      <Filter>parchment\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\graphics\PixelSurface.h">
+      <Filter>parchment\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\graphics\ParchmentImages.h">
+      <Filter>parchment\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\graphics\ParchmentFonts.h">
+      <Filter>parchment\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\graphics\ParchmentRenderer.h">
+      <Filter>parchment\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GlobalConstants.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="model\JsonReader.h">
+      <Filter>model</Filter>
+    </ClInclude>
+    <ClInclude Include="model\CivCatalog.h">
+      <Filter>model</Filter>
+    </ClInclude>
+    <ClInclude Include="common\CivDataLimits.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="model\ShareLink.h">
+      <Filter>model</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\windows\ParchmentToast.h">
+      <Filter>parchment\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="view\DialogMetrics.h">
+      <Filter>view</Filter>
+    </ClInclude>
+    <ClInclude Include="parchment\controls\ParchmentScrollBar.h">
+      <Filter>parchment\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="view\CivPickerLayout.h">
+      <Filter>view</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FRCP_GUI.rc" />
@@ -74,12 +192,37 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CLAUDE2.md" />
+    <None Include="CLAUDE2_LOG.md" />
     <None Include="data.json" />
     <None Include="formatting_notes.md" />
     <None Include="settings.ini" />
     <None Include="TODO.md" />
   </ItemGroup>
   <ItemGroup>
+    <Filter Include="parchment">
+      <UniqueIdentifier>{0befdb2e-59af-46ce-8448-a064d0e28abc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{6c8564ff-b9c1-41cc-87d3-4614b973bf3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="model">
+      <UniqueIdentifier>{b758d88b-a979-4307-8959-41fd481c9e43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="controller">
+      <UniqueIdentifier>{a3d0c207-93e0-4afb-8b55-2e5688ab3e18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="view">
+      <UniqueIdentifier>{85b995a8-4fc9-46b3-bd22-51fc91a9ab4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="parchment\graphics">
+      <UniqueIdentifier>{6aad0161-8e0f-414b-9d82-8df2c946027b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="parchment\controls">
+      <UniqueIdentifier>{1a1fad50-80db-4b84-a38b-fa6a8b435f3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="parchment\windows">
+      <UniqueIdentifier>{d3a32190-f0c4-43cc-87c3-c8218063d90e}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Histories">
       <UniqueIdentifier>{873cc985-37b0-40b1-9e85-6a9f1fec2dea}</UniqueIdentifier>
     </Filter>

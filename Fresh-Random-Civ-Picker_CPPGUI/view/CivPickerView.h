@@ -317,8 +317,10 @@ private:
     void ShowEditionControls(int edition);
     void CheckEditionRow(int edition);
     void MoveResetButton(int tab_index);
+    void ShowControl(HWND control, bool shown);
+    bool HasDlcToggle(int dlc) const;
 
-    // --- Labels, logs and tooltips ---
+    // --- Labels, logs and tooltips (CivPickerViewObserver.cpp) ---
     std::wstring IterationText() const;
     int CivAtlasCell(const std::wstring& civ_name) const;
     void ShowCivIconFor(const std::wstring& civ_name);
@@ -330,8 +332,6 @@ private:
     void UpdateTooltips(bool drawn);
     void UpdateTooltipText(int tooltip_id, const std::wstring& text);
     void SetControlText(HWND control, const wchar_t* text);
-    void ShowControl(HWND control, bool shown);
-    bool HasDlcToggle(int dlc) const;
 
     // --- The DLC toggles' lists, which scroll once they don't fit (CivPickerViewDlcToggles.cpp) ---
     bool CreateDlcToggles();

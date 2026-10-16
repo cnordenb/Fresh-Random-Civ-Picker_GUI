@@ -115,14 +115,17 @@ Instructions for Visual Studio on Windows
 The program is C++ on the Win32 API, drawn with Direct2D, in a Model-View-Controller design.
 - `Fresh-Random-Civ-Picker_CPPGUI/`: the program
   - `Main.cpp`: the entry point, which loads the catalog and builds the model and the controller
-  - `CivCatalog`, `JsonReader`: the editions, DLCs and civs, read from `data.json`
-  - `CivPickerModel`: the civ pool, the draws, the histories and the settings, in plain C++
-  - `CivPickerView*.cpp`: the main window and the dialogs; `CivPickerController`: turns the user's input into
-    requests on the model
-  - `Parchment*`: the parchment look (controls, dialogs, logs, menus, the renderer)
-  - `ShareLink`: the share link format, the same as the web version's
+  - `model/`: in plain C++, `CivCatalog` and `JsonReader` (the editions, DLCs and civs, read from `data.json`),
+    `CivPickerModel` (the civ pool, the draws, the histories and the settings) and `ShareLink` (the share link
+    format, the same as the web version's)
+  - `view/`: `CivPickerView*.cpp`, the main window and the dialogs
+  - `controller/`: `CivPickerController*.cpp`, which turn the user's input into requests on the model
+  - `parchment/`: the parchment look, in `graphics/` (the renderer, images, fonts and layout arithmetic),
+    `controls/` (buttons, checkboxes, logs, sliders, scrollbars) and `windows/` (window shapes, dialogs, menus,
+    tooltips)
+  - `common/`: the assertions and the constants every part uses
   - `data.json`, `images/`, `sounds/`: data and assets, copied next to the exe by every build
-  - `CLAUDE2.md`: the coding rules and the design notes
+  - `CLAUDE2.md`: the coding rules; `CLAUDE2_LOG.md`: the design notes and the history of the changes
 - `UnitTesting_FRCP/`: the unit tests (Google Test)
 
 The code has no conditional compilation flags and no machine-dependent files.

@@ -73,10 +73,11 @@
   <PropertyGroup Label="UserMacros" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)common;$(ProjectDir)model;$(ProjectDir)controller;$(ProjectDir)view;$(ProjectDir)parchment\graphics;$(ProjectDir)parchment\controls;$(ProjectDir)parchment\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -87,12 +88,13 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)common;$(ProjectDir)model;$(ProjectDir)controller;$(ProjectDir)view;$(ProjectDir)parchment\graphics;$(ProjectDir)parchment\controls;$(ProjectDir)parchment\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -105,10 +107,11 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)common;$(ProjectDir)model;$(ProjectDir)controller;$(ProjectDir)view;$(ProjectDir)parchment\graphics;$(ProjectDir)parchment\controls;$(ProjectDir)parchment\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -119,12 +122,13 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)common;$(ProjectDir)model;$(ProjectDir)controller;$(ProjectDir)view;$(ProjectDir)parchment\graphics;$(ProjectDir)parchment\controls;$(ProjectDir)parchment\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -137,67 +141,69 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
-    <ClInclude Include="GlobalConstants.h" />
+    <ClInclude Include="common\GlobalConstants.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="CivPickerModel.h" />
-    <ClInclude Include="CivPickerView.h" />
-    <ClInclude Include="CivPickerController.h" />
-    <ClInclude Include="ParchmentControl.h" />
-    <ClInclude Include="ParchmentButtons.h" />
-    <ClInclude Include="ParchmentWidgets.h" />
-    <ClInclude Include="ParchmentLog.h" />
-    <ClInclude Include="ParchmentShell.h" />
-    <ClInclude Include="ParchmentTooltip.h" />
-    <ClInclude Include="ParchmentMenu.h" />
-    <ClInclude Include="ParchmentDialogControls.h" />
-    <ClInclude Include="ParchmentDialog.h" />
-    <ClInclude Include="Assertions.h" />
-    <ClInclude Include="ParchmentGeometry.h" />
-    <ClInclude Include="ParchmentTheme.h" />
-    <ClInclude Include="PixelSurface.h" />
-    <ClInclude Include="ParchmentImages.h" />
-    <ClInclude Include="ParchmentFonts.h" />
-    <ClInclude Include="ParchmentRenderer.h" />
-    <ClInclude Include="JsonReader.h" />
-    <ClInclude Include="CivCatalog.h" />
-    <ClInclude Include="CivDataLimits.h" />
-    <ClInclude Include="ShareLink.h" />
-    <ClInclude Include="ParchmentToast.h" />
-    <ClInclude Include="DialogMetrics.h" />
-    <ClInclude Include="ParchmentScrollBar.h" />
-    <ClInclude Include="CivPickerLayout.h" />
+    <ClInclude Include="model\CivPickerModel.h" />
+    <ClInclude Include="view\CivPickerView.h" />
+    <ClInclude Include="controller\CivPickerController.h" />
+    <ClInclude Include="parchment\controls\ParchmentControl.h" />
+    <ClInclude Include="parchment\controls\ParchmentButtons.h" />
+    <ClInclude Include="parchment\controls\ParchmentWidgets.h" />
+    <ClInclude Include="parchment\controls\ParchmentLog.h" />
+    <ClInclude Include="parchment\windows\ParchmentShell.h" />
+    <ClInclude Include="parchment\windows\ParchmentTooltip.h" />
+    <ClInclude Include="parchment\windows\ParchmentMenu.h" />
+    <ClInclude Include="parchment\controls\ParchmentDialogControls.h" />
+    <ClInclude Include="parchment\windows\ParchmentDialog.h" />
+    <ClInclude Include="common\Assertions.h" />
+    <ClInclude Include="parchment\graphics\ParchmentGeometry.h" />
+    <ClInclude Include="parchment\graphics\ParchmentTheme.h" />
+    <ClInclude Include="parchment\graphics\PixelSurface.h" />
+    <ClInclude Include="parchment\graphics\ParchmentImages.h" />
+    <ClInclude Include="parchment\graphics\ParchmentFonts.h" />
+    <ClInclude Include="parchment\graphics\ParchmentRenderer.h" />
+    <ClInclude Include="model\JsonReader.h" />
+    <ClInclude Include="model\CivCatalog.h" />
+    <ClInclude Include="common\CivDataLimits.h" />
+    <ClInclude Include="model\ShareLink.h" />
+    <ClInclude Include="parchment\windows\ParchmentToast.h" />
+    <ClInclude Include="view\DialogMetrics.h" />
+    <ClInclude Include="parchment\controls\ParchmentScrollBar.h" />
+    <ClInclude Include="view\CivPickerLayout.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CivPickerModel.cpp" />
-    <ClCompile Include="CivPickerView.cpp" />
-    <ClCompile Include="CivPickerController.cpp" />
-    <ClCompile Include="ParchmentControl.cpp" />
-    <ClCompile Include="ParchmentButtons.cpp" />
-    <ClCompile Include="ParchmentWidgets.cpp" />
-    <ClCompile Include="ParchmentLog.cpp" />
-    <ClCompile Include="ParchmentShell.cpp" />
-    <ClCompile Include="ParchmentTooltip.cpp" />
-    <ClCompile Include="ParchmentMenu.cpp" />
-    <ClCompile Include="ParchmentDialogControls.cpp" />
-    <ClCompile Include="ParchmentDialog.cpp" />
-    <ClCompile Include="CivPickerViewLayout.cpp" />
-    <ClCompile Include="CivPickerViewDialogs.cpp" />
-    <ClCompile Include="Assertions.cpp" />
-    <ClCompile Include="ParchmentGeometry.cpp" />
-    <ClCompile Include="PixelSurface.cpp" />
-    <ClCompile Include="ParchmentImages.cpp" />
-    <ClCompile Include="ParchmentFonts.cpp" />
-    <ClCompile Include="ParchmentRenderer.cpp" />
-    <ClCompile Include="JsonReader.cpp" />
-    <ClCompile Include="CivCatalog.cpp" />
-    <ClCompile Include="ShareLink.cpp" />
-    <ClCompile Include="ParchmentToast.cpp" />
-    <ClCompile Include="CivPickerViewShare.cpp" />
-    <ClCompile Include="ParchmentScrollBar.cpp" />
-    <ClCompile Include="CivPickerViewDlcToggles.cpp" />
-    <ClCompile Include="CivPickerViewImages.cpp" />
+    <ClCompile Include="model\CivPickerModel.cpp" />
+    <ClCompile Include="view\CivPickerView.cpp" />
+    <ClCompile Include="controller\CivPickerController.cpp" />
+    <ClCompile Include="parchment\controls\ParchmentControl.cpp" />
+    <ClCompile Include="parchment\controls\ParchmentButtons.cpp" />
+    <ClCompile Include="parchment\controls\ParchmentWidgets.cpp" />
+    <ClCompile Include="parchment\controls\ParchmentLog.cpp" />
+    <ClCompile Include="parchment\windows\ParchmentShell.cpp" />
+    <ClCompile Include="parchment\windows\ParchmentTooltip.cpp" />
+    <ClCompile Include="parchment\windows\ParchmentMenu.cpp" />
+    <ClCompile Include="parchment\controls\ParchmentDialogControls.cpp" />
+    <ClCompile Include="parchment\windows\ParchmentDialog.cpp" />
+    <ClCompile Include="view\CivPickerViewLayout.cpp" />
+    <ClCompile Include="view\CivPickerViewDialogs.cpp" />
+    <ClCompile Include="common\Assertions.cpp" />
+    <ClCompile Include="parchment\graphics\ParchmentGeometry.cpp" />
+    <ClCompile Include="parchment\graphics\PixelSurface.cpp" />
+    <ClCompile Include="parchment\graphics\ParchmentImages.cpp" />
+    <ClCompile Include="parchment\graphics\ParchmentFonts.cpp" />
+    <ClCompile Include="parchment\graphics\ParchmentRenderer.cpp" />
+    <ClCompile Include="model\JsonReader.cpp" />
+    <ClCompile Include="model\CivCatalog.cpp" />
+    <ClCompile Include="model\ShareLink.cpp" />
+    <ClCompile Include="parchment\windows\ParchmentToast.cpp" />
+    <ClCompile Include="view\CivPickerViewShare.cpp" />
+    <ClCompile Include="parchment\controls\ParchmentScrollBar.cpp" />
+    <ClCompile Include="view\CivPickerViewDlcToggles.cpp" />
+    <ClCompile Include="view\CivPickerViewImages.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="view\CivPickerViewObserver.cpp" />
+    <ClCompile Include="controller\CivPickerControllerInput.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Fresh Random Civ Picker.ico" />
@@ -209,6 +215,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CLAUDE2.md" />
+    <None Include="CLAUDE2_LOG.md" />
     <None Include="data.json" />
     <None Include="formatting_notes.md" />
     <None Include="settings.ini" />

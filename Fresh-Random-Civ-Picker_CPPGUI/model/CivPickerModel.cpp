@@ -26,23 +26,40 @@ namespace
     class SilentObserver final : public CivPickerObserver
     {
     public:
-        void OnPoolChanged(int) override {}
-        void OnBulkPoolChanged() override {}
-        void OnDlcPoolChanged() override {}
-        void OnEditionChanged() override {}
-        void OnResetStarted(bool) override {}
-        void OnDrawSequenceBroken() override {}
-        void OnPoolReset(bool) override {}
-        void OnDrawStarted() override {}
-        void OnEmptyPoolDraw() override {}
-        void OnCivDrawn() override {}
-        void OnUndrawAccepted() override {}
-        void OnCivUndrawn() override {}
-        void OnCivRedrawn() override {}
-        void OnActionRejected() override {}
-        void OnLogLoaded(SaveType) override {}
-        void OnModelError(const std::wstring&, bool) override {}
+        void OnPoolChanged(int) override;
+        void OnBulkPoolChanged() override;
+        void OnDlcPoolChanged() override;
+        void OnEditionChanged() override;
+        void OnResetStarted(bool) override;
+        void OnDrawSequenceBroken() override;
+        void OnPoolReset(bool) override;
+        void OnDrawStarted() override;
+        void OnEmptyPoolDraw() override;
+        void OnCivDrawn() override;
+        void OnUndrawAccepted() override;
+        void OnCivUndrawn() override;
+        void OnCivRedrawn() override;
+        void OnActionRejected() override;
+        void OnLogLoaded(SaveType) override;
+        void OnModelError(const std::wstring&, bool) override;
     };
+
+    void SilentObserver::OnPoolChanged(int) {}
+    void SilentObserver::OnBulkPoolChanged() {}
+    void SilentObserver::OnDlcPoolChanged() {}
+    void SilentObserver::OnEditionChanged() {}
+    void SilentObserver::OnResetStarted(bool) {}
+    void SilentObserver::OnDrawSequenceBroken() {}
+    void SilentObserver::OnPoolReset(bool) {}
+    void SilentObserver::OnDrawStarted() {}
+    void SilentObserver::OnEmptyPoolDraw() {}
+    void SilentObserver::OnCivDrawn() {}
+    void SilentObserver::OnUndrawAccepted() {}
+    void SilentObserver::OnCivUndrawn() {}
+    void SilentObserver::OnCivRedrawn() {}
+    void SilentObserver::OnActionRejected() {}
+    void SilentObserver::OnLogLoaded(SaveType) {}
+    void SilentObserver::OnModelError(const std::wstring&, bool) {}
 
     CivPickerObserver& GetSilentObserver()
     {

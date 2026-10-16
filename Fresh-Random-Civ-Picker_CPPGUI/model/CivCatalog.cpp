@@ -77,83 +77,103 @@ namespace
 class DataReader final
 {
 public:
-    explicit DataReader(const JsonDocument& json) : document(json) {}
+    explicit DataReader(const JsonDocument& json);
 
-    const JsonDocument& Document() const { return document; }
-    bool Failed() const { return !problem.empty(); }
-    const std::wstring& Problem() const { return problem; }
-    void Enter(const std::wstring& where)
-    {
-        if (!c_assert(!where.empty())) return;
-        place = where;
-    }
-
-    void Fail(const std::wstring& what)
-    {
-        if (!c_assert(!what.empty())) return;
-        if (problem.empty()) problem = L"data.json: " + what;
-    }
-
-    // A member that must be there, of the given type; NONE (and a problem) otherwise.
-    int Required(int object, const char* key, JsonType type)
-    {
-        if (!c_assert(key != nullptr)) return JsonDocument::NONE;
-        const int value = document.Member(object, key);
-        if (document.Is(value, type)) return value;
-        Fail(place + L" needs \"" + Widen(key) + L"\" (" + TypeName(type) + L")");
-        return JsonDocument::NONE;
-    }
-
-    std::wstring TextOf(int string_value)
-    {
-        if (!document.Is(string_value, JsonType::string))
-        {
-            Fail(place + L" has a value that should be a text");
-            return L"";
-        }
-        const JsonDocument::TextResult text = document.Text(string_value);
-        if (!text.ok) Fail(place + L" has a text that is not valid UTF-8");
-        return text.text;
-    }
-
-    std::wstring Text(int object, const char* key)
-    {
-        if (!c_assert(key != nullptr)) return L"";
-        const int value = Required(object, key, JsonType::string);
-        return value != JsonDocument::NONE ? TextOf(value) : L"";
-    }
-
-    // A text member that may be missing or null.
-    std::wstring OptionalText(int object, const char* key)
-    {
-        if (!c_assert(key != nullptr)) return L"";
-        const int value = document.Member(object, key);
-        if (value == JsonDocument::NONE || document.IsNull(value)) return L"";
-        return TextOf(value);
-    }
-
-    int Integer(int object, const char* key)
-    {
-        if (!c_assert(key != nullptr)) return 0;
-        const int value = Required(object, key, JsonType::number);
-        if (value == JsonDocument::NONE) return 0;
-        const JsonDocument::IntegerResult number = document.Integer(value);
-        if (!number.ok) Fail(place + L"'s \"" + Widen(key) + L"\" is not a whole number");
-        return number.ok ? number.value : 0;
-    }
-
-    // A member that is either true or missing (false).
-    bool Flag(int object, const char* key) const
-    {
-        if (!c_assert(key != nullptr)) return false;
-        return document.IsTrue(document.Member(object, key));
-    }
+    const JsonDocument& Document() const;
+    bool Failed() const;
+    const std::wstring& Problem() const;
+    void Enter(const std::wstring& where);
+    void Fail(const std::wstring& what);
+    int Required(int object, const char* key, JsonType type);
+    std::wstring TextOf(int string_value);
+    std::wstring Text(int object, const char* key);
+    std::wstring OptionalText(int object, const char* key);
+    int Integer(int object, const char* key);
+    bool Flag(int object, const char* key) const;
 
 private:
     const JsonDocument& document;
     std::wstring problem;
     std::wstring place = L"the file";
 };
+
+DataReader::DataReader(const JsonDocument& json) :
+    document(json)
+{
+}
+
+const JsonDocument& DataReader::Document() const { return document; }
+
+bool DataReader::Failed() const { return !problem.empty(); }
+
+const std::wstring& DataReader::Problem() const { return problem; }
+
+void DataReader::Enter(const std::wstring& where)
+{
+    if (!c_assert(!where.empty())) return;
+    place = where;
+}
+
+void DataReader::Fail(const std::wstring& what)
+{
+    if (!c_assert(!what.empty())) return;
+    if (problem.empty()) problem = L"data.json: " + what;
+}
+
+// A member that must be there, of the given type; NONE (and a problem) otherwise.
+int DataReader::Required(int object, const char* key, JsonType type)
+{
+    if (!c_assert(key != nullptr)) return JsonDocument::NONE;
+    const int value = document.Member(object, key);
+    if (document.Is(value, type)) return value;
+    Fail(place + L" needs \"" + Widen(key) + L"\" (" + TypeName(type) + L")");
+    return JsonDocument::NONE;
+}
+
+std::wstring DataReader::TextOf(int string_value)
+{
+    if (!document.Is(string_value, JsonType::string))
+    {
+        Fail(place + L" has a value that should be a text");
+        return L"";
+    }
+    const JsonDocument::TextResult text = document.Text(string_value);
+    if (!text.ok) Fail(place + L" has a text that is not valid UTF-8");
+    return text.text;
+}
+
+std::wstring DataReader::Text(int object, const char* key)
+{
+    if (!c_assert(key != nullptr)) return L"";
+    const int value = Required(object, key, JsonType::string);
+    return value != JsonDocument::NONE ? TextOf(value) : L"";
+}
+
+// A text member that may be missing or null.
+std::wstring DataReader::OptionalText(int object, const char* key)
+{
+    if (!c_assert(key != nullptr)) return L"";
+    const int value = document.Member(object, key);
+    if (value == JsonDocument::NONE || document.IsNull(value)) return L"";
+    return TextOf(value);
+}
+
+int DataReader::Integer(int object, const char* key)
+{
+    if (!c_assert(key != nullptr)) return 0;
+    const int value = Required(object, key, JsonType::number);
+    if (value == JsonDocument::NONE) return 0;
+    const JsonDocument::IntegerResult number = document.Integer(value);
+    if (!number.ok) Fail(place + L"'s \"" + Widen(key) + L"\" is not a whole number");
+    return number.ok ? number.value : 0;
+}
+
+// A member that is either true or missing (false).
+bool DataReader::Flag(int object, const char* key) const
+{
+    if (!c_assert(key != nullptr)) return false;
+    return document.IsTrue(document.Member(object, key));
+}
 
 // --- Loading ---
 
