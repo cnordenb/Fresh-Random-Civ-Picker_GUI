@@ -16,6 +16,13 @@ namespace
     // .dlg-x { padding: 6.5px 14.5px }: the browser snaps the 17 px image to (15, 7).
     constexpr float CLOSE_IMAGE_LEFT = 15.0f;
     constexpr float CLOSE_IMAGE_TOP = 7.0f;
+    // kbd.key { border: 1px #b4b4b4; border-bottom-width: 2px; border-radius: 3px; padding: 0 4px }
+    constexpr float KEY_RADIUS = 3.0f;
+    constexpr float KEY_BORDER = 1.0f;
+    constexpr float KEY_BOTTOM_BORDER = 2.0f;
+    // A key button's cap leaves room around it for the dotted focus outline.
+    constexpr float KEY_FOCUS_MARGIN = 2.0f;
+    const wchar_t* const LISTENING_TEXT = L"\u2026";
 
     PixelRect WholeImage(PixelSize size)
     {
@@ -27,6 +34,20 @@ namespace
     {
         if (!c_assert(index >= 0) || !c_assert(cell_size > 0)) return { 0, 0, 0, 0 };
         return { index * cell_size, 0, (index + 1) * cell_size, cell_size };
+    }
+
+    bool IsHeld(int key) { return GetKeyState(key) < 0; }
+
+    // A modifier pressed on its own is held for the key that follows.
+    bool IsModifierKey(WPARAM key)
+    {
+        const WPARAM modifier_keys[] = { VK_SHIFT, VK_CONTROL, VK_MENU, VK_LSHIFT, VK_RSHIFT, VK_LCONTROL,
+                                         VK_RCONTROL, VK_LMENU, VK_RMENU, VK_LWIN, VK_RWIN };
+        for (WPARAM modifier : modifier_keys)
+        {
+            if (key == modifier) return true;
+        }
+        return false;
     }
 }
 
@@ -136,3 +157,92 @@ void LinkButton::Paint(ParchmentRenderer& renderer, const FloatRect& bounds)
 }
 
 bool LinkButton::ShowsFocus() const { return false; }
+
+void PaintKeyCap(ParchmentRenderer& renderer, const KeyCap& cap)
+{
+    if (!c_assert(HasArea(cap.box))) return;
+    const FloatRect& box = cap.box;
+    renderer.FillRoundedRect(box, KEY_RADIUS, KEY_BORDER_COLOUR);
+    renderer.FillRoundedRect({ box.left + KEY_BORDER, box.top + KEY_BORDER, box.right - KEY_BORDER,
+                               box.bottom - KEY_BOTTOM_BORDER },
+                             KEY_RADIUS - KEY_BORDER, cap.face);
+    const float baseline = renderer.BaselineInLine(FontId::key, box.top + KEY_BORDER, KEY_LINE_HEIGHT);
+    renderer.DrawText({ cap.name, TOOLTIP_TEXT_COLOUR, box.left, box.right, baseline, TextAlign::centre });
+}
+
+// Gold while listening or under the pointer.
+void KeyButton::Paint(ParchmentRenderer& renderer, const FloatRect& bounds)
+{
+    if (!c_assert(HasArea(bounds))) return;
+    const Look look = CurrentLook();
+    const FloatRect cap = { bounds.left + KEY_FOCUS_MARGIN, bounds.top + KEY_FOCUS_MARGIN,
+                            bounds.right - KEY_FOCUS_MARGIN, bounds.bottom - KEY_FOCUS_MARGIN };
+    const TextSpan name = listening ? TextSpan{ LISTENING_TEXT, 1, FontId::key } : Text(FontId::key);
+    const bool gold = listening || look.hot || look.pressed;
+    PaintKeyCap(renderer, { cap, name, gold ? HOVER_GOLD_COLOUR : KEY_COLOUR });
+    if (look.focused && !listening) renderer.DrawDottedFrame(bounds, FOCUS_COLOUR);
+}
+
+void KeyButton::OnClicked()
+{
+    listening = !listening;
+    Notify(listening ? KEY_LISTENING : KEY_KEPT);
+}
+
+bool KeyButton::NotifiesClicks() const { return false; }
+
+// While listening it takes every key, Tab, Enter and Esc too, which a dialog would use itself.
+LRESULT KeyButton::DialogCode() const
+{
+    return listening ? DLGC_WANTALLKEYS | DLGC_WANTCHARS : DLGC_BUTTON | DLGC_UNDEFPUSHBUTTON;
+}
+
+bool KeyButton::OnKeyPressed(WPARAM key)
+{
+    if (!listening) return false;
+    if (!IsModifierKey(key)) Choose(key);
+    return true;
+}
+
+// Alt and F10 arrive as system keys; while listening, they and the characters keys make go no further.
+LRESULT KeyButton::OnOtherMessage(UINT message, WPARAM wParam, LPARAM lParam)
+{
+    if (message == GET_KEYSTROKE) return chosen;
+    if (message == STOP_LISTENING)
+    {
+        listening = false;
+        Redraw();
+        return 0;
+    }
+    const bool key_message = message == WM_SYSKEYDOWN || message == WM_SYSKEYUP || message == WM_CHAR ||
+                             message == WM_SYSCHAR;
+    if (!listening || !key_message) return ParchmentControl::OnOtherMessage(message, wParam, lParam);
+    if (message == WM_SYSKEYDOWN && !IsModifierKey(wParam)) Choose(wParam);
+    return 0;
+}
+
+void KeyButton::OnFocusLost()
+{
+    if (!listening) return;
+    listening = false;
+    Notify(KEY_KEPT);
+}
+
+void KeyButton::Choose(WPARAM key)
+{
+    if (!c_assert(listening) || !c_assert(key > 0 && key <= 0xFE)) return;
+    const UINT modifiers = (IsHeld(VK_CONTROL) ? MOD_CONTROL : 0) | (IsHeld(VK_MENU) ? MOD_ALT : 0) |
+                           (IsHeld(VK_SHIFT) ? MOD_SHIFT : 0);
+    chosen = MAKELRESULT(static_cast<WORD>(key), static_cast<WORD>(modifiers));
+    listening = false;
+    Redraw();
+    Notify(KEY_CHOSEN);
+}
+
+// Posted, so the parent hears of it once this control's message is handled and can change the control then.
+void KeyButton::Notify(WORD notification) const
+{
+    const int control_id = GetDlgCtrlID(Window());
+    if (!c_assert(control_id != 0)) return;
+    NotifyParentLater(WM_COMMAND, MAKEWPARAM(control_id, notification));
+}

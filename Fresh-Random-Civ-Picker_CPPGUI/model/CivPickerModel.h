@@ -7,6 +7,7 @@
 
 #include "CivCatalog.h"
 #include "GlobalConstants.h"
+#include "HotkeyBindings.h"
 #include "ShareLink.h"
 
 // MODEL of the Model-View-Controller design (HFDP ch. 12).
@@ -93,6 +94,8 @@ public:
     void SetStartingUp(bool starting_up);
     const Settings& GetSettings() const;
     Settings& EditSettings();
+    const HotkeyBindings& GetHotkeys() const;
+    HotkeyBindings& EditHotkeys();
 
     const Civ& GetCiv(int civ_index) const;
     const Civ& GetCiv(const std::wstring& civ_name) const;
@@ -186,6 +189,7 @@ private:
     std::unordered_map<std::wstring, int> civ_name_to_index;
     CivPickerObserver* observer;
     Settings settings;
+    HotkeyBindings hotkeys;
 
     std::wstring civ_list[MAX_CIVS];
     bool available_civs[MAX_CIVS] = {};

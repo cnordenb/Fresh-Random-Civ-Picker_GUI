@@ -94,3 +94,46 @@ private:
     void Paint(ParchmentRenderer& renderer, const FloatRect& bounds) override;
     bool ShowsFocus() const override;
 };
+
+// A key as the Hotkeys dialogs show it (kbd.key): a small rounded box in its face colour with the key's name.
+struct KeyCap
+{
+    FloatRect box;
+    TextSpan name;
+    Colour face;
+};
+
+void PaintKeyCap(ParchmentRenderer& renderer, const KeyCap& cap);
+
+// A key of the Customise Hotkeys dialog, which a click sets listening: it shows an ellipsis on gold and takes every
+// key, and the first one pressed that isn't a modifier, with the modifiers held, is the one it chose. Another click,
+// or the focus leaving, stops it listening. It tells its parent with WM_COMMAND, posted, as KEY_LISTENING (the
+// parent gives it the focus), KEY_CHOSEN and KEY_KEPT; GET_KEYSTROKE answers the chosen key as MAKELRESULT(key,
+// modifiers), with Windows' virtual-key code and MOD_ALT, MOD_CONTROL and MOD_SHIFT, and STOP_LISTENING stops it
+// listening without a word. Its text is the key's name.
+class KeyButton final : public ParchmentControl
+{
+public:
+    // Notifications of its own, apart from the BN_, EN_ and CBN_ codes.
+    static constexpr WORD KEY_LISTENING = 0x4B01;
+    static constexpr WORD KEY_CHOSEN = 0x4B02;
+    static constexpr WORD KEY_KEPT = 0x4B03;
+    static constexpr UINT GET_KEYSTROKE = WM_USER + 0x100;
+    static constexpr UINT STOP_LISTENING = WM_USER + 0x101;
+
+    KeyButton() = default;
+
+private:
+    void Paint(ParchmentRenderer& renderer, const FloatRect& bounds) override;
+    void OnClicked() override;
+    bool NotifiesClicks() const override;
+    LRESULT DialogCode() const override;
+    bool OnKeyPressed(WPARAM key) override;
+    LRESULT OnOtherMessage(UINT message, WPARAM wParam, LPARAM lParam) override;
+    void OnFocusLost() override;
+    void Choose(WPARAM key);
+    void Notify(WORD notification) const;
+
+    bool listening = false;
+    LRESULT chosen = 0;
+};

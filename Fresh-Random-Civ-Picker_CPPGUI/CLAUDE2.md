@@ -21,7 +21,7 @@ Source tags: `P10-n` = P10 rule n. `CCn` = CC chapter n. `CC-G5`, `CC-N3`, `CC-T
 
 This file holds the rules. Their history is in `CLAUDE2_LOG.md` beside it: the state of the code, how each
 change was built and verified, the decisions taken and the questions still open for the user (sections 8, 9,
-10.2 to 10.4, 11 to 13, 14.5 and 16). The two files share one numbering, so a reference such as "I2" or
+10.2 to 10.4, 11 to 13, 14.5, 16 and 17). The two files share one numbering, so a reference such as "I2" or
 "question 13.1.6" means the same in either. They were one file until 2026-10-16, when the user's limit of
 1000 lines per file (section 15) split them.
 
@@ -594,9 +594,9 @@ Win32/P10 application:
 - [ ] Design principles respected; patterns only where they solve a present problem (HF).
 - [ ] Model/View/Controller separation respected (section 6).
 - [ ] Editions, DLCs and civs come from data.json only; no name, ID, count, list or layout of
+      theirs in code, resources, project files or tests (section 10).
 - [ ] No file is over 1000 lines, and no folder holds over 20 files besides the asset folders
       (section 15).
-      theirs in code, resources, project files or tests (section 10).
 - [ ] The GSFC rules of section 14.2 hold.
 - [ ] Boy Scout: the code I touched is a little cleaner than before.
 
@@ -841,7 +841,7 @@ is in folders by its role in MVC (section 6), the Parchment components by what t
 | Folder | What it holds | Includes from |
 |--------|---------------|---------------|
 | `common\` | `Assertions`, `CivDataLimits.h`, `GlobalConstants.h`: what every part uses | the root |
-| `model\` | `CivCatalog`, `JsonReader`, `CivPickerModel`, `ShareLink`: plain C++, unit-tested | common |
+| `model\` | `CivCatalog`, `JsonReader`, `CivPickerModel`, `HotkeyBindings`, `ShareLink`: plain C++, unit-tested | common |
 | `controller\` | `CivPickerController*.cpp` | model, view, common |
 | `view\` | `CivPickerView*.cpp`, `CivPickerLayout.h`, `DialogMetrics.h` | model, controller, parchment, common |
 | `parchment\graphics\` | the renderer, images, fonts, layout arithmetic, theme, `PixelSurface` | common |

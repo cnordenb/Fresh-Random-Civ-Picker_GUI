@@ -25,7 +25,8 @@ struct MenuSpec
 // The menu bar of the parchment theme (View): the web version's titles (.menubar) and their dark brown lists with
 // gold highlights (.menu-list). It replaces the window menu and keeps its keyboard use: Alt with a title's
 // letter or F10 opens a menu, the arrow keys move through the menus and items, Enter chooses and Esc closes.
-// A chosen item is posted to the parent as WM_COMMAND with its command ID, as a window menu does.
+// A chosen item is posted to the parent as WM_COMMAND with its command ID, as a window menu does. The items'
+// texts may change while the bar lives (the hotkeys' keys), after which Remeasure fits the lists to them.
 class ParchmentMenuBar final
 {
 public:
@@ -47,6 +48,7 @@ public:
     void Close();
     bool HandleKey(const MSG& message);
     bool ChooseHighlighted();
+    bool Remeasure();
 
 private:
     struct TitleLayout

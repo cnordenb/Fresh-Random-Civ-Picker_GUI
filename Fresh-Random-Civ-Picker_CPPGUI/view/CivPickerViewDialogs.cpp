@@ -42,6 +42,7 @@ namespace
         { PartKind::radio, IDC_RADIO_LOGGING, { 38, 265, 230, 287 }, L"Automatic civ pool logging" },
         { PartKind::radio, IDC_RADIO_STARTRESET, { 38, 287, 230, 309 }, L"Reset civ pool on startup" },
         { PartKind::button, IDC_BUTTON_HOTKEYS, { 262, 243, 358, 266 }, L"Show Hotkeys" },
+        { PartKind::button, IDC_BUTTON_CUSTOMISEHOTKEYS, { 366, 243, 462, 266 }, L"Customise" },
         { PartKind::default_button, IDOK, { 614, 351, 689, 374 }, L"OK" },
     };
 
@@ -91,46 +92,6 @@ namespace
                                         LOBBY_DECORATIONS, CountOf(LOBBY_DECORATIONS), nullptr, 0, IDC_BUTTON_OK };
     const DialogLayout HISTORY_LAYOUT = { L"History", { 600, 509 }, HISTORY_PARTS, CountOf(HISTORY_PARTS),
                                           HISTORY_DECORATIONS, CountOf(HISTORY_DECORATIONS), nullptr, 0, IDOK };
-
-    // --- Hotkeys (#dlgHotkeys): sections of keys and what they do, the global ones in two columns ---
-
-    using HotkeyItem = CivPickerView::HotkeyItem;
-
-    const HotkeyItem GLOBAL_HOTKEYS[] = {
-        { L"Tab", L"Cycle tabs" },           { L"1", L"Go to Draw Civ tab" },     { L"2", L"Go to Log tab" },
-        { L"3", L"Go to Civ Pool tab" },     { L"F1", L"Open Options" },          { L"F2", L"Open Hotkeys" },
-        { L"F3", L"Open About" },            { L"F4", L"Open Tech Tree" },        { L"F5", L"Quicksave" },
-        { L"F9", L"Quickload" },             { L"Ctrl+S", L"Save preset" },       { L"Ctrl+R", L"Load preset" },
-        { L"P", L"Copy share link" },        { L"U", L"Open a share link" },
-        { L"Ctrl+F", L"Join Lobby" },        { L"Ctrl+Z", L"Undo a draw or reset" }, { L"Ctrl+X", L"Redraw" },
-        { L"Ctrl+T", L"Open Sustainability App" }, { L"Z", L"Toggle civ name" },  { L"X", L"Toggle civ icon" },
-        { L"C", L"Toggle round counter" },   { L"V", L"Toggle civ jingles" },     { L"B", L"Toggle UI sounds" },
-        { L"Esc", L"Exit" },
-    };
-    const HotkeyItem DRAW_TAB_HOTKEYS[] = {
-        { L"Space", L"Draw civ" },    { L"Enter", L"Reset drawn civs" },           { L"Q", L"Open Options" },
-        { L"R", L"Open Sustainability App" }, { L"T", L"Open Tech Tree" },        { L"H", L"Open History" },
-    };
-    const HotkeyItem LOG_TAB_HOTKEYS[] = {
-        { L"Space", L"Draw civ" },
-        { L"Enter", L"Reset drawn civs" },
-        { L"Q", L"Clear drawn log" },
-        { L"W", L"Toggle remaining log" },
-    };
-
-    // .hk-grid: columns 28 px apart, headings (h3) 4 px above their list, list items 21 px high (line-height 1.75)
-    // with their keys 2 px below the item's top, and sections 12 px apart.
-    constexpr float HOTKEY_COLUMN_GAP = 28.0f;
-    constexpr float HOTKEY_ITEM_HEIGHT = 21.0f;
-    constexpr float HOTKEY_LIST_GAP = 4.0f;
-    constexpr float HOTKEY_SECTION_GAP = 12.0f;
-    constexpr float KEY_TOP_IN_ITEM = 2.0f;
-    constexpr float KEY_HEIGHT = 18.390625f;
-    constexpr float KEY_MIN_WIDTH = 20.0f;
-    constexpr float KEY_PADDING = 10.0f; // padding 0 4px plus the 1 px borders
-    constexpr float ITEM_TEXT_DROP = 2.1f; // a 16.8 px text line centred in the 21 px item
-    constexpr int GLOBAL_ROWS = 12;
-    constexpr int MAX_HOTKEY_ITEMS = 32; // the longest hotkey list, the global one, has 24
 
     // Non-ASCII characters are written as \u escapes: without a byte order mark, MSVC reads a source file in the
     // system code page.
@@ -255,149 +216,7 @@ CivPickerView::FileChoice CivPickerView::AskOpenFilePath(const std::wstring& ini
 // ---------------------------------------------------------------------------------------------------
 // Layouts made from measured text (at startup, except a message's)
 
-bool CivPickerView::BuildDialogLayouts() { return BuildHotkeysLayout() && BuildAboutLayout(); }
-
-float CivPickerView::KeyWidth(const wchar_t* key)
-{
-    if (!c_assert(key != nullptr)) return KEY_MIN_WIDTH;
-    const float text = renderer.MeasureText({ key, TextLength(key), FontId::key });
-    return std::max(text + KEY_PADDING, KEY_MIN_WIDTH);
-}
-
-float CivPickerView::HotkeyItemWidth(const HotkeyItemSpan& items)
-{
-    const HotkeyItem* list = items.items;
-    if (!c_assert(list != nullptr) || !c_assert(items.count > 0 && items.count <= MAX_HOTKEY_ITEMS)) return 0.0f;
-    float widest = 0.0f;
-    const float space = renderer.MeasureText({ L" ", 1, FontId::ui });
-    for (int i = 0; i < items.count && i < MAX_HOTKEY_ITEMS; i++)
-    {
-        const float width = KeyWidth(list[i].key) + space +
-                            renderer.MeasureText({ list[i].text, TextLength(list[i].text), FontId::ui });
-        if (width > widest) widest = width;
-    }
-    return widest;
-}
-
-// Adds a heading and its list of keys at a column's place; returns where the next section can start.
-float CivPickerView::AddHotkeySection(const HotkeySection& section)
-{
-    const HotkeyItem* items = section.items.items;
-    if (!c_assert(items != nullptr && section.rows > 0)) return section.top;
-    if (!c_assert(section.items.count > 0 && section.items.count <= MAX_HOTKEY_ITEMS)) return section.top;
-    const float space = renderer.MeasureText({ L" ", 1, FontId::ui });
-    AddHotkeyDecoration({ DecorationKind::bold_text,
-                          { Rounded(section.left), Rounded(section.top), Rounded(section.left + section.column_width),
-                            Rounded(section.top + DIALOG_LINE_HEIGHT) },
-                          section.title });
-    const float list_top = section.top + DIALOG_LINE_HEIGHT + HOTKEY_LIST_GAP;
-    for (int i = 0; i < section.items.count && i < MAX_HOTKEY_ITEMS; i++)
-    {
-        const int column = i / section.rows;
-        const float left = section.left + static_cast<float>(column) * (section.column_width + HOTKEY_COLUMN_GAP);
-        const float top = list_top + static_cast<float>(i % section.rows) * HOTKEY_ITEM_HEIGHT;
-        const float key_right = left + KeyWidth(items[i].key);
-        AddHotkeyDecoration({ DecorationKind::key,
-                              { Rounded(left), Rounded(top + KEY_TOP_IN_ITEM), Rounded(key_right),
-                                Rounded(top + KEY_TOP_IN_ITEM + KEY_HEIGHT) },
-                              items[i].key });
-        const int text_left = Rounded(key_right + space);
-        AddHotkeyDecoration({ DecorationKind::text,
-                              { text_left, Rounded(top + ITEM_TEXT_DROP), text_left + Rounded(section.column_width),
-                                Rounded(top + ITEM_TEXT_DROP + DIALOG_LINE_HEIGHT) },
-                              items[i].text });
-    }
-    const int rows_used = std::min(section.items.count, section.rows);
-    return list_top + static_cast<float>(rows_used) * HOTKEY_ITEM_HEIGHT;
-}
-
-void CivPickerView::AddHotkeyDecoration(const DialogDecoration& decoration)
-{
-    if (!c_assert(hotkey_decoration_count < MAX_HOTKEY_DECORATIONS) || !c_assert(decoration.text != nullptr)) return;
-    hotkey_decorations[hotkey_decoration_count] = decoration;
-    hotkey_decoration_count++;
-}
-
-bool CivPickerView::BuildHotkeysLayout()
-{
-    if (!BuildPoolHotkeys()) return false;
-    hotkey_decoration_count = 0;
-    AddHotkeyDecoration({ DecorationKind::hint, { BODY_LEFT, BODY_TOP, 800, BODY_TOP + 17 },
-                          L"Hotkeys work while the Fresh Random Civ Picker window is active." });
-    const float grid_top = BODY_TOP + DIALOG_LINE_HEIGHT + PARAGRAPH_GAP;
-    const float global_column = HotkeyItemWidth({ GLOBAL_HOTKEYS, CountOf(GLOBAL_HOTKEYS) });
-    const float tab_column = std::max(HotkeyItemWidth({ DRAW_TAB_HOTKEYS, CountOf(DRAW_TAB_HOTKEYS) }),
-                                      HotkeyItemWidth({ LOG_TAB_HOTKEYS, CountOf(LOG_TAB_HOTKEYS) }));
-    const float pool_column = HotkeyItemWidth({ pool_hotkeys, pool_hotkey_count });
-    const float tab_left = BODY_LEFT + 2.0f * global_column + 2.0f * HOTKEY_COLUMN_GAP;
-    const float pool_left = tab_left + tab_column + HOTKEY_COLUMN_GAP;
-
-    const float global_bottom = AddHotkeySection({ L"Global", { GLOBAL_HOTKEYS, CountOf(GLOBAL_HOTKEYS) },
-                                                   BODY_LEFT, grid_top, global_column, GLOBAL_ROWS });
-    const float draw_bottom = AddHotkeySection({ L"Draw Civ tab", { DRAW_TAB_HOTKEYS, CountOf(DRAW_TAB_HOTKEYS) },
-                                                 tab_left, grid_top, tab_column, CountOf(DRAW_TAB_HOTKEYS) });
-    const float log_bottom = AddHotkeySection({ L"Log tab", { LOG_TAB_HOTKEYS, CountOf(LOG_TAB_HOTKEYS) }, tab_left,
-                                                draw_bottom + HOTKEY_SECTION_GAP, tab_column,
-                                                CountOf(LOG_TAB_HOTKEYS) });
-    const float pool_bottom = AddHotkeySection({ L"Civ Pool tab", { pool_hotkeys, pool_hotkey_count }, pool_left,
-                                                 grid_top, pool_column, pool_hotkey_count });
-    float grid_bottom = std::max(global_bottom, log_bottom);
-    if (pool_bottom > grid_bottom) grid_bottom = pool_bottom;
-
-    const int width = Rounded(pool_left + pool_column) + BUTTON_ROW_PADDING + PANEL_PADDING;
-    const PixelSize size = { width, HeightBelowBody(grid_bottom - PARAGRAPH_GAP) };
-    hotkeys_parts[0] = { PartKind::default_button, IDOK, BottomRightButton(size), L"OK" };
-    hotkeys_layout = { L"Hotkeys", size, hotkeys_parts, 1, hotkey_decorations, hotkey_decoration_count, nullptr, 0,
-                       IDOK };
-    return c_assert(size.width <= ParchmentDialogs::MAX_DIALOG_WIDTH &&
-                    size.height <= ParchmentDialogs::MAX_DIALOG_HEIGHT);
-}
-
-// The Civ Pool tab's keys: the fixed ones, one for each edition, and one for each of the first places in the
-// editions' lists of DLC toggles, which toggles the DLCs in that place (the web version's dlcSlotText).
-bool CivPickerView::BuildPoolHotkeys()
-{
-    const CivCatalog& catalog = model.Catalog();
-    pool_hotkey_count = 0;
-    AddPoolHotkey(L"Space", L"Enable all civs");
-    AddPoolHotkey(L"Enter", L"Disable all civs");
-    for (int edition = 0; edition < catalog.EditionCount() && edition < MAX_EDITIONS; edition++)
-        AddPoolHotkey(EDITION_HOTKEY_KEYS[edition], catalog.EditionAt(edition).short_name);
-    AddPoolHotkey(L"R", L"Auto-toggle older civs");
-    AddPoolHotkey(L"T", L"Auto-reset on change");
-    for (int slot = 0; slot < DLC_HOTKEY_COUNT; slot++)
-    {
-        const std::wstring names = DlcSlotNames(slot);
-        if (!names.empty()) AddPoolHotkey(DLC_SLOT_HOTKEY_KEYS[slot], L"Toggle " + names);
-    }
-    return c_assert(pool_hotkey_count > 0 && pool_hotkey_count <= MAX_POOL_HOTKEYS);
-}
-
-void CivPickerView::AddPoolHotkey(const wchar_t* key, const std::wstring& text)
-{
-    if (!c_assert(key != nullptr) || !c_assert(pool_hotkey_count < MAX_POOL_HOTKEYS)) return;
-    // A text longer than its buffer is cut short, which still shows its start.
-    (void)wcsncpy_s(pool_hotkey_texts[pool_hotkey_count], text.c_str(), _TRUNCATE);
-    pool_hotkeys[pool_hotkey_count] = { key, pool_hotkey_texts[pool_hotkey_count] };
-    pool_hotkey_count++;
-}
-
-// The short names of the DLCs whose toggles are in this place in their edition's list, joined by slashes.
-std::wstring CivPickerView::DlcSlotNames(int slot) const
-{
-    if (!c_assert(slot >= 0 && slot < MAX_DLC_TOGGLES)) return L"";
-    const CivCatalog& catalog = model.Catalog();
-    std::wstring names;
-    for (int edition = 0; edition < catalog.EditionCount() && edition < MAX_EDITIONS; edition++)
-    {
-        const EditionInfo& info = catalog.EditionAt(edition);
-        if (slot >= info.dlc_toggle_count) continue;
-        const DlcInfo& dlc = catalog.DlcAt(info.dlc_toggles[slot]);
-        if (!names.empty()) names += L" / ";
-        names += dlc.short_name.empty() ? dlc.name : dlc.short_name;
-    }
-    return names;
-}
+bool CivPickerView::BuildDialogLayouts() { return BuildHotkeyLayouts() && BuildAboutLayout(); }
 
 // The height of a dialog paragraph wrapped at width: its lines at the dialog's line height.
 float CivPickerView::ParagraphHeight(const wchar_t* text, float width)

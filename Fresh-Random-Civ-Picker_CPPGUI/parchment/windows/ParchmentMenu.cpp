@@ -422,6 +422,14 @@ bool ParchmentMenuBar::OpenByMnemonic(wchar_t letter)
     return false;
 }
 
+// Lays the lists out again for their items' texts as they are now; an open menu closes first.
+bool ParchmentMenuBar::Remeasure()
+{
+    if (!c_assert(window != NULL)) return false;
+    Close();
+    return LayOut();
+}
+
 bool ParchmentMenuBar::ChooseHighlighted()
 {
     if (!IsOpen()) return false;

@@ -19,11 +19,13 @@ public:
 
     void OnMainWindowCreated(HWND window);
     void OnActivate(WPARAM activation);
-    void OnHotkey(WPARAM hotkey_id);
+    void OnHotkey(Keystroke keystroke);
     bool OnCommand(int command_id);
     void OnTabSelected(int tab_index);
     bool OnOptionsCommand(HWND dialog, const CivPickerView::OptionsEvent& options_event);
     void OnFreshnessChanged(int civs);
+    void OnKeyChosen(HWND editor, HotkeyAction action, Keystroke keystroke);
+    void OnDefaultKeysChosen(HWND editor);
     void OpenAuthorPage();
     void Quit();
     void OnFatalError();
@@ -37,6 +39,8 @@ private:
     void LoadSettings();
     void SaveSettings();
     void WriteSetting(const wchar_t* key, bool enabled) const;
+    void LoadHotkeys();
+    void SaveHotkeys() const;
     std::wstring SavesFolder() const;
     std::wstring QuicksavePath() const;
     bool FileExists(const std::wstring& path) const;
@@ -46,16 +50,18 @@ private:
     void ShowTab(int tab_index);
     void SelectTab(int tab_index);
 
-    void HandleGlobalHotkey(WPARAM hotkey_id);
-    void HandleDrawTabHotkey(WPARAM hotkey_id);
-    void HandleDrawingHotkey(WPARAM hotkey_id);
-    void DrawCivWithinRateCap();
-    void HandleCivPoolHotkey(WPARAM hotkey_id);
-    void HandleEditionHotkey(WPARAM hotkey_id);
-    void HandleDlcHotkey(WPARAM hotkey_id);
-    void HandleLogTabHotkey(WPARAM hotkey_id);
-    void HandleTabHotkey(WPARAM hotkey_id);
-    void HandleDisplayToggleHotkey(WPARAM hotkey_id);
+    HotkeyScope ShownTabScope() const;
+    void RunHotkey(HotkeyAction action);
+    void RunGlobalHotkey(HotkeyAction action);
+    void CycleTabs();
+    void ToggleDisplaySetting(HotkeyAction action);
+    void RunDrawTabHotkey(HotkeyAction action);
+    void RunLogTabHotkey(HotkeyAction action);
+    void RunCivPoolHotkey(HotkeyAction action);
+    void SelectEditionByPlace(int edition);
+    void ToggleDlcBySlot(int slot);
+    void CustomiseHotkeys(HWND owner);
+    bool IsAnotherProgramsHotkey(Keystroke keystroke) const;
 
     bool IsPoolControl(int command_id) const;
     void HandleCivCheckbox(int command_id);
@@ -65,6 +71,7 @@ private:
     bool OpenEditionLink(int command_id);
     bool HandleMenuCommand(int command_id);
     bool HandleButtonCommand(int command_id);
+    void DrawCivWithinRateCap();
     void OpenEditionPage();
 
     void PlayComboFeedback(int notification);

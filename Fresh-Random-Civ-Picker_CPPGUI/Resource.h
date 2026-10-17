@@ -71,6 +71,7 @@
 #define IDC_SHARE_ROUND                 1035
 #define IDC_COPY_POOL                   1036
 #define IDC_COPY_ROUND                  1037
+#define IDC_BUTTON_CUSTOMISEHOTKEYS     1038
 #define IDC_CHECKBOX_AUTORESET			7750
 #define IDC_CHECKBOX_AUTOTOGGLE			7764
 

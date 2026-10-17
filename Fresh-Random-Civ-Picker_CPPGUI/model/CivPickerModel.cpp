@@ -78,6 +78,15 @@ namespace
         }
         return INVALID_INDEX;
     }
+
+    // The most DLC toggles an edition has, which is how many DLC slots on the Civ Pool tab have a use.
+    int MostDlcToggles(const CivCatalog& catalog)
+    {
+        int most = 0;
+        for (int edition = 0; edition < catalog.EditionCount() && edition < MAX_EDITIONS; edition++)
+            most = std::max(most, catalog.EditionAt(edition).dlc_toggle_count);
+        return most;
+    }
 }
 
 CivPickerModel::CivPickerModel(const CivCatalog& civ_catalog) :
@@ -85,6 +94,7 @@ CivPickerModel::CivPickerModel(const CivCatalog& civ_catalog) :
     civ_count(civ_catalog.CivCount()),
     random(RANDOM_CIV),
     observer(&GetSilentObserver()),
+    hotkeys(civ_catalog.EditionCount(), MostDlcToggles(civ_catalog)),
     current_civ(L"Random"),
     iterator(0),
     remaining(static_cast<uint8_t>(civ_catalog.CivCount())),
@@ -138,6 +148,10 @@ void CivPickerModel::SetStartingUp(bool starting_up) { startup = starting_up; }
 const Settings& CivPickerModel::GetSettings() const { return settings; }
 
 Settings& CivPickerModel::EditSettings() { return settings; }
+
+const HotkeyBindings& CivPickerModel::GetHotkeys() const { return hotkeys; }
+
+HotkeyBindings& CivPickerModel::EditHotkeys() { return hotkeys; }
 
 const Civ& CivPickerModel::GetCiv(int civ_index) const
 {

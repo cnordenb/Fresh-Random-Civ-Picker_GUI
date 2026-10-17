@@ -72,11 +72,13 @@ protected:
     virtual LRESULT OnOtherMessage(UINT message, WPARAM wParam, LPARAM lParam);
     virtual bool NotifiesClicks() const;
     virtual bool OnKeyPressed(WPARAM key);
+    virtual void OnFocusLost();
 
     Look CurrentLook() const;
     TextSpan Text(FontId font) const;
     void Check(bool checked);
     void NotifyParent(UINT message, WPARAM wParam) const;
+    void NotifyParentLater(UINT message, WPARAM wParam) const;
     bool IsPressed() const;
 
 private:
@@ -122,6 +124,7 @@ private:
     void OnCaptureLost();
     LRESULT OnSetCursor(WPARAM wParam, LPARAM lParam);
     LRESULT OnSetText(WPARAM wParam, LPARAM lParam);
+    void OnKillFocus();
     void OnKey(UINT message, WPARAM key);
     void Click();
     void ForwardMouseMove(WPARAM wParam, LPARAM lParam) const;

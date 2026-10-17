@@ -277,15 +277,18 @@ void CivPickerView::UpdateEnabledCivsCounter()
 
 void CivPickerView::UpdateTooltips(bool drawn)
 {
+    const std::wstring tech_tree_line =
+        DrawTabHotkeyLine(HotkeyAction::draw_tab_open_tech_tree, HotkeyAction::open_tech_tree);
+    const std::wstring history_line = HotkeyLine(HotkeyAction::open_history);
     if (drawn)
     {
         const std::wstring& current_civ = model.GetCurrentCiv();
-        UpdateTooltipText(TOOLTIP_TECHTREE, L"Opens the tech tree for the " + current_civ + TECHTREE_HOTKEY_LINE);
-        UpdateTooltipText(TOOLTIP_HISTORY, L"Opens the game's history info for the " + current_civ + L"\nHotkey: H");
+        UpdateTooltipText(TOOLTIP_TECHTREE, L"Opens the tech tree for the " + current_civ + tech_tree_line);
+        UpdateTooltipText(TOOLTIP_HISTORY, L"Opens the game's history info for the " + current_civ + history_line);
         return;
     }
-    UpdateTooltipText(TOOLTIP_TECHTREE, std::wstring(L"Opens the tech tree") + TECHTREE_HOTKEY_LINE);
-    UpdateTooltipText(TOOLTIP_HISTORY, L"Opens the game's history info\nHotkey: H");
+    UpdateTooltipText(TOOLTIP_TECHTREE, L"Opens the tech tree" + tech_tree_line);
+    UpdateTooltipText(TOOLTIP_HISTORY, L"Opens the game's history info" + history_line);
 }
 
 // Changes a tooltip's text; a tooltip on show changes with it, as the web version's does.

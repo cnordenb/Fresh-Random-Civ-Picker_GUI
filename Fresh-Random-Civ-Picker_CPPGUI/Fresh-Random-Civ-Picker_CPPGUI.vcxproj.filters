@@ -92,6 +92,15 @@
     <ClCompile Include="controller\CivPickerControllerInput.cpp">
       <Filter>controller</Filter>
     </ClCompile>
+    <ClCompile Include="controller\CivPickerControllerHotkeys.cpp">
+      <Filter>controller</Filter>
+    </ClCompile>
+    <ClCompile Include="view\CivPickerViewHotkeys.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="model\HotkeyBindings.cpp">
+      <Filter>model</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
@@ -167,6 +176,9 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="model\ShareLink.h">
+      <Filter>model</Filter>
+    </ClInclude>
+    <ClInclude Include="model\HotkeyBindings.h">
       <Filter>model</Filter>
     </ClInclude>
     <ClInclude Include="parchment\windows\ParchmentToast.h">

@@ -12,7 +12,7 @@
 enum class PartKind
 {
     checkbox, radio, button, default_button, label, error_label, slider, dropdown, text_field, readonly_field, log,
-    picture
+    picture, key_button
 };
 
 struct DialogPart
@@ -66,6 +66,7 @@ public:
     // The largest dialogs are Hotkeys (882 wide) and History (509 tall); their layouts check they fit.
     static constexpr int MAX_DIALOG_WIDTH = 900;
     static constexpr int MAX_DIALOG_HEIGHT = 560;
+    static constexpr int MAX_KEY_BUTTONS = 24; // the Customise Hotkeys dialog's, for the 24 global hotkeys
     static constexpr int SHADOW_MARGIN = 48; // room for the panel's drop shadow around a dialog
 
     struct Setup
@@ -110,7 +111,7 @@ public:
 private:
     static constexpr int MAX_BUTTONS = 6;
     static constexpr int MAX_CHECKBOXES = 12;
-    static constexpr int MAX_LABELS = 16;
+    static constexpr int MAX_LABELS = 32;
     static constexpr int MAX_LINKS = 4;
 
     struct Level
@@ -127,6 +128,7 @@ private:
         Checkbox checkboxes[MAX_CHECKBOXES];
         Label labels[MAX_LABELS];
         LinkButton links[MAX_LINKS];
+        KeyButton key_buttons[MAX_KEY_BUTTONS];
         SliderControl slider;
         ParchmentLog log;
         PictureButton picture;
@@ -135,6 +137,7 @@ private:
         int checkbox_count;
         int label_count;
         int link_count;
+        int key_button_count;
     };
 
     struct LineDraw
@@ -168,6 +171,7 @@ private:
     bool CreateButtonPart(Level& level, const DialogPart& part);
     bool CreateCheckboxPart(Level& level, const DialogPart& part);
     bool CreateLabelPart(Level& level, const DialogPart& part);
+    bool CreateKeyButtonPart(Level& level, const DialogPart& part);
     bool CreateWindowPart(Level& level, const DialogPart& part);
     bool CreateLinks(Level& level);
     void ReleaseLevel(Level& level);

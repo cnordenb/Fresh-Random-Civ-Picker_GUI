@@ -167,6 +167,7 @@
     <ClInclude Include="model\CivCatalog.h" />
     <ClInclude Include="common\CivDataLimits.h" />
     <ClInclude Include="model\ShareLink.h" />
+    <ClInclude Include="model\HotkeyBindings.h" />
     <ClInclude Include="parchment\windows\ParchmentToast.h" />
     <ClInclude Include="view\DialogMetrics.h" />
     <ClInclude Include="parchment\controls\ParchmentScrollBar.h" />
@@ -204,6 +205,9 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="view\CivPickerViewObserver.cpp" />
     <ClCompile Include="controller\CivPickerControllerInput.cpp" />
+    <ClCompile Include="controller\CivPickerControllerHotkeys.cpp" />
+    <ClCompile Include="view\CivPickerViewHotkeys.cpp" />
+    <ClCompile Include="model\HotkeyBindings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Fresh Random Civ Picker.ico" />

@@ -1,5 +1,7 @@
 #include "pch.h"
 
+#include <algorithm>
+
 #include "TestData.h"
 
 #include "CivPickerModel.cpp"
@@ -154,4 +156,28 @@ TEST(FreshnessTest, TheMostFollowsThePoolsSize)
     model.SetFreshness(1);
     EXPECT_EQ(model.FreshnessLimit(), 1);
     EXPECT_EQ(model.GetSettings().contfresh_civs, 1);
+}
+
+// The Civ Pool tab's edition and DLC hotkeys are in use as far as data.json gives them editions and DLC toggles.
+TEST(HotkeyTest, TheModelsHotkeysFollowDataJson)
+{
+    CivCatalog catalog;
+    ASSERT_TRUE(catalog.Load(ReadProgramDataFile()));
+    const CivPickerModel model(catalog);
+    int most_toggles = 0;
+    for (int edition = 0; edition < catalog.EditionCount(); edition++)
+        most_toggles = std::max(most_toggles, catalog.EditionAt(edition).dlc_toggle_count);
+
+    for (int edition = 0; edition < MAX_EDITIONS; edition++)
+    {
+        const HotkeyAction action = static_cast<HotkeyAction>(static_cast<int>(HotkeyAction::edition_1) + edition);
+        EXPECT_EQ(model.GetHotkeys().IsUsed(action), edition < catalog.EditionCount()) << edition;
+    }
+    for (int slot = 0; slot < DLC_HOTKEY_COUNT; slot++)
+    {
+        const HotkeyAction action = static_cast<HotkeyAction>(static_cast<int>(HotkeyAction::dlc_slot_1) + slot);
+        EXPECT_EQ(model.GetHotkeys().IsUsed(action), slot < most_toggles) << slot;
+    }
+    const Keystroke tab = { 0, KEY_TAB };
+    EXPECT_TRUE(model.GetHotkeys().KeystrokeOf(HotkeyAction::cycle_tabs) == tab);
 }

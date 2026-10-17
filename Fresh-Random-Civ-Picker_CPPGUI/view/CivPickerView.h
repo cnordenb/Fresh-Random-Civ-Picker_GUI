@@ -73,11 +73,15 @@ public:
     };
     struct FileChoice { bool chosen; std::wstring path; };
 
-    // A line of the Hotkeys dialog: a key and what it does.
-    struct HotkeyItem
+    // What became of a key chosen in the Customise Hotkeys dialog, which its status lines tell.
+    enum class KeyChoice { assigned, cleared, kept_by_windows, unnamed_key, defaults_restored };
+    struct KeyChange
     {
-        const wchar_t* key;
-        const wchar_t* text;
+        KeyChoice choice;
+        HotkeyAction action;
+        Keystroke keystroke;
+        HotkeyBindings::Clashes taken_from;
+        bool used_by_other_program;
     };
 
     CivPickerView(const CivPickerModel& picker_model, CivPickerController& picker_controller);
@@ -137,6 +141,9 @@ public:
     FileChoice AskOpenFilePath(const std::wstring& initial_folder) const;
     void ShowJingleTypeOption(HWND dialog, bool shown) const;
     void ShowContfreshOptions(HWND dialog, bool shown) const;
+    bool ShowHotkeyEditor(HWND owner);
+    void ShowKeyChange(HWND editor, const KeyChange& change);
+    void RefreshHotkeyTexts();
 
     void OnPoolChanged(int civ_index) override;
     void OnBulkPoolChanged() override;
@@ -182,15 +189,16 @@ private:
     static constexpr int MENU_COUNT = 6;
     static constexpr int MAX_GAME_ITEMS = MAX_EDITIONS * MAX_EDITION_LINKS + 1;
     static constexpr int MAX_MENU_LABEL = 64;
-    static constexpr int MAX_POOL_HOTKEYS = 4 + MAX_EDITIONS + DLC_HOTKEY_COUNT;
     static constexpr int MAX_HOTKEY_TEXT = 96;
+    static constexpr int MAX_EDITOR_PARTS = HOTKEY_SCOPE_COUNT + 2 * ParchmentDialogs::MAX_KEY_BUTTONS + 5;
+    static constexpr int MAX_EDITOR_STATUS = 256;
     static constexpr int MAX_ABOUT_LEGAL = 512;
     static constexpr UINT_PTR TOAST_TIMER = 2;
     static constexpr int MAX_SHARE_NOTE = 128;
     static constexpr int MAX_PREVIEW_DECORATIONS = 8;
     static constexpr int MAX_PREVIEW_POOL = 768;
     static constexpr int MAX_PREVIEW_ROUND = 3072;
-    static constexpr const wchar_t* TECHTREE_HOTKEY_LINE = L"\nHotkey: T (Draw tab only) / F4";
+
     static constexpr int MAX_LOG_TEXT = ParchmentLog::MAX_TEXT_LENGTH;
     static constexpr int MAX_HOTKEY_DECORATIONS = 160;
     static constexpr int MAX_MESSAGE_TEXT = 512;
@@ -238,6 +246,14 @@ private:
         bool external;
     };
 
+    // A line of the Hotkeys dialog: a hotkey, its key and what it does.
+    struct HotkeyItem
+    {
+        HotkeyAction action;
+        const wchar_t* key;
+        const wchar_t* text;
+    };
+
     struct HotkeyItemSpan
     {
         const HotkeyItem* items;
@@ -254,6 +270,21 @@ private:
         int rows;
     };
 
+    // A notification from a key of the Customise Hotkeys dialog's rows.
+    struct EditorKeyEvent
+    {
+        int row;
+        WORD notification;
+        HWND control;
+    };
+
+    // The Customise Hotkeys dialog's two status lines.
+    struct EditorStatus
+    {
+        wchar_t status[MAX_EDITOR_STATUS];
+        wchar_t detail[MAX_EDITOR_STATUS];
+    };
+
     static LRESULT CALLBACK MainWindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
     static INT_PTR CALLBACK AboutDialogProc(HWND dialog, UINT message, WPARAM wParam, LPARAM lParam) noexcept;
     static INT_PTR CALLBACK OptionsDialogProc(HWND dialog, UINT message, WPARAM wParam, LPARAM lParam) noexcept;
@@ -264,6 +295,7 @@ private:
     static INT_PTR CALLBACK ShareDialogProc(HWND dialog, UINT message, WPARAM wParam, LPARAM lParam) noexcept;
     static INT_PTR CALLBACK OpenLinkDialogProc(HWND dialog, UINT message, WPARAM wParam, LPARAM lParam) noexcept;
     static INT_PTR CALLBACK PreviewDialogProc(HWND dialog, UINT message, WPARAM wParam, LPARAM lParam) noexcept;
+    static INT_PTR CALLBACK HotkeyEditorProc(HWND dialog, UINT message, WPARAM wParam, LPARAM lParam) noexcept;
     static CivPickerView* FromWindow(HWND window);
     static CivPickerView* AttachDialog(HWND dialog, UINT message, LPARAM lParam);
 
@@ -276,7 +308,7 @@ private:
     LRESULT OnSetCursor(WPARAM wParam, LPARAM lParam);
     LRESULT OnWindowMoved(WPARAM wParam, LPARAM lParam);
     LRESULT OnActivate(WPARAM wParam);
-    LRESULT OnHotkey(WPARAM hotkey_id);
+    LRESULT OnHotkey(LPARAM lParam);
     LRESULT OnCommand(WPARAM wParam, LPARAM lParam);
     LRESULT OnTimer(WPARAM timer_id);
     LRESULT OnMouseWheel(WPARAM wParam, LPARAM lParam);
@@ -302,9 +334,11 @@ private:
     bool CreateLabel(Label& label, const ControlPlacement& placement, const Label::Style& style);
     ControlPlacement PlaceInClient(int id, const PixelRect& client_bounds, const wchar_t* text) const;
     bool BuildMenus();
+    bool CopyMenu(int menu_index, const MenuSpec& menu);
     void SetUpTooltips();
     void SetUpDataTooltips();
     std::wstring DlcTooltipText(int dlc) const;
+    void SetHotkeyTooltip(int tooltip_id, const wchar_t* text, HotkeyAction action);
     void SetTooltip(int tooltip_id, const wchar_t* text);
     void CollectTooltipTargets();
 
@@ -361,14 +395,6 @@ private:
     INT_PTR RunDialog(const ParchmentDialogs::Run& run);
     INT_PTR BeginDialog(HWND dialog);
     bool BuildDialogLayouts();
-    bool BuildHotkeysLayout();
-    bool BuildPoolHotkeys();
-    void AddPoolHotkey(const wchar_t* key, const std::wstring& text);
-    std::wstring DlcSlotNames(int slot) const;
-    float KeyWidth(const wchar_t* key);
-    float HotkeyItemWidth(const HotkeyItemSpan& items);
-    float AddHotkeySection(const HotkeySection& section);
-    void AddHotkeyDecoration(const DialogDecoration& decoration);
     bool BuildAboutLayout();
     void ComposeAboutLegal();
     bool BuildMessageLayout(const wchar_t* text, const wchar_t* caption);
@@ -388,6 +414,40 @@ private:
     void UpdateCivPoolInfo(HWND dialog, const std::wstring& civ_name) const;
     void HidePoolInfo(HWND dialog) const;
     bool OnAboutCommand(HWND dialog, int command_id);
+
+    // --- Hotkeys (CivPickerViewHotkeys.cpp) ---
+    void RefreshHotkeyNames();
+    const wchar_t* KeyNameOf(HotkeyAction action) const;
+    const wchar_t* ShownKeyOf(HotkeyAction action) const;
+    const wchar_t* HotkeyTextOf(HotkeyAction action) const;
+    void NameSlotHotkeys();
+    std::wstring DlcSlotNames(int slot) const;
+    std::wstring HotkeyLine(HotkeyAction action) const;
+    std::wstring DrawTabHotkeyLine(HotkeyAction draw_tab_action, HotkeyAction global_action) const;
+    void ShowTabTooltips(int tab_index);
+    bool BuildHotkeyLayouts();
+    void CollectHotkeyItems();
+    float KeyWidth(const wchar_t* key);
+    float HotkeyItemWidth(const HotkeyItemSpan& items);
+    float AddHotkeySection(const HotkeySection& section);
+    void AddHotkeyDecoration(const DialogDecoration& decoration);
+    bool BuildHotkeysLayout();
+    bool BuildHotkeyEditorLayout();
+    void AddEditorSections();
+    float WidestHotkeyText();
+    void AddEditorPart(const DialogPart& part);
+    PixelPoint EditorRowOrigin(int row, int rows_per_column) const;
+    void InitialiseHotkeyEditor(HWND editor);
+    bool OnHotkeyEditorCommand(HWND editor, WPARAM wParam, LPARAM lParam);
+    bool OnEditorKey(HWND editor, const EditorKeyEvent& key_event);
+    void StopEditorListening(HWND editor);
+    void ShowHotkeySection(HWND editor, HotkeyScope section);
+    void PlaceEditorRow(HWND editor, int row, int rows_per_column);
+    void RefreshEditorKeys(HWND editor);
+    void ShowListeningStatus(HWND editor, HotkeyAction action);
+    EditorStatus DescribeKeyChange(const KeyChange& change) const;
+    EditorStatus DescribeAssignedKey(const KeyChange& change) const;
+    void SetEditorStatus(HWND editor, const EditorStatus& text);
 
     // --- Share links (CivPickerViewShare.cpp) ---
     bool BuildShareLayout(const ShareLinks& links);
@@ -423,8 +483,8 @@ private:
 
     HWND main_window = NULL;
     CloseButton close_button;
-    MenuItemSpec game_items[MAX_GAME_ITEMS] = {};
     wchar_t game_item_labels[MAX_GAME_ITEMS][MAX_MENU_LABEL] = {};
+    MenuItemSpec menu_items[MENU_COUNT][ParchmentMenuBar::MAX_ITEMS] = {};
     MenuSpec menus[MENU_COUNT] = {};
     ParchmentMenuBar menu_bar;
     TabStrip tab_strip;
@@ -479,10 +539,20 @@ private:
     DialogDecoration hotkey_decorations[MAX_HOTKEY_DECORATIONS] = {};
     int hotkey_decoration_count = 0;
     DialogPart hotkeys_parts[1] = {};
-    HotkeyItem pool_hotkeys[MAX_POOL_HOTKEYS] = {};
-    wchar_t pool_hotkey_texts[MAX_POOL_HOTKEYS][MAX_HOTKEY_TEXT] = {};
-    int pool_hotkey_count = 0;
     DialogLayout hotkeys_layout = {};
+    // Each hotkey's key by name (empty without one), and the texts data.json gives the editions' and DLC slots'.
+    KeystrokeName hotkey_keys[HOTKEY_ACTION_COUNT] = {};
+    wchar_t slot_hotkey_texts[MAX_EDITIONS + DLC_HOTKEY_COUNT][MAX_HOTKEY_TEXT] = {};
+    HotkeyItem hotkey_items[HOTKEY_ACTION_COUNT] = {};
+    HotkeyItemSpan hotkey_sections[HOTKEY_SCOPE_COUNT] = {};
+    DialogDecoration editor_decorations[1] = {};
+    DialogPart editor_parts[MAX_EDITOR_PARTS] = {};
+    int editor_part_count = 0;
+    int editor_column_width = 0;
+    DialogLayout editor_layout = {};
+    HotkeyAction editor_rows[ParchmentDialogs::MAX_KEY_BUTTONS] = {};
+    int editor_row_count = 0;
+    int editor_listening_row = -1;
     wchar_t about_version[64] = L"";
     wchar_t about_legal[MAX_ABOUT_LEGAL] = L"";
     DialogDecoration about_decorations[ABOUT_DECORATIONS] = {};

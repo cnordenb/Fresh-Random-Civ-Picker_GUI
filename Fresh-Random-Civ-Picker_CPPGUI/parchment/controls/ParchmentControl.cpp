@@ -109,6 +109,8 @@ bool ParchmentControl::NotifiesClicks() const { return true; }
 
 bool ParchmentControl::OnKeyPressed(WPARAM) { return false; }
 
+void ParchmentControl::OnFocusLost() {}
+
 bool ParchmentControl::IsPressed() const { return pressed; }
 
 // Tells the parent about the control, as a standard control sends WM_COMMAND or WM_HSCROLL.
@@ -116,6 +118,13 @@ void ParchmentControl::NotifyParent(UINT message, WPARAM wParam) const
 {
     if (!c_assert(parent != NULL) || !c_assert(window != NULL)) return;
     (void)SendMessage(parent, message, wParam, reinterpret_cast<LPARAM>(window));
+}
+
+// Tells the parent once this control's message is handled, for a parent that then changes this control.
+void ParchmentControl::NotifyParentLater(UINT message, WPARAM wParam) const
+{
+    if (!c_assert(parent != NULL) || !c_assert(window != NULL)) return;
+    (void)c_assert(PostMessage(parent, message, wParam, reinterpret_cast<LPARAM>(window)) != FALSE);
 }
 
 ParchmentControl::Look ParchmentControl::CurrentLook() const
@@ -168,8 +177,8 @@ LRESULT ParchmentControl::HandleMessage(UINT message, WPARAM wParam, LPARAM lPar
         case WM_SETTEXT: return OnSetText(wParam, lParam);
         case WM_KEYDOWN:
         case WM_KEYUP: OnKey(message, wParam); return 0;
+        case WM_KILLFOCUS: OnKillFocus(); return 0;
         case WM_SETFOCUS:
-        case WM_KILLFOCUS:
         case WM_ENABLE: Redraw(); return 0;
         case WM_GETDLGCODE: return DialogCode();
         case BM_GETCHECK: return checked ? BST_CHECKED : BST_UNCHECKED;
@@ -408,6 +417,13 @@ LRESULT ParchmentControl::OnSetText(WPARAM wParam, LPARAM lParam)
     text_length = wcsncpy_s(text, new_text, _TRUNCATE) == 0 ? static_cast<int>(wcslen(text)) : 0;
     Redraw();
     return result;
+}
+
+void ParchmentControl::OnKillFocus()
+{
+    if (!c_assert(window != NULL)) return;
+    OnFocusLost();
+    Redraw();
 }
 
 // Space presses and releases a focused control, as on a button in a dialog.

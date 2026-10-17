@@ -684,3 +684,100 @@ recorded rather than worked off in this pass, and the project files get Level4.
 - The P10 backlog of section 8 and the questions of 9.5, 10.4 and 13.
 - To check by hand: the solution in Visual Studio after the move (Solution Explorer shows the folders as filters,
   F5 builds and runs as before), and a few hotkeys.
+
+## 17. Customisable hotkeys (2026-10-17)
+
+The user asked: "new feature: customisable hotkeys. the user should be able to set their own custom hotkeys in
+options." The web version has nothing to match (it has two fixed key sets), so the design is the desktop's own; the
+decisions it took are in 17.3.
+
+### 17.1 What changed
+
+- Model: `HotkeyBindings` (`model\HotkeyBindings.h/.cpp`, plain C++, unit-tested). Every line of the Hotkeys dialog
+  is a hotkey (`HotkeyAction`, 50 of them) with a scope (global, or the Draw Civ, Log or Civ Pool tab), a default key
+  (the key the program always had), a name in settings.ini, and the key the user gave it (`Keystroke`: a virtual-key
+  code and the MOD_ALT, MOD_CONTROL and MOD_SHIFT modifiers; the controller static_asserts that the numbers are
+  Windows'). Two hotkeys that can work at the same time (on the same tab, or one of them global) never share a
+  keystroke: giving a hotkey a keystroke takes it from the hotkeys it clashes with (`ClashesWith`, at most one on
+  each tab). The editions' and DLC slots' hotkeys that data.json gives nothing to do (past its editions, past the most
+  DLC toggles an edition has) are unused: not registered, not shown, never clashing. Keystrokes have names ("Ctrl+S",
+  "Num 5", "None") that `ParseKeystroke` reads back; one can be a hotkey when its key has a name (letters, digits, F1
+  to F11, the editing and arrow keys, the number pad) and Windows doesn't keep it (F12; Alt with Tab, F4 or Space; Esc
+  with Alt or Ctrl; Ctrl+Alt+Delete). `CivPickerModel` holds the bindings (`GetHotkeys`, `EditHotkeys`) as it holds
+  the settings.
+- Controller: `CivPickerControllerHotkeys.cpp` (new) registers each keystroke of the hotkeys in use once (the ID is
+  the action's number + 1), turns a WM_HOTKEY's keystroke into the hotkey for the tab shown (`ActionFor`) and runs it,
+  one switch per scope. The table of IDs and its handlers left `CivPickerControllerInput.cpp`; `GlobalConstants.h`
+  lost `HOTKEY_AMOUNT`, the `HOTKEY_ID_*` constants and the editions' and DLC slots' ID and key tables. settings.ini
+  has a `[Hotkeys]` section with a line for each hotkey whose key isn't its default (`DrawTabDrawCiv=D`,
+  `Exit=None`), written anew on exit, so with default keys there is no section; a line that names no keystroke the
+  hotkey can have is left out at startup.
+- Options > Hotkeys has a Customise button beside Show Hotkeys. It opens the Customise Hotkeys dialog (desktop only,
+  `view\CivPickerViewHotkeys.cpp`): a hint, a radio button for each section, the section's hotkeys in rows of a key
+  (`KeyButton`) and what it does (one column, or two even ones past 12 rows), two status lines, and Defaults, Cancel
+  and OK. A click sets a key listening (gold, an ellipsis): it takes every key, Tab, Enter and Esc too, and reports
+  the first that isn't a modifier, with the modifiers held; Backspace leaves the hotkey without a key (a dash).
+  Another click, the focus leaving or another section stops it. The status lines say what became of the key: the
+  hotkey's new key, the hotkeys it was taken from ("Q was taken from Open Options (Draw Civ tab), Clear drawn log (Log
+  tab) and Definitive Edition (Civ Pool tab)."), a keystroke Windows keeps or one without a name, and that another
+  program has the keystroke as a hotkey (the controller tries to register it; the program's own hotkeys are
+  unregistered while the dialog is open). Keys change at once; Cancel or Esc gives back the keys the dialog opened
+  with, and Defaults gives every hotkey its default.
+- The menus' shortcuts, the tooltips' "Hotkey:" lines and the Hotkeys dialog show the keys the hotkeys have
+  (`RefreshHotkeyTexts` once the dialog closes); a hotkey without a key has no shortcut or hotkey line, and a dash in
+  the dialogs. The Hotkeys dialog's layout is made from the bindings (it moved from `CivPickerViewDialogs.cpp`); the
+  Draw and Reset buttons, shown on the Draw Civ and Log tabs, say the key of the tab shown.
+- With a menu open, a hotkey's keystroke goes to the menu first as its own key (Esc, Enter, the arrows) and
+  otherwise closes it, as Esc and Enter did before.
+- Parchment: `KeyButton` and `PaintKeyCap` (the Hotkeys dialog's keys are drawn with it too); `PartKind::key_button`
+  with 24 key buttons per dialog level, and 32 labels instead of 16; `ParchmentControl::OnFocusLost` and
+  `NotifyParentLater` (posted, so a key's parent changes the key after the key's message, I7);
+  `ParchmentMenuBar::Remeasure`.
+
+### 17.2 Verification
+
+- Unit tests: 113 pass on x64 and Win32 (30 new: every default is the key the program had and none clash, what a
+  keystroke means on each tab, clashes and taking a key, unused slots, names read back for all 596 usable keystrokes,
+  F12 and the keystrokes Windows keeps refused, the model's hotkeys follow data.json). Breaking the clash rule (global
+  keystrokes not clashing with the tabs') fails 3 of them.
+- Builds: x64 and Win32, Debug and Release, zero warnings at /W4; zero /analyze findings (x64 Debug, 34 analysis
+  logs). clang-tidy 22 with the checks of 14.5 finds nothing new in the touched files but one test of a Win32 BOOL,
+  which rule 13 allows. A scratch checker of the touched files: none over 1000 lines (the largest, CivPickerModel.cpp,
+  has 872), no folder over 20 files, no function over 60 lines, no line over 120 characters, every switch with a
+  default case last, ASCII and CRLF throughout.
+- On a hidden desktop (a new scratch harness: posted clicks and keys, PrintWindow, the debug output read for failed
+  assertions), Debug x64, Release x64 and Release Win32: the sections, listening and stopping, a global keystroke
+  taken from three tabs' hotkeys, Backspace, F12, a key without a name, F10 (a system key), Esc, Tab and Enter taken as
+  keys while listening and Esc cancelling otherwise, Ctrl+Shift+Y with the modifiers held (the harness shared the
+  program's input state), Defaults, Cancel, OK, and another program's hotkey (the harness's own) warned of.
+  settings.ini kept the changed lines only, and at the next start the menus, the Hotkeys dialog and the Customise
+  Hotkeys dialog showed them (a refused F12 and broken lines were left out). No assertion fired, and the program
+  exited normally each time.
+- With default keys, against the build before (each build run twice; the first run of the build before differed from
+  its second in up to 49 pixels, as in 16.2): the three tabs, all six menus and the Hotkeys and About dialogs
+  pixel-identical, Options different only inside its new button, settings.ini byte-identical.
+- Not verified here: pressing the hotkeys themselves (a hidden desktop isn't the input desktop, 16.3), the keys'
+  hover look, and keys typed on a real keyboard into the dialog (the tests posted them to the key, which the dialog
+  manager handles the same way).
+- While this ran, `images\ui\background.png` was moved to `images\ui\obsolete\` and `images\ui\new_background.png`
+  appeared (not by Claude; left as they are). The scratch test folders used the moved file.
+
+### 17.3 Decisions taken without asking (change any of them)
+
+- Where: Options > Hotkeys > Customise, a dialog of its own; the Hotkeys dialog stays the read-only summary. Every
+  hotkey it lists can change, the editions' and DLC slots' too, and each has one key.
+- A keystroke in use where the hotkey would also work is taken from the hotkeys that had it, and the status line
+  names them, rather than refused: swapping two keys takes two presses, and Cancel undoes everything.
+- While a key listens, Backspace means "no key", so plain Backspace can't be a hotkey (Ctrl+Backspace can). Esc, Tab
+  and Enter can.
+- Punctuation keys (; = , - . / ` [ ] \ ') can't be hotkeys: their characters depend on the keyboard's layout.
+- The Draw Civ and Log tabs' Draw civ and Reset are separate hotkeys, as the Hotkeys dialog lists them.
+- F6 no longer quicksaves (ISSUES.md, Fixed). The aoe2vils.net tooltip says "Ctrl+T" where it said "Ctrl + T", as
+  the program names keys everywhere else.
+- Found and not changed: Options' two radio buttons don't untick each other (ISSUES.md, Tracked).
+
+### 17.4 Questions
+
+1. Should the web version get customisable hotkeys too?
+2. Taking a keystroke over (17.3): keep it, refuse a keystroke in use, or swap the two hotkeys' keys?
+3. Should punctuation keys be allowed, named after the keyboard layout's characters?

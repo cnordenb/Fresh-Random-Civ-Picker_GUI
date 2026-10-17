@@ -174,6 +174,7 @@ void CivPickerController::LoadSettings()
     settings.legacy_jingle_enabled = GetPrivateProfileInt(L"Settings", L"LegacyJingleEnabled", 0, ini_file) != 0;
     settings.contfresh_enabled = GetPrivateProfileInt(L"Settings", L"ContFreshEnabled", 0, ini_file) != 0;
     settings.contfresh_civs = ReadFreshness(ini_file, model.Catalog().CivCount());
+    LoadHotkeys();
 }
 
 void CivPickerController::SaveSettings()
@@ -196,6 +197,7 @@ void CivPickerController::SaveSettings()
                               settings_file_path.c_str());
     // The strength the number of civs replaced goes; a key that is already gone leaves nothing to do.
     (void)WritePrivateProfileString(L"Settings", L"ContFreshStrengthValue", nullptr, settings_file_path.c_str());
+    SaveHotkeys();
 }
 
 void CivPickerController::WriteSetting(const wchar_t* key, bool enabled) const
@@ -296,6 +298,9 @@ void CivPickerController::HandleOptionsClick(HWND dialog, int command_id)
     {
         case IDC_BUTTON_HOTKEYS:
             OpenHotkeys(dialog);
+            break;
+        case IDC_BUTTON_CUSTOMISEHOTKEYS:
+            CustomiseHotkeys(dialog);
             break;
         case IDC_CHECKBOX_LABELS:
         case IDC_CHECKBOX_CORNERLABEL:

@@ -15,44 +15,72 @@ namespace
 
     constexpr MenuItemSpec SEPARATOR = { nullptr, nullptr, 0, false };
 
+    // The items' shortcuts are the keys of the hotkeys in MENU_SHORTCUTS, which the user can change.
     const MenuItemSpec FILE_ITEMS[] = {
-        { L"Copy Share Link", L"P", IDM_COPYLINK, false },     { L"Share ...", nullptr, IDM_SHARE, false },
-        { L"Open Link ...", L"U", IDM_OPENLINK, false },
+        { L"Copy Share Link", nullptr, IDM_COPYLINK, false },    { L"Share ...", nullptr, IDM_SHARE, false },
+        { L"Open Link ...", nullptr, IDM_OPENLINK, false },
         SEPARATOR,
-        { L"Save Preset ...", L"Ctrl+S", IDM_SAVELOG, false }, { L"Load Preset ...", L"Ctrl+R", IDM_LOADLOG, false },
+        { L"Save Preset ...", nullptr, IDM_SAVELOG, false },     { L"Load Preset ...", nullptr, IDM_LOADLOG, false },
         SEPARATOR,
-        { L"Quicksave", L"F5", IDM_QUICKSAVE, false },         { L"Quickload", L"F9", IDM_QUICKLOAD, false },
+        { L"Quicksave", nullptr, IDM_QUICKSAVE, false },         { L"Quickload", nullptr, IDM_QUICKLOAD, false },
         SEPARATOR,
-        { L"Options ...", L"F1", IDM_OPTIONS, false },
+        { L"Options ...", nullptr, IDM_OPTIONS, false },
         SEPARATOR,
-        { L"Exit", L"Esc", IDM_EXIT, false },
+        { L"Exit", nullptr, IDM_EXIT, false },
     };
     const MenuItemSpec LOBBY_ITEMS[] = {
-        { L"Join Lobby ...", L"Ctrl+F", IDM_JOINLOBBY, false },
+        { L"Join Lobby ...", nullptr, IDM_JOINLOBBY, false },
         { L"AoE2 Insights ...", nullptr, IDM_AOE2INSIGHTS, true },
         { L"Spectator Dashboard ...", nullptr, IDM_SPECTATORDASHBOARD, true },
     };
     const MenuItemSpec CIV_ITEMS[] = {
-        { L"Undraw", L"Ctrl+Z", IDM_UNDRAW, false },
-        { L"Redraw", L"Ctrl+X", IDM_REDRAW, false },
-        { L"Tech Tree ...", L"F4", IDM_TECHTREE, true },
+        { L"Undraw", nullptr, IDM_UNDRAW, false },
+        { L"Redraw", nullptr, IDM_REDRAW, false },
+        { L"Tech Tree ...", nullptr, IDM_TECHTREE, true },
         { L"Stats ...", nullptr, IDM_STATS, true },
     };
     // The Game menu lists the editions' links from data.json, then this.
-    constexpr MenuItemSpec SURVAPP_ITEM = { L"Sustainability App ...", L"Ctrl+T", IDM_SURVAPP, true };
+    constexpr MenuItemSpec SURVAPP_ITEM = { L"Sustainability App ...", nullptr, IDM_SURVAPP, true };
     const MenuItemSpec FRCP_ITEMS[] = {
         { L"GitHub Repository ...", nullptr, IDM_GITHUB, true },
         { L"Web Version ...", nullptr, IDM_WEBVERSION, true },
         { L"Discord Server ...", nullptr, IDM_DISCORD, true },
     };
     const MenuItemSpec HELP_ITEMS[] = {
-        { L"Hotkeys ...", L"F2", IDM_HOTKEYS, false },
+        { L"Hotkeys ...", nullptr, IDM_HOTKEYS, false },
         { L"Donate ...", nullptr, IDM_DONATE, true },
         { L"Check for Updates ...", nullptr, IDM_UPDATE, true },
-        { L"About ...", L"F3", IDM_ABOUT, false },
+        { L"About ...", nullptr, IDM_ABOUT, false },
+    };
+
+    struct MenuShortcut
+    {
+        int command;
+        HotkeyAction action;
+    };
+
+    const MenuShortcut MENU_SHORTCUTS[] = {
+        { IDM_COPYLINK, HotkeyAction::copy_share_link }, { IDM_OPENLINK, HotkeyAction::open_share_link },
+        { IDM_SAVELOG, HotkeyAction::save_preset },      { IDM_LOADLOG, HotkeyAction::load_preset },
+        { IDM_QUICKSAVE, HotkeyAction::quicksave },      { IDM_QUICKLOAD, HotkeyAction::quickload },
+        { IDM_OPTIONS, HotkeyAction::open_options },     { IDM_EXIT, HotkeyAction::quit },
+        { IDM_JOINLOBBY, HotkeyAction::join_lobby },     { IDM_UNDRAW, HotkeyAction::undo },
+        { IDM_REDRAW, HotkeyAction::redraw },            { IDM_TECHTREE, HotkeyAction::open_tech_tree },
+        { IDM_SURVAPP, HotkeyAction::open_sustainability_app },
+        { IDM_HOTKEYS, HotkeyAction::open_hotkeys },     { IDM_ABOUT, HotkeyAction::open_about },
     };
 
     template <int Count> constexpr int CountOf(const MenuItemSpec (&)[Count]) { return Count; }
+
+    // The hotkey whose key a menu item shows, or none.
+    HotkeyAction ShortcutOf(int command)
+    {
+        for (const MenuShortcut& shortcut : MENU_SHORTCUTS)
+        {
+            if (shortcut.command == command) return shortcut.action;
+        }
+        return HotkeyAction::none;
+    }
 
     // --- Places in the client area (style.css), and the desktop's own buttons placed to match them ---
 
@@ -212,9 +240,11 @@ bool CivPickerView::CreateFrameControls()
 // The menus of the web version, whose Game menu starts with the links data.json gives the editions.
 bool CivPickerView::BuildMenus()
 {
+    static_assert(MAX_GAME_ITEMS <= ParchmentMenuBar::MAX_ITEMS, "the Game menu fits a menu");
     const CivCatalog& catalog = model.Catalog();
     const int link_count = catalog.LinkCount();
     if (!c_assert(link_count >= 0 && link_count < MAX_GAME_ITEMS)) return false;
+    MenuItemSpec game_items[MAX_GAME_ITEMS] = {};
     for (int i = 0; i < link_count; i++)
     {
         // A label longer than its buffer is cut short, which still names the page it opens.
@@ -227,7 +257,26 @@ bool CivPickerView::BuildMenus()
         { L"Civs", L'C', CIV_ITEMS, CountOf(CIV_ITEMS) },     { L"Game", L'G', game_items, link_count + 1 },
         { L"FRCP", L'F', FRCP_ITEMS, CountOf(FRCP_ITEMS) },  { L"Help", L'H', HELP_ITEMS, CountOf(HELP_ITEMS) },
     };
-    for (int i = 0; i < MENU_COUNT; i++) menus[i] = all_menus[i];
+    for (int i = 0; i < MENU_COUNT; i++)
+    {
+        if (!CopyMenu(i, all_menus[i])) return false;
+    }
+    return true;
+}
+
+// The view keeps its own copy of each menu, whose shortcuts show the keys the hotkeys have, as they change.
+bool CivPickerView::CopyMenu(int menu_index, const MenuSpec& menu)
+{
+    if (!c_assert(menu_index >= 0 && menu_index < MENU_COUNT) || !c_assert(menu.items != nullptr)) return false;
+    if (!c_assert(menu.item_count > 0 && menu.item_count <= ParchmentMenuBar::MAX_ITEMS)) return false;
+    for (int i = 0; i < menu.item_count; i++)
+    {
+        MenuItemSpec item = menu.items[i];
+        const HotkeyAction shortcut = ShortcutOf(item.command);
+        if (shortcut != HotkeyAction::none) item.shortcut = hotkey_keys[static_cast<int>(shortcut)].characters;
+        menu_items[menu_index][i] = item;
+    }
+    menus[menu_index] = { menu.title, menu.mnemonic, menu_items[menu_index], menu.item_count };
     return true;
 }
 
@@ -383,28 +432,38 @@ void CivPickerView::MoveResetButton(int tab_index)
 
 // --- Tooltips ---
 
+// Each tooltip ends with its hotkey's key as the hotkey has it now (Draw, Reset and Options: ShowTabTooltips).
 void CivPickerView::SetUpTooltips()
 {
-    SetTooltip(TOOLTIP_DRAW, L"Draws a fresh random civilisation\nHotkey: Space");
-    SetTooltip(TOOLTIP_RESET, L"Resets the pool of drawn civs and renders all enabled civs available\nHotkey: Enter");
-    SetTooltip(TOOLTIP_OPTIONS, L"Opens options\nHotkey: F1");
-    SetTooltip(TOOLTIP_TECHTREE, (std::wstring(L"Opens the tech tree") + TECHTREE_HOTKEY_LINE).c_str());
-    SetTooltip(TOOLTIP_SURVAPP, L"Opens aoe2vils.net to calculate villagers required for sustainable production\n"
-                                L"Hotkey: R (Draw tab only) / Ctrl + T");
-    SetTooltip(TOOLTIP_HISTORY, L"Opens the game's History info\nHotkey: H (Draw tab only)");
-    SetTooltip(TOOLTIP_CLEAR, L"Clears the log of previously drawn civs\nHotkey: Q");
-    SetTooltip(TOOLTIP_REMAININGTOGGLE, L"Toggles the display of the remaining civs log\nHotkey: W");
-    SetTooltip(TOOLTIP_AUTOTOGGLE, L"Toggles older civs as well as the automatic enabling of older civs when "
-                                   L"switching between editions\nHotkey: R");
-    SetTooltip(TOOLTIP_AUTORESET,
-               L"Automatically resets the pool of drawn civs when the civilisation pool is changed\nHotkey: T");
-    SetTooltip(TOOLTIP_ENABLEALL, L"Enables all civilisations so that they are made available in the pool of "
-                                  L"civilisations for drawing\nHotkey: Space");
-    SetTooltip(TOOLTIP_DISABLEALL, L"Disables all civilisations so that they are removed from the pool of "
-                                   L"civilisations for drawing\nHotkey: Enter");
-    SetTooltip(TOOLTIP_SHARE, L"Copies a share link with the currently selected civ pool and this round's draws\n"
-                              L"Hotkey: P");
+    const std::wstring tech_tree_line =
+        DrawTabHotkeyLine(HotkeyAction::draw_tab_open_tech_tree, HotkeyAction::open_tech_tree);
+    const std::wstring survapp_line =
+        DrawTabHotkeyLine(HotkeyAction::draw_tab_open_sustainability_app, HotkeyAction::open_sustainability_app);
+    const std::wstring history_line = DrawTabHotkeyLine(HotkeyAction::open_history, HotkeyAction::none);
+    SetTooltip(TOOLTIP_TECHTREE, (L"Opens the tech tree" + tech_tree_line).c_str());
+    const std::wstring survapp_text =
+        L"Opens aoe2vils.net to calculate villagers required for sustainable production" + survapp_line;
+    SetTooltip(TOOLTIP_SURVAPP, survapp_text.c_str());
+    SetTooltip(TOOLTIP_HISTORY, (L"Opens the game's History info" + history_line).c_str());
+    SetHotkeyTooltip(TOOLTIP_CLEAR, L"Clears the log of previously drawn civs", HotkeyAction::clear_drawn_log);
+    SetHotkeyTooltip(TOOLTIP_REMAININGTOGGLE, L"Toggles the display of the remaining civs log",
+                     HotkeyAction::toggle_remaining_log);
+    SetHotkeyTooltip(TOOLTIP_AUTOTOGGLE, L"Toggles older civs as well as the automatic enabling of older civs when "
+                                         L"switching between editions",
+                     HotkeyAction::toggle_auto_toggle);
+    SetHotkeyTooltip(TOOLTIP_AUTORESET,
+                     L"Automatically resets the pool of drawn civs when the civilisation pool is changed",
+                     HotkeyAction::toggle_auto_reset);
+    SetHotkeyTooltip(TOOLTIP_ENABLEALL, L"Enables all civilisations so that they are made available in the pool of "
+                                        L"civilisations for drawing",
+                     HotkeyAction::enable_all_civs);
+    SetHotkeyTooltip(TOOLTIP_DISABLEALL, L"Disables all civilisations so that they are removed from the pool of "
+                                         L"civilisations for drawing",
+                     HotkeyAction::disable_all_civs);
+    SetHotkeyTooltip(TOOLTIP_SHARE, L"Copies a share link with the currently selected civ pool and this round's draws",
+                     HotkeyAction::copy_share_link);
     SetTooltip(TOOLTIP_POOLSHARE, L"Copies a share link with this civ pool");
+    ShowTabTooltips(current_tab);
     SetUpDataTooltips();
     tooltips[TOOLTIP_TECHTREE].external = true;
     tooltips[TOOLTIP_SURVAPP].external = true;
@@ -418,7 +477,7 @@ void CivPickerView::SetUpDataTooltips()
     {
         const EditionInfo& info = catalog.EditionAt(edition);
         const std::wstring text = L"Selects the " + info.short_name + L" (" + std::to_wstring(info.year) +
-                                  L") civilisation pool\nHotkey: " + EDITION_HOTKEY_KEYS[edition];
+                                  L") civilisation pool" + HotkeyLine(HotkeyBindings::EditionHotkey(edition));
         SetTooltip(EDITION_TOOLTIP_BASE + edition, text.c_str());
     }
     for (int dlc = 0; dlc < catalog.DlcCount() && dlc < MAX_DLCS; dlc++)
@@ -443,9 +502,15 @@ std::wstring CivPickerView::DlcTooltipText(int dlc) const
         civ_count++;
     }
     const wchar_t* const noun = civ_count == 1 ? L" civilisation\n(" : L" civilisations\n(";
-    const std::wstring text = L"Toggles " + info.name + noun + names + L")";
-    if (info.toggle_slot >= DLC_HOTKEY_COUNT) return text;
-    return text + L"\nHotkey: " + DLC_SLOT_HOTKEY_KEYS[info.toggle_slot];
+    // A toggle after the ones with a hotkey has none, and no hotkey line.
+    return L"Toggles " + info.name + noun + names + L")" + HotkeyLine(HotkeyBindings::DlcSlotHotkey(info.toggle_slot));
+}
+
+// A tooltip that ends with its hotkey's key.
+void CivPickerView::SetHotkeyTooltip(int tooltip_id, const wchar_t* text, HotkeyAction action)
+{
+    if (!c_assert(text != nullptr)) return;
+    SetTooltip(tooltip_id, (text + HotkeyLine(action)).c_str());
 }
 
 void CivPickerView::SetTooltip(int tooltip_id, const wchar_t* text)

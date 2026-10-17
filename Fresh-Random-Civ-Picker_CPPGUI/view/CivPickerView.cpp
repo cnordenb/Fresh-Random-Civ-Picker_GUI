@@ -191,7 +191,7 @@ LRESULT CivPickerView::HandleMainWindowMessage(const MSG& message)
         case WM_ACTIVATE: return OnActivate(wParam);
         case WM_MOUSEMOVE: return OnMainWindowMouseMove();
         case WM_MOUSELEAVE: return OnMouseLeave();
-        case WM_HOTKEY: return OnHotkey(wParam);
+        case WM_HOTKEY: return OnHotkey(lParam);
         case WM_COMMAND: return OnCommand(wParam, lParam);
         case WM_TIMER: return OnTimer(wParam);
         case WM_MOUSEWHEEL: return OnMouseWheel(wParam, lParam);
@@ -286,26 +286,21 @@ LRESULT CivPickerView::OnActivate(WPARAM wParam)
     return 0;
 }
 
-// With a menu open, Esc only closes it and Enter chooses the highlighted item; any other key closes it and then
-// does its usual job, as in the web version.
-LRESULT CivPickerView::OnHotkey(WPARAM hotkey_id)
+// A hotkey's message carries its keystroke: the modifiers and the key. With a menu open, the menu's own keys work it
+// (Esc closes it, Enter chooses the highlighted item) and any other key closes it and then does its usual job, as
+// in the web version.
+LRESULT CivPickerView::OnHotkey(LPARAM lParam)
 {
     if (!c_assert(main_window != NULL)) return 0;
+    const Keystroke keystroke = { static_cast<uint8_t>(LOWORD(lParam) & (MOD_ALT | MOD_CONTROL | MOD_SHIFT)),
+                                  static_cast<uint8_t>(HIWORD(lParam)) };
     if (menu_bar.IsOpen())
     {
-        if (hotkey_id == HOTKEY_ID_ESC)
-        {
-            menu_bar.Close();
-            return 0;
-        }
-        if (hotkey_id == HOTKEY_ID_RETURN)
-        {
-            (void)menu_bar.ChooseHighlighted();
-            return 0;
-        }
+        const MSG menu_key = { main_window, WM_KEYDOWN, keystroke.key, 0 };
+        if (keystroke.modifiers == 0 && menu_bar.HandleKey(menu_key)) return 0;
         menu_bar.Close();
     }
-    controller.OnHotkey(hotkey_id);
+    controller.OnHotkey(keystroke);
     return 0;
 }
 
@@ -434,6 +429,7 @@ void CivPickerView::ShowTabComponents(int tab_index)
         ShowLogTab(false);
         ShowCustomTab(true);
     }
+    ShowTabTooltips(tab_index);
 }
 
 void CivPickerView::ShowDrawTab(bool showing_enabled)
@@ -451,7 +447,6 @@ void CivPickerView::ShowDrawTab(bool showing_enabled)
         if (settings.icons_enabled) ShowControl(civ_icon.Window(), true);
         if (settings.iteration_label_enabled) ShowControl(label_corner.Window(), true);
         for (HWND control : draw_tab_only) ShowControl(control, true);
-        UpdateTooltipText(TOOLTIP_OPTIONS, L"Opens options\nHotkey: Q (Draw tab only) / F1");
         return;
     }
 
@@ -465,7 +460,6 @@ void CivPickerView::ShowDrawTab(bool showing_enabled)
     MoveResetButton(LOG_TAB);
     ShowControl(label_corner.Window(), false);
     for (HWND control : draw_tab_only) ShowControl(control, false);
-    UpdateTooltipText(TOOLTIP_OPTIONS, L"Opens options\nHotkey: F1");
 }
 
 void CivPickerView::ShowLogTab(bool showing_enabled)

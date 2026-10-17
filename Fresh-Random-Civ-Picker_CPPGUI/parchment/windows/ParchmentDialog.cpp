@@ -19,10 +19,6 @@ namespace
     // .group { border: 1px } and its legend { padding: 0 3px }, 11 px in from the group's edge.
     constexpr int LEGEND_LEFT = 11;
     constexpr float LEGEND_PADDING = 3.0f;
-    // kbd.key { border: 1px #b4b4b4; border-bottom-width: 2px; border-radius: 3px; padding: 0 4px }
-    constexpr float KEY_RADIUS = 3.0f;
-    constexpr float KEY_BORDER = 1.0f;
-    constexpr float KEY_BOTTOM_BORDER = 2.0f;
 
     struct EmptyDialogTemplate
     {
@@ -133,6 +129,7 @@ bool ParchmentDialogs::Build(HWND dialog)
     level.checkbox_count = 0;
     level.label_count = 0;
     level.link_count = 0;
+    level.key_button_count = 0;
     level.field_look = { context, field_font, nullptr };
     level.dropdown_look = { context, &level.shell.Backdrop() };
     if (!PlaceDialog(level) || !RenderPanel(level) || !level.shell.Attach(dialog, level.size)) return false;
@@ -326,15 +323,8 @@ void ParchmentDialogs::DrawGroup(const DialogDecoration& decoration)
 void ParchmentDialogs::DrawKey(const DialogDecoration& decoration)
 {
     if (!c_assert(context.renderer != nullptr) || !c_assert(HasArea(decoration.bounds))) return;
-    ParchmentRenderer& renderer = *context.renderer;
-    const FloatRect box = ToFloatRect(decoration.bounds);
-    renderer.FillRoundedRect(box, KEY_RADIUS, KEY_BORDER_COLOUR);
-    renderer.FillRoundedRect({ box.left + KEY_BORDER, box.top + KEY_BORDER, box.right - KEY_BORDER,
-                               box.bottom - KEY_BOTTOM_BORDER },
-                             KEY_RADIUS - KEY_BORDER, KEY_COLOUR);
-    const float baseline = renderer.BaselineInLine(FontId::key, box.top + KEY_BORDER, KEY_LINE_HEIGHT);
-    renderer.DrawText({ { decoration.text, TextLength(decoration.text), FontId::key }, TOOLTIP_TEXT_COLOUR, box.left,
-                        box.right, baseline, TextAlign::centre });
+    const TextSpan name = { decoration.text, TextLength(decoration.text), FontId::key };
+    PaintKeyCap(*context.renderer, { ToFloatRect(decoration.bounds), name, KEY_COLOUR });
 }
 
 bool ParchmentDialogs::CreateCloseButton(Level& level)
@@ -371,6 +361,7 @@ bool ParchmentDialogs::CreatePart(Level& level, const DialogPart& part)
         case PartKind::radio: return CreateCheckboxPart(level, part);
         case PartKind::label:
         case PartKind::error_label: return CreateLabelPart(level, part);
+        case PartKind::key_button: return CreateKeyButtonPart(level, part);
         case PartKind::slider:
         case PartKind::log:
         case PartKind::picture:
@@ -413,6 +404,14 @@ bool ParchmentDialogs::CreateLabelPart(Level& level, const DialogPart& part)
     // An error message waits hidden until the dialog has an error to show.
     if (error) (void)ShowWindow(label.Window(), SW_HIDE);
     return true;
+}
+
+bool ParchmentDialogs::CreateKeyButtonPart(Level& level, const DialogPart& part)
+{
+    if (!c_assert(level.key_button_count < MAX_KEY_BUTTONS) || !c_assert(part.text != nullptr)) return false;
+    KeyButton& key_button = level.key_buttons[level.key_button_count];
+    level.key_button_count++;
+    return key_button.Create(context, { level.dialog, part.id, part.bounds, &level.shell.Backdrop(), part.text });
 }
 
 // The parts that are one of a kind in a dialog, or standard controls in the parchment look.
@@ -462,6 +461,7 @@ void ParchmentDialogs::ReleaseLevel(Level& level)
     for (int i = 0; i < level.checkbox_count && i < MAX_CHECKBOXES; i++) level.checkboxes[i].Release();
     for (int i = 0; i < level.label_count && i < MAX_LABELS; i++) level.labels[i].Release();
     for (int i = 0; i < level.link_count && i < MAX_LINKS; i++) level.links[i].Release();
+    for (int i = 0; i < level.key_button_count && i < MAX_KEY_BUTTONS; i++) level.key_buttons[i].Release();
     level.slider.Release();
     level.log.Release();
     level.picture.Release();

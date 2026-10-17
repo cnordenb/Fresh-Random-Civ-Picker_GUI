@@ -86,7 +86,7 @@ In this youtube video (10 minutes) I explain the need for fresh random and demon
 *Browse the histories of the civs and see any civ's pool status as well as the time and game edition it was added to the game. Both search bar and dropdown menu available. Click the history button or press H while on Draw tab.*
 
 - **Use hotkeys!**  
-*Most of the program is entirely controllable with key bindings. To see which hotkeys there are and what they do, navigate to Hotkeys from either Options or the Help menu.*
+*Most of the program is entirely controllable with key bindings. To see which hotkeys there are and what they do, navigate to Hotkeys from either Options or the Help menu. To give a hotkey another key, go to Options and click Customise: pick a section, click a hotkey's key and press the key you want (Backspace leaves it without one). Your keys are saved in settings.ini.*
 
 ## GUI description  
 The program has a graphical user interface which is a window. This window contains three tabs: "Draw Civ", "Log", and "Civ Pool".  
@@ -116,8 +116,9 @@ The program is C++ on the Win32 API, drawn with Direct2D, in a Model-View-Contro
 - `Fresh-Random-Civ-Picker_CPPGUI/`: the program
   - `Main.cpp`: the entry point, which loads the catalog and builds the model and the controller
   - `model/`: in plain C++, `CivCatalog` and `JsonReader` (the editions, DLCs and civs, read from `data.json`),
-    `CivPickerModel` (the civ pool, the draws, the histories and the settings) and `ShareLink` (the share link
-    format, the same as the web version's)
+    `CivPickerModel` (the civ pool, the draws, the histories and the settings), `HotkeyBindings` (the hotkeys,
+    where they work and the keys the user gave them) and `ShareLink` (the share link format, the same as the web
+    version's)
   - `view/`: `CivPickerView*.cpp`, the main window and the dialogs
   - `controller/`: `CivPickerController*.cpp`, which turn the user's input into requests on the model
   - `parchment/`: the parchment look, in `graphics/` (the renderer, images, fonts and layout arithmetic),

@@ -9,11 +9,13 @@ Line numbers refer to commit `10b2ab4` and will drift. When an issue is fixed, m
 - **Mouse-toggling a DLC checkbox or an edition radio button doesn't trigger auto-reset**, while the equivalent
   hotkeys (A–H, Q/W/E) do. Their control ids fall outside the range at `FRCP_GUI.cpp:441`, and
   `ToggleDlc`/`SetEditionState` (`:443–444`) never reset.
-- **F6 also quicksaves, and T is registered twice.** `hotkey[]` registers `VK_F6` with `HOTKEY_ID_F5`
-  (`FRCP_GUI.h:61`; `HOTKEY_ID_F6` is unused and F6 isn't documented) and registers `T` at both `FRCP_GUI.h:55` and
-  `:59`. Careful when fixing: `DisableHotkeys()` (`FRCP_GUI.cpp:1108`) unregisters ids `1..HOTKEY_AMOUNT-1`, so if
-  `HOTKEY_AMOUNT` is simply decremented, the highest id (currently L, 39) would stay registered system-wide after
-  FRCP loses focus.
+- **Options' two "When the program starts" radio buttons don't untick each other.** Clicking "Automatic civ pool
+  logging" while "Reset civ pool on startup" is ticked leaves both ticked until Options is opened again (the setting
+  itself changes correctly). A parchment radio button only ever ticks itself (`Checkbox::OnClicked`), and nothing
+  unticks the other one after a click; `InitialiseOptionsDialog` calls `CheckRadioButton` only when the dialog opens.
+  Found 2026-10-17 on the build before customisable hotkeys (a hidden-desktop click on IDC_RADIO_LOGGING: both
+  report BST_CHECKED). The Customise Hotkeys dialog's section radio buttons untick each other with
+  `CheckRadioButton`.
 
 ### Latent (no visible effect today)
 - `if (IDC_LEGACY_OPTION)` in `OptionsDlgProc` (`FRCP_GUI.cpp:759`) is always true; it should compare `wmId`. Any
@@ -46,6 +48,10 @@ Line numbers refer to commit `10b2ab4` and will drift. When an issue is fixed, m
 - Stale project file: `Fresh-Random-Civ-Picker_CPPGUI.filters` (Visual Studio template leftover).
 
 ## Fixed
+- **F6 also quicksaved, and T was registered twice.** The fixed table of hotkeys registered `VK_F6` under the
+  quicksave hotkey's id (F6 was never documented) and registered `T` twice. With customisable hotkeys (2026-10-17)
+  the table is gone: each hotkey has one key (`HotkeyBindings`), each keystroke is registered once, and every id is
+  unregistered when FRCP loses focus. F6 no longer quicksaves unless the user gives Quicksave that key.
 - **`UnitTesting_FRCP` didn't compile, so Build Solution failed.** The tests were rewritten with the model in the
   MVC split (2026-10-13), and the stale entries of the project files (duplicate `civ_icons\*.png` items in the
   `.vcxproj.filters`, `<Image>`/`<Text>` items for old paths) went with the data separation (2026-10-14). Checked
