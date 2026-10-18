@@ -146,12 +146,12 @@ constexpr float KEY_LINE_HEIGHT = 15.390625f; // 11px/1.4 = 15.4 px
 
 // --- The main window (.window, .titlebar, .menubar, .client) ---
 
-// The parchment is never stretched: the visible part of ui/background.png (1024 x 1167; the paper and its burnt edge
+// The parchment is never stretched: the visible part of ui/background.png (1024 x 1070; the paper and its burnt edge
 // without the transparent margin around them) fills the window's width, and the window is as tall as that makes it.
 constexpr int BACKGROUND_VISIBLE_LEFT = 26;
 constexpr int BACKGROUND_VISIBLE_TOP = 13;
 constexpr int BACKGROUND_VISIBLE_RIGHT = 995;
-constexpr int BACKGROUND_VISIBLE_BOTTOM = 1151;
+constexpr int BACKGROUND_VISIBLE_BOTTOM = 1054;
 constexpr int BACKGROUND_VISIBLE_WIDTH = BACKGROUND_VISIBLE_RIGHT - BACKGROUND_VISIBLE_LEFT;
 constexpr int BACKGROUND_VISIBLE_HEIGHT = BACKGROUND_VISIBLE_BOTTOM - BACKGROUND_VISIBLE_TOP;
 constexpr int WINDOW_WIDTH = 578;

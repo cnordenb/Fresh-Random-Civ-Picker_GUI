@@ -781,3 +781,22 @@ decisions it took are in 17.3.
 1. Should the web version get customisable hotkeys too?
 2. Taking a keystroke over (17.3): keep it, refuse a keystroke in use, or swap the two hotkeys' keys?
 3. Should punctuation keys be allowed, named after the keyboard layout's characters?
+
+## 18. The shorter parchment (2026-10-18)
+
+The user asked for the new `ui/background.png` (1024 x 1070, the author's), which "should fit neater and doesn't
+have the excess vertical space".
+
+- The new picture is the old one of 12.2 with its rows 0 to 886 unchanged and a new burnt bottom edge 97 px higher.
+  Its visible part (alpha above 3) is x 26 to 995, y 13 to 1054, so `BACKGROUND_VISIBLE_BOTTOM` is 1054 (it was
+  1151) and the window, whose height follows from it, is 621 px tall instead of 679: 38 px of parchment below the
+  client area instead of 96 (the web version has 22). This settles question 13.1.1 (the bare parchment below the
+  content) and leaves more room on the 1080p display at 150 % of 13.2.
+- Verified: zero warnings at /W4 in Debug and Release, x64 and Win32; 113 unit tests pass. On a hidden desktop the
+  window is 578 x 621; no pixel of the content lies outside the window region (12.7), which reaches row 609 in the
+  middle; the paper is fully opaque under the content's columns down to row 596, and the content ends at row 583. The
+  menus and the Options, Hotkeys and About dialogs are pixel-identical to the build before (the Hotkeys dialog once
+  showed its OK button's focus outline, which Windows shows or hides by the keys of the run), and no assertion fired.
+- The pictures' git state is the author's: `images\ui\new_background.png` and `images\ui\obsolete\background.png`
+  (committed in 5b78ec3) are deleted in the working tree and `images\ui\background.png` is untracked; nothing was
+  staged.

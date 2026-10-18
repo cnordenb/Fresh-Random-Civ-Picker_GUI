@@ -21,7 +21,7 @@ Source tags: `P10-n` = P10 rule n. `CCn` = CC chapter n. `CC-G5`, `CC-N3`, `CC-T
 
 This file holds the rules. Their history is in `CLAUDE2_LOG.md` beside it: the state of the code, how each
 change was built and verified, the decisions taken and the questions still open for the user (sections 8, 9,
-10.2 to 10.4, 11 to 13, 14.5, 16 and 17). The two files share one numbering, so a reference such as "I2" or
+10.2 to 10.4, 11 to 13, 14.5 and 16 to 18). The two files share one numbering, so a reference such as "I2" or
 "question 13.1.6" means the same in either. They were one file until 2026-10-16, when the user's limit of
 1000 lines per file (section 15) split them.
 
