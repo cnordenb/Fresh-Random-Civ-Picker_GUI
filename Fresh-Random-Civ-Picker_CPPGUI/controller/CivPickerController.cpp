@@ -60,7 +60,7 @@ CivPickerController::CivPickerController(CivPickerModel& picker_model) :
 bool CivPickerController::LoadCatalog(CivCatalog& catalog)
 {
     const std::wstring path = GetExeFolder() + L"\\data.json";
-    std::ifstream file(path, std::ios::binary);
+    std::ifstream file(path.c_str(), std::ios::binary);
     std::stringstream contents;
     if (file) contents << file.rdbuf();
     if (file && catalog.Load(contents.str())) return true;

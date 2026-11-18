@@ -297,14 +297,14 @@ void CivPickerView::ComposePreviewPool(const SharedPool& pool)
     (void)swprintf_s(preview_pool, L"%d of %d civs", enabled, catalog.EditionCivCount(pool.edition));
     if (left_out == 0 || left_out > MAX_LEFT_OUT_SHOWN) return;
     // A list longer than its buffer is cut short, which still shows its start.
-    (void)wcsncat_s(preview_pool, L". Left out: ", _TRUNCATE);
+    (void)wcsncat_s(preview_pool, _countof(preview_pool), L". Left out: ", _TRUNCATE);
     int listed = 0;
     for (int position = 0; position < catalog.CivCount() && position < MAX_CIVS; position++)
     {
         const int civ = catalog.DisplayCiv(position);
         if (pool.enabled[civ] || !catalog.InEdition(civ, pool.edition)) continue;
-        if (listed > 0) (void)wcsncat_s(preview_pool, L", ", _TRUNCATE);
-        (void)wcsncat_s(preview_pool, catalog.CivAt(civ).name.c_str(), _TRUNCATE);
+        if (listed > 0) (void)wcsncat_s(preview_pool, _countof(preview_pool), L", ", _TRUNCATE);
+        (void)wcsncat_s(preview_pool, _countof(preview_pool), catalog.CivAt(civ).name.c_str(), _TRUNCATE);
         listed++;
     }
 }
@@ -324,8 +324,8 @@ void CivPickerView::ComposePreviewRound(const SharedPool& pool)
     {
         if (!c_assert(pool.draws[i] >= 0 && pool.draws[i] < catalog.CivCount())) return;
         // A list longer than its buffer is cut short, which still shows its start.
-        if (i > 0) (void)wcsncat_s(preview_round, L", ", _TRUNCATE);
-        (void)wcsncat_s(preview_round, catalog.CivAt(pool.draws[i]).name.c_str(), _TRUNCATE);
+        if (i > 0) (void)wcsncat_s(preview_round, _countof(preview_round), L", ", _TRUNCATE);
+        (void)wcsncat_s(preview_round, _countof(preview_round), catalog.CivAt(pool.draws[i]).name.c_str(), _TRUNCATE);
     }
 }
 

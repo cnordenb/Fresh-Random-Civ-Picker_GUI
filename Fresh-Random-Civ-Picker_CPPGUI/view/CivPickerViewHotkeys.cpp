@@ -712,9 +712,9 @@ CivPickerView::EditorStatus CivPickerView::DescribeAssignedKey(const KeyChange& 
         wchar_t part[MAX_HOTKEY_TEXT + 32] = L"";
         (void)_snwprintf_s(part, _TRUNCATE, L"%ls%ls (%ls)", separator, HotkeyTextOf(taken),
                            SECTION_PLACES[static_cast<int>(HotkeyBindings::ScopeOf(taken))]);
-        (void)wcsncat_s(text.detail, part, _TRUNCATE);
+        (void)wcsncat_s(text.detail, _countof(text.detail), part, _TRUNCATE);
     }
-    (void)wcsncat_s(text.detail, L".", _TRUNCATE);
+    (void)wcsncat_s(text.detail, _countof(text.detail), L".", _TRUNCATE);
     return text;
 }
 

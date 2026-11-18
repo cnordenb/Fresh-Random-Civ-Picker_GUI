@@ -10,6 +10,7 @@
 - Getting Started
   - [Installation](#How-to-install-and-run-a-release)
   - [Compilation](#How-to-compile-in-IDE)  
+  - [Compilation with MinGW-w64](#How-to-compile-with-MinGW-w64)  
   - [Code organization](#How-the-code-is-organized)  
 - Usage
   - [Using the Fresh Random Civ Picker](#How-do-I-use-this-application)
@@ -110,6 +111,17 @@ Instructions for Visual Studio on Windows
 2. Open Fresh-Random-Civ-Picker_CPPGUI.sln
 3. Select Fresh-Random-Civ-Picker_CPPGUI as single startup project in Solution Property Pages
 4. Run or debug
+
+## How to compile with MinGW-w64
+The program can also be built with GCC, without Visual Studio, using `build.bat` in the repository's root folder.
+1. Install [MinGW-w64](https://winlibs.com/) (for example the WinLibs UCRT build) and add its `bin` folder to your `PATH`. Open a new terminal and check that `g++ --version` and `windres --version` both answer
+2. Clone this repository
+3. In the repository's folder, run `build.bat` (or double-click it). It ends with `Built bin\FRCP_GUI.exe`
+   - If it stops with an error and no `Built` line, read the first error; it names the file and the line
+   - If it says `cannot open output file ... Permission denied`, FRCP is still running. Close it and build again
+4. Run `bin\FRCP_GUI.exe`. The build copies `data.json`, `images\` and `sounds\` next to it, and links the exe statically, so the `bin` folder runs on its own on any Windows x64 PC
+
+The unit tests are built with Visual Studio only (see [Compilation](#How-to-compile-in-IDE)).
 
 ## How the code is organized
 The program is C++ on the Win32 API, drawn with Direct2D, in a Model-View-Controller design.

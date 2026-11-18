@@ -228,7 +228,7 @@ bool CivPickerModel::HasBeenDrawn(const std::wstring& civ_name) const
 
 std::wstring CivPickerModel::FetchHistory(const std::wstring& civ_name) const
 {
-    std::ifstream file(history_folder_path + civ_name + L".txt", std::ios::binary);
+    std::ifstream file((history_folder_path + civ_name + L".txt").c_str(), std::ios::binary);
     if (!file) return L"History not found.";
 
     std::stringstream buffer;
@@ -732,7 +732,7 @@ void CivPickerModel::DiscardRedoHistory()
 
 bool CivPickerModel::WriteLogFile(const std::wstring& path) const
 {
-    std::wofstream out_file(path);
+    std::wofstream out_file(path.c_str());
     if (!out_file) return false;
 
     out_file << L"CivStates:" << std::endl;
@@ -764,7 +764,7 @@ void CivPickerModel::SaveAutomaticLog()
 
 bool CivPickerModel::LoadLogFile(const std::wstring& path, SaveType type)
 {
-    std::wifstream in_file(path);
+    std::wifstream in_file(path.c_str());
     if (!in_file) return false;
 
     if (type == SaveType::automatic) InitialiseCivs();
