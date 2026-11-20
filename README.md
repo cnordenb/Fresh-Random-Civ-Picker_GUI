@@ -1,5 +1,9 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/cnordenb/frcp-desktop)](#)
+<<<<<<< HEAD
 [![language](https://img.shields.io/badge/language-C%2B%2B-555555)](#)
+=======
+[![language](https://img.shields.io/badge/language-C++-F34B7D)](#)
+>>>>>>> cd058f24d45f41bd937f239732998fb628b6c6e3
 [![license](https://img.shields.io/badge/license-MIT-007FFF)](LICENSE)
 [![testing](https://img.shields.io/badge/testing-yes-C3FF00)](documentation/TESTS.md)
 [![maintainable](https://img.shields.io/badge/maintainable-yes-00FF72)](documentation/MAINTAINER.md)
