@@ -525,3 +525,70 @@ Part 2 of the development log. It follows [part 1](DEVLOG1.md). The decisions ma
 12. **Proposals in the rewritten log.** Three proposals in the days of 2026-10-15 were added in the rewriting and
     were in no earlier document: matching the web version on both questions of continuous freshness, and raising
     the limit of 64 civs before a third DLC needs it. Should they stand?
+
+### 18:14:30: the accessibility checklist gone through, one success criterion at a time
+
+#### What changed
+
+- **Why.** No item of `.github/ACCESSIBILITY.md` had been checked. The program is now gone through against WCAG 2.2
+  at level AA, one success criterion at a time, each one confirmed before the next is begun. An item that holds is
+  marked `[x]`; one that does not gets the date and time it was found and a plan for mending it, under the item.
+- **1.1.1 Non-text Content: not met.** The picture-only controls have no name for assistive technology: the close
+  buttons, the Options, Tech Tree and Sustainability App buttons, both share buttons, the civ icon, the edition
+  banner and the picture of the History dialog. The plan, under the item, is to give each its name as window text,
+  which the picture buttons do not draw.
+- **Checked.** `bin/FRCP_GUI.exe` was started and its main window read through UI Automation: 13 elements on the
+  Draw Civ tab, every one a pane, named only where the control has window text ("History", "Draw", "Reset", the civ
+  name, the round counter). No code handles `WM_GETOBJECT`. `AtlasButton`, `FramedIconButton`, `PictureButton`
+  and `CloseButton` were read to see that they paint no text.
+- **Documents.** `ACCESSIBILITY.md`: the finding and the plan under 1.1.1.
+
+#### Not done
+
+- **No code was changed.** The plan for 1.1.1 is not carried out.
+- **The other 54 items.** Not yet gone through.
+- **Dialogs and the other two tabs.** Read in the code only, not through UI Automation.
+- **The program that was read.** Built at 07:08, six minutes before the last change of `DialogMetrics.h`.
+- **Narrator.** Not tried; a screen reader is for a person to try.
+
+### 19:09:18: the accessibility check paused after 1.1.1, which awaits confirmation
+
+#### What changed
+
+- **Why.** The check of `.github/ACCESSIBILITY.md` was paused, to be taken up another day. This section holds what
+  is needed to go on: the task, where it stands, and the finding on 1.1.1 in full.
+- **The task.** The program is checked against WCAG 2.2 at level AA, the 55 items of `ACCESSIBILITY.md` in their
+  order. No item is begun before the one before it is confirmed. An item that holds is marked `[x]`; one that does
+  not gets, under it, the date and time it was found and a plan for mending it.
+- **Where it stands.** 1 of 55 gone through. 1.1.1 Non-text Content is recorded as not met and is not yet
+  confirmed. The next item is 1.2.1 Audio-only and Video-only (Prerecorded).
+- **1.1.1, what has no name.** Read through UI Automation, these controls have no name: the close button of the main
+  window and of every dialog, the Options, Tech Tree and Sustainability App buttons, both share buttons, the civ
+  icon (clickable, it plays the jingle), the edition banner and the picture of the History dialog.
+- **1.1.1, what has a name.** The History button ("History"), and Draw, Reset, the civ name and the round counter,
+  by their text.
+- **1.1.1, the cause.** A control's name is its window text, and the controls without a name are created with an
+  empty text. No code handles `WM_GETOBJECT`, so nothing else gives a name. A tooltip describes some of the
+  buttons, but only on screen, which does not count.
+- **1.1.1, what passes.** The icons beside civ, DLC and edition names are decoration next to their text, and a
+  jingle is identified by the civ name shown with it.
+- **1.1.1, the plan.** (1) Each control gets its name as window text, which the picture buttons never draw: "Close",
+  "Options", "Tech Tree", "Sustainability App", "Copy Share Link", "Copy Civ Pool Share Link". (2) The civ icon, the
+  edition banner and the History picture take the name of the civ or edition shown, from `CivCatalog`, set again
+  whenever the picture changes. (3) Narrator is tried on all three tabs and in every dialog.
+- **Left to later items.** Every control is exposed as a plain pane, and the menu bar, the tab strip and the logs
+  each as one pane without parts. That is the larger fault, and belongs to 1.3.1 and 4.1.2, not to 1.1.1.
+- **Checked.** `check-rules.sh` passed after the section before this one.
+
+#### Not done
+
+- **No code was changed.** 1.1.1 has a finding and a plan only, and the plan is not a decision until confirmed, so
+  nothing was added to `DECISIONS.md`.
+- **Items 1.2.1 to 4.1.3.** The other 54, not begun.
+- **What the section before this one names as not done** still stands: the dialogs and two of the tabs read in the
+  code only, the program read being six minutes older than `DialogMetrics.h`, and Narrator not tried.
+
+#### Questions
+
+1. **1.1.1 as recorded.** Are the finding and the plan under 1.1.1 in `ACCESSIBILITY.md` right, so that 1.2.1 can be
+   begun? Proposal: yes.

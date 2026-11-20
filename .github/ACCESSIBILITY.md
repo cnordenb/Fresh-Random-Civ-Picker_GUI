@@ -27,6 +27,18 @@ apply:" and why.
 - [ ] [1.1.1 Non-text Content][1.1.1] (A): every image, icon, chart and control has a text alternative that serves
       the same purpose, and decoration is hidden from assistive technology.
       **Partly automated; human verification required.**
+      - **Not met, 2026-11-20 18:14:05.** UI Automation gives these picture-only controls no name: the close button
+        of the main window and of every dialog, the Options, Tech Tree and Sustainability App buttons, both share
+        buttons, the civ icon (which plays the jingle when clicked), the edition banner and the picture of the
+        History dialog. A tooltip describes some of them, but only on screen. The History button has a name, and
+        the icons beside civ, DLC and edition names are decoration next to their text.
+      - **Plan.** (1) Give each of these controls its name as window text, which the picture buttons do not draw
+        and which Windows already passes on as the name, as it does for "History": "Close", "Options", "Tech Tree",
+        "Sustainability App", "Copy Share Link", "Copy Civ Pool Share Link"; the civ icon, the edition banner and
+        the History picture take the name of the civ or edition shown, from `CivCatalog`, set again whenever the
+        picture changes. (2) Check with Narrator that each is read by its name, on all three tabs and in every
+        dialog. The role and state of the controls, and the parts inside the menu bar, the tab strip and the logs,
+        belong to 1.3.1 and 4.1.2.
 - [ ] [1.2.1 Audio-only and Video-only (Prerecorded)][1.2.1] (A): recorded audio has a transcript, and recorded video
       without sound has a transcript or an audio track that describes it.
       **Human verification required.**
