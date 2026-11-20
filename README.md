@@ -6,6 +6,9 @@
 
 # Fresh Random Civ Picker
 
+<img width="981" height="1063" alt="image" src="https://github.com/user-attachments/assets/cb179be9-9582-4d22-9c95-56ef0ed7df05" />
+
+
 ## Usage  
 Download the zip file in [releases](https://github.com/cnordenb/frcp-desktop/releases) and extract it in any folder. Run the .exe file.
 
