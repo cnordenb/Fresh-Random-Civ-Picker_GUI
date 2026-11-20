@@ -7,7 +7,7 @@
 # Fresh Random Civ Picker
 
 ## Usage  
-After you've started FRCP (see [Installation](#How-to-install-and-run-a-release)), simply press spacebar or click the Draw button to receive your fresh random civ. You can track the drawn and remaining civs in the log tab or alter the civ pool in the custom civ pool tab. To reset - undrawing all drawn civs - press enter or click the Reset button. Draw and Reset cannot be used while in the custom civ pool tab.
+Download the zip file in [releases](https://github.com/cnordenb/frcp-desktop/releases) and extract it in any folder. Run the .exe file.
 
 ## Contributing
 
