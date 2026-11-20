@@ -7,9 +7,6 @@
 #include "ParchmentRenderer.h"
 #include "PixelSurface.h"
 
-// The tooltip of the parchment theme (View): the web version's tan box (#tip) that follows the mouse, with the
-// external-link icon before the text of a button that opens another site. One layered window, made at startup,
-// shows every tooltip; its soft shadow is drawn with it.
 class ParchmentTooltip final
 {
 public:

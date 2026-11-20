@@ -5,11 +5,6 @@
 #include "CivPickerModel.h"
 #include "CivPickerView.h"
 
-// CONTROLLER of the Model-View-Controller design (HFDP ch. 12).
-// Takes the user's input from the view (menus, buttons, hotkeys, the Options dialog), works out what
-// it means and turns it into requests on the model, and tells the view when to change. It holds no
-// application logic of its own. As in HFDP, the controller creates its view; Run() is the startup
-// sequence that wires model, view and controller together and runs the message loop.
 class CivPickerController final
 {
 public:
@@ -29,7 +24,7 @@ public:
     void OpenAuthorPage();
     void Quit();
     void OnFatalError();
-     
+
     static bool IsValidLobbyCode(const std::wstring& lobby_code);
     static bool LoadCatalog(CivCatalog& catalog);
 

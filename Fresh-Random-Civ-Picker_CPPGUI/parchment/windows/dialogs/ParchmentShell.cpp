@@ -7,7 +7,7 @@
 namespace
 {
     const wchar_t* const LAYER_CLASS = L"FrcpParchmentLayer";
-    constexpr float DIM_PER_DIALOG = 0.85f; // dialog::backdrop { background: rgba(0, 0, 0, .15) }
+    constexpr float DIM_PER_DIALOG = 0.85f;
     constexpr int MAX_ROW_WIDTH = MAX_SHADOW_SIDE;
 
     uint32_t AlphaOf(uint32_t pixel) { return pixel >> 24; }
@@ -18,8 +18,6 @@ bool ParchmentShell::RegisterWindowClass(HINSTANCE instance)
     if (!c_assert(instance != NULL)) return false;
     WNDCLASSEXW class_info = {};
     class_info.cbSize = sizeof(class_info);
-    // The layers only show an image and never handle a message themselves, so Windows' own default procedure is
-    // their window procedure (a function pointer Win32 requires, CLAUDE2.md I2).
     class_info.lpfnWndProc = DefWindowProcW;
     class_info.hInstance = instance;
     class_info.lpszClassName = LAYER_CLASS;
@@ -57,7 +55,6 @@ void ParchmentShell::Destroy()
     backdrop.Destroy();
 }
 
-// The window's image is drawn here before Attach: the shared workspace's canvas.
 PixelSurface& ParchmentShell::Canvas() { return workspace->canvas; }
 
 PixelPoint ParchmentShell::WindowOrigin() const { return { margin, margin }; }
@@ -66,8 +63,6 @@ PixelSurface& ParchmentShell::Backdrop() { return backdrop; }
 
 const PixelSurface& ParchmentShell::Backdrop() const { return backdrop; }
 
-// Shapes the window after the image drawn on the canvas (at WindowOrigin, premultiplied BGRA): the opaque
-// pixels become the window and its backdrop, the rest the skin, with the shadow if the shell has a margin.
 bool ParchmentShell::Attach(HWND window, PixelSize size)
 {
     if (!c_assert(window != NULL) || !c_assert(skin == NULL) || !c_assert(workspace != nullptr)) return false;
@@ -83,57 +78,43 @@ bool ParchmentShell::Attach(HWND window, PixelSize size)
     skin = CreateLayer();
     dimmer = CreateLayer();
     if (!c_assert(skin != NULL && dimmer != NULL) || !ShowLayer(skin, 255)) return false;
-    // The dimmer gets its picture now, while the workspace holds this shape; dimming only changes its opacity.
     ComposeDimMask();
     return ShowLayer(dimmer, 255);
 }
 
-// Called as the window shows. A new window starts out black, and with WS_CLIPCHILDREN its own paint leaves its
-// controls' places black until each control has painted; the backdrop goes under them first, then they paint.
 void ParchmentShell::Reveal()
 {
     if (!c_assert(skin != NULL)) return;
-    // Without DCX_CLIPCHILDREN (or DCX_USESTYLE) the device context reaches under the controls.
     const HDC target = GetDCEx(owner, NULL, DCX_CACHE);
     if (target != NULL)
     {
         ShowBackdrop(target);
-        // ReleaseDC can't fail for a cache device context.
         (void)ReleaseDC(owner, target);
     }
-    // A paint that fails is repeated by the window's next one.
     (void)RedrawWindow(owner, nullptr, NULL, RDW_UPDATENOW | RDW_ALLCHILDREN);
-    // ShowWindow reports the earlier visibility, not success.
     (void)ShowWindow(skin, SW_SHOWNOACTIVATE);
 }
 
-// Called by the window's paint before it paints itself. Windows paints a window before its controls; drawing
-// the controls first lets the window and its controls change on the screen together, with no moment where the
-// window shows its new backdrop around the controls' old pictures.
 void ParchmentShell::PaintWaitingChildren() const
 {
     if (owner == NULL) return;
     HWND child = GetWindow(owner, GW_CHILD);
     for (int i = 0; i < MAX_CHILDREN && child != NULL; i++)
     {
-        // UpdateWindow paints only a child that waits for its paint; a failed paint is repeated by the next one.
         if (IsWindowVisible(child)) (void)UpdateWindow(child);
         child = GetWindow(child, GW_HWNDNEXT);
     }
-    // Children past MAX_CHILDREN paint after the window, as they would without this.
     (void)c_assert(child == NULL);
 }
 
 void ParchmentShell::ShowBackdrop(HDC target) const
 {
     if (!c_assert(target != NULL) || !c_assert(owner != NULL)) return;
-    // A failed copy leaves the window's earlier picture until its next paint.
     (void)BitBlt(target, 0, 0, window_size.width, window_size.height, backdrop.Dc(), 0, 0, SRCCOPY);
 }
 
 void ParchmentShell::Detach()
 {
-    // The layers belong to the owner and go with it anyway; destroying them first keeps no stale handles.
     if (skin != NULL) (void)DestroyWindow(skin);
     if (dimmer != NULL) (void)DestroyWindow(dimmer);
     skin = NULL;
@@ -155,13 +136,11 @@ bool ParchmentShell::ApplyRegion()
     const DWORD bytes = sizeof(RGNDATAHEADER) + data->rdh.nRgnSize;
     const HRGN region = ExtCreateRegion(nullptr, bytes, data);
     if (!c_assert(region != NULL)) return false;
-    // On success the window owns the region; on failure it is ours to free.
     const bool applied = SetWindowRgn(owner, region, TRUE) != 0;
     if (!applied) (void)DeleteObject(region);
     return c_assert(applied);
 }
 
-// Adds a rectangle for every fully opaque run of one row; returns the new count, or -1 when full.
 int ParchmentShell::AddRowRuns(int y, int rect_count)
 {
     uint8_t alpha_row[MAX_ROW_WIDTH] = {};
@@ -191,7 +170,6 @@ bool ParchmentShell::CopyBackdrop()
                            margin, margin, SRCCOPY) != FALSE);
 }
 
-// The CSS drop shadow: the image's alpha, moved down 12 px and blurred (a Gaussian of 12 px).
 void ParchmentShell::CastShadow()
 {
     if (margin == 0) return;
@@ -209,12 +187,9 @@ void ParchmentShell::CastShadow()
             shadow[static_cast<ptrdiff_t>(y) * width + x] = static_cast<uint8_t>(AlphaOf(source));
         }
     }
-    // A failed blur leaves a hard-edged shadow, which still shows the dialog; nothing else depends on it.
     (void)workspace->blur.Blur({ shadow, width, canvas_size.height, SHADOW_SIGMA });
 }
 
-// Turns the canvas into the skin: the image over its shadow, cleared where the window itself shows the image.
-// The coverage of every pixel (image and shadow together) stays behind for the dimming mask.
 void ParchmentShell::ComposeSkin()
 {
     uint32_t* pixels = workspace->canvas.Pixels();
@@ -239,7 +214,6 @@ void ParchmentShell::ComposeSkin()
     }
 }
 
-// The dimming mask: the shape in black, as opaque as the image and its shadow cover each pixel.
 void ParchmentShell::ComposeDimMask()
 {
     uint32_t* pixels = workspace->canvas.Pixels();
@@ -265,7 +239,6 @@ HWND ParchmentShell::CreateLayer()
                            owner_rect.top - margin, canvas_size.width, canvas_size.height, owner, NULL, instance, NULL);
 }
 
-// Hands the layer the workspace canvas as its picture; the layer keeps its own copy.
 bool ParchmentShell::ShowLayer(HWND layer, BYTE opacity)
 {
     RECT owner_rect = {};
@@ -278,7 +251,6 @@ bool ParchmentShell::ShowLayer(HWND layer, BYTE opacity)
                                         ULW_ALPHA) != FALSE);
 }
 
-// Dims the shape once for each dialog open over it.
 void ParchmentShell::Dim(int depth)
 {
     if (!c_assert(depth >= 0) || dimmer == NULL) return;
@@ -289,7 +261,6 @@ void ParchmentShell::Dim(int depth)
     }
     const float dimmed = 1.0f - std::pow(DIM_PER_DIALOG, static_cast<float>(depth));
     BLENDFUNCTION blend = { AC_SRC_OVER, 0, static_cast<BYTE>(std::lround(dimmed * 255.0f)), AC_SRC_ALPHA };
-    // The dimmer's picture is unchanged, so only its opacity goes to UpdateLayeredWindow (no source DC).
     if (!c_assert(UpdateLayeredWindow(dimmer, NULL, nullptr, nullptr, NULL, nullptr, 0, &blend, ULW_ALPHA) != FALSE))
         return;
     (void)ShowWindow(dimmer, SW_SHOWNOACTIVATE);
@@ -302,7 +273,6 @@ void ParchmentShell::Follow()
     const UINT flags = SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE;
     const int left = owner_rect.left - margin;
     const int top = owner_rect.top - margin;
-    // A layer that couldn't move catches up with the next move; nothing else depends on it.
     if (skin != NULL) (void)SetWindowPos(skin, NULL, left, top, 0, 0, flags);
     if (dimmer != NULL) (void)SetWindowPos(dimmer, NULL, left, top, 0, 0, flags);
 }

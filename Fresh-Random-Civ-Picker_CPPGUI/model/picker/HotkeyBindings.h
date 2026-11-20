@@ -5,18 +5,10 @@
 #include "CivDataLimits.h"
 #include "GlobalConstants.h"
 
-// Part of the MODEL: the program's hotkeys, what each one does, where it works and the key it has, which the user
-// can change (Options > Customise). A hotkey works on every tab or on one; a keystroke means at most one thing on
-// each tab, so no two hotkeys that can work at the same time share it. Plain C++, unit-tested.
-
-// Where a hotkey works, which is also its section of the Hotkeys dialog.
 enum class HotkeyScope { global, draw_tab, log_tab, civ_pool_tab };
 
 constexpr int HOTKEY_SCOPE_COUNT = 4;
 
-// What a hotkey does: one for each line of the Hotkeys dialog, in its order (the global ones, then each tab's).
-// The editions' hotkeys pick the editions by their place in data.json, the DLC slots' toggle the DLC in that place
-// of the current edition's toggles (A to L by default).
 enum class HotkeyAction
 {
     cycle_tabs,
@@ -69,7 +61,7 @@ enum class HotkeyAction
     dlc_slot_7,
     dlc_slot_8,
     dlc_slot_9,
-    none // no hotkey; also the number of the others
+    none
 };
 
 constexpr int HOTKEY_ACTION_COUNT = static_cast<int>(HotkeyAction::none);
@@ -78,9 +70,6 @@ static_assert(static_cast<int>(HotkeyAction::edition_3) - static_cast<int>(Hotke
 static_assert(static_cast<int>(HotkeyAction::dlc_slot_9) - static_cast<int>(HotkeyAction::dlc_slot_1) + 1 ==
                   DLC_HOTKEY_COUNT, "a DLC slot hotkey for each DLC toggle that has one");
 
-// A key and the modifier keys held with it, numbered as Windows numbers them for RegisterHotKey: a virtual-key
-// code (0 for no key; letters and digits are their capital ASCII characters) and MOD_ALT, MOD_CONTROL and
-// MOD_SHIFT. The controller checks that these numbers are Windows'.
 struct Keystroke
 {
     uint8_t modifiers;
@@ -124,8 +113,6 @@ constexpr uint8_t KEY_F1 = 0x70;
 constexpr uint8_t KEY_F11 = 0x7A;
 constexpr uint8_t KEY_F12 = 0x7B;
 
-// A keystroke's name, as the program shows and saves it: "Ctrl+S", "Space", "Num 5"; "None" for no key, and empty
-// for a key without a name.
 struct KeystrokeName
 {
     static constexpr int MAX_LENGTH = 31;
@@ -138,24 +125,18 @@ struct ReadKeystroke
     Keystroke keystroke;
 };
 
-// Whether a keystroke can be a hotkey: the key has a name here (letters, digits, F1 to F12, the editing and arrow
-// keys, the number pad), and Windows doesn't keep it for itself (F12 for debuggers, Alt+Tab and the like).
 enum class KeystrokeUse { usable, unnamed_key, kept_by_windows };
 
 KeystrokeName NameKeystroke(Keystroke keystroke);
 ReadKeystroke ParseKeystroke(const wchar_t* text);
 KeystrokeUse CheckKeystroke(Keystroke keystroke);
 
-// Which key each hotkey has. The editions' and DLC slots' hotkeys that data.json gives nothing to do are unused:
-// they keep their default keys, take no key from the others, and do nothing.
 class HotkeyBindings final
 {
 public:
-    // A global keystroke can be in use on each of the three tabs: at most this many hotkeys lose it to another.
     static constexpr int MAX_CLASHES = 3;
     static constexpr int NO_PLACE = -1;
 
-    // The hotkeys whose keystroke another hotkey would take from them.
     struct Clashes
     {
         HotkeyAction actions[MAX_CLASHES];
@@ -167,8 +148,6 @@ public:
     static HotkeyScope ScopeOf(HotkeyAction action);
     static Keystroke DefaultKeystrokeOf(HotkeyAction action);
     static const wchar_t* SettingNameOf(HotkeyAction action);
-    // An edition's hotkey's edition by its place in data.json, and a DLC slot's hotkey's place in an edition's
-    // toggles; NO_PLACE for the other hotkeys. The hotkeys in those places, and none past the last.
     static int EditionOf(HotkeyAction action);
     static int DlcSlotOf(HotkeyAction action);
     static HotkeyAction EditionHotkey(int edition);

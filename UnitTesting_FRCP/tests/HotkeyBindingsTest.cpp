@@ -5,9 +5,6 @@
 
 #include "HotkeyBindings.cpp"
 
-// The program's hotkeys: the keys they start with, what a keystroke does on each tab, changing them as the
-// Customise Hotkeys dialog does, and their names in settings.ini.
-
 namespace
 {
     constexpr HotkeyScope TABS[] = { HotkeyScope::draw_tab, HotkeyScope::log_tab, HotkeyScope::civ_pool_tab };
@@ -20,7 +17,6 @@ namespace
                                           MODIFIER_ALT | MODIFIER_SHIFT,
                                           MODIFIER_CONTROL | MODIFIER_ALT | MODIFIER_SHIFT };
 
-    // The keys the program had before they could be changed, in the Hotkeys dialog's order.
     const wchar_t* const DEFAULT_KEYS[HOTKEY_ACTION_COUNT] = {
         L"Tab", L"1", L"2", L"3", L"F1", L"F2", L"F3", L"F4", L"F5", L"F9", L"Ctrl+S", L"Ctrl+R", L"P", L"U",
         L"Ctrl+F", L"Ctrl+Z", L"Ctrl+X", L"Ctrl+T", L"Z", L"X", L"C", L"V", L"B", L"Esc",
@@ -29,7 +25,7 @@ namespace
         L"Space", L"Enter", L"Q", L"W", L"E", L"R", L"T", L"A", L"S", L"D", L"F", L"G", L"H", L"J", L"K", L"L" };
     constexpr uint8_t KEY_F4 = KEY_F1 + 3;
     constexpr uint8_t KEY_NUMPAD_5 = KEY_NUMPAD_0 + 5;
-    constexpr uint8_t KEY_SEMICOLON = 0xBA; // a punctuation key, which depends on the keyboard's layout
+    constexpr uint8_t KEY_SEMICOLON = 0xBA;
     constexpr uint8_t MODIFIER_WINDOWS = 0x8;
 
     HotkeyBindings AllInUse() { return HotkeyBindings(MAX_EDITIONS, DLC_HOTKEY_COUNT); }
@@ -42,7 +38,6 @@ namespace
 
     Keystroke Held(uint8_t modifiers, uint8_t key) { return { modifiers, key }; }
 
-    // Every pair of hotkeys that can work at the same time has two keystrokes, or at least one without a key.
     bool NoClashAnywhere(const HotkeyBindings& hotkeys)
     {
         for (int i = 0; i < HOTKEY_ACTION_COUNT; i++)
@@ -132,7 +127,6 @@ TEST(HotkeyActionTest, AKeystrokeWithoutAHotkeyMeansNothing)
 
 TEST(HotkeyActionTest, HotkeysDataJsonGivesNothingToDoAreUnused)
 {
-    // Two editions, and at most three DLC toggles in an edition.
     const HotkeyBindings hotkeys(2, 3);
 
     EXPECT_TRUE(hotkeys.IsUsed(HotkeyAction::edition_2));
@@ -306,9 +300,6 @@ TEST(KeystrokeNameTest, EveryUsableKeystrokeIsReadBackFromItsName)
             EXPECT_TRUE(read.ok && read.keystroke == keystroke) << NameOf(keystroke).c_str();
         }
     }
-    // 26 letters, 10 digits, 11 function keys, 10 number pad digits and 20 other keys, each with the 8 sets of
-    // modifiers, less the 20 Windows keeps: Tab, F4 and Space with the 4 sets that hold Alt, Esc with the 6 that
-    // hold Alt or Ctrl, and Delete with the 2 that hold Ctrl and Alt.
     EXPECT_EQ(usable, 77 * 8 - 20);
 }
 

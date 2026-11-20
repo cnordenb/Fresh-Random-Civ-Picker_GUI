@@ -6,6 +6,7 @@
 #include <string>
 
 #include "CivPickerModel.h"
+#include "CivPickerViewTypes.h"
 #include "ParchmentButtons.h"
 #include "ParchmentDialog.h"
 #include "ParchmentLog.h"
@@ -18,26 +19,12 @@
 #include "ParchmentWidgets.h"
 #include "PixelSurface.h"
 
-class CivPickerController;
-
-// VIEW of the Model-View-Controller design (HFDP ch. 12).
-// Owns every window, control, dialog, image, font and sound. It observes the model and pulls the state it
-// displays from it, but can only read it (it holds a const reference). User input is handed to the controller
-// (its Strategy); the view knows how to change the display, the controller decides when. Dialogs that only
-// present model data (About, Hotkeys, History) handle their own presentation-only interactions.
-// Everything is drawn in the parchment theme of the web version (frcp.net): the Parchment* classes are the
-// View's components (HFDP ch. 9 Composite of windows), and this class arranges them.
-
-enum class SoundType { button, tabsound, hover, view, error };
-
 class CivPickerView final : public CivPickerObserver
 {
 public:
     static constexpr int DRAW_TAB = 0;
     static constexpr int LOG_TAB = 1;
     static constexpr int CIV_POOL_TAB = 2;
-    // The controls and menu items made from data.json have IDs from a base plus their number there: a civ toggle
-    // its civ's ID, a DLC toggle its DLC's number, an edition row its edition's, a Game menu link its link's.
     static constexpr int CIV_CHECKBOX_BASE_ID = 5;
     static constexpr int EDITION_ROW_BASE_ID = 7950;
     static constexpr int DLC_SCROLLBAR_BASE_ID = 7960;
@@ -47,7 +34,6 @@ public:
     static_assert(DLC_SCROLLBAR_BASE_ID + MAX_EDITIONS <= DLC_TOGGLE_BASE_ID, "scrollbars and DLC toggles apart");
     static_assert(DLC_TOGGLE_BASE_ID + MAX_DLCS <= EDITION_LINK_BASE_ID, "DLC toggles and links apart");
 
-    // A WM_COMMAND of the Options dialog together with the state of all its controls.
     struct OptionsEvent
     {
         int command_id;
@@ -64,16 +50,8 @@ public:
     };
     struct LobbyInput { INT_PTR result; std::wstring code; };
 
-    // A pool's two share links, and the number of draws the second one carries (the Share dialog).
-    struct ShareLinks
-    {
-        const wchar_t* pool;
-        const wchar_t* round;
-        int draw_count;
-    };
     struct FileChoice { bool chosen; std::wstring path; };
 
-    // What became of a key chosen in the Customise Hotkeys dialog, which its status lines tell.
     enum class KeyChoice { assigned, cleared, kept_by_windows, unnamed_key, defaults_restored };
     struct KeyChange
     {
@@ -163,128 +141,6 @@ public:
     void OnModelError(const std::wstring& message, bool fatal) override;
 
 private:
-    static constexpr int MAX_TOOLTIP_TEXT = 256;
-    // The tooltips: these, then one per edition row and one per DLC.
-    enum FixedTooltip
-    {
-        TOOLTIP_DRAW,
-        TOOLTIP_RESET,
-        TOOLTIP_CLEAR,
-        TOOLTIP_ENABLEALL,
-        TOOLTIP_DISABLEALL,
-        TOOLTIP_TECHTREE,
-        TOOLTIP_REMAININGTOGGLE,
-        TOOLTIP_AUTOTOGGLE,
-        TOOLTIP_AUTORESET,
-        TOOLTIP_OPTIONS,
-        TOOLTIP_SURVAPP,
-        TOOLTIP_HISTORY,
-        TOOLTIP_SHARE,
-        TOOLTIP_POOLSHARE,
-        FIXED_TOOLTIP_COUNT
-    };
-    static constexpr int EDITION_TOOLTIP_BASE = FIXED_TOOLTIP_COUNT;
-    static constexpr int DLC_TOOLTIP_BASE = EDITION_TOOLTIP_BASE + MAX_EDITIONS;
-    static constexpr int TOOLTIP_AMOUNT = DLC_TOOLTIP_BASE + MAX_DLCS;
-    static constexpr int MENU_COUNT = 6;
-    static constexpr int MAX_GAME_ITEMS = MAX_EDITIONS * MAX_EDITION_LINKS + 1;
-    static constexpr int MAX_MENU_LABEL = 64;
-    static constexpr int MAX_HOTKEY_TEXT = 96;
-    static constexpr int MAX_EDITOR_PARTS = HOTKEY_SCOPE_COUNT + 2 * ParchmentDialogs::MAX_KEY_BUTTONS + 5;
-    static constexpr int MAX_EDITOR_STATUS = 256;
-    static constexpr int MAX_ABOUT_LEGAL = 512;
-    static constexpr UINT_PTR TOAST_TIMER = 2;
-    static constexpr int MAX_SHARE_NOTE = 128;
-    static constexpr int MAX_PREVIEW_DECORATIONS = 8;
-    static constexpr int MAX_PREVIEW_POOL = 768;
-    static constexpr int MAX_PREVIEW_ROUND = 3072;
-
-    static constexpr int MAX_LOG_TEXT = ParchmentLog::MAX_TEXT_LENGTH;
-    static constexpr int MAX_HOTKEY_DECORATIONS = 160;
-    static constexpr int MAX_MESSAGE_TEXT = 512;
-    static constexpr int MAX_MESSAGE_TITLE = 64;
-    static constexpr int ABOUT_DECORATIONS = 5;
-    static constexpr int ABOUT_LINKS = 3;
-
-    enum class DrawnLogUpdate { count_only, entry, blank_line };
-
-    struct SoundResource
-    {
-        HRSRC info;
-        HGLOBAL handle;
-        LPVOID data;
-        LPCWSTR name;
-    };
-
-    // One line of the Open Shared Link dialog's facts (dl.facts): a term and its text, which wraps.
-    struct PreviewFact
-    {
-        const wchar_t* term;
-        const wchar_t* text;
-    };
-
-    // A jingle file mapped into memory, where it stays until the program ends; null if it couldn't be.
-    struct MappedJingle
-    {
-        const void* data;
-    };
-
-    struct TooltipTarget { HWND control; int tooltip_id; };
-
-    // Where one DLC toggle goes (data.json dlcToggleLayout): its top-left corner, icon size and gap.
-    struct DlcToggleSpot
-    {
-        int left;
-        int top;
-        int size;
-        int gap;
-    };
-
-    struct Tooltip
-    {
-        wchar_t text[MAX_TOOLTIP_TEXT];
-        bool external;
-    };
-
-    // A line of the Hotkeys dialog: a hotkey, its key and what it does.
-    struct HotkeyItem
-    {
-        HotkeyAction action;
-        const wchar_t* key;
-        const wchar_t* text;
-    };
-
-    struct HotkeyItemSpan
-    {
-        const HotkeyItem* items;
-        int count;
-    };
-
-    struct HotkeySection
-    {
-        const wchar_t* title;
-        HotkeyItemSpan items;
-        float left;
-        float top;
-        float column_width;
-        int rows;
-    };
-
-    // A notification from a key of the Customise Hotkeys dialog's rows.
-    struct EditorKeyEvent
-    {
-        int row;
-        WORD notification;
-        HWND control;
-    };
-
-    // The Customise Hotkeys dialog's two status lines.
-    struct EditorStatus
-    {
-        wchar_t status[MAX_EDITOR_STATUS];
-        wchar_t detail[MAX_EDITOR_STATUS];
-    };
-
     static LRESULT CALLBACK MainWindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam);
     static INT_PTR CALLBACK AboutDialogProc(HWND dialog, UINT message, WPARAM wParam, LPARAM lParam) noexcept;
     static INT_PTR CALLBACK OptionsDialogProc(HWND dialog, UINT message, WPARAM wParam, LPARAM lParam) noexcept;
@@ -299,7 +155,6 @@ private:
     static CivPickerView* FromWindow(HWND window);
     static CivPickerView* AttachDialog(HWND dialog, UINT message, LPARAM lParam);
 
-    // --- The main window (CivPickerView.cpp) ---
     LRESULT HandleMainWindowMessage(const MSG& message);
     LRESULT OnDestroy();
     LRESULT OnCreate(HWND window);
@@ -319,7 +174,6 @@ private:
     bool RegisterWindowClasses();
     PixelPoint CentredWindowPosition() const;
 
-    // --- Building the main window (CivPickerViewLayout.cpp) ---
     bool BuildMainShell();
     bool DecorateMainBackdrop();
     bool CreateMainControls();
@@ -342,7 +196,6 @@ private:
     void SetTooltip(int tooltip_id, const wchar_t* text);
     void CollectTooltipTargets();
 
-    // --- Tabs and control visibility ---
     void ShowDrawTab(bool showing_enabled);
     void ShowLogTab(bool showing_enabled);
     void ShowCustomTab(bool showing_enabled);
@@ -354,7 +207,6 @@ private:
     void ShowControl(HWND control, bool shown);
     bool HasDlcToggle(int dlc) const;
 
-    // --- Labels, logs and tooltips (CivPickerViewObserver.cpp) ---
     std::wstring IterationText() const;
     int CivAtlasCell(const std::wstring& civ_name) const;
     void ShowCivIconFor(const std::wstring& civ_name);
@@ -367,7 +219,6 @@ private:
     void UpdateTooltipText(int tooltip_id, const std::wstring& text);
     void SetControlText(HWND control, const wchar_t* text);
 
-    // --- The DLC toggles' lists, which scroll once they don't fit (CivPickerViewDlcToggles.cpp) ---
     bool CreateDlcToggles();
     bool CreateDlcToggle(int dlc, const DlcToggleSpot& spot);
     bool CreateDlcScrollbar(int edition);
@@ -378,12 +229,10 @@ private:
     void LayOutDlcToggles(int edition);
     void HideDlcToggles(int edition);
 
-    // --- Images and cursors (CivPickerViewImages.cpp) ---
     ImageSources CollectImageSources();
     void ReportMissingImages() const;
     void UpdateCursorSize();
 
-    // --- Sounds and jingles ---
     void LoadSound(SoundResource& sound_resource);
     void LoadJingles();
     MappedJingle MapJingle(const std::wstring& file_name) const;
@@ -391,7 +240,6 @@ private:
     void PlayResource(const SoundResource& sound_resource) const;
     void PlayWave(const void* wave) const;
 
-    // --- Dialogs (CivPickerViewDialogs.cpp) ---
     INT_PTR RunDialog(const ParchmentDialogs::Run& run);
     INT_PTR BeginDialog(HWND dialog);
     bool BuildDialogLayouts();
@@ -415,7 +263,6 @@ private:
     void HidePoolInfo(HWND dialog) const;
     bool OnAboutCommand(HWND dialog, int command_id);
 
-    // --- Hotkeys (CivPickerViewHotkeys.cpp) ---
     void RefreshHotkeyNames();
     const wchar_t* KeyNameOf(HotkeyAction action) const;
     const wchar_t* ShownKeyOf(HotkeyAction action) const;
@@ -449,7 +296,6 @@ private:
     EditorStatus DescribeAssignedKey(const KeyChange& change) const;
     void SetEditorStatus(HWND editor, const EditorStatus& text);
 
-    // --- Share links (CivPickerViewShare.cpp) ---
     bool BuildShareLayout(const ShareLinks& links);
     INT_PTR BeginShareDialog(HWND dialog);
     bool OnShareCommand(HWND dialog, int command_id);
@@ -540,7 +386,6 @@ private:
     int hotkey_decoration_count = 0;
     DialogPart hotkeys_parts[1] = {};
     DialogLayout hotkeys_layout = {};
-    // Each hotkey's key by name (empty without one), and the texts data.json gives the editions' and DLC slots'.
     KeystrokeName hotkey_keys[HOTKEY_ACTION_COUNT] = {};
     wchar_t slot_hotkey_texts[MAX_EDITIONS + DLC_HOTKEY_COUNT][MAX_HOTKEY_TEXT] = {};
     HotkeyItem hotkey_items[HOTKEY_ACTION_COUNT] = {};

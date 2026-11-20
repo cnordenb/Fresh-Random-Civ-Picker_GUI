@@ -362,8 +362,12 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /WindowsProject1/main.c
-CLAUDE.md
-ISSUES.md
 
 materials/
 TODO.md
+
+.vscode/
+temp/
+.claude/settings.local.json
+.metrics/
+target/

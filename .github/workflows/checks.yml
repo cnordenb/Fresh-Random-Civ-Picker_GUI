@@ -1,0 +1,32 @@
+name: Checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    timeout-minutes: 30
+    steps:
+      - name: Get the code
+        run: |
+          git init --quiet .
+          git fetch --quiet --depth=1 \
+            "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "${{ github.sha }}"
+          git checkout --quiet FETCH_HEAD
+      - name: Check the rules that a script can check
+        env:
+          TEMPLATE: ${{ github.event.repository.is_template }}
+        run: bash .github/scripts/check-rules.sh
+      - name: Run the tests
+        if: always()
+        env:
+          TEST_COMMAND: 'bash UnitTesting_FRCP/run-tests.sh'
+        run: |
+          if [ -z "$TEST_COMMAND" ]; then
+            echo "::warning::No tests run yet: set TEST_COMMAND in .github/workflows/checks.yml."
+            exit 0
+          fi
+          bash -c "$TEST_COMMAND"

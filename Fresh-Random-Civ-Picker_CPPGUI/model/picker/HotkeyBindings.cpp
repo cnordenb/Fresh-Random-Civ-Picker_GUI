@@ -12,7 +12,7 @@ namespace
         HotkeyAction action;
         HotkeyScope scope;
         Keystroke default_keystroke;
-        const wchar_t* setting_name; // its key in settings.ini
+        const wchar_t* setting_name;
     };
 
     constexpr Keystroke Plain(uint8_t key) { return { 0, key }; }
@@ -21,7 +21,6 @@ namespace
 
     constexpr uint8_t FunctionKey(int number) { return static_cast<uint8_t>(KEY_F1 + number - 1); }
 
-    // The keys the program always had, global ones first, then the Draw Civ, Log and Civ Pool tabs'.
     constexpr HotkeyDefinition DEFINITIONS[HOTKEY_ACTION_COUNT] = {
         { HotkeyAction::cycle_tabs, HotkeyScope::global, Plain(KEY_TAB), L"CycleTabs" },
         { HotkeyAction::show_draw_tab, HotkeyScope::global, Plain('1'), L"ShowDrawTab" },
@@ -86,7 +85,6 @@ namespace
     }
     static_assert(DefinitionsInActionOrder(), "DEFINITIONS defines every action, in the order of HotkeyAction");
 
-    // The keys named here besides the letters, the digits, the number pad's digits and F1 to F12.
     struct NamedKey
     {
         uint8_t key;
@@ -103,7 +101,6 @@ namespace
         { KEY_DECIMAL, L"Num ." },       { KEY_DIVIDE, L"Num /" },
     };
 
-    // The modifiers in the order their names lead a keystroke's name.
     struct NamedModifier
     {
         uint8_t modifier;
@@ -114,9 +111,6 @@ namespace
         { MODIFIER_CONTROL, L"Ctrl+" }, { MODIFIER_ALT, L"Alt+" }, { MODIFIER_SHIFT, L"Shift+" } };
     constexpr uint8_t ALL_MODIFIERS = MODIFIER_ALT | MODIFIER_CONTROL | MODIFIER_SHIFT;
 
-    // A key Windows answers itself while a modifier is held: switching windows (Alt+Tab, Alt+Esc), the Start menu
-    // (Ctrl+Esc), closing the window (Alt+F4), its window menu (Alt+Space) and the security screen
-    // (Ctrl+Alt+Delete). F12 it keeps for debuggers with any modifiers, or none.
     struct KeptKeystroke
     {
         uint8_t key;
@@ -133,10 +127,9 @@ namespace
         { KEY_F12, 0 },
     };
 
-    constexpr int MAX_KEY_LABEL = 10; // "Backspace" and its terminating null
-    constexpr int HIGHEST_KEY = 0xFE; // Windows' virtual-key codes run from 1 to 254
+    constexpr int MAX_KEY_LABEL = 10;
+    constexpr int HIGHEST_KEY = 0xFE;
 
-    // The name of a key without its modifiers; empty for a key without one.
     struct KeyLabel
     {
         wchar_t text[MAX_KEY_LABEL];
@@ -148,14 +141,12 @@ namespace
         return index >= 0 && index < HOTKEY_ACTION_COUNT;
     }
 
-    // The action's place among count actions from first on, or NO_PLACE.
     int PlaceAmong(HotkeyAction action, HotkeyAction first, int count)
     {
         const int place = static_cast<int>(action) - static_cast<int>(first);
         return place >= 0 && place < count ? place : HotkeyBindings::NO_PLACE;
     }
 
-    // The action in this place among count actions from first on, or none.
     HotkeyAction ActionInPlace(HotkeyAction first, int place, int count)
     {
         if (place < 0 || place >= count) return HotkeyAction::none;
@@ -172,7 +163,6 @@ namespace
             label.text[0] = static_cast<wchar_t>(key);
             return label;
         }
-        // The longest label written here, "Num 9" or "F12", fits its buffer.
         if (key >= KEY_NUMPAD_0 && key <= KEY_NUMPAD_9) (void)swprintf_s(label.text, L"Num %d", key - KEY_NUMPAD_0);
         if (key >= KEY_F1 && key <= KEY_F12) (void)swprintf_s(label.text, L"F%d", key - KEY_F1 + 1);
         for (const NamedKey& named : NAMED_KEYS)
@@ -184,7 +174,6 @@ namespace
 
     bool HasLabel(uint8_t key) { return LabelOf(key).text[0] != L'\0'; }
 
-    // The key whose label this text is, in any case, or 0 if none has.
     uint8_t KeyLabelled(const wchar_t* text)
     {
         if (!c_assert(text != nullptr) || text[0] == L'\0') return 0;
@@ -206,7 +195,6 @@ namespace
         return false;
     }
 
-    // Hotkeys can work at the same time when one is global or both work on the same tab.
     bool ScopesOverlap(HotkeyScope first, HotkeyScope second)
     {
         return first == second || first == HotkeyScope::global || second == HotkeyScope::global;
@@ -217,7 +205,6 @@ bool operator==(Keystroke left, Keystroke right) { return left.modifiers == righ
 
 bool operator!=(Keystroke left, Keystroke right) { return !(left == right); }
 
-// Modifiers first, in the order Ctrl, Alt, Shift: "Ctrl+Shift+S". A key without a name gives an empty name.
 KeystrokeName NameKeystroke(Keystroke keystroke)
 {
     KeystrokeName name = {};
@@ -232,12 +219,10 @@ KeystrokeName NameKeystroke(Keystroke keystroke)
     {
         if ((keystroke.modifiers & named.modifier) != 0) (void)wcscat_s(name.characters, named.prefix);
     }
-    // The longest name, "Ctrl+Alt+Shift+Backspace", fits the buffer.
     (void)wcscat_s(name.characters, label.text);
     return name;
 }
 
-// Reads a keystroke's name, in any case: its modifiers, each once and in NameKeystroke's order, then its key.
 ReadKeystroke ParseKeystroke(const wchar_t* text)
 {
     const ReadKeystroke refused = { false, NO_KEYSTROKE };
@@ -265,8 +250,6 @@ KeystrokeUse CheckKeystroke(Keystroke keystroke)
     return KeystrokeUse::usable;
 }
 
-// Every hotkey starts with its default key. The editions' hotkeys beyond data.json's editions, and the DLC slots'
-// beyond the most DLC toggles an edition has, are unused.
 HotkeyBindings::HotkeyBindings(int edition_count, int most_dlc_toggles) :
     used_editions(std::min(std::max(edition_count, 0), MAX_EDITIONS)),
     used_dlc_slots(std::min(std::max(most_dlc_toggles, 0), DLC_HOTKEY_COUNT))
@@ -330,7 +313,6 @@ Keystroke HotkeyBindings::KeystrokeOf(HotkeyAction action) const
     return keystrokes[static_cast<int>(action)];
 }
 
-// What the keystroke does on this tab: a global hotkey's, else the tab's own, else none.
 HotkeyAction HotkeyBindings::ActionFor(Keystroke keystroke, HotkeyScope tab) const
 {
     if (keystroke == NO_KEYSTROKE) return HotkeyAction::none;
@@ -345,7 +327,6 @@ HotkeyAction HotkeyBindings::ActionFor(Keystroke keystroke, HotkeyScope tab) con
     return tab_action;
 }
 
-// The hotkeys that have this keystroke where this one would work too, which giving it to this one takes it from.
 HotkeyBindings::Clashes HotkeyBindings::ClashesWith(HotkeyAction action, Keystroke keystroke) const
 {
     Clashes clashes = {};
@@ -356,7 +337,6 @@ HotkeyBindings::Clashes HotkeyBindings::ClashesWith(HotkeyAction action, Keystro
         const HotkeyAction other = static_cast<HotkeyAction>(i);
         if (other == action || keystrokes[i] != keystroke || !IsUsed(other)) continue;
         if (!ScopesOverlap(scope, DEFINITIONS[i].scope)) continue;
-        // No two hotkeys that work together share a keystroke, so it is in use at most once on each tab.
         if (!c_assert(clashes.count < MAX_CLASHES)) return clashes;
         clashes.actions[clashes.count] = other;
         clashes.count++;
@@ -364,7 +344,6 @@ HotkeyBindings::Clashes HotkeyBindings::ClashesWith(HotkeyAction action, Keystro
     return clashes;
 }
 
-// Gives the hotkey a keystroke that can be one, taking it from the hotkeys it clashes with; false if it can't.
 bool HotkeyBindings::Assign(HotkeyAction action, Keystroke keystroke)
 {
     if (!c_assert(IsKnownAction(action)) || !IsUsed(action)) return false;

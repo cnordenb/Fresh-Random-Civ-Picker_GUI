@@ -7,9 +7,6 @@
 #include "ParchmentRenderer.h"
 #include "PixelSurface.h"
 
-// The web version's status message (#toast) (View): a dark rounded box of one line, centred just below the window,
-// that fades in, stays a while and fades out. One layered window, made at startup, shows every message; its shadow
-// is drawn with it. The window that owns it runs a timer while a message shows and calls Tick on each tick.
 class ParchmentToast final
 {
 public:

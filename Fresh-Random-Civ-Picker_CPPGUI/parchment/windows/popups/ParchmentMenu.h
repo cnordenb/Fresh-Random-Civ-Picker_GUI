@@ -4,8 +4,6 @@
 #include "ParchmentControl.h"
 #include "ParchmentGeometry.h"
 
-// One item of a menu; an item without a label is a separator. A shortcut is shown on the right, and an item that
-// opens another site shows the external-link icon.
 struct MenuItemSpec
 {
     const wchar_t* label;
@@ -22,11 +20,6 @@ struct MenuSpec
     int item_count;
 };
 
-// The menu bar of the parchment theme (View): the web version's titles (.menubar) and their dark brown lists with
-// gold highlights (.menu-list). It replaces the window menu and keeps its keyboard use: Alt with a title's
-// letter or F10 opens a menu, the arrow keys move through the menus and items, Enter chooses and Esc closes.
-// A chosen item is posted to the parent as WM_COMMAND with its command ID, as a window menu does. The items'
-// texts may change while the bar lives (the hotkeys' keys), after which Remeasure fits the lists to them.
 class ParchmentMenuBar final
 {
 public:

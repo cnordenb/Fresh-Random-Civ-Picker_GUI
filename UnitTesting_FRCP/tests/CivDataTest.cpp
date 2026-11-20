@@ -3,10 +3,9 @@
 #include "TestData.h"
 
 #include "CivCatalog.cpp"
+#include "CivCatalogLookup.cpp"
 #include "JsonReader.cpp"
-
-// JsonDocument reads JSON as RFC 8259 defines it. CivCatalog reads the program's own data.json, so these tests hold
-// for whatever editions, DLCs and civs it lists; the files with problems are data.json with one thing changed.
+#include "JsonReaderAccess.cpp"
 
 namespace
 {
@@ -26,8 +25,6 @@ namespace
 
     bool Contains(const std::wstring& text, const std::wstring& part) { return text.find(part) != std::wstring::npos; }
 }
-
-// --- JsonDocument ---
 
 TEST(Json, FindsObjectMembersByKey)
 {
@@ -76,7 +73,6 @@ TEST(Json, DecodesEscapes)
 
 TEST(Json, DecodesUtf8IncludingCharactersBeyondTheBasicPlane)
 {
-    // U+00F6 takes two bytes, U+20AC three and U+1F600 four, which UTF-16 writes as a surrogate pair.
     const JsonDocument document = Parsed("[\"\xC3\xB6 \xE2\x82\xAC \xF0\x9F\x98\x80\"]");
     EXPECT_EQ(TextOf(document, document.Element(document.Root(), 0)), L"\u00F6 \u20AC \xD83D\xDE00");
 }
@@ -85,7 +81,7 @@ TEST(Json, RefusesMalformedUtf8InText)
 {
     const JsonDocument document = Parsed("[\"\xC3\x28\", \"\xE0\x80\x80\"]");
     EXPECT_FALSE(document.Text(document.Element(document.Root(), 0)).ok);
-    EXPECT_FALSE(document.Text(document.Element(document.Root(), 1)).ok); // an overlong encoding
+    EXPECT_FALSE(document.Text(document.Element(document.Root(), 1)).ok);
 }
 
 TEST(Json, ReadsWholeNumbersOnly)
@@ -97,7 +93,7 @@ TEST(Json, ReadsWholeNumbersOnly)
     EXPECT_TRUE(document.Integer(document.Element(root, 2)).ok);
     EXPECT_FALSE(document.Integer(document.Element(root, 3)).ok);
     EXPECT_FALSE(document.Integer(document.Element(root, 4)).ok);
-    EXPECT_FALSE(document.Integer(document.Element(root, 5)).ok); // more digits than an int is sure to hold
+    EXPECT_FALSE(document.Integer(document.Element(root, 5)).ok);
 }
 
 TEST(Json, TellsTypesApart)
@@ -157,8 +153,6 @@ TEST(Json, ReportsTheLineWhereItStopped)
     EXPECT_EQ(document.ErrorLine(), 3);
 }
 
-// --- CivCatalog with the program's data.json ---
-
 TEST(CivCatalog, LoadsTheProgramsDataFile)
 {
     CivCatalog catalog;
@@ -208,7 +202,6 @@ TEST(CivCatalog, EachDlcToggleKnowsItsPlace)
     EXPECT_EQ(dlcs_with_toggles, toggles);
 }
 
-// The icon files are named in data.json: every edition's icon and banner, and the icon of every DLC that has one.
 TEST(CivCatalog, NamesTheIconFilesOfEveryEditionAndDlc)
 {
     CivCatalog catalog;
@@ -227,7 +220,6 @@ TEST(CivCatalog, NamesTheIconFilesOfEveryEditionAndDlc)
 
 namespace
 {
-    // data.json with extra DLCs of the first edition, toggled at the top of its list, as a new DLC is added.
     std::string ProgramDataFileWithNewDlcs(int count)
     {
         CivCatalog original;

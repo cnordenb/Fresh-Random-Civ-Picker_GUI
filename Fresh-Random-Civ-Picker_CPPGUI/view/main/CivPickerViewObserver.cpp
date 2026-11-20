@@ -3,12 +3,6 @@
 #include "Assertions.h"
 #include "CivPickerController.h"
 
-// The view as the model's observer (CivPickerView): the model's notifications, and the labels, logs and tooltips
-// they bring up to date from the model's state.
-
-// ---------------------------------------------------------------------------------------------------
-// Rendering model state (Observer notifications, HFDP ch. 2 and 12)
-
 void CivPickerView::OnPoolChanged(int civ_index)
 {
     if (!c_assert(civ_index >= 0 && civ_index < model.Catalog().CivCount())) return;
@@ -154,15 +148,11 @@ void CivPickerView::OnModelError(const std::wstring& message, bool fatal)
     if (fatal) controller.OnFatalError();
 }
 
-// ---------------------------------------------------------------------------------------------------
-// Labels, logs and tooltips
-
 std::wstring CivPickerView::IterationText() const
 {
     return std::to_wstring(model.GetIterator()) + L"/" + std::to_wstring(model.GetCustomMaxCivs());
 }
 
-// The civ's cell in the civ icon atlas, which holds the civs in the order of their IDs and Random after them.
 int CivPickerView::CivAtlasCell(const std::wstring& civ_name) const
 {
     const int random_cell = model.Catalog().CivCount();
@@ -184,7 +174,6 @@ void CivPickerView::ShowCivIconFor(const std::wstring& civ_name)
 void CivPickerView::SetControlText(HWND control, const wchar_t* text)
 {
     if (!c_assert(text != nullptr) || control == NULL) return;
-    // A label that didn't take the text keeps showing the old one until the next update.
     (void)SetWindowTextW(control, text);
 }
 
@@ -251,7 +240,6 @@ void CivPickerView::RemoveNewestDrawnLogEntry()
 void CivPickerView::UpdateRemainingLog()
 {
     if (!c_assert(remaining_log.Window() != NULL && label_remainingcount.Window() != NULL)) return;
-    // In the order of their names, as the Civ Pool tab shows them.
     std::wstring remaining_text;
     const CivCatalog& catalog = model.Catalog();
     for (int position = 0; position < catalog.CivCount() && position < MAX_CIVS; position++)
@@ -291,7 +279,6 @@ void CivPickerView::UpdateTooltips(bool drawn)
     UpdateTooltipText(TOOLTIP_HISTORY, L"Opens the game's history info" + history_line);
 }
 
-// Changes a tooltip's text; a tooltip on show changes with it, as the web version's does.
 void CivPickerView::UpdateTooltipText(int tooltip_id, const std::wstring& text)
 {
     if (!c_assert(tooltip_id >= 0 && tooltip_id < TOOLTIP_AMOUNT) || !c_assert(!text.empty())) return;

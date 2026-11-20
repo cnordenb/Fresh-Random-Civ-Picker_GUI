@@ -7,16 +7,16 @@
 
 namespace
 {
-    constexpr float DISABLED_OPACITY = 0.55f; // :disabled { opacity: .55 }
-    constexpr int DROPDOWN_BUTTON_WIDTH = 16; // the wooden button fills the right 16 px
-    constexpr float DROPDOWN_TEXT_LEFT = 5.0f; // border 1px + padding-left 4px
-    constexpr float OPTION_PADDING_X = 6.0f; // option { padding: 3px 6px }
+    constexpr float DISABLED_OPACITY = 0.55f;
+    constexpr int DROPDOWN_BUTTON_WIDTH = 16;
+    constexpr float DROPDOWN_TEXT_LEFT = 5.0f;
+    constexpr float OPTION_PADDING_X = 6.0f;
     constexpr float OPTION_PADDING_Y = 3.0f;
-    constexpr int FIELD_BORDER = 7; // border-image: ... 15 fill / 7px stretch
-    constexpr int FIELD_INSET_X = 6; // border 1px + padding 0 5px
-    constexpr int FIELD_INSET_Y = 4; // a 14 px line centred in the 22 px box
-    constexpr int FIELD_FOCUS_OFFSET = 2; // outline-offset 1px plus the 1 px outline
-    constexpr COLORREF PLACEHOLDER_COLOUR = RGB(0x9a, 0x9a, 0x9a); // rgba(255, 255, 255, .45) over #474747
+    constexpr int FIELD_BORDER = 7;
+    constexpr int FIELD_INSET_X = 6;
+    constexpr int FIELD_INSET_Y = 4;
+    constexpr int FIELD_FOCUS_OFFSET = 2;
+    constexpr COLORREF PLACEHOLDER_COLOUR = RGB(0x9a, 0x9a, 0x9a);
     constexpr UINT_PTR DROPDOWN_SUBCLASS = 1;
     constexpr UINT_PTR FIELD_SUBCLASS = 2;
     constexpr UINT_PTR DROPDOWN_LIST_SUBCLASS = 3;
@@ -29,7 +29,6 @@ namespace
         return std::min(value, range.maximum);
     }
 
-    // A slider bar image over the target: its frame's ends keep their proportions, its middle stretches.
     void DrawBarImage(ParchmentRenderer& renderer, ImageId image, const FloatRect& target)
     {
         if (!c_assert(HasArea(target))) return;
@@ -46,8 +45,6 @@ namespace
                              { target.right - cap, target.top, target.right, target.bottom }, 1.0f, smooth });
     }
 
-    // Paints a dropdown's closed box: dark brown with a 1 px border, the chosen text, and the wooden button, which
-    // shows its pressed look while the list is open.
     void PaintDropdownBox(ParchmentRenderer& renderer, const FloatRect& bounds, const COMBOBOXINFO& info)
     {
         if (!c_assert(HasArea(bounds)) || !c_assert(info.cbSize == sizeof(COMBOBOXINFO))) return;
@@ -75,8 +72,6 @@ namespace
                              1.0f, ParchmentRenderer::Smoothing::smooth });
     }
 
-    // Puts the piece of the dialog's backdrop under the dropdown into the back buffer, where a disabled dropdown's
-    // translucent box shows it.
     bool CopyBackdropUnder(HWND dropdown, const DropdownLook& look, PixelSize size)
     {
         if (!c_assert(look.backdrop != nullptr) || !c_assert(look.context.back_buffer != nullptr)) return false;
@@ -114,7 +109,6 @@ namespace
         (void)EndPaint(dropdown, &paint);
     }
 
-    // Over its box the dropdown shows the game's hand cursor; elsewhere the combobox decides.
     LRESULT OnDropdownSetCursor(const MSG& message, const ControlContext& context)
     {
         if (!c_assert(message.hwnd != NULL)) return FALSE;
@@ -124,8 +118,6 @@ namespace
         return TRUE;
     }
 
-    // Subclass procedure of a dropdown. comctl32 subclassing only works through a function pointer (CLAUDE2.md
-    // I2); the dropdown's look travels as the subclass data.
     LRESULT CALLBACK DropdownProc(HWND dropdown, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR,
                                   DWORD_PTR data) noexcept
     {
@@ -142,7 +134,6 @@ namespace
         return DefSubclassProc(dropdown, message, wParam, lParam);
     }
 
-    // The placeholder of an empty text field, drawn over the field after it painted itself.
     void PaintPlaceholder(HWND field, const FieldLook& look)
     {
         if (!c_assert(field != NULL) || !c_assert(look.font != NULL)) return;
@@ -152,13 +143,11 @@ namespace
         const HGDIOBJ previous_font = SelectObject(dc, look.font);
         (void)SetTextColor(dc, PLACEHOLDER_COLOUR);
         (void)SetBkMode(dc, TRANSPARENT);
-        // A placeholder that fails to draw only leaves the field blank; the field still works.
         (void)TextOutW(dc, 0, 0, look.placeholder, static_cast<int>(wcslen(look.placeholder)));
         (void)SelectObject(dc, previous_font);
         (void)ReleaseDC(field, dc);
     }
 
-    // Subclass procedure of a text field (CLAUDE2.md I2, as above); its look travels as the subclass data.
     LRESULT CALLBACK TextFieldProc(HWND field, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR,
                                    DWORD_PTR data) noexcept
     {
@@ -169,13 +158,10 @@ namespace
         return result;
     }
 
-    // The open list's 1 px frame in the menus' border colour (the web version's list: border: 1px solid #3d2c1c),
-    // drawn over the system's, which the theme turns blue under the mouse.
     void PaintListFrame(HWND list, HDC target)
     {
         if (!c_assert(list != NULL) || !c_assert(target != NULL)) return;
         RECT frame = {};
-        // A frame that can't be painted keeps the system's look until the list's next paint.
         if (!GetWindowRect(list, &frame)) return;
         (void)OffsetRect(&frame, -frame.left, -frame.top);
         (void)SetDCBrushColor(target, RGB(MENU_BORDER_COLOUR.red, MENU_BORDER_COLOUR.green, MENU_BORDER_COLOUR.blue));
@@ -191,8 +177,6 @@ namespace
         (void)ReleaseDC(list, target);
     }
 
-    // Subclass procedure of a dropdown's list (CLAUDE2.md I2, as above). The system paints the frame first, and the
-    // scrollbar of a long list with it; then the frame gets the parchment colour, on the screen and in a printout.
     LRESULT CALLBACK DropdownListProc(HWND list, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR,
                                       DWORD_PTR) noexcept
     {
@@ -205,9 +189,6 @@ namespace
     }
 }
 
-// --- SliderControl ---
-
-// The bar with its fill up to the handle, the arrows over the bar's ends, and the handle on top.
 void SliderControl::Paint(ParchmentRenderer& renderer, const FloatRect& bounds)
 {
     if (!c_assert(HasArea(bounds)) || !c_assert(range.maximum >= range.minimum)) return;
@@ -241,7 +222,6 @@ void SliderControl::PaintBar(ParchmentRenderer& renderer, const SliderTrack& tra
     renderer.PopClip();
 }
 
-// An arrow is active while it is held and lit while the mouse is over it, as long as nothing else is held.
 ImageId SliderControl::ArrowImage(SliderPart arrow) const
 {
     const bool left = arrow == SliderPart::left_arrow;
@@ -281,8 +261,6 @@ bool SliderControl::OnKeyPressed(WPARAM key)
     }
 }
 
-// An arrow steps once; a press on the bar moves the handle there and drags it from there on, as one on the handle
-// drags it from where it is.
 void SliderControl::OnPointerPressed(PixelPoint point)
 {
     const SliderTrack track = Track();
@@ -310,7 +288,6 @@ void SliderControl::OnPointerMoved(PixelPoint point)
 
 void SliderControl::OnPointerLeft() { hovered_part = SliderPart::none; }
 
-// The trackbar messages the Options dialog uses.
 LRESULT SliderControl::OnOtherMessage(UINT message, WPARAM wParam, LPARAM lParam)
 {
     if (!c_assert(Window() != NULL)) return 0;
@@ -323,7 +300,6 @@ LRESULT SliderControl::OnOtherMessage(UINT message, WPARAM wParam, LPARAM lParam
     }
 }
 
-// TBM_SETRANGE: the low word of lParam is the minimum, the high word the maximum.
 LRESULT SliderControl::OnSetRange(LPARAM lParam)
 {
     const int minimum = static_cast<short>(LOWORD(lParam));
@@ -353,7 +329,6 @@ void SliderControl::MoveTo(int value)
     NotifyParent(WM_HSCROLL, MAKEWPARAM(TB_THUMBTRACK, static_cast<WORD>(clamped)));
 }
 
-// The slider's layout at its window's size, with its range.
 SliderTrack SliderControl::Track() const
 {
     RECT client = { 0, 0, 1, 1 };
@@ -361,8 +336,6 @@ SliderTrack SliderControl::Track() const
         client = { 0, 0, 1, 1 };
     return { LayOutSlider({ client.right, client.bottom }), range };
 }
-
-// --- Dropdowns and text fields ---
 
 bool StyleDropdown(HWND dropdown, const DropdownLook& look)
 {
@@ -385,7 +358,6 @@ bool StyleTextField(HWND field, const FieldLook& look)
     return c_assert(SetWindowSubclass(field, TextFieldProc, FIELD_SUBCLASS, subclass_data) != FALSE);
 }
 
-// One item of an open dropdown list: gold with black text under the mouse, otherwise brown with cream text.
 void DrawDropdownItem(ParchmentRenderer& renderer, PixelSurface& back_buffer, const DRAWITEMSTRUCT& item)
 {
     if (!c_assert(item.hwndItem != NULL && item.hDC != NULL)) return;
@@ -405,7 +377,6 @@ void DrawDropdownItem(ParchmentRenderer& renderer, PixelSurface& back_buffer, co
     (void)BitBlt(item.hDC, item.rcItem.left, item.rcItem.top, size.width, size.height, back_buffer.Dc(), 0, 0, SRCCOPY);
 }
 
-// The dark box of a text field (a nine-slice drawn over the field's grey), drawn on the dialog's backdrop.
 void PaintTextFieldFrame(ParchmentRenderer& renderer, const PixelRect& box)
 {
     if (!c_assert(HasArea(box))) return;
@@ -420,7 +391,6 @@ PixelRect TextFieldEditArea(const PixelRect& box)
     return { box.left + FIELD_INSET_X, box.top + FIELD_INSET_Y, box.right - FIELD_INSET_X, box.bottom - FIELD_INSET_Y };
 }
 
-// The focus outline around a text field's box (outline: 1px dotted; outline-offset: 1px), from its edit area.
 PixelRect TextFieldFocusFrame(const PixelRect& edit_area)
 {
     if (!c_assert(HasArea(edit_area))) return edit_area;

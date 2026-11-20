@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Bash(*git* commit*)",
+      "Bash(*git* push*)",
+      "Bash(*git* pull*)",
+      "Bash(*git* merge *)",
+      "Bash(*git* merge)",
+      "Bash(*git* rebase*)",
+      "Bash(*git* cherry-pick*)",
+      "Bash(*git* revert*)",
+      "Bash(*git* am *)",
+      "Bash(*git* am)",
+      "Bash(*git* update-ref*)",
+      "Bash(*git* send-pack*)",
+      "Bash(*git* filter-branch*)",
+      "Bash(*git*alias.*)",
+      "Bash(*gh* pr create*)",
+      "Bash(*gh* pr merge*)",
+      "Bash(*gh* api *pulls*)",
+      "PowerShell(*git* commit*)",
+      "PowerShell(*git* push*)",
+      "PowerShell(*git* pull*)",
+      "PowerShell(*git* merge *)",
+      "PowerShell(*git* merge)",
+      "PowerShell(*git* rebase*)",
+      "PowerShell(*git* cherry-pick*)",
+      "PowerShell(*git* revert*)",
+      "PowerShell(*git* am *)",
+      "PowerShell(*git* am)",
+      "PowerShell(*git* update-ref*)",
+      "PowerShell(*git* send-pack*)",
+      "PowerShell(*git* filter-branch*)",
+      "PowerShell(*git*alias.*)",
+      "PowerShell(*gh* pr create*)",
+      "PowerShell(*gh* pr merge*)",
+      "PowerShell(*gh* api *pulls*)",
+      "Edit(/documentation/REQUIREMENTS.md)"
+    ]
+  }
+}

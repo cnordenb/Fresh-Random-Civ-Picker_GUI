@@ -12,7 +12,6 @@
 
 namespace
 {
-    // data.json's first edition is the default one.
     constexpr int DEFAULT_EDITION = 0;
 
     std::wstring GetExeFolder()
@@ -24,11 +23,6 @@ namespace
         return exe_folder;
     }
 
-    void OpenUrl(const wchar_t* url) { ShellExecute(NULL, L"open", url, NULL, NULL, SW_SHOWNORMAL); }
-
-    // How many civs continuous freshness keeps out (ContFreshCivs), at least 1 and at most CONTFRESH_MOST. Settings
-    // saved before have a strength from 1 to 10 (ContFreshStrengthValue): 1 kept out the previous civ, 10 the most,
-    // and each step between a tenth of half the civs. Without either, the most, as in the web version.
     uint8_t ReadFreshness(const wchar_t* ini_file, int civ_count)
     {
         constexpr int NOT_SAVED = -1;
@@ -55,8 +49,6 @@ CivPickerController::CivPickerController(CivPickerModel& picker_model) :
     model.SetObserver(view);
 }
 
-// Reads the editions, DLCs and civs from data.json in the exe's folder (the build copies it there). If the program
-// can't start with it, says why and returns false.
 bool CivPickerController::LoadCatalog(CivCatalog& catalog)
 {
     const std::wstring path = GetExeFolder() + L"\\data.json";
@@ -70,9 +62,6 @@ bool CivPickerController::LoadCatalog(CivCatalog& catalog)
     return false;
 }
 
-// ---------------------------------------------------------------------------------------------------
-// Startup, message loop and shutdown
-
 int CivPickerController::Run(HINSTANCE app_instance, int show_command)
 {
     view.SetInstance(app_instance);
@@ -82,7 +71,6 @@ int CivPickerController::Run(HINSTANCE app_instance, int show_command)
     if (!view.StartGraphics() || !view.CreateMainWindow(show_command))
     {
         view.StopGraphics();
-        // The program says that it stops rather than vanish; the debugger output names the check that failed.
         (void)MessageBoxW(NULL, L"The program could not build its window and stops.", L"Fresh Random Civ Picker",
                           MB_OK | MB_ICONERROR);
         return FALSE;
@@ -97,7 +85,6 @@ int CivPickerController::Run(HINSTANCE app_instance, int show_command)
     return exit_code;
 }
 
-// The Win32 message loop is the program's event loop: it runs until WM_QUIT (CLAUDE2.md I3).
 int CivPickerController::RunMessageLoop(HINSTANCE app_instance)
 {
     HACCEL accelerators = LoadAccelerators(app_instance, MAKEINTRESOURCE(IDC_WINDOWSPROJECT1));
@@ -149,10 +136,7 @@ void CivPickerController::GenerateFilePaths()
     settings_file_path = exe_folder + L"\\settings.ini";
     log_file_path = exe_folder + L"\\log.txt";
     model.SetFilePaths(log_file_path, exe_folder + L"\\Histories\\");
-    // The images sit next to the exe (the build copies them to the output folder), so they are found
-    // whatever working directory the program was started in.
     view.SetImageFolder(exe_folder + L"\\images\\");
-    // The jingles are files there too, named after the civs in data.json.
     view.SetJingleFolder(exe_folder + L"\\sounds\\civ_jingles\\");
 }
 
@@ -195,7 +179,6 @@ void CivPickerController::SaveSettings()
     WriteSetting(L"ContFreshEnabled", settings.contfresh_enabled);
     WritePrivateProfileString(L"Settings", L"ContFreshCivs", std::to_wstring(settings.contfresh_civs).c_str(),
                               settings_file_path.c_str());
-    // The strength the number of civs replaced goes; a key that is already gone leaves nothing to do.
     (void)WritePrivateProfileString(L"Settings", L"ContFreshStrengthValue", nullptr, settings_file_path.c_str());
     SaveHotkeys();
 }
@@ -227,12 +210,8 @@ bool CivPickerController::FileExists(const std::wstring& path) const
     return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY) == 0;
 }
 
-// ---------------------------------------------------------------------------------------------------
-// Tabs
-
 void CivPickerController::OnTabSelected(int tab_index) { ShowTab(tab_index); }
 
-// Showing the Civ Pool tab drops any civ that the current edition does not contain.
 void CivPickerController::ShowTab(int tab_index)
 {
     if (tab_index == CivPickerView::CIV_POOL_TAB) model.EnforceEditionPool();
@@ -244,9 +223,6 @@ void CivPickerController::SelectTab(int tab_index)
     view.SelectTab(tab_index);
     ShowTab(tab_index);
 }
-
-// ---------------------------------------------------------------------------------------------------
-// Options dialog
 
 bool CivPickerController::OnOptionsCommand(HWND dialog, const CivPickerView::OptionsEvent& options_event)
 {
@@ -262,7 +238,6 @@ bool CivPickerController::OnOptionsCommand(HWND dialog, const CivPickerView::Opt
     return true;
 }
 
-// Combo box feedback plays before the new jingle type is applied below.
 void CivPickerController::PlayComboFeedback(int notification)
 {
     if (notification == CBN_DROPDOWN) view.PlayAudio(SoundType::hover);
@@ -326,9 +301,6 @@ void CivPickerController::HandleOptionsClick(HWND dialog, int command_id)
 
 void CivPickerController::OnFreshnessChanged(int civs) { model.SetFreshness(civs); }
 
-// ---------------------------------------------------------------------------------------------------
-// Pool toggles, undo and the drawn log
-
 void CivPickerController::ToggleDlc(int dlc)
 {
     if (!c_assert(dlc >= 0 && dlc < model.Catalog().DlcCount())) return;
@@ -383,7 +355,6 @@ void CivPickerController::ClearDrawnLog()
     view.ClearDrawnLog();
 }
 
-// Undo means undrawing the last civ, or restoring the log saved by the last reset.
 void CivPickerController::Undo()
 {
     const bool cache_restorable = model.GetSettings().persistent_logging && model.IsCacheAvailable();
@@ -404,258 +375,10 @@ void CivPickerController::Undo()
     }
 }
 
-void CivPickerController::LoadCachedLog()
-{
-    model.SetCacheLoading(true);
-    LoadLog(SaveType::automatic);
-    model.SetCacheAvailable(false);
-    model.SetCacheLoading(false);
-}
-
-// ---------------------------------------------------------------------------------------------------
-// Saving and loading the log
-
-void CivPickerController::SaveLog(SaveType type)
-{
-    model.DiscardRedoHistory();
-    std::wstring save_file_path = log_file_path;
-    if (type == SaveType::quick) save_file_path = QuicksavePath();
-    else if (type == SaveType::manual)
-    {
-        const CivPickerView::FileChoice choice = ChooseManualSaveFile();
-        if (!choice.chosen) return;
-        save_file_path = choice.path;
-    }
-    // A save that cannot be written is skipped silently, as it always has been.
-    (void)model.WriteLogFile(save_file_path);
-}
-
-CivPickerView::FileChoice CivPickerController::ChooseManualSaveFile()
-{
-    view.PlayAudio(SoundType::button);
-    SYSTEMTIME now = {};
-    GetLocalTime(&now);
-
-    std::wstringstream file_name;
-    file_name << L"FRCP Preset v" << VERSION << L" @"
-              << std::setw(4) << std::setfill(L'0') << now.wYear << L"."
-              << std::setw(2) << std::setfill(L'0') << now.wMonth << L"."
-              << std::setw(2) << std::setfill(L'0') << now.wDay << L" "
-              << std::setw(2) << std::setfill(L'0') << now.wHour
-              << std::setw(2) << std::setfill(L'0') << now.wMinute
-              << std::setw(2) << std::setfill(L'0') << now.wSecond << L".txt";
-
-    CivPickerView::FileChoice choice = view.AskSaveFilePath(file_name.str(), SavesFolder());
-    view.PlayAudio(SoundType::button);
-    if (choice.chosen && choice.path.find(L".txt") == std::wstring::npos) choice.path.append(L".txt");
-    return choice;
-}
-
-void CivPickerController::LoadLog(SaveType type)
-{
-    std::wstring load_file_path = log_file_path;
-    if (type != SaveType::automatic)
-    {
-        const CivPickerView::FileChoice choice = ChooseLogToLoad(type);
-        if (!choice.chosen) return;
-        load_file_path = choice.path;
-        PrepareLogLoad();
-    }
-
-    if (!model.LoadLogFile(load_file_path, type)) return;
-    if (type != SaveType::automatic || model.IsCacheLoading())
-    {
-        ShowTab(view.GetCurrentTab());
-        view.ValidateAllDlcToggles();
-        model.SetStartingUp(false);
-    }
-}
-
-CivPickerView::FileChoice CivPickerController::ChooseLogToLoad(SaveType type)
-{
-    view.PlayAudio(SoundType::button);
-    if (type == SaveType::quick)
-    {
-        const std::wstring quicksave_path = QuicksavePath();
-        return { FileExists(quicksave_path), quicksave_path };
-    }
-
-    CivPickerView::FileChoice choice = view.AskOpenFilePath(SavesFolder());
-    if (!choice.chosen)
-    {
-        view.PlayAudio(SoundType::button);
-        model.SetStartingUp(false);
-    }
-    return choice;
-}
-
-// A loaded log replaces the whole session: both logs are emptied and the default edition's full pool is restored
-// first.
 void CivPickerController::PrepareLogLoad()
 {
     view.ClearLogTexts();
     model.SetEdition(DEFAULT_EDITION);
     EnableAll(false);
     model.ResetProgram(true);
-}
-
-// ---------------------------------------------------------------------------------------------------
-// Share links: the web version's links, which both versions write and open
-
-// P, the Log tab's share button and File > Copy Share Link: the pool with this round's draws.
-void CivPickerController::CopyRoundLink()
-{
-    view.PlayAudio(SoundType::button);
-    CopyLink(model.GetSharedPool());
-}
-
-// The Civ Pool tab's share button: the pool alone.
-void CivPickerController::CopyPoolLink()
-{
-    view.PlayAudio(SoundType::button);
-    SharedPool pool = model.GetSharedPool();
-    pool.draw_count = 0;
-    CopyLink(pool);
-}
-
-// If the clipboard can't take the link, the Share dialog shows the links to copy by hand (as copyShareLink does).
-void CivPickerController::CopyLink(const SharedPool& pool)
-{
-    const ShareLink::Text link = ShareLink::Write(model.Catalog(), pool);
-    if (view.CopyText(link.Characters())) view.ShowLinkCopied(pool.draw_count);
-    else ShowShareLinks();
-}
-
-// File > Share ...: both links, in a dialog.
-void CivPickerController::OpenShare()
-{
-    view.PlayAudio(SoundType::button);
-    ShowShareLinks();
-}
-
-void CivPickerController::ShowShareLinks()
-{
-    SharedPool pool = model.GetSharedPool();
-    const ShareLink::Text round_link = ShareLink::Write(model.Catalog(), pool);
-    const int draw_count = pool.draw_count;
-    pool.draw_count = 0;
-    const ShareLink::Text pool_link = ShareLink::Write(model.Catalog(), pool);
-    view.ShowShareDialog(main_window, { pool_link.Characters(), round_link.Characters(), draw_count });
-}
-
-// U and File > Open Link ...: a link someone shared replaces the pool and the round, after a look at what it holds
-// unless nothing would be lost (the web version's offerLink). The log of past rounds stays.
-void CivPickerController::OpenShareLink()
-{
-    view.PlayAudio(SoundType::button);
-    const ShareLink::Opened opened = view.AskShareLink(main_window);
-    if (!opened.ok) return;
-    const bool replaces = model.HasCustomState() || view.HasDrawnLog();
-    if (replaces && !view.ConfirmSharedPool(main_window, opened.pool)) return;
-    // The link's draws come in quietly, as a saved log's do at startup.
-    model.SetStartingUp(true);
-    model.LoadSharedPool(opened.pool);
-    model.SetStartingUp(false);
-    ShowTab(view.GetCurrentTab());
-    view.ValidateAllDlcToggles();
-    if (replaces) view.PlayAudio(SoundType::button);
-    view.ShowLinkLoaded();
-}
-
-// ---------------------------------------------------------------------------------------------------
-// Dialogs and web pages
-
-// The Game menu's links to the editions' pages (data.json's links).
-bool CivPickerController::OpenEditionLink(int command_id)
-{
-    const int link = command_id - CivPickerView::EDITION_LINK_BASE_ID;
-    if (link < 0 || link >= model.Catalog().LinkCount()) return false;
-    view.PlayAudio(SoundType::button);
-    OpenUrl(model.Catalog().LinkAt(link).url.c_str());
-    return true;
-}
-
-// The edition's store page, or the note data.json has for an edition without one.
-void CivPickerController::OpenEditionPage()
-{
-    const EditionInfo& edition = model.Catalog().EditionAt(model.GetEdition());
-    if (!edition.url.empty()) OpenUrl(edition.url.c_str());
-    else view.ShowInformation(edition.store_note.c_str(), edition.short_name.c_str());
-}
-
-void CivPickerController::OpenTechTree()
-{
-    view.PlayAudio(SoundType::button);
-    // aoe2techtree.net names some civs differently (data.json's techTree).
-    const int civ = model.FindCivIndex(model.GetCurrentCiv());
-    std::wstring techtree_url = L"https://aoe2techtree.net/#";
-    if (civ != CivCatalog::NONE) techtree_url += model.Catalog().CivAt(civ).tech_tree;
-    OpenUrl(techtree_url.c_str());
-}
-
-void CivPickerController::OpenSurvapp()
-{
-    view.PlayAudio(SoundType::button);
-    OpenUrl(L"https://aoe2vils.net/");
-}
-
-void CivPickerController::OpenAuthorPage() { OpenUrl(L"https://linktr.ee/hjoerleif"); }
-
-void CivPickerController::OpenOptions(HWND owner)
-{
-    view.PlayAudio(SoundType::button);
-    view.ShowOptionsDialog(owner);
-}
-
-void CivPickerController::OpenHotkeys(HWND owner)
-{
-    view.PlayAudio(SoundType::button);
-    view.ShowHotkeysDialog(owner);
-}
-
-void CivPickerController::OpenAbout(HWND owner)
-{
-    view.PlayAudio(SoundType::button);
-    view.ShowAboutDialog(owner);
-}
-
-void CivPickerController::OpenHistory(HWND owner)
-{
-    view.PlayAudio(SoundType::button);
-    view.ShowHistoryDialog(owner);
-}
-
-void CivPickerController::JoinLobby()
-{
-    view.PlayAudio(SoundType::button);
-    const CivPickerView::LobbyInput input = view.AskLobbyCode(main_window);
-    if (input.result == IDC_BUTTON_OK) LaunchLobby(input.code, L"aoe2de://0/", L"aoe2de://1/");
-    else if (input.result == IDC_BUTTON_SPEC) LaunchLobby(input.code, L"aoe2de://1/", L"aoe2de://0/");
-}
-
-// A bare 9-digit code gets the prefix; a full link has the other mode's prefix swapped for this one.
-void CivPickerController::LaunchLobby(std::wstring lobby_code, const wchar_t* prefix, const wchar_t* other_prefix) const
-{
-    if (lobby_code.length() == 9)
-    {
-        OpenUrl((prefix + lobby_code).c_str());
-        return;
-    }
-    if (lobby_code.substr(0, 11) == other_prefix) lobby_code.replace(0, 11, prefix);
-    OpenUrl(lobby_code.c_str());
-}
-
-bool CivPickerController::IsValidLobbyCode(const std::wstring& lobby_code)
-{
-    const size_t length = lobby_code.length();
-    if (length != 9 && length != 20) return false;
-
-    if (length == 20)
-    {
-        if (lobby_code.substr(0, 11) != L"aoe2de://0/" && lobby_code.substr(0, 11) != L"aoe2de://1/") return false;
-        const std::wstring numbers = lobby_code.substr(12, 20);
-        if (numbers.find_first_not_of(L"0123456789") != std::wstring::npos) return false;
-    }
-    if (length == 9 && lobby_code.find_first_not_of(L"0123456789") != std::wstring::npos) return false;
-    return true;
 }

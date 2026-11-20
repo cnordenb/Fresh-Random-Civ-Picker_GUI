@@ -12,8 +12,7 @@ namespace
     constexpr char FORMAT_VERSION = '1';
     constexpr char DRAWS_MARK = '.';
     constexpr int BITS_PER_DIGIT = 6;
-    constexpr int BITFIELD_START = 2; // after the version and the edition
-    // base64url: the digit of each value from 0 to 63.
+    constexpr int BITFIELD_START = 2;
     const wchar_t* const DIGITS = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
     constexpr int DIGIT_COUNT = 64;
     constexpr wchar_t HIGHEST_ASCII = 0x7F;
@@ -37,7 +36,6 @@ namespace
         return -1;
     }
 
-    // Opens a link (or only its code) as the web version's parseShare does: Open says whether the text is one.
     class LinkOpener final
     {
     public:
@@ -73,8 +71,6 @@ namespace
         return { true, pool };
     }
 
-    // The code: the text trimmed, from after its first "#", without "p=", and with its percent escapes decoded
-    // (what JavaScript's trim and decodeURIComponent do). A character outside ASCII can't be part of a code.
     bool LinkOpener::ReadCode(const wchar_t* text)
     {
         if (!c_assert(text != nullptr)) return false;
@@ -106,8 +102,6 @@ namespace
         return true;
     }
 
-    // The version, the edition, at least one digit of bitfield, and optionally "." and at least one draw: nothing
-    // else (the web version's /^1([A-Za-z0-9_-])([A-Za-z0-9_-]+)(?:\.([A-Za-z0-9_-]+))?$/).
     bool LinkOpener::ReadParts()
     {
         if (!c_assert(length >= 0 && length <= ShareLink::MAX_INPUT_LENGTH)) return false;
@@ -130,7 +124,6 @@ namespace
         return true;
     }
 
-    // A civ is on if it belongs to the edition and its bit is set, or lies past the end of the bitfield.
     void LinkOpener::ReadPool()
     {
         if (!c_assert(bits_end > BITFIELD_START && bits_end <= length)) return;
@@ -144,7 +137,6 @@ namespace
         }
     }
 
-    // Each draw is a civ in the pool, drawn once.
     bool LinkOpener::ReadDraws()
     {
         if (!c_assert(draws_start >= bits_end && draws_start <= length)) return false;
@@ -180,7 +172,6 @@ void ShareLink::Text::Append(const wchar_t* characters)
     for (int i = 0; i < MAX_LINK_LENGTH && characters[i] != L'\0'; i++) Append(characters[i]);
 }
 
-// The link the web version writes for the same pool (its shareCode), with the draws if the pool has any.
 ShareLink::Text ShareLink::Write(const CivCatalog& catalog, const SharedPool& pool)
 {
     const int civ_count = catalog.CivCount();

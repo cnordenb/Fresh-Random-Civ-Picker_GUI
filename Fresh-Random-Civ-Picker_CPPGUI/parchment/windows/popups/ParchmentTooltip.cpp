@@ -8,7 +8,6 @@
 
 namespace
 {
-    // #tip { max-width: 300px; padding: 3px 7px 4px; border: 1px; box-shadow: 1px 1px 3px rgba(0, 0, 0, .18) }
     constexpr int MAX_BOX_WIDTH = 300;
     constexpr int MAX_BOX_HEIGHT = 148;
     constexpr int BORDER = 1;
@@ -18,7 +17,6 @@ namespace
     constexpr float SHADOW_OPACITY = 0.18f;
     constexpr int SHADOW_OFFSET = 1;
     constexpr float SHADOW_SIGMA = 1.5f;
-    // #tip.ext::before { width: 12px; margin-right: 4px; vertical-align: -1px }
     constexpr float ICON_ROOM = EXTERNAL_ICON_SIZE + 4.0f;
     constexpr float ICON_DROP = 1.0f;
 }
@@ -38,7 +36,6 @@ bool ParchmentTooltip::Create(HWND owner, ParchmentRenderer& tooltip_renderer)
 
 void ParchmentTooltip::Destroy()
 {
-    // The window goes with its owner anyway; destroying it first leaves no stale handle.
     if (window != NULL) (void)DestroyWindow(window);
     window = NULL;
     surface.Destroy();
@@ -57,7 +54,6 @@ void ParchmentTooltip::Show(const Content& content, PixelPoint cursor)
     BLENDFUNCTION blend = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
     if (!UpdateLayeredWindow(window, NULL, &position, &size, surface.Dc(), &origin, 0, &blend, ULW_ALPHA)) return;
     if (shown) return;
-    // ShowWindow reports the earlier visibility, not success.
     (void)ShowWindow(window, SW_SHOWNOACTIVATE);
     shown = true;
 }
@@ -69,7 +65,6 @@ void ParchmentTooltip::Hide()
     shown = false;
 }
 
-// Wraps the text to the box's widest content (white-space: pre-line); the icon takes room on the first line.
 bool ParchmentTooltip::LayOut(const Content& content)
 {
     if (!c_assert(content.text != nullptr) || !c_assert(renderer != nullptr)) return false;
@@ -135,13 +130,11 @@ void ParchmentTooltip::PaintBox(PixelSize box)
     }
 }
 
-// The box is opaque; around it lies its shadow, 1 px right and down and softened, in premultiplied black.
 void ParchmentTooltip::AddShadow(PixelSize box)
 {
     if (!c_assert(box.width > 0 && box.width <= MAX_BOX_WIDTH && box.height <= MAX_BOX_HEIGHT)) return;
     const PixelSize frame = { box.width + 2 * SHADOW_MARGIN, box.height + 2 * SHADOW_MARGIN };
     const PixelRect box_area = { SHADOW_MARGIN, SHADOW_MARGIN, SHADOW_MARGIN + box.width, SHADOW_MARGIN + box.height };
-    // A tooltip without its shadow is still readable, so a failure here changes nothing else.
     (void)box_shadow.Apply({ surface.Pixels(), surface.Size().width, frame, box_area, { SHADOW_OFFSET, SHADOW_OFFSET },
                              SHADOW_SIGMA, SHADOW_OPACITY });
 }

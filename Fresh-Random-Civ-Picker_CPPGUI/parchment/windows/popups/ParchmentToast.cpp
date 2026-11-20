@@ -8,8 +8,6 @@
 
 namespace
 {
-    // #toast { margin-top: 14px; padding: 5px 12px; border-radius: 3px; box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
-    // transition: opacity .15s }, shown for 2.2 s (toast()).
     constexpr int GAP_BELOW_WINDOW = 14;
     constexpr int PADDING_X = 12;
     constexpr int PADDING_Y = 5;
@@ -36,7 +34,6 @@ bool ParchmentToast::Create(HWND owner_window, ParchmentRenderer& toast_renderer
 
 void ParchmentToast::Destroy()
 {
-    // The window goes with its owner anyway; destroying it first leaves no stale handle.
     if (window != NULL) (void)DestroyWindow(window);
     window = NULL;
     owner = NULL;
@@ -44,22 +41,18 @@ void ParchmentToast::Destroy()
     surface.Destroy();
 }
 
-// Shows a message, or puts it in place of the one on show, which then stays its full time again.
 bool ParchmentToast::Show(const wchar_t* message)
 {
     if (!c_assert(window != NULL) || !c_assert(message != nullptr)) return false;
     if (!LayOut(message) || !Render()) return false;
     const ULONGLONG now = GetTickCount64();
-    // A message replacing one on show appears at once; a new one fades in.
     shown_at = shown ? now - FADE_MS : now;
     if (!Present(OpacityAt(now - shown_at))) return false;
-    // ShowWindow reports the earlier visibility, not success.
     if (!shown) (void)ShowWindow(window, SW_SHOWNOACTIVATE);
     shown = true;
     return true;
 }
 
-// Fades the message in and out; false once it has gone, so the owner can stop its timer.
 bool ParchmentToast::Tick()
 {
     if (!shown || !c_assert(window != NULL)) return false;
@@ -69,7 +62,6 @@ bool ParchmentToast::Tick()
         Hide();
         return false;
     }
-    // While fully shown nothing changes; a failed update leaves the message as it was until the next tick.
     if (elapsed < FADE_MS || elapsed > SHOWN_MS) (void)Present(OpacityAt(elapsed));
     return true;
 }
@@ -81,7 +73,6 @@ void ParchmentToast::Hide()
     shown = false;
 }
 
-// One line of text in the box's padding; the box is as wide as the text.
 bool ParchmentToast::LayOut(const wchar_t* message)
 {
     if (!c_assert(message != nullptr) || !c_assert(renderer != nullptr)) return false;
@@ -114,8 +105,6 @@ bool ParchmentToast::Render()
     return true;
 }
 
-// The shadow: the box's area moved 2 px down and blurred, in black at 30 %, under the box's own pixels (they are
-// premultiplied, so what the box leaves uncovered, such as its rounded corners, lets the shadow through).
 void ParchmentToast::AddShadow()
 {
     const PixelSize frame = { box_size.width + 2 * SHADOW_MARGIN, box_size.height + 2 * SHADOW_MARGIN };
@@ -126,7 +115,6 @@ void ParchmentToast::AddShadow()
     {
         for (int x = 0; x < frame.width; x++) shadow[y * frame.width + x] = RectContains(cast, { x, y }) ? 255 : 0;
     }
-    // Without the blur the shadow keeps a hard edge, which still reads as a shadow.
     (void)blur.Blur({ shadow, frame.width, frame.height, SHADOW_SIGMA });
     uint32_t* pixels = surface.Pixels();
     const int stride = surface.Size().width;
@@ -143,7 +131,6 @@ void ParchmentToast::AddShadow()
     }
 }
 
-// Puts the message centred below the owner, as the web version's #toast sits below its window.
 bool ParchmentToast::Present(BYTE opacity)
 {
     RECT owner_rect = {};

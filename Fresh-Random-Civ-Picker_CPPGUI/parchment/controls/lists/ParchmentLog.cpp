@@ -12,19 +12,14 @@ namespace
 {
     const wchar_t* const LOG_CLASS = L"FrcpParchmentLog";
 
-    // .log { border: 6px; padding: 6px 2px 6px 8px }, and 29 px on the right once the scrollbar shows.
     constexpr int BORDER = 6;
     constexpr int PADDING_TOP = 6;
     constexpr int PADDING_LEFT = 8;
     constexpr int PADDING_RIGHT = 2;
     constexpr int PADDING_RIGHT_WITH_BAR = 29;
-    constexpr int FIRST_REPEAT_DELAY_MS = 350; // a held scrollbar button repeats as in the web version
+    constexpr int FIRST_REPEAT_DELAY_MS = 350;
     constexpr int REPEAT_DELAY_MS = 50;
     constexpr UINT_PTR REPEAT_TIMER = 1;
-    constexpr int COMMAND_COPY = 1;
-    constexpr int COMMAND_SELECT_ALL = 2;
-    // .log-icon { width: 18px; height: 18px }, .log-row { gap: 4px }, and the parchment logs' line-height of 20px,
-    // which fits the icons.
     constexpr int ICON_SIZE = 18;
     constexpr int ICON_GAP = 4;
     constexpr float ICON_LINE_HEIGHT = 20.0f;
@@ -57,7 +52,6 @@ bool ParchmentLog::Create(const ControlContext& control_context, const ControlPl
     parent = placement.parent;
     size = { RectWidth(placement.bounds), RectHeight(placement.bounds) };
     const HINSTANCE instance = reinterpret_cast<HINSTANCE>(GetWindowLongPtr(parent, GWLP_HINSTANCE));
-    // The window procedure needs this object from the first message on, so it travels as the creation parameter.
     window = CreateWindowExW(0, LOG_CLASS, L"", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_CLIPSIBLINGS,
                              placement.bounds.left, placement.bounds.top, size.width, size.height, parent,
                              ControlId(placement.id), instance, this);
@@ -66,8 +60,6 @@ bool ParchmentLog::Create(const ControlContext& control_context, const ControlPl
     return true;
 }
 
-// From now on every line that starts with one of the labels is led by its icon, in a column left of the text, and
-// the lines are tall enough for the icons.
 bool ParchmentLog::ShowIcons(const Icons& line_icons)
 {
     if (!c_assert(window != NULL) || !c_assert(line_icons.labels != nullptr)) return false;
@@ -79,7 +71,6 @@ bool ParchmentLog::ShowIcons(const Icons& line_icons)
     return true;
 }
 
-// Forgets a window that was destroyed with its dialog, so the log can be created again next time.
 void ParchmentLog::Release()
 {
     window = NULL;
@@ -94,8 +85,6 @@ void ParchmentLog::Release()
 
 HWND ParchmentLog::Window() const { return window; }
 
-// Window procedure of the logs. Win32 can only deliver window messages through a function pointer to this
-// procedure (CLAUDE2.md I2); it reaches its log through the window's user data.
 LRESULT CALLBACK ParchmentLog::WindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 {
     if (message == WM_NCCREATE)
@@ -107,7 +96,6 @@ LRESULT CALLBACK ParchmentLog::WindowProc(HWND window, UINT message, WPARAM wPar
     ParchmentLog* log = reinterpret_cast<ParchmentLog*>(GetWindowLongPtr(window, GWLP_USERDATA));
     if (log == nullptr) return DefWindowProc(window, message, wParam, lParam);
     if (message == WM_NCCREATE) log->window = window;
-    // A log forgotten with its dialog (Release) no longer answers for the window being destroyed.
     if (log->window != window) return DefWindowProc(window, message, wParam, lParam);
     return log->HandleMessage(message, wParam, lParam);
 }
@@ -134,8 +122,6 @@ LRESULT ParchmentLog::HandleMessage(UINT message, WPARAM wParam, LPARAM lParam)
     }
 }
 
-// The window keeps the text for GetWindowText; the log keeps a copy to lay out and draw. Like an EDIT control,
-// new text starts unselected and scrolled to the top.
 LRESULT ParchmentLog::OnSetText(WPARAM wParam, LPARAM lParam)
 {
     if (!c_assert(window != NULL)) return FALSE;
@@ -151,7 +137,6 @@ LRESULT ParchmentLog::OnSetText(WPARAM wParam, LPARAM lParam)
     return result;
 }
 
-// Wraps the text to the box; once it overflows, the scrollbar takes room on the right and it wraps again.
 void ParchmentLog::LayOutText()
 {
     if (!c_assert(context.renderer != nullptr)) return;
@@ -239,8 +224,6 @@ void ParchmentLog::PaintLine(ParchmentRenderer& renderer, int line_index, float 
                         static_cast<float>(size.width), baseline, TextAlign::left });
 }
 
-// The icon of the label a line of the text starts with, centred in the line left of the text (.log-icon). The
-// rest of a line that wrapped has none.
 void ParchmentLog::PaintIcon(ParchmentRenderer& renderer, int line_index, float top)
 {
     if (icons.labels == nullptr) return;
@@ -257,23 +240,6 @@ void ParchmentLog::PaintIcon(ParchmentRenderer& renderer, int line_index, float 
                              { left, icon_top, left + side, icon_top + side } });
 }
 
-// The selected part of a line, in the system's highlight colours as in a browser.
-void ParchmentLog::PaintSelection(ParchmentRenderer& renderer, int line_index, float top)
-{
-    const int first = std::min(selection_anchor, selection_caret);
-    const int last = std::max(selection_anchor, selection_caret);
-    if (!c_assert(line_index >= 0 && line_index < lines.Count())) return;
-    if (!c_assert(first >= 0 && last <= text_length)) return;
-    const TextLine line = lines.Line(line_index);
-    const int start = std::max(first, line.start);
-    const int end = std::min(last, line.start + line.length);
-    if (start >= end) return;
-    const COLORREF highlight = GetSysColor(COLOR_HIGHLIGHT);
-    const Colour colour = { GetRValue(highlight), GetGValue(highlight), GetBValue(highlight), 1.0f };
-    renderer.FillRect({ CharacterX(line_index, start), top, CharacterX(line_index, end), top + line_height }, colour);
-}
-
-// The scrollbar over the log's right side: up button, stretched track, down button and the knob (.sb).
 void ParchmentLog::PaintScrollbar(ParchmentRenderer& renderer)
 {
     if (!c_assert(layout.has_scrollbar) || !c_assert(TrackLength() >= SCROLLBAR_KNOB_SIZE)) return;
@@ -288,7 +254,6 @@ void ParchmentLog::OnButtonDown(LPARAM lParam)
 {
     if (!c_assert(window != NULL)) return;
     const PixelPoint point = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-    // Taking the focus lets the keys scroll and copy; a log that can't get it still scrolls by mouse.
     (void)SetFocus(window);
     (void)SetCapture(window);
     if (layout.has_scrollbar && point.x >= size.width - BORDER - SCROLLBAR_WIDTH)
@@ -316,7 +281,6 @@ void ParchmentLog::PressScrollbar(PixelPoint point)
         return;
     }
     drag = Drag::scrolling;
-    // Without the timer the press still scrolls once; holding it just doesn't repeat.
     if (StepScrollbar()) (void)SetTimer(window, REPEAT_TIMER, FIRST_REPEAT_DELAY_MS, nullptr);
 }
 
@@ -351,7 +315,6 @@ void ParchmentLog::OnCaptureLost()
 {
     drag = Drag::none;
     if (!c_assert(window != NULL)) return;
-    // The timer may already be gone; either way no repeat follows.
     (void)KillTimer(window, REPEAT_TIMER);
 }
 
@@ -366,7 +329,6 @@ void ParchmentLog::OnTimer()
     (void)SetTimer(window, REPEAT_TIMER, REPEAT_DELAY_MS, nullptr);
 }
 
-// One step of a held button or track; the track pages towards the pointer until the knob reaches it.
 bool ParchmentLog::StepScrollbar()
 {
     if (!c_assert(drag == Drag::scrolling) || !c_assert(layout.has_scrollbar)) return false;
@@ -381,7 +343,6 @@ bool ParchmentLog::StepScrollbar()
 
 int ParchmentLog::ScrollStep(ScrollbarPart part) const
 {
-    // The knob is dragged, not stepped.
     if (!c_assert(part != ScrollbarPart::knob)) return 0;
     const int step = LineStep();
     const int page = std::max(ViewportHeight(size) - step, step);
@@ -392,7 +353,6 @@ int ParchmentLog::ScrollStep(ScrollbarPart part) const
     return 0;
 }
 
-// One line, in whole pixels.
 int ParchmentLog::LineStep() const
 {
     const int step = static_cast<int>(line_height);
@@ -400,7 +360,6 @@ int ParchmentLog::LineStep() const
     return step;
 }
 
-// The room the icons take left of the text: none in a log without them.
 int ParchmentLog::IconColumn() const { return icons.labels != nullptr ? ICON_SIZE + ICON_GAP : 0; }
 
 bool ParchmentLog::ScrollBy(int distance)
@@ -420,7 +379,6 @@ int ParchmentLog::MaxScroll() const { return MaxScrollTop({ layout.content_heigh
 void ParchmentLog::OnWheel(WPARAM wParam)
 {
     UINT lines_per_notch = 3;
-    // SPI_GETWHEELSCROLLLINES only fails on a broken system; the default of 3 lines is then used.
     (void)SystemParametersInfoW(SPI_GETWHEELSCROLLLINES, 0, &lines_per_notch, 0);
     const int notches = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
     (void)ScrollBy(-notches * static_cast<int>(lines_per_notch) * LineStep());
@@ -440,22 +398,6 @@ void ParchmentLog::OnKey(WPARAM key)
     if (key == VK_END) (void)ScrollBy(MaxScroll());
 }
 
-void ParchmentLog::OnContextMenu(LPARAM lParam)
-{
-    if (!c_assert(window != NULL)) return;
-    if (context.text_menu == NULL) return;
-    POINT point = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-    if (point.x == -1 && point.y == -1)
-    {
-        point = { 0, 0 };
-        (void)ClientToScreen(window, &point);
-    }
-    const BOOL command = TrackPopupMenu(context.text_menu, TPM_RETURNCMD | TPM_NONOTIFY, point.x, point.y, 0, window,
-                                        nullptr);
-    if (command == COMMAND_COPY) CopySelection();
-    if (command == COMMAND_SELECT_ALL) SelectAll();
-}
-
 LRESULT ParchmentLog::OnSetCursor(WPARAM wParam, LPARAM lParam)
 {
     const HCURSOR cursor = context.renderer != nullptr ? context.renderer->Cursor(CursorId::arrow) : NULL;
@@ -464,66 +406,8 @@ LRESULT ParchmentLog::OnSetCursor(WPARAM wParam, LPARAM lParam)
     return TRUE;
 }
 
-int ParchmentLog::CharacterAt(PixelPoint point) const
-{
-    if (!c_assert(text_length >= 0 && text_length <= MAX_TEXT_LENGTH)) return 0;
-    if (lines.Count() == 0) return 0;
-    const float content_y = static_cast<float>(point.y - layout.text_area.top + scroll_top);
-    const int line_index = static_cast<int>(std::floor(content_y / line_height));
-    if (line_index < 0) return 0;
-    if (line_index >= lines.Count()) return text_length;
-    const TextLine line = lines.Line(line_index);
-    float x = static_cast<float>(layout.text_area.left);
-    for (int i = line.start; i < line.start + line.length && i < MAX_TEXT_LENGTH; i++)
-    {
-        if (static_cast<float>(point.x) < x + advances[i] / 2.0f) return i;
-        x += advances[i];
-    }
-    return line.start + line.length;
-}
-
-float ParchmentLog::CharacterX(int line_index, int character) const
-{
-    float x = static_cast<float>(layout.text_area.left);
-    if (!c_assert(line_index >= 0 && line_index < lines.Count())) return x;
-    if (!c_assert(character >= 0 && character <= text_length)) return x;
-    const TextLine line = lines.Line(line_index);
-    for (int i = line.start; i < character && i < MAX_TEXT_LENGTH; i++) x += advances[i];
-    return x;
-}
-
-void ParchmentLog::SelectAll()
-{
-    selection_anchor = 0;
-    selection_caret = text_length;
-    Redraw();
-}
-
-// Puts the selection on the clipboard as text. The clipboard takes a memory block it then owns, the one
-// allocation the platform demands here.
-void ParchmentLog::CopySelection() const
-{
-    const int first = std::min(selection_anchor, selection_caret);
-    const int last = std::max(selection_anchor, selection_caret);
-    if (!c_assert(window != NULL)) return;
-    if (!c_assert(first >= 0 && last <= text_length) || first == last || !OpenClipboard(window)) return;
-    const SIZE_T bytes = static_cast<SIZE_T>(last - first + 1) * sizeof(wchar_t);
-    HGLOBAL block = EmptyClipboard() ? GlobalAlloc(GMEM_MOVEABLE, bytes) : NULL;
-    wchar_t* copy = block != NULL ? static_cast<wchar_t*>(GlobalLock(block)) : nullptr;
-    if (copy != nullptr)
-    {
-        (void)wmemcpy_s(copy, static_cast<rsize_t>(last - first + 1), text + first, static_cast<rsize_t>(last - first));
-        copy[last - first] = L'\0';
-        (void)GlobalUnlock(block);
-        if (SetClipboardData(CF_UNICODETEXT, block) != NULL) block = NULL;
-    }
-    if (block != NULL) (void)GlobalFree(block);
-    (void)CloseClipboard();
-}
-
 void ParchmentLog::Redraw()
 {
     if (window == NULL) return;
-    // Invalidating a live window can't fail in a way that needs handling; at worst the next paint shows it.
     (void)InvalidateRect(window, nullptr, FALSE);
 }

@@ -31,7 +31,6 @@ bool PixelSurface::Create(PixelSize surface_size)
 void PixelSurface::Destroy()
 {
     if (dc != NULL && previous_bitmap != NULL) (void)SelectObject(dc, previous_bitmap);
-    // Freeing at shutdown: a failure leaves nothing to recover.
     if (bitmap != NULL) (void)DeleteObject(bitmap);
     if (dc != NULL) (void)DeleteDC(dc);
     dc = NULL;

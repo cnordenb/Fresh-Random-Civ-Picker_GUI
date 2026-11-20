@@ -5,7 +5,7 @@
 namespace
 {
     constexpr UINT_PTR REPEAT_TIMER = 1;
-    constexpr UINT FIRST_REPEAT_DELAY_MS = 350; // a held button repeats as the logs' does
+    constexpr UINT FIRST_REPEAT_DELAY_MS = 350;
     constexpr UINT REPEAT_DELAY_MS = 50;
 }
 
@@ -29,7 +29,6 @@ void DrawScrollbar(ParchmentRenderer& renderer, const ScrollbarDraw& draw)
                          { knob_left, knob_top, knob_left + knob, knob_top + knob }, 1.0f, smooth });
 }
 
-// The scrollbar counts in rows where the logs' counts in pixels: the scroll arithmetic is the same.
 void ScrollBar::SetRows(const Rows& list_rows)
 {
     if (!c_assert(list_rows.total >= 0 && list_rows.shown > 0)) return;
@@ -40,8 +39,6 @@ void ScrollBar::SetRows(const Rows& list_rows)
 
 int ScrollBar::FirstRow() const { return rows.first; }
 
-// Scrolls by rows, up for a negative count, and says whether the list moved. The caller, who asked for it, moves
-// the list; no message goes to the parent.
 bool ScrollBar::ScrollBy(int row_count)
 {
     if (!c_assert(rows.shown > 0)) return false;
@@ -72,7 +69,6 @@ void ScrollBar::OnPointerPressed(PixelPoint point)
     drag_start_y = point.y;
     drag_start_first = rows.first;
     if (pressed_part == ScrollbarPart::knob || pressed_part == ScrollbarPart::none) return;
-    // Without the timer the press still scrolls once; holding it just doesn't repeat.
     if (Step()) (void)SetTimer(Window(), REPEAT_TIMER, FIRST_REPEAT_DELAY_MS, nullptr);
 }
 
@@ -95,20 +91,17 @@ LRESULT ScrollBar::OnOtherMessage(UINT message, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-// A held button or track repeats until it is let go, or until the track has paged up to the pointer.
 void ScrollBar::OnRepeatTimer()
 {
     if (!c_assert(Window() != NULL)) return;
     if (!IsPressed() || !Step())
     {
-        // The timer may already be gone; either way no repeat follows.
         (void)KillTimer(Window(), REPEAT_TIMER);
         return;
     }
     (void)SetTimer(Window(), REPEAT_TIMER, REPEAT_DELAY_MS, nullptr);
 }
 
-// One step of the pressed button or track; the track pages towards the pointer until the knob reaches it.
 bool ScrollBar::Step()
 {
     if (!c_assert(rows.shown > 0)) return false;

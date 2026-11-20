@@ -77,7 +77,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)common;$(ProjectDir)model;$(ProjectDir)controller;$(ProjectDir)view;$(ProjectDir)parchment\graphics;$(ProjectDir)parchment\controls;$(ProjectDir)parchment\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)common;$(ProjectDir)controller;$(ProjectDir)model\catalog;$(ProjectDir)model\picker;$(ProjectDir)parchment\controls\base;$(ProjectDir)parchment\controls\lists;$(ProjectDir)parchment\graphics\drawing;$(ProjectDir)parchment\graphics\layout;$(ProjectDir)parchment\windows\dialogs;$(ProjectDir)parchment\windows\popups;$(ProjectDir)view\dialogs;$(ProjectDir)view\layout;$(ProjectDir)view\main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -94,7 +94,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)common;$(ProjectDir)model;$(ProjectDir)controller;$(ProjectDir)view;$(ProjectDir)parchment\graphics;$(ProjectDir)parchment\controls;$(ProjectDir)parchment\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)common;$(ProjectDir)controller;$(ProjectDir)model\catalog;$(ProjectDir)model\picker;$(ProjectDir)parchment\controls\base;$(ProjectDir)parchment\controls\lists;$(ProjectDir)parchment\graphics\drawing;$(ProjectDir)parchment\graphics\layout;$(ProjectDir)parchment\windows\dialogs;$(ProjectDir)parchment\windows\popups;$(ProjectDir)view\dialogs;$(ProjectDir)view\layout;$(ProjectDir)view\main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -111,7 +111,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)common;$(ProjectDir)model;$(ProjectDir)controller;$(ProjectDir)view;$(ProjectDir)parchment\graphics;$(ProjectDir)parchment\controls;$(ProjectDir)parchment\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)common;$(ProjectDir)controller;$(ProjectDir)model\catalog;$(ProjectDir)model\picker;$(ProjectDir)parchment\controls\base;$(ProjectDir)parchment\controls\lists;$(ProjectDir)parchment\graphics\drawing;$(ProjectDir)parchment\graphics\layout;$(ProjectDir)parchment\windows\dialogs;$(ProjectDir)parchment\windows\popups;$(ProjectDir)view\dialogs;$(ProjectDir)view\layout;$(ProjectDir)view\main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -128,7 +128,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)common;$(ProjectDir)model;$(ProjectDir)controller;$(ProjectDir)view;$(ProjectDir)parchment\graphics;$(ProjectDir)parchment\controls;$(ProjectDir)parchment\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)common;$(ProjectDir)controller;$(ProjectDir)model\catalog;$(ProjectDir)model\picker;$(ProjectDir)parchment\controls\base;$(ProjectDir)parchment\controls\lists;$(ProjectDir)parchment\graphics\drawing;$(ProjectDir)parchment\graphics\layout;$(ProjectDir)parchment\windows\dialogs;$(ProjectDir)parchment\windows\popups;$(ProjectDir)view\dialogs;$(ProjectDir)view\layout;$(ProjectDir)view\main;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -140,90 +140,102 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h" />
+    <ClInclude Include="common\Assertions.h" />
+    <ClInclude Include="common\CivDataLimits.h" />
+    <ClInclude Include="common\framework.h" />
     <ClInclude Include="common\GlobalConstants.h" />
+    <ClInclude Include="controller\CivPickerController.h" />
+    <ClInclude Include="model\catalog\CivCatalog.h" />
+    <ClInclude Include="model\catalog\JsonReader.h" />
+    <ClInclude Include="model\picker\CivPickerModel.h" />
+    <ClInclude Include="model\picker\HotkeyBindings.h" />
+    <ClInclude Include="model\picker\ShareLink.h" />
+    <ClInclude Include="parchment\controls\base\ParchmentButtons.h" />
+    <ClInclude Include="parchment\controls\base\ParchmentControl.h" />
+    <ClInclude Include="parchment\controls\base\ParchmentWidgets.h" />
+    <ClInclude Include="parchment\controls\lists\ParchmentDialogControls.h" />
+    <ClInclude Include="parchment\controls\lists\ParchmentLog.h" />
+    <ClInclude Include="parchment\controls\lists\ParchmentScrollBar.h" />
+    <ClInclude Include="parchment\graphics\drawing\ParchmentFonts.h" />
+    <ClInclude Include="parchment\graphics\drawing\ParchmentRenderer.h" />
+    <ClInclude Include="parchment\graphics\drawing\ParchmentTheme.h" />
+    <ClInclude Include="parchment\graphics\drawing\PixelSurface.h" />
+    <ClInclude Include="parchment\graphics\layout\ParchmentGeometry.h" />
+    <ClInclude Include="parchment\graphics\layout\ParchmentImages.h" />
+    <ClInclude Include="parchment\windows\dialogs\ParchmentDialog.h" />
+    <ClInclude Include="parchment\windows\dialogs\ParchmentShell.h" />
+    <ClInclude Include="parchment\windows\popups\ParchmentMenu.h" />
+    <ClInclude Include="parchment\windows\popups\ParchmentToast.h" />
+    <ClInclude Include="parchment\windows\popups\ParchmentTooltip.h" />
+    <ClInclude Include="view\main\CivPickerLayout.h" />
+    <ClInclude Include="view\main\CivPickerView.h" />
+    <ClInclude Include="view\main\CivPickerViewTypes.h" />
+    <ClInclude Include="view\main\DialogMetrics.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="model\CivPickerModel.h" />
-    <ClInclude Include="view\CivPickerView.h" />
-    <ClInclude Include="controller\CivPickerController.h" />
-    <ClInclude Include="parchment\controls\ParchmentControl.h" />
-    <ClInclude Include="parchment\controls\ParchmentButtons.h" />
-    <ClInclude Include="parchment\controls\ParchmentWidgets.h" />
-    <ClInclude Include="parchment\controls\ParchmentLog.h" />
-    <ClInclude Include="parchment\windows\ParchmentShell.h" />
-    <ClInclude Include="parchment\windows\ParchmentTooltip.h" />
-    <ClInclude Include="parchment\windows\ParchmentMenu.h" />
-    <ClInclude Include="parchment\controls\ParchmentDialogControls.h" />
-    <ClInclude Include="parchment\windows\ParchmentDialog.h" />
-    <ClInclude Include="common\Assertions.h" />
-    <ClInclude Include="parchment\graphics\ParchmentGeometry.h" />
-    <ClInclude Include="parchment\graphics\ParchmentTheme.h" />
-    <ClInclude Include="parchment\graphics\PixelSurface.h" />
-    <ClInclude Include="parchment\graphics\ParchmentImages.h" />
-    <ClInclude Include="parchment\graphics\ParchmentFonts.h" />
-    <ClInclude Include="parchment\graphics\ParchmentRenderer.h" />
-    <ClInclude Include="model\JsonReader.h" />
-    <ClInclude Include="model\CivCatalog.h" />
-    <ClInclude Include="common\CivDataLimits.h" />
-    <ClInclude Include="model\ShareLink.h" />
-    <ClInclude Include="model\HotkeyBindings.h" />
-    <ClInclude Include="parchment\windows\ParchmentToast.h" />
-    <ClInclude Include="view\DialogMetrics.h" />
-    <ClInclude Include="parchment\controls\ParchmentScrollBar.h" />
-    <ClInclude Include="view\CivPickerLayout.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="model\CivPickerModel.cpp" />
-    <ClCompile Include="view\CivPickerView.cpp" />
-    <ClCompile Include="controller\CivPickerController.cpp" />
-    <ClCompile Include="parchment\controls\ParchmentControl.cpp" />
-    <ClCompile Include="parchment\controls\ParchmentButtons.cpp" />
-    <ClCompile Include="parchment\controls\ParchmentWidgets.cpp" />
-    <ClCompile Include="parchment\controls\ParchmentLog.cpp" />
-    <ClCompile Include="parchment\windows\ParchmentShell.cpp" />
-    <ClCompile Include="parchment\windows\ParchmentTooltip.cpp" />
-    <ClCompile Include="parchment\windows\ParchmentMenu.cpp" />
-    <ClCompile Include="parchment\controls\ParchmentDialogControls.cpp" />
-    <ClCompile Include="parchment\windows\ParchmentDialog.cpp" />
-    <ClCompile Include="view\CivPickerViewLayout.cpp" />
-    <ClCompile Include="view\CivPickerViewDialogs.cpp" />
     <ClCompile Include="common\Assertions.cpp" />
-    <ClCompile Include="parchment\graphics\ParchmentGeometry.cpp" />
-    <ClCompile Include="parchment\graphics\PixelSurface.cpp" />
-    <ClCompile Include="parchment\graphics\ParchmentImages.cpp" />
-    <ClCompile Include="parchment\graphics\ParchmentFonts.cpp" />
-    <ClCompile Include="parchment\graphics\ParchmentRenderer.cpp" />
-    <ClCompile Include="model\JsonReader.cpp" />
-    <ClCompile Include="model\CivCatalog.cpp" />
-    <ClCompile Include="model\ShareLink.cpp" />
-    <ClCompile Include="parchment\windows\ParchmentToast.cpp" />
-    <ClCompile Include="view\CivPickerViewShare.cpp" />
-    <ClCompile Include="parchment\controls\ParchmentScrollBar.cpp" />
-    <ClCompile Include="view\CivPickerViewDlcToggles.cpp" />
-    <ClCompile Include="view\CivPickerViewImages.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="view\CivPickerViewObserver.cpp" />
-    <ClCompile Include="controller\CivPickerControllerInput.cpp" />
+    <ClCompile Include="controller\CivPickerController.cpp" />
+    <ClCompile Include="controller\CivPickerControllerExternal.cpp" />
     <ClCompile Include="controller\CivPickerControllerHotkeys.cpp" />
-    <ClCompile Include="view\CivPickerViewHotkeys.cpp" />
-    <ClCompile Include="model\HotkeyBindings.cpp" />
+    <ClCompile Include="controller\CivPickerControllerInput.cpp" />
+    <ClCompile Include="model\catalog\CivCatalog.cpp" />
+    <ClCompile Include="model\catalog\CivCatalogLookup.cpp" />
+    <ClCompile Include="model\catalog\JsonReader.cpp" />
+    <ClCompile Include="model\catalog\JsonReaderAccess.cpp" />
+    <ClCompile Include="model\picker\CivPickerModel.cpp" />
+    <ClCompile Include="model\picker\CivPickerModelPool.cpp" />
+    <ClCompile Include="model\picker\HotkeyBindings.cpp" />
+    <ClCompile Include="model\picker\ShareLink.cpp" />
+    <ClCompile Include="parchment\controls\base\ParchmentButtons.cpp" />
+    <ClCompile Include="parchment\controls\base\ParchmentControl.cpp" />
+    <ClCompile Include="parchment\controls\base\ParchmentWidgets.cpp" />
+    <ClCompile Include="parchment\controls\lists\ParchmentDialogControls.cpp" />
+    <ClCompile Include="parchment\controls\lists\ParchmentLog.cpp" />
+    <ClCompile Include="parchment\controls\lists\ParchmentLogSelection.cpp" />
+    <ClCompile Include="parchment\controls\lists\ParchmentScrollBar.cpp" />
+    <ClCompile Include="parchment\graphics\drawing\ParchmentFonts.cpp" />
+    <ClCompile Include="parchment\graphics\drawing\ParchmentRenderer.cpp" />
+    <ClCompile Include="parchment\graphics\drawing\PixelSurface.cpp" />
+    <ClCompile Include="parchment\graphics\layout\ParchmentGeometry.cpp" />
+    <ClCompile Include="parchment\graphics\layout\ParchmentGeometryPixels.cpp" />
+    <ClCompile Include="parchment\graphics\layout\ParchmentImages.cpp" />
+    <ClCompile Include="parchment\graphics\layout\ParchmentImagesLoading.cpp" />
+    <ClCompile Include="parchment\windows\dialogs\ParchmentDialog.cpp" />
+    <ClCompile Include="parchment\windows\dialogs\ParchmentDialogLevels.cpp" />
+    <ClCompile Include="parchment\windows\dialogs\ParchmentShell.cpp" />
+    <ClCompile Include="parchment\windows\popups\ParchmentMenu.cpp" />
+    <ClCompile Include="parchment\windows\popups\ParchmentMenuInput.cpp" />
+    <ClCompile Include="parchment\windows\popups\ParchmentToast.cpp" />
+    <ClCompile Include="parchment\windows\popups\ParchmentTooltip.cpp" />
+    <ClCompile Include="view\dialogs\CivPickerViewDialogs.cpp" />
+    <ClCompile Include="view\dialogs\CivPickerViewFixedDialogs.cpp" />
+    <ClCompile Include="view\dialogs\CivPickerViewHotkeyEditor.cpp" />
+    <ClCompile Include="view\dialogs\CivPickerViewHotkeys.cpp" />
+    <ClCompile Include="view\dialogs\CivPickerViewShare.cpp" />
+    <ClCompile Include="view\layout\CivPickerViewDlcToggles.cpp" />
+    <ClCompile Include="view\layout\CivPickerViewImages.cpp" />
+    <ClCompile Include="view\layout\CivPickerViewLayout.cpp" />
+    <ClCompile Include="view\layout\CivPickerViewTooltips.cpp" />
+    <ClCompile Include="view\main\CivPickerView.cpp" />
+    <ClCompile Include="view\main\CivPickerViewObserver.cpp" />
+    <ClCompile Include="view\main\CivPickerViewTabsSounds.cpp" />
+    <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Fresh Random Civ Picker.ico" />
-    <Image Include="small_Fresh Random Civ Picker.ico" />
-    <Image Include="social-preview.png" />
+    <Image Include="images\Fresh Random Civ Picker.ico" />
+    <Image Include="images\small_Fresh Random Civ Picker.ico" />
+    <Image Include="images\social-preview.png" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FRCP_GUI.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="CLAUDE2.md" />
-    <None Include="CLAUDE2_LOG.md" />
     <None Include="data.json" />
-    <None Include="formatting_notes.md" />
-    <None Include="settings.ini" />
-    <None Include="TODO.md" />
+    <None Include="tools\build.bat" />
+    <None Include="tools\FRCP_GUI.manifest" />
+    <None Include="tools\convert_web_assets.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

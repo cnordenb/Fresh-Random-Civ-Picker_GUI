@@ -2,8 +2,7 @@
 
 #include "Assertions.cpp"
 #include "ParchmentGeometry.cpp"
-
-// The web version's CSS is the specification: each test names the rule it reproduces.
+#include "ParchmentGeometryPixels.cpp"
 
 TEST(Rects, OverlapWhenTheyShareAPixel)
 {
@@ -37,7 +36,6 @@ TEST(Rects, BoundingRectCoversBoth)
 
 TEST(DottedLine, OddLengthDotsEveryOtherPixelFromBothEnds)
 {
-    // outline: 1px dotted along 5 px: Chrome puts dots on both ends.
     EXPECT_TRUE(DottedLineHasDot(0, 5));
     EXPECT_FALSE(DottedLineHasDot(1, 5));
     EXPECT_TRUE(DottedLineHasDot(2, 5));
@@ -47,7 +45,6 @@ TEST(DottedLine, OddLengthDotsEveryOtherPixelFromBothEnds)
 
 TEST(DottedLine, EvenLengthDoublesTheFirstDotToReachTheLastPixel)
 {
-    // Measured on the web version's focused lobby field: dots at 0, 1, 3, 5, ... of a 424 px side.
     EXPECT_TRUE(DottedLineHasDot(0, 424));
     EXPECT_TRUE(DottedLineHasDot(1, 424));
     EXPECT_FALSE(DottedLineHasDot(2, 424));
@@ -71,7 +68,6 @@ TEST(TileLayout, StretchCoversTheAreaWithOneTile)
 
 TEST(TileLayout, RepeatCentresWholeTilesInTheArea)
 {
-    // border-image-repeat: repeat centres the tiling, so 40 px of 6 px tiles start 2 px before the area.
     const TileSpan span = LayOutTiles({ 40, 6.0f, TileRule::repeat });
     EXPECT_FLOAT_EQ(span.length, 6.0f);
     EXPECT_FLOAT_EQ(span.origin, -1.0f);
@@ -79,7 +75,6 @@ TEST(TileLayout, RepeatCentresWholeTilesInTheArea)
 
 TEST(TileLayout, RoundScalesTilesToFitAWholeNumber)
 {
-    // border-image-repeat: round fits round(100 / 38) = 3 tiles of 33.33 px.
     const TileSpan span = LayOutTiles({ 100, 38.0f, TileRule::round });
     EXPECT_FLOAT_EQ(span.origin, 0.0f);
     EXPECT_NEAR(span.length, 100.0f / 3.0f, 0.001f);
@@ -106,7 +101,6 @@ TEST(NineSlice, SplitsTheTargetIntoCornersEdgesAndMiddle)
 
 TEST(Scrollbar, KnobStartsAtTheTopAndEndsAtTheBottomOfTheTrack)
 {
-    // The knob runs the whole track: top at scroll 0, track length minus knob length at the end.
     EXPECT_EQ(KnobOffset({ 1000, 400, 0 }, 375), 0);
     EXPECT_EQ(KnobOffset({ 1000, 400, 600 }, 375), 354);
     EXPECT_EQ(KnobOffset({ 1000, 400, 300 }, 375), 177);
@@ -127,14 +121,12 @@ TEST(Scrollbar, ScrollTopIsClampedToTheContent)
 
 TEST(Scrollbar, DraggingTheKnobScrollsInProportion)
 {
-    // ratio = hidden part / free track length = 600 / 354
     EXPECT_EQ(ScrollTopForKnobDrag({ 0, 177, 600, 354 }), 300);
     EXPECT_EQ(ScrollTopForKnobDrag({ 300, 1000, 600, 354 }), 600);
 }
 
 TEST(Scrollbar, HitTestFindsButtonsTrackAndKnob)
 {
-    // A 429 px bar: 27 px buttons, the track between them, a 21 px knob at track offset 100.
     EXPECT_EQ(HitTestScrollbar({ 5, 429, 100 }), ScrollbarPart::up_button);
     EXPECT_EQ(HitTestScrollbar({ 420, 429, 100 }), ScrollbarPart::down_button);
     EXPECT_EQ(HitTestScrollbar({ 60, 429, 100 }), ScrollbarPart::track_above_knob);
@@ -149,7 +141,6 @@ TEST(Slider, FillRunsFromTheMinimumToTheMaximum)
     EXPECT_FLOAT_EQ(SliderFill({ 1, 10, 4 }), 1.0f / 3.0f);
 }
 
-// The Options dialog's slider is 192 x 24: the 43 px handle drawn 24 px tall sets the scale, 24/43.
 TEST(Slider, ArrowsAndBarKeepTheImagesProportionsAtTheHandlesScale)
 {
     const SliderLayout layout = LayOutSlider({ 192, 24 });
@@ -188,7 +179,6 @@ TEST(Slider, PointerFindsTheArrowsTheHandleAndTheBar)
     EXPECT_EQ(HitTestSlider(track, { 192, 12 }), SliderPart::none);
 }
 
-// object-fit: contain, for icon files of another size than their atlas cell.
 TEST(ContainedSize, KeepsTheImagesProportionsInTheBox)
 {
     const PixelSize cell = { 128, 128 };
@@ -208,7 +198,6 @@ TEST(ContainedSize, EnlargesSmallImagesAndKeepsAPixel)
 
 namespace
 {
-    // Every character 10 px wide, so the expected breaks are easy to see.
     struct EvenText
     {
         const wchar_t* text;
@@ -272,7 +261,6 @@ TEST(WordWrap, TheWidestLineIsMeasuredWithoutTrailingSpaces)
     EXPECT_FLOAT_EQ(lines.WidestLine(), 70.0f);
 }
 
-// .log-row: a log's line is led by the icon of the name it starts with.
 TEST(IconLabels, ALineThatStartsWithALabelGetsItsIcon)
 {
     IconLabels labels;

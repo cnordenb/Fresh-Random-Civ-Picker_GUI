@@ -4,11 +4,6 @@
 #include "ParchmentControl.h"
 #include "ParchmentGeometry.h"
 
-// A read-only text log of the parchment theme (View): the web version's sunken brown box (.log) drawn from the log
-// nine-slice, with the game's scrollbar over its right side while the text overflows. It takes the place of a
-// read-only multi-line EDIT control: its text is the window text (SetWindowText, GetWindowText), long lines wrap,
-// the wheel, the keys and the scrollbar scroll it, and text can be selected and copied (Ctrl+C, Ctrl+A or the
-// context menu). A log may lead each line by an icon, picked by the label the line starts with (.log-row).
 class ParchmentLog final
 {
 public:

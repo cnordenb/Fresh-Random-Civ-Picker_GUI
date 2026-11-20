@@ -4,23 +4,18 @@
 
 namespace
 {
-    // .btn { padding: 0 6px }, and while pressed { padding: 0 2px 2px 4px }: the face moves with the pressed image.
     constexpr float TEXT_BUTTON_PADDING = 6.0f;
     constexpr float PRESSED_PADDING_LEFT = 4.0f;
     constexpr float PRESSED_PADDING_RIGHT = 2.0f;
     constexpr float PRESSED_PADDING_BOTTOM = 2.0f;
     constexpr float BUTTON_FOCUS_INSET = 4.0f;
-    // The share buttons' 6 px nine-slice frame; a pressed button's icon moves 1 px right and up.
     constexpr float ICON_BUTTON_BORDER = 6.0f;
     constexpr float PRESSED_ICON_SHIFT = 1.0f;
-    // .dlg-x { padding: 6.5px 14.5px }: the browser snaps the 17 px image to (15, 7).
     constexpr float CLOSE_IMAGE_LEFT = 15.0f;
     constexpr float CLOSE_IMAGE_TOP = 7.0f;
-    // kbd.key { border: 1px #b4b4b4; border-bottom-width: 2px; border-radius: 3px; padding: 0 4px }
     constexpr float KEY_RADIUS = 3.0f;
     constexpr float KEY_BORDER = 1.0f;
     constexpr float KEY_BOTTOM_BORDER = 2.0f;
-    // A key button's cap leaves room around it for the dotted focus outline.
     constexpr float KEY_FOCUS_MARGIN = 2.0f;
     const wchar_t* const LISTENING_TEXT = L"\u2026";
 
@@ -38,7 +33,6 @@ namespace
 
     bool IsHeld(int key) { return GetKeyState(key) < 0; }
 
-    // A modifier pressed on its own is held for the key that follows.
     bool IsModifierKey(WPARAM key)
     {
         const WPARAM modifier_keys[] = { VK_SHIFT, VK_CONTROL, VK_MENU, VK_LSHIFT, VK_RSHIFT, VK_LCONTROL,
@@ -170,7 +164,6 @@ void PaintKeyCap(ParchmentRenderer& renderer, const KeyCap& cap)
     renderer.DrawText({ cap.name, TOOLTIP_TEXT_COLOUR, box.left, box.right, baseline, TextAlign::centre });
 }
 
-// Gold while listening or under the pointer.
 void KeyButton::Paint(ParchmentRenderer& renderer, const FloatRect& bounds)
 {
     if (!c_assert(HasArea(bounds))) return;
@@ -191,7 +184,6 @@ void KeyButton::OnClicked()
 
 bool KeyButton::NotifiesClicks() const { return false; }
 
-// While listening it takes every key, Tab, Enter and Esc too, which a dialog would use itself.
 LRESULT KeyButton::DialogCode() const
 {
     return listening ? DLGC_WANTALLKEYS | DLGC_WANTCHARS : DLGC_BUTTON | DLGC_UNDEFPUSHBUTTON;
@@ -204,7 +196,6 @@ bool KeyButton::OnKeyPressed(WPARAM key)
     return true;
 }
 
-// Alt and F10 arrive as system keys; while listening, they and the characters keys make go no further.
 LRESULT KeyButton::OnOtherMessage(UINT message, WPARAM wParam, LPARAM lParam)
 {
     if (message == GET_KEYSTROKE) return chosen;
@@ -239,7 +230,6 @@ void KeyButton::Choose(WPARAM key)
     Notify(KEY_CHOSEN);
 }
 
-// Posted, so the parent hears of it once this control's message is handled and can change the control then.
 void KeyButton::Notify(WORD notification) const
 {
     const int control_id = GetDlgCtrlID(Window());

@@ -6,16 +6,10 @@
 #include "CivPickerLayout.h"
 #include "Resource.h"
 
-// Building the main window (CivPickerView): the parchment, the title and menus, and every control at the place
-// the web version gives it (style.css: positions in the 534 x 511 client area, as on the desktop app).
-
 namespace
 {
-    // --- Menus (the window menu of FRCP_GUI.rc, laid out as the web version's .menu-list) ---
-
     constexpr MenuItemSpec SEPARATOR = { nullptr, nullptr, 0, false };
 
-    // The items' shortcuts are the keys of the hotkeys in MENU_SHORTCUTS, which the user can change.
     const MenuItemSpec FILE_ITEMS[] = {
         { L"Copy Share Link", nullptr, IDM_COPYLINK, false },    { L"Share ...", nullptr, IDM_SHARE, false },
         { L"Open Link ...", nullptr, IDM_OPENLINK, false },
@@ -39,7 +33,6 @@ namespace
         { L"Tech Tree ...", nullptr, IDM_TECHTREE, true },
         { L"Stats ...", nullptr, IDM_STATS, true },
     };
-    // The Game menu lists the editions' links from data.json, then this.
     constexpr MenuItemSpec SURVAPP_ITEM = { L"Sustainability App ...", nullptr, IDM_SURVAPP, true };
     const MenuItemSpec FRCP_ITEMS[] = {
         { L"GitHub Repository ...", nullptr, IDM_GITHUB, true },
@@ -72,7 +65,6 @@ namespace
 
     template <int Count> constexpr int CountOf(const MenuItemSpec (&)[Count]) { return Count; }
 
-    // The hotkey whose key a menu item shows, or none.
     HotkeyAction ShortcutOf(int command)
     {
         for (const MenuShortcut& shortcut : MENU_SHORTCUTS)
@@ -82,50 +74,45 @@ namespace
         return HotkeyAction::none;
     }
 
-    // --- Places in the client area (style.css), and the desktop's own buttons placed to match them ---
-
-    constexpr PixelRect TAB_STRIP_AREA = { 2, 0, 208, 25 }; // .tabstrip { left: 2px }
-    constexpr PixelRect OPTIONS_AREA = { 66, 54, 138, 126 }; // #optionsBig
-    constexpr PixelRect HISTORY_AREA = { 385, 60, 468, 120 }; // desktop: mirrors the Options button
-    constexpr PixelRect SURVAPP_AREA = { 90, 391, 150, 451 }; // desktop: mirrors the tech tree button
-    constexpr PixelRect CIV_ICON_AREA = { 217, 165, 321, 269 }; // #civIcon
-    constexpr PixelRect CIV_NAME_AREA = { 169, 273, 369, 292 }; // #civName
-    constexpr PixelRect DRAW_AREA = { 217, 305, 317, 335 }; // #drawBtn
-    constexpr PixelRect TECHTREE_AREA = { 384, 391, 444, 451 }; // #techBtn
-    constexpr PixelRect ROUND_COUNTER_AREA = { 456, 484, 516, 501 }; // #roundCounter
-    constexpr PixelRect DRAWN_COUNT_AREA = { 10, 32, 105, 49 }; // #drawnCount
-    constexpr PixelRect CLEAR_LOG_AREA = { 110, 25, 210, 55 }; // #clearLogBtn
-    constexpr PixelRect DRAWN_LOG_AREA = { 10, 60, 208, 501 }; // #drawnLog
-    constexpr PixelRect REMAINING_COUNT_AREA = { 327, 32, 452, 49 }; // #remainingCount
-    constexpr PixelRect SHOW_REMAINING_AREA = { 457, 30, 517, 50 }; // #showRemainingLabel
-    constexpr PixelRect REMAINING_LOG_AREA = { 327, 60, 529, 501 }; // #remainingLog
-    constexpr PixelRect SHARE_AREA = { 249, 385, 286, 422 }; // #shareBtn, midway between Draw and Reset
-    constexpr PixelRect POOL_SHARE_AREA = { 487, 466, 524, 503 }; // #poolShareBtn
-    constexpr int SHARE_ICON_SIZE = 28; // ::before { background-size: 28px }
-    constexpr PixelRect EDITION_BANNER_AREA = { 200, 30, 328, 123 }; // #editionIcon
-    constexpr PixelRect ENABLED_COUNT_AREA = { 210, 140, 330, 157 }; // #enabledCount
-    constexpr PixelRect AUTO_TOGGLE_AREA = { 10, 180, 160, 200 }; // #autoToggleLabel
-    constexpr PixelRect ENABLE_ALL_AREA = { 10, 470, 110, 500 }; // #enableAllBtn
-    constexpr PixelRect DISABLE_ALL_AREA = { 125, 470, 225, 500 }; // #disableAllBtn
-    constexpr PixelRect AUTO_RESET_AREA = { 240, 480, 400, 500 }; // #autoResetLabel
-    constexpr int RESET_LEFT_ON_DRAW_TAB = 10; // #resetBtn
-    constexpr int RESET_LEFT_ON_LOG_TAB = 217; // .client[data-tab="1"] #resetBtn
+    constexpr PixelRect TAB_STRIP_AREA = { 2, 0, 208, 25 };
+    constexpr PixelRect OPTIONS_AREA = { 66, 54, 138, 126 };
+    constexpr PixelRect HISTORY_AREA = { 385, 60, 468, 120 };
+    constexpr PixelRect SURVAPP_AREA = { 90, 391, 150, 451 };
+    constexpr PixelRect CIV_ICON_AREA = { 217, 165, 321, 269 };
+    constexpr PixelRect CIV_NAME_AREA = { 169, 273, 369, 292 };
+    constexpr PixelRect DRAW_AREA = { 217, 305, 317, 335 };
+    constexpr PixelRect TECHTREE_AREA = { 384, 391, 444, 451 };
+    constexpr PixelRect ROUND_COUNTER_AREA = { 456, 484, 516, 501 };
+    constexpr PixelRect DRAWN_COUNT_AREA = { 10, 32, 105, 49 };
+    constexpr PixelRect CLEAR_LOG_AREA = { 110, 25, 210, 55 };
+    constexpr PixelRect DRAWN_LOG_AREA = { 10, 60, 208, 501 };
+    constexpr PixelRect REMAINING_COUNT_AREA = { 327, 32, 452, 49 };
+    constexpr PixelRect SHOW_REMAINING_AREA = { 457, 30, 517, 50 };
+    constexpr PixelRect REMAINING_LOG_AREA = { 327, 60, 529, 501 };
+    constexpr PixelRect SHARE_AREA = { 249, 385, 286, 422 };
+    constexpr PixelRect POOL_SHARE_AREA = { 487, 466, 524, 503 };
+    constexpr int SHARE_ICON_SIZE = 28;
+    constexpr PixelRect EDITION_BANNER_AREA = { 200, 30, 328, 123 };
+    constexpr PixelRect ENABLED_COUNT_AREA = { 210, 140, 330, 157 };
+    constexpr PixelRect AUTO_TOGGLE_AREA = { 10, 180, 160, 200 };
+    constexpr PixelRect ENABLE_ALL_AREA = { 10, 470, 110, 500 };
+    constexpr PixelRect DISABLE_ALL_AREA = { 125, 470, 225, 500 };
+    constexpr PixelRect AUTO_RESET_AREA = { 240, 480, 400, 500 };
+    constexpr int RESET_LEFT_ON_DRAW_TAB = 10;
+    constexpr int RESET_LEFT_ON_LOG_TAB = 217;
     constexpr int RESET_TOP = 471;
     constexpr int BUTTON_SIZE_X = 100;
     constexpr int BUTTON_SIZE_Y = 30;
-    constexpr int SURVAPP_ICON_SIZE = 48; // the 12 px pixel art, four times over
+    constexpr int SURVAPP_ICON_SIZE = 48;
 
-    // Edition rows (buildPoolControls): 175 x 28, from y 36 in steps of 30, in data.json's order of editions.
     constexpr int EDITION_LEFT = 10;
     constexpr int EDITION_TOP = 36;
     constexpr int EDITION_STEP = 30;
-    constexpr int EDITION_WIDTH = 188; // 175 px, but the bold name may run on up to the banner
+    constexpr int EDITION_WIDTH = 188;
     constexpr int EDITION_HEIGHT = 28;
     static_assert(EDITION_TOP + EDITION_STEP * (MAX_EDITIONS - 1) + EDITION_HEIGHT <= ENABLED_COUNT_AREA.top,
                   "the edition rows fit above the count of enabled civs");
 
-    // The civ grid: five columns of 102 x 20 toggles from y 210 in the order of the civs' names, every civ always
-    // in its own place.
     constexpr int GRID_COLUMNS[] = { 10, 112, 214, 316, 418 };
     constexpr int GRID_COLUMN_COUNT = static_cast<int>(sizeof(GRID_COLUMNS) / sizeof(GRID_COLUMNS[0]));
     constexpr int GRID_ROW = 20;
@@ -135,7 +122,6 @@ namespace
     constexpr int CIV_ICON_SIZE = 18;
     constexpr int CIV_ICON_GAP = 2;
 
-    // The client area's frame (.frame { top: 21px; border: 1px }).
     constexpr float CLIENT_FRAME_BOTTOM = static_cast<float>(CLIENT_HEIGHT);
 }
 
@@ -148,8 +134,6 @@ namespace
     }
 }
 
-// The parchment over the whole window: the image's visible part, which has the window's proportions, so the
-// parchment isn't stretched.
 bool CivPickerView::BuildMainShell()
 {
     if (!c_assert(main_window != NULL)) return false;
@@ -157,9 +141,6 @@ bool CivPickerView::BuildMainShell()
     const PixelSize size = { WINDOW_WIDTH, WINDOW_HEIGHT };
     if (!renderer.BeginFrame({ canvas.Dc(), size, ParchmentRenderer::SurfaceAlpha::premultiplied })) return false;
     renderer.Clear();
-    // The burnt edge reaches into the content here and there (the title row, the menu bar, the client area). The
-    // content lies on an opaque underlay, so all of it is the window's own and none of it the skin's, which
-    // follows the window a moment late when the window moves.
     const PixelRect content = { WINDOW_PADDING, WINDOW_PADDING, WINDOW_WIDTH - WINDOW_PADDING,
                                 CLIENT_TOP + CLIENT_HEIGHT };
     renderer.FillRect(ToFloatRect(content), CONTENT_UNDERLAY_COLOUR);
@@ -170,7 +151,6 @@ bool CivPickerView::BuildMainShell()
     return renderer.EndFrame() && main_shell.Attach(main_window, size);
 }
 
-// The window's own drawing under its controls: the icon and title (.titlebar h1) and the client area's frame.
 bool CivPickerView::DecorateMainBackdrop()
 {
     if (!c_assert(main_window != NULL) || !c_assert(title[0] != L'\0')) return false;
@@ -181,7 +161,6 @@ bool CivPickerView::DecorateMainBackdrop()
     const TextSpan title_text = { title, static_cast<int>(wcslen(title)), FontId::ui };
     const float baseline = renderer.BaselineCentred(FontId::ui, static_cast<float>(WINDOW_PADDING),
                                                     static_cast<float>(TITLE_BAR_HEIGHT));
-    // The program's icon before the title, as in a window caption, scaled down from its 500 px picture.
     const PixelSize icon = renderer.ImageSize(ImageId::program_icon);
     const int icon_left = WINDOW_PADDING + TITLE_TEXT_LEFT;
     const int icon_top = WINDOW_PADDING + (TITLE_BAR_HEIGHT - TITLE_ICON_SIZE) / 2;
@@ -208,11 +187,8 @@ bool CivPickerView::CreateMainControls()
     return CreateFrameControls() && CreateDrawTabControls() && CreateLogTabControls() && CreatePoolTabControls();
 }
 
-// A control's placement from its place in the client area (the window has no frame, so the client area starts
-// after the parchment's padding, the title bar and the menu bar).
 ControlPlacement CivPickerView::PlaceInClient(int id, const PixelRect& client_bounds, const wchar_t* text) const
 {
-    // A placement without a parent is refused by the control it is meant for.
     const ControlPlacement refused = { NULL, id, client_bounds, nullptr, L"" };
     if (!c_assert(HasArea(client_bounds)) || !c_assert(text != nullptr)) return refused;
     return { main_window, id, OffsetRect(client_bounds, { CLIENT_LEFT, CLIENT_TOP }), &main_shell.Backdrop(), text };
@@ -237,7 +213,6 @@ bool CivPickerView::CreateFrameControls()
     return tab_strip.Create(context, PlaceInClient(IDC_TAB_STRIP, TAB_STRIP_AREA, L""));
 }
 
-// The menus of the web version, whose Game menu starts with the links data.json gives the editions.
 bool CivPickerView::BuildMenus()
 {
     static_assert(MAX_GAME_ITEMS <= ParchmentMenuBar::MAX_ITEMS, "the Game menu fits a menu");
@@ -247,7 +222,6 @@ bool CivPickerView::BuildMenus()
     MenuItemSpec game_items[MAX_GAME_ITEMS] = {};
     for (int i = 0; i < link_count; i++)
     {
-        // A label longer than its buffer is cut short, which still names the page it opens.
         (void)_snwprintf_s(game_item_labels[i], MAX_MENU_LABEL, _TRUNCATE, L"%ls ...", catalog.LinkAt(i).text.c_str());
         game_items[i] = { game_item_labels[i], nullptr, EDITION_LINK_BASE_ID + i, true };
     }
@@ -264,7 +238,6 @@ bool CivPickerView::BuildMenus()
     return true;
 }
 
-// The view keeps its own copy of each menu, whose shortcuts show the keys the hotkeys have, as they change.
 bool CivPickerView::CopyMenu(int menu_index, const MenuSpec& menu)
 {
     if (!c_assert(menu_index >= 0 && menu_index < MENU_COUNT) || !c_assert(menu.items != nullptr)) return false;
@@ -324,8 +297,6 @@ bool CivPickerView::CreateLogTabControls()
            RaiseLogsOverCivName();
 }
 
-// A log line that starts with a civ's name is led by the civ's icon, as in the web version's logs. The civ icon
-// atlas holds the civs in the order of their IDs.
 bool CivPickerView::ShowCivIconsInLogs()
 {
     static_assert(MAX_CIVS <= MAX_ICON_LABELS, "every civ's name can lead a log line");
@@ -339,7 +310,6 @@ bool CivPickerView::ShowCivIconsInLogs()
     return drawn_log.ShowIcons(icons) && remaining_log.ShowIcons(icons);
 }
 
-// On the Log tab the civ name reaches into the logs, which lie over it as in the web version.
 bool CivPickerView::RaiseLogsOverCivName()
 {
     if (!c_assert(drawn_log.Window() != NULL && remaining_log.Window() != NULL)) return false;
@@ -381,7 +351,6 @@ bool CivPickerView::CreateEditionControls()
         const EditionInfo& edition = catalog.EditionAt(i);
         const int top = EDITION_TOP + EDITION_STEP * i;
         const PixelRect area = { EDITION_LEFT, top, EDITION_LEFT + EDITION_WIDTH, top + EDITION_HEIGHT };
-        // A row reads "short name (year)" beside the edition's icon, as the web version's do.
         const std::wstring text = edition.short_name + L" (" + std::to_wstring(edition.year) + L")";
         edition_rows[i].SetEditionIndex(i);
         if (!edition_rows[i].Create(context, PlaceInClient(EDITION_ROW_BASE_ID + i, area, text.c_str()))) return false;
@@ -400,7 +369,6 @@ bool CivPickerView::CreateCivToggles()
         const int civ = catalog.DisplayCiv(position);
         const int left = GRID_COLUMNS[position % GRID_COLUMN_COUNT];
         const int top = CIV_GRID_TOP + GRID_ROW * (position / GRID_COLUMN_COUNT);
-        // The civ icon atlas holds the civs in the order of their IDs.
         civ_toggles[civ].SetIcon({ ImageId::civ_atlas, ImageId::civ_atlas_grey, CIV_ATLAS_COLUMNS, CIV_ATLAS_CELL, civ,
                                    CIV_ICON_SIZE, CIV_ICON_GAP, true });
         civ_toggles[civ].SetChecked(true);
@@ -425,135 +393,6 @@ void CivPickerView::MoveResetButton(int tab_index)
     if (!c_assert(button_reset.Window() != NULL)) return;
     const int left = tab_index == LOG_TAB ? RESET_LEFT_ON_LOG_TAB : RESET_LEFT_ON_DRAW_TAB;
     const PixelRect area = OffsetRect(ResetArea(left), { CLIENT_LEFT, CLIENT_TOP });
-    // A button that couldn't move stays usable where it is.
     const UINT flags = SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE;
     (void)SetWindowPos(button_reset.Window(), NULL, area.left, area.top, 0, 0, flags);
-}
-
-// --- Tooltips ---
-
-// Each tooltip ends with its hotkey's key as the hotkey has it now (Draw, Reset and Options: ShowTabTooltips).
-void CivPickerView::SetUpTooltips()
-{
-    const std::wstring tech_tree_line =
-        DrawTabHotkeyLine(HotkeyAction::draw_tab_open_tech_tree, HotkeyAction::open_tech_tree);
-    const std::wstring survapp_line =
-        DrawTabHotkeyLine(HotkeyAction::draw_tab_open_sustainability_app, HotkeyAction::open_sustainability_app);
-    const std::wstring history_line = DrawTabHotkeyLine(HotkeyAction::open_history, HotkeyAction::none);
-    SetTooltip(TOOLTIP_TECHTREE, (L"Opens the tech tree" + tech_tree_line).c_str());
-    const std::wstring survapp_text =
-        L"Opens aoe2vils.net to calculate villagers required for sustainable production" + survapp_line;
-    SetTooltip(TOOLTIP_SURVAPP, survapp_text.c_str());
-    SetTooltip(TOOLTIP_HISTORY, (L"Opens the game's History info" + history_line).c_str());
-    SetHotkeyTooltip(TOOLTIP_CLEAR, L"Clears the log of previously drawn civs", HotkeyAction::clear_drawn_log);
-    SetHotkeyTooltip(TOOLTIP_REMAININGTOGGLE, L"Toggles the display of the remaining civs log",
-                     HotkeyAction::toggle_remaining_log);
-    SetHotkeyTooltip(TOOLTIP_AUTOTOGGLE, L"Toggles older civs as well as the automatic enabling of older civs when "
-                                         L"switching between editions",
-                     HotkeyAction::toggle_auto_toggle);
-    SetHotkeyTooltip(TOOLTIP_AUTORESET,
-                     L"Automatically resets the pool of drawn civs when the civilisation pool is changed",
-                     HotkeyAction::toggle_auto_reset);
-    SetHotkeyTooltip(TOOLTIP_ENABLEALL, L"Enables all civilisations so that they are made available in the pool of "
-                                        L"civilisations for drawing",
-                     HotkeyAction::enable_all_civs);
-    SetHotkeyTooltip(TOOLTIP_DISABLEALL, L"Disables all civilisations so that they are removed from the pool of "
-                                         L"civilisations for drawing",
-                     HotkeyAction::disable_all_civs);
-    SetHotkeyTooltip(TOOLTIP_SHARE, L"Copies a share link with the currently selected civ pool and this round's draws",
-                     HotkeyAction::copy_share_link);
-    SetTooltip(TOOLTIP_POOLSHARE, L"Copies a share link with this civ pool");
-    ShowTabTooltips(current_tab);
-    SetUpDataTooltips();
-    tooltips[TOOLTIP_TECHTREE].external = true;
-    tooltips[TOOLTIP_SURVAPP].external = true;
-}
-
-// The edition rows' and DLC toggles' tooltips, worded as the web version's.
-void CivPickerView::SetUpDataTooltips()
-{
-    const CivCatalog& catalog = model.Catalog();
-    for (int edition = 0; edition < catalog.EditionCount() && edition < MAX_EDITIONS; edition++)
-    {
-        const EditionInfo& info = catalog.EditionAt(edition);
-        const std::wstring text = L"Selects the " + info.short_name + L" (" + std::to_wstring(info.year) +
-                                  L") civilisation pool" + HotkeyLine(HotkeyBindings::EditionHotkey(edition));
-        SetTooltip(EDITION_TOOLTIP_BASE + edition, text.c_str());
-    }
-    for (int dlc = 0; dlc < catalog.DlcCount() && dlc < MAX_DLCS; dlc++)
-    {
-        if (HasDlcToggle(dlc)) SetTooltip(DLC_TOOLTIP_BASE + dlc, DlcTooltipText(dlc).c_str());
-    }
-}
-
-// The DLC, its civs in the order of their IDs and its toggle's hotkey if it has one (the web version's dlcTip).
-std::wstring CivPickerView::DlcTooltipText(int dlc) const
-{
-    if (!c_assert(HasDlcToggle(dlc))) return L"";
-    const CivCatalog& catalog = model.Catalog();
-    const DlcInfo& info = catalog.DlcAt(dlc);
-    if (!c_assert(info.toggle_slot >= 0 && info.toggle_slot < MAX_DLC_TOGGLES)) return L"";
-    std::wstring names;
-    int civ_count = 0;
-    for (int civ = 0; civ < catalog.CivCount() && civ < MAX_CIVS; civ++)
-    {
-        if (catalog.CivAt(civ).dlc != dlc) continue;
-        names += (civ_count > 0 ? L", " : L"") + catalog.CivAt(civ).name;
-        civ_count++;
-    }
-    const wchar_t* const noun = civ_count == 1 ? L" civilisation\n(" : L" civilisations\n(";
-    // A toggle after the ones with a hotkey has none, and no hotkey line.
-    return L"Toggles " + info.name + noun + names + L")" + HotkeyLine(HotkeyBindings::DlcSlotHotkey(info.toggle_slot));
-}
-
-// A tooltip that ends with its hotkey's key.
-void CivPickerView::SetHotkeyTooltip(int tooltip_id, const wchar_t* text, HotkeyAction action)
-{
-    if (!c_assert(text != nullptr)) return;
-    SetTooltip(tooltip_id, (text + HotkeyLine(action)).c_str());
-}
-
-void CivPickerView::SetTooltip(int tooltip_id, const wchar_t* text)
-{
-    if (!c_assert(tooltip_id >= 0 && tooltip_id < TOOLTIP_AMOUNT) || !c_assert(text != nullptr)) return;
-    // A tooltip longer than its buffer is cut short, which still shows its start.
-    (void)wcsncpy_s(tooltips[tooltip_id].text, text, _TRUNCATE);
-}
-
-// The controls and tooltips the hover handler checks, in the order they always have been checked: the buttons, the
-// edition rows, the pool's checkboxes and buttons, then each edition's DLC toggles from the top.
-void CivPickerView::CollectTooltipTargets()
-{
-    const TooltipTarget first_targets[] = { { button_draw.Window(), TOOLTIP_DRAW },
-                                            { button_reset.Window(), TOOLTIP_RESET },
-                                            { button_techtree.Window(), TOOLTIP_TECHTREE },
-                                            { button_options.Window(), TOOLTIP_OPTIONS },
-                                            { button_clearlog.Window(), TOOLTIP_CLEAR },
-                                            { button_enableall.Window(), TOOLTIP_ENABLEALL },
-                                            { button_disableall.Window(), TOOLTIP_DISABLEALL },
-                                            { checkbox_showremainlog.Window(), TOOLTIP_REMAININGTOGGLE },
-                                            { button_share.Window(), TOOLTIP_SHARE },
-                                            { button_poolshare.Window(), TOOLTIP_POOLSHARE } };
-    const TooltipTarget pool_targets[] = { { checkbox_autotoggle.Window(), TOOLTIP_AUTOTOGGLE },
-                                           { checkbox_autoreset.Window(), TOOLTIP_AUTORESET },
-                                           { button_survapp.Window(), TOOLTIP_SURVAPP },
-                                           { button_history.Window(), TOOLTIP_HISTORY } };
-    static_assert(sizeof(first_targets) / sizeof(first_targets[0]) + sizeof(pool_targets) / sizeof(pool_targets[0]) +
-                      MAX_EDITIONS + MAX_DLCS <= TOOLTIP_AMOUNT, "every tooltip target has a slot");
-    if (!c_assert(main_window != NULL)) return;
-    const CivCatalog& catalog = model.Catalog();
-    int count = 0;
-    for (const TooltipTarget& target : first_targets) tooltip_targets[count++] = target;
-    for (int edition = 0; edition < catalog.EditionCount() && edition < MAX_EDITIONS; edition++)
-        tooltip_targets[count++] = { edition_rows[edition].Window(), EDITION_TOOLTIP_BASE + edition };
-    for (const TooltipTarget& target : pool_targets) tooltip_targets[count++] = target;
-    for (int edition = 0; edition < catalog.EditionCount() && edition < MAX_EDITIONS; edition++)
-    {
-        const EditionInfo& info = catalog.EditionAt(edition);
-        for (int slot = 0; slot < info.dlc_toggle_count && slot < MAX_DLC_TOGGLES && count < TOOLTIP_AMOUNT; slot++)
-        {
-            const int dlc = info.dlc_toggles[slot];
-            tooltip_targets[count++] = { dlc_toggles[dlc].Window(), DLC_TOOLTIP_BASE + dlc };
-        }
-    }
 }

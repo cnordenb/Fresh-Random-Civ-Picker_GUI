@@ -6,19 +6,13 @@
 #include "Assertions.h"
 #include "CivPickerLayout.h"
 
-// The DLC toggles of the main window's Civ Pool tab (CivPickerView): each edition's list where its dlcToggleLayout in
-// data.json puts it. A list with more toggles than fit above the civ grid shows as many as fit and scrolls by its
-// scrollbar or the mouse wheel. How many fit follows from the layout, so a new DLC in data.json needs nothing here.
-
 namespace
 {
-    // The scrollbar at the client area's right edge; the toggles stop short of it.
     constexpr int DLC_SCROLLBAR_LEFT = CLIENT_WIDTH - SCROLLBAR_WIDTH - 4;
     constexpr int DLC_TOGGLE_RIGHT = DLC_SCROLLBAR_LEFT - 2;
     constexpr int SCROLLBAR_MIN_HEIGHT = 2 * SCROLLBAR_BUTTON_LENGTH + SCROLLBAR_KNOB_SIZE;
 }
 
-// Each edition's DLC toggles in the order of its dlcToggles, and a scrollbar for a list that doesn't fit.
 bool CivPickerView::CreateDlcToggles()
 {
     if (!c_assert(main_window != NULL)) return false;
@@ -37,8 +31,6 @@ bool CivPickerView::CreateDlcToggles()
     return true;
 }
 
-// A DLC toggle is as wide as its icon, the gap and its name in bold, the widest the name gets; a name too long for
-// the room left of the scrollbar is cut short.
 bool CivPickerView::CreateDlcToggle(int dlc, const DlcToggleSpot& spot)
 {
     if (!c_assert(HasDlcToggle(dlc))) return false;
@@ -59,7 +51,6 @@ bool CivPickerView::CreateDlcToggle(int dlc, const DlcToggleSpot& spot)
     return toggle.Create(context, PlaceInClient(DLC_TOGGLE_BASE_ID + dlc, area, info.name.c_str()));
 }
 
-// A list that doesn't fit gets a scrollbar at the client area's right edge, beside the rows it shows.
 bool CivPickerView::CreateDlcScrollbar(int edition)
 {
     const EditionInfo& info = model.Catalog().EditionAt(edition);
@@ -73,12 +64,10 @@ bool CivPickerView::CreateDlcScrollbar(int edition)
     scrollbar.SetRows({ info.dlc_toggle_count, rows, 0 });
     const ControlContext context = { &renderer, &back_buffer, text_menu };
     if (!scrollbar.Create(context, PlaceInClient(DLC_SCROLLBAR_BASE_ID + edition, area, L""))) return false;
-    // The scrollbar shows with its edition's toggles.
     ShowControl(scrollbar.Window(), false);
     return true;
 }
 
-// How many of the edition's toggles fit from their layout's top down to the civ grid; all of them if they fit.
 int CivPickerView::VisibleDlcRows(int edition) const
 {
     const EditionInfo& info = model.Catalog().EditionAt(edition);
@@ -89,7 +78,6 @@ int CivPickerView::VisibleDlcRows(int edition) const
     return std::min(info.dlc_toggle_count, fitting);
 }
 
-// The height of the rows the edition's list shows, at least the height its scrollbar needs.
 int CivPickerView::DlcListHeight(int edition) const
 {
     const DlcToggleLayout& layout = model.Catalog().EditionAt(edition).toggle_layout;
@@ -98,7 +86,6 @@ int CivPickerView::DlcListHeight(int edition) const
     return std::max(rows_height, SCROLLBAR_MIN_HEIGHT);
 }
 
-// Where the edition's list lies in the main window, with its scrollbar.
 PixelRect CivPickerView::DlcListArea(int edition) const
 {
     const DlcToggleLayout& layout = model.Catalog().EditionAt(edition).toggle_layout;
@@ -106,7 +93,6 @@ PixelRect CivPickerView::DlcListArea(int edition) const
     return OffsetRect(area, { CLIENT_LEFT, CLIENT_TOP });
 }
 
-// Only the edition's own list shows.
 void CivPickerView::ShowDlcToggles(int edition)
 {
     const CivCatalog& catalog = model.Catalog();
@@ -118,7 +104,6 @@ void CivPickerView::ShowDlcToggles(int edition)
     LayOutDlcToggles(edition);
 }
 
-// Shows the rows the edition's list is scrolled to, each in its place from the layout's top, and hides the others.
 void CivPickerView::LayOutDlcToggles(int edition)
 {
     const CivCatalog& catalog = model.Catalog();
@@ -134,7 +119,6 @@ void CivPickerView::LayOutDlcToggles(int edition)
         const PixelPoint place = { CLIENT_LEFT + layout.left, CLIENT_TOP + layout.top + layout.step * (slot - first) };
         const UINT visibility = shown ? SWP_SHOWWINDOW : (SWP_HIDEWINDOW | SWP_NOMOVE);
         const UINT flags = SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | visibility;
-        // A toggle that couldn't move keeps its place until the next layout.
         (void)SetWindowPos(toggle, NULL, place.x, place.y, 0, 0, flags);
     }
     const HWND scrollbar = dlc_scrollbars[edition].Window();
@@ -152,7 +136,6 @@ void CivPickerView::HideDlcToggles(int edition)
     if (scrollbar != NULL) ShowControl(scrollbar, false);
 }
 
-// A DLC list's scrollbar moved: its edition's toggles follow.
 LRESULT CivPickerView::OnScroll(LPARAM lParam)
 {
     const HWND source = reinterpret_cast<HWND>(lParam);
@@ -165,8 +148,6 @@ LRESULT CivPickerView::OnScroll(LPARAM lParam)
     return 0;
 }
 
-// The wheel scrolls the shown DLC list while the mouse is over it, as many rows a notch as the system says for
-// lines, but at most a page.
 LRESULT CivPickerView::OnMouseWheel(WPARAM wParam, LPARAM lParam)
 {
     if (!c_assert(main_window != NULL) || current_tab != CIV_POOL_TAB) return 0;
@@ -175,7 +156,6 @@ LRESULT CivPickerView::OnMouseWheel(WPARAM wParam, LPARAM lParam)
     POINT point = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
     if (!ScreenToClient(main_window, &point) || !RectContains(DlcListArea(edition), { point.x, point.y })) return 0;
     UINT lines_per_notch = 3;
-    // SPI_GETWHEELSCROLLLINES only fails on a broken system; the default of 3 then stands.
     (void)SystemParametersInfoW(SPI_GETWHEELSCROLLLINES, 0, &lines_per_notch, 0);
     const int page = VisibleDlcRows(edition);
     const int rows_per_notch = lines_per_notch < static_cast<UINT>(page) ? static_cast<int>(lines_per_notch) : page;

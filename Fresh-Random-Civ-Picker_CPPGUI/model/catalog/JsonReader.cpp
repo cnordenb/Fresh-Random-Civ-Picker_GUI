@@ -8,17 +8,10 @@
 namespace
 {
     constexpr int BYTE_ORDER_MARK_LENGTH = 3;
-    constexpr int HEX_DIGITS = 4; // \uXXXX
+    constexpr int HEX_DIGITS = 4;
     constexpr int UNICODE_ESCAPE_LENGTH = 2 + HEX_DIGITS;
     constexpr int SIMPLE_ESCAPE_LENGTH = 2;
-    constexpr int MAX_INTEGER_DIGITS = 9; // so an integer always fits an int
-    constexpr int MAX_UTF8_LENGTH = 4;
-    constexpr unsigned int MAX_CODE_POINT = 0x10FFFF;
-    constexpr unsigned int FIRST_SURROGATE = 0xD800;
-    constexpr unsigned int LAST_SURROGATE = 0xDFFF;
-    constexpr unsigned int FIRST_SUPPLEMENTARY = 0x10000;
 
-    // The escapes a JSON string may use after its backslash, and the characters they stand for.
     constexpr int SIMPLE_ESCAPE_COUNT = 8;
     constexpr char ESCAPE_KINDS[SIMPLE_ESCAPE_COUNT + 1] = "\"\\/bfnrt";
     constexpr wchar_t ESCAPE_MEANINGS[SIMPLE_ESCAPE_COUNT] = { L'"', L'\\', L'/', L'\b', L'\f', L'\n', L'\r', L'\t' };
@@ -34,19 +27,7 @@ namespace
         if (c >= 'A' && c <= 'F') return c - 'A' + 10;
         return -1;
     }
-
-    // The length of the UTF-8 sequence a byte starts, or 0 if it can't start one.
-    int Utf8Length(unsigned char lead)
-    {
-        if (lead < 0x80) return 1;
-        if (lead >= 0xC2 && lead <= 0xDF) return 2;
-        if (lead >= 0xE0 && lead <= 0xEF) return 3;
-        if (lead >= 0xF0 && lead <= 0xF4) return 4;
-        return 0;
-    }
 }
-
-// --- Tokenizing ---
 
 JsonStatus JsonDocument::Parse(const std::string& utf8_text)
 {
@@ -60,7 +41,6 @@ JsonStatus JsonDocument::Parse(const std::string& utf8_text)
     tokens.reserve(MAX_VALUES);
     const int length = static_cast<int>(text.size());
     int position = text.compare(0, BYTE_ORDER_MARK_LENGTH, "\xEF\xBB\xBF") == 0 ? BYTE_ORDER_MARK_LENGTH : 0;
-    // Every scan consumes at least one character, so the text's length bounds the loop.
     for (int step = 0; step < length && position < length; step++)
     {
         const Scan scan = ScanAt(position);
@@ -68,9 +48,7 @@ JsonStatus JsonDocument::Parse(const std::string& utf8_text)
         if (!c_assert(scan.next > position)) return Fail(JsonStatus::syntax_error, position);
         position = scan.next;
     }
-    // The text ended inside a value, or held none.
     if (expect != Expect::nothing) return Fail(JsonStatus::syntax_error, length);
-    // A complete value has closed every container it opened.
     if (!c_assert(depth == 0 && !tokens.empty())) return Fail(JsonStatus::syntax_error, length);
     parsed = true;
     return JsonStatus::ok;
@@ -84,7 +62,6 @@ JsonStatus JsonDocument::Fail(JsonStatus status, int offset)
     return status;
 }
 
-// The line of the text where parsing stopped, counted from 1.
 int JsonDocument::ErrorLine() const
 {
     if (!c_assert(error_offset >= 0)) return 1;
@@ -136,7 +113,6 @@ JsonDocument::Scan JsonDocument::Close(JsonType type, int position)
     const int container = TopContainer();
     if (container == NONE || !c_assert(IsValue(container)) || tokens[static_cast<size_t>(container)].type != type)
         return { JsonStatus::syntax_error, position };
-    // A container closes after one of its values, or right after it opened.
     const Expect empty = type == JsonType::object ? Expect::key_or_close : Expect::value_or_close;
     if (expect != Expect::comma_or_close && expect != empty) return { JsonStatus::syntax_error, position };
     Token& token = tokens[static_cast<size_t>(container)];
@@ -164,7 +140,6 @@ JsonDocument::Scan JsonDocument::Colon(int position)
     return { JsonStatus::ok, position + 1 };
 }
 
-// A string is a member's key where the object expects one, and a value everywhere else.
 JsonDocument::Scan JsonDocument::String(int position)
 {
     const int closing = StringEnd(position);
@@ -189,7 +164,6 @@ JsonDocument::Scan JsonDocument::Number(int position)
     return { JsonStatus::ok, end };
 }
 
-// true, false or null.
 JsonDocument::Scan JsonDocument::Literal(int position)
 {
     if (!c_assert(position >= 0 && position < static_cast<int>(text.size()))) return { JsonStatus::syntax_error, 0 };
@@ -213,7 +187,6 @@ JsonStatus JsonDocument::BeginValue(JsonType type, int start)
     if (!c_assert(start >= 0)) return JsonStatus::syntax_error;
     if (expect != Expect::value && expect != Expect::value_or_close) return JsonStatus::syntax_error;
     if (static_cast<int>(tokens.size()) >= MAX_VALUES) return JsonStatus::too_many_values;
-    // An array counts its elements as they begin; an object counts its members by their keys.
     const int container = TopContainer();
     if (container != NONE && tokens[static_cast<size_t>(container)].type == JsonType::array)
         tokens[static_cast<size_t>(container)].count++;
@@ -246,7 +219,6 @@ int JsonDocument::TopContainer() const
     return depth > 0 ? open[depth - 1] : NONE;
 }
 
-// The index of the quote that closes the string opening at position, or NONE if the string is malformed.
 int JsonDocument::StringEnd(int position) const
 {
     const int length = static_cast<int>(text.size());
@@ -264,7 +236,6 @@ int JsonDocument::StringEnd(int position) const
     return NONE;
 }
 
-// The length of the escape at position (from its backslash), or 0 if it is malformed.
 int JsonDocument::EscapeLength(int position) const
 {
     const int length = static_cast<int>(text.size());
@@ -301,8 +272,6 @@ int JsonDocument::NumberEnd(int position) const
     return end;
 }
 
-// JSON's number grammar: an optional minus, an integer without leading zeros, then optionally a fraction and an
-// exponent.
 bool JsonDocument::IsNumber(int start, int end) const
 {
     if (!c_assert(start >= 0 && start < end && end <= static_cast<int>(text.size()))) return false;
@@ -329,7 +298,6 @@ bool JsonDocument::IsNumber(int start, int end) const
     return position == end;
 }
 
-// The first position from position on (up to end) that doesn't hold a digit.
 int JsonDocument::DigitsEnd(int position, int end) const
 {
     if (!c_assert(position >= 0 && end <= static_cast<int>(text.size()))) return position;
@@ -338,96 +306,6 @@ int JsonDocument::DigitsEnd(int position, int end) const
     return digits_end;
 }
 
-// --- Reading the values ---
-
-int JsonDocument::Root() const { return parsed && !tokens.empty() ? 0 : NONE; }
-
-bool JsonDocument::IsValue(int value) const { return value >= 0 && value < static_cast<int>(tokens.size()); }
-
-bool JsonDocument::Is(int value, JsonType type) const
-{
-    return IsValue(value) && tokens[static_cast<size_t>(value)].type == type;
-}
-
-// The members of an object or the elements of an array; 0 for anything else, including NONE.
-int JsonDocument::Count(int container) const
-{
-    if (!Is(container, JsonType::object) && !Is(container, JsonType::array)) return 0;
-    return tokens[static_cast<size_t>(container)].count;
-}
-
-// The value of an object's member, or NONE if the object (or what stands for it) has no member of that name.
-int JsonDocument::Member(int object, const char* key) const
-{
-    if (!c_assert(key != nullptr) || !Is(object, JsonType::object)) return NONE;
-    const int count = tokens[static_cast<size_t>(object)].count;
-    int key_token = object + 1;
-    for (int i = 0; i < count && i < MAX_VALUES; i++)
-    {
-        if (!c_assert(IsValue(key_token + 1))) return NONE;
-        if (KeyEquals(key_token, key)) return key_token + 1;
-        key_token = tokens[static_cast<size_t>(key_token + 1)].after;
-    }
-    return NONE;
-}
-
-// The key of an object's member at position; its value is the token after it.
-int JsonDocument::MemberKey(int object, int position) const
-{
-    if (!Is(object, JsonType::object) || position < 0 || position >= Count(object)) return NONE;
-    int key_token = object + 1;
-    for (int i = 0; i < position && i < MAX_VALUES; i++)
-    {
-        if (!c_assert(IsValue(key_token + 1))) return NONE;
-        key_token = tokens[static_cast<size_t>(key_token + 1)].after;
-    }
-    return c_assert(Is(key_token, JsonType::string)) ? key_token : NONE;
-}
-
-int JsonDocument::Element(int array, int position) const
-{
-    if (!Is(array, JsonType::array) || position < 0 || position >= Count(array)) return NONE;
-    int element = array + 1;
-    for (int i = 0; i < position && i < MAX_VALUES; i++)
-    {
-        if (!c_assert(IsValue(element))) return NONE;
-        element = tokens[static_cast<size_t>(element)].after;
-    }
-    return c_assert(IsValue(element)) ? element : NONE;
-}
-
-// Keys are compared as written: a key that uses escapes doesn't match.
-bool JsonDocument::KeyEquals(int key, const char* name) const
-{
-    if (!c_assert(Is(key, JsonType::string)) || !c_assert(name != nullptr)) return false;
-    const Token& token = tokens[static_cast<size_t>(key)];
-    const size_t length = std::strlen(name);
-    return static_cast<size_t>(token.end - token.start) == length &&
-           text.compare(static_cast<size_t>(token.start), length, name) == 0;
-}
-
-// A string value (or a key) in UTF-16, its escapes and UTF-8 characters decoded.
-JsonDocument::TextResult JsonDocument::Text(int string_value) const
-{
-    if (!Is(string_value, JsonType::string)) return { false, L"" };
-    const Token& token = tokens[static_cast<size_t>(string_value)];
-    if (!c_assert(token.start <= token.end)) return { false, L"" };
-    std::wstring decoded;
-    decoded.reserve(static_cast<size_t>(token.end - token.start));
-    int position = token.start;
-    for (int step = 0; step < token.end - token.start && position < token.end; step++)
-    {
-        const bool escape = text[static_cast<size_t>(position)] == '\\';
-        const CodeUnits next = escape ? DecodeEscape(position) : DecodeUtf8(position, token.end);
-        if (next.consumed <= 0) return { false, L"" };
-        for (int i = 0; i < next.count && i < 2; i++) decoded.push_back(next.units[i]);
-        position += next.consumed;
-    }
-    return { true, decoded };
-}
-
-// An escape that StringEnd accepted; a \u escape gives one UTF-16 code unit, as JSON writes surrogate pairs as
-// two escapes.
 JsonDocument::CodeUnits JsonDocument::DecodeEscape(int position) const
 {
     const CodeUnits malformed = { 0, 0, { 0, 0 } };
@@ -440,56 +318,4 @@ JsonDocument::CodeUnits JsonDocument::DecodeEscape(int position) const
         if (ESCAPE_KINDS[i] == kind) return { length, 1, { ESCAPE_MEANINGS[i], 0 } };
     }
     return malformed;
-}
-
-// One UTF-8 character as one UTF-16 code unit, or two (a surrogate pair) beyond the Basic Multilingual Plane.
-JsonDocument::CodeUnits JsonDocument::DecodeUtf8(int position, int end) const
-{
-    const CodeUnits malformed = { 0, 0, { 0, 0 } };
-    if (!c_assert(position >= 0 && position < end && end <= static_cast<int>(text.size()))) return malformed;
-    const int length = Utf8Length(static_cast<unsigned char>(text[static_cast<size_t>(position)]));
-    if (length == 0 || position + length > end) return malformed;
-    const unsigned int lead_bits[MAX_UTF8_LENGTH + 1] = { 0, 0x7F, 0x1F, 0x0F, 0x07 };
-    const unsigned int shortest[MAX_UTF8_LENGTH + 1] = { 0, 0, 0x80, 0x800, FIRST_SUPPLEMENTARY };
-    unsigned int code_point = static_cast<unsigned char>(text[static_cast<size_t>(position)]) & lead_bits[length];
-    for (int i = 1; i < length; i++)
-    {
-        const unsigned char next = static_cast<unsigned char>(text[static_cast<size_t>(position + i)]);
-        if ((next & 0xC0u) != 0x80u) return malformed;
-        code_point = (code_point << 6) | (next & 0x3Fu);
-    }
-    const bool surrogate = code_point >= FIRST_SURROGATE && code_point <= LAST_SURROGATE;
-    if (code_point < shortest[length] || code_point > MAX_CODE_POINT || surrogate) return malformed;
-    if (code_point < FIRST_SUPPLEMENTARY) return { length, 1, { static_cast<wchar_t>(code_point), 0 } };
-    const unsigned int offset = code_point - FIRST_SUPPLEMENTARY;
-    return { length, 2, { static_cast<wchar_t>(FIRST_SURROGATE + (offset >> 10)),
-                          static_cast<wchar_t>(0xDC00u + (offset & 0x3FFu)) } };
-}
-
-// A number value without a fraction or exponent, of at most MAX_INTEGER_DIGITS digits.
-JsonDocument::IntegerResult JsonDocument::Integer(int number_value) const
-{
-    if (!Is(number_value, JsonType::number)) return { false, 0 };
-    const Token& token = tokens[static_cast<size_t>(number_value)];
-    if (!c_assert(token.start < token.end)) return { false, 0 };
-    const bool negative = text[static_cast<size_t>(token.start)] == '-';
-    const int first_digit = negative ? token.start + 1 : token.start;
-    const int digit_count = token.end - first_digit;
-    if (digit_count < 1 || digit_count > MAX_INTEGER_DIGITS) return { false, 0 };
-    if (DigitsEnd(first_digit, token.end) != token.end) return { false, 0 };
-    int value = 0;
-    for (int i = first_digit; i < token.end; i++) value = value * 10 + (text[static_cast<size_t>(i)] - '0');
-    return { true, negative ? -value : value };
-}
-
-bool JsonDocument::IsTrue(int value) const
-{
-    return Is(value, JsonType::literal) && text.compare(static_cast<size_t>(tokens[static_cast<size_t>(value)].start),
-                                                        4, "true") == 0;
-}
-
-bool JsonDocument::IsNull(int value) const
-{
-    return Is(value, JsonType::literal) && text.compare(static_cast<size_t>(tokens[static_cast<size_t>(value)].start),
-                                                        4, "null") == 0;
 }

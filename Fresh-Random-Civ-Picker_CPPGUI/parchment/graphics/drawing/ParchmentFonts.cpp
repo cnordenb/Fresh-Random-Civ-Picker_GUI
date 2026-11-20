@@ -10,8 +10,6 @@ namespace
 {
     constexpr int MEASURE_CHUNK = 256;
 
-    // The fonts of style.css: Georgia for all text, and for the wooden buttons the first installed of
-    // "Lucida Blackletter", "Old English Text MT" and the browser's default serif font.
     const wchar_t* const UI_FAMILY = L"Georgia";
     const wchar_t* const BLACKLETTER_FAMILIES[] = { L"Lucida Blackletter", L"Old English Text MT", L"Times New Roman" };
     const wchar_t* const LOCALE = L"en-us";
@@ -71,7 +69,6 @@ bool ParchmentFonts::LoadFont(const FontSpec& spec)
     return LoadFontFace(spec, family);
 }
 
-// The font face measures text; its metrics place text the way a browser does (ascent and descent rounded).
 bool ParchmentFonts::LoadFontFace(const FontSpec& spec, const wchar_t* family)
 {
     IDWriteFontCollection* fonts = nullptr;
@@ -140,7 +137,6 @@ IDWriteTextFormat* ParchmentFonts::Format(FontId font, TextAlign align) const
     return formats[index][align_index];
 }
 
-// Every metric query goes through here, so an out-of-range font falls back to the UI font.
 const ParchmentFonts::FontMetrics& ParchmentFonts::MetricsOf(FontId font) const
 {
     const int index = static_cast<int>(font);
@@ -170,7 +166,6 @@ float ParchmentFonts::Measure(const TextSpan& span)
     return width;
 }
 
-// The advance of every character of the span, valid until the next call.
 const float* ParchmentFonts::Advances(const TextSpan& span)
 {
     const bool valid = (span.text != nullptr || span.length == 0) && span.length >= 0 &&
@@ -203,7 +198,6 @@ bool ParchmentFonts::MeasureChunk(const TextSpan& span, int first)
     IDWriteFontFace1* kerning_face = nullptr;
     if (SUCCEEDED(face->QueryInterface(__uuidof(IDWriteFontFace1), reinterpret_cast<void**>(&kerning_face))))
     {
-        // Text without kerning pairs measures a little wide at worst, so a failure here is no reason to stop.
         if (kerning_face->HasKerningPairs())
             (void)kerning_face->GetKerningPairAdjustments(static_cast<UINT32>(count), glyphs, kerning);
         ReleaseInterface(kerning_face);

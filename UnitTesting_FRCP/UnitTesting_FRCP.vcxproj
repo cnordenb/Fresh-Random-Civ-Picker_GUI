@@ -37,7 +37,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\common;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\model;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\parchment\graphics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\common;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\model\catalog;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\model\picker;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\parchment\graphics\layout;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\parchment\graphics\drawing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -53,7 +53,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\common;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\model;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\parchment\graphics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\common;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\model\catalog;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\model\picker;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\parchment\graphics\layout;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\parchment\graphics\drawing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>X64;_DEBUG;_CONSOLE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -69,7 +69,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\common;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\model;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\parchment\graphics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\common;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\model\catalog;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\model\picker;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\parchment\graphics\layout;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\parchment\graphics\drawing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level4</WarningLevel>
@@ -86,7 +86,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\common;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\model;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\parchment\graphics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\common;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\model\catalog;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\model\picker;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\parchment\graphics\layout;$(ProjectDir)..\Fresh-Random-Civ-Picker_CPPGUI\parchment\graphics\drawing;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>X64;NDEBUG;_CONSOLE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level4</WarningLevel>
@@ -104,12 +104,12 @@
     <ClInclude Include="TestData.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test.cpp" />
+    <ClCompile Include="tests\test.cpp" />
     <ClCompile Include="TestMain.cpp" />
-    <ClCompile Include="ParchmentGeometryTest.cpp" />
-    <ClCompile Include="CivDataTest.cpp" />
-    <ClCompile Include="ShareLinkTest.cpp" />
-    <ClCompile Include="HotkeyBindingsTest.cpp" />
+    <ClCompile Include="tests\ParchmentGeometryTest.cpp" />
+    <ClCompile Include="tests\CivDataTest.cpp" />
+    <ClCompile Include="tests\ShareLinkTest.cpp" />
+    <ClCompile Include="tests\HotkeyBindingsTest.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -124,6 +124,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="run-tests.sh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,8 +5,6 @@
 #include "framework.h"
 #include "ParchmentGeometry.h"
 
-// A fixed-size 32-bit top-down DIB with its own memory DC (View). Surfaces are created at startup and reused:
-// window backdrops, the shared back buffer that controls paint into, and the images of layered windows.
 class PixelSurface final
 {
 public:

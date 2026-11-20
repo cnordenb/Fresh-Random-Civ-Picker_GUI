@@ -7,8 +7,6 @@
 #include "ParchmentShell.h"
 #include "ParchmentWidgets.h"
 
-// --- What a dialog consists of: its parts (controls, with command IDs) and its decorations (drawn once) ---
-
 enum class PartKind
 {
     checkbox, radio, button, default_button, label, error_label, slider, dropdown, text_field, readonly_field, log,
@@ -23,7 +21,6 @@ struct DialogPart
     const wchar_t* text;
 };
 
-// Text decorations give the top of their first line; paragraphs wrap to their width.
 enum class DecorationKind { text, bold_text, paragraph, hint, group, key };
 
 struct DialogDecoration
@@ -33,7 +30,6 @@ struct DialogDecoration
     const wchar_t* text;
 };
 
-// A link inside a paragraph decoration: the characters it covers become a link part with this command ID.
 struct DialogLink
 {
     int decoration;
@@ -54,20 +50,14 @@ struct DialogLayout
     int default_button;
 };
 
-// Runs the dialogs of the parchment theme (View): the web version's panels (dialog.win) with their title, wooden
-// close button and drop shadow, over everything they dim. A dialog is an ordinary modal dialog whose procedure
-// keeps its job; this class builds the dialog from its layout when the procedure gets WM_INITDIALOG, and handles
-// the messages that draw and shape it. Dialogs can open over each other up to MAX_LEVELS deep; each level has its
-// controls and surfaces from startup.
 class ParchmentDialogs final
 {
 public:
     static constexpr int MAX_LEVELS = 2;
-    // The largest dialogs are Hotkeys (882 wide) and History (509 tall); their layouts check they fit.
     static constexpr int MAX_DIALOG_WIDTH = 900;
     static constexpr int MAX_DIALOG_HEIGHT = 560;
-    static constexpr int MAX_KEY_BUTTONS = 24; // the Customise Hotkeys dialog's, for the 24 global hotkeys
-    static constexpr int SHADOW_MARGIN = 48; // room for the panel's drop shadow around a dialog
+    static constexpr int MAX_KEY_BUTTONS = 24;
+    static constexpr int SHADOW_MARGIN = 48;
 
     struct Setup
     {
@@ -77,7 +67,6 @@ public:
         ShellWorkspace* shell_workspace;
     };
 
-    // The dialog procedure is the function pointer Win32 runs the dialog with (CLAUDE2.md I2).
     struct Run
     {
         HWND owner;
@@ -92,7 +81,6 @@ public:
         INT_PTR result;
     };
 
-    // Grows a dialog downwards: the parts from a height on (but one) move down to make room.
     struct Growth
     {
         int extra_height;

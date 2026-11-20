@@ -2,10 +2,6 @@
 
 #include "ParchmentControl.h"
 
-// Labels, tabs and the checkbox-like controls of the parchment theme (View), drawn as their web version
-// counterparts (style.css).
-
-// One line of text (.label); the text is the window text, so SetWindowText changes it.
 class Label final : public ParchmentControl
 {
 public:
@@ -26,8 +22,6 @@ private:
     Style style = { FontId::ui, TEXT_COLOUR, TextAlign::left, UI_LINE_HEIGHT };
 };
 
-// The three tabs (.tabstrip): each 70 x 25 from the tabs image, overlapping by 2 px, with the selected one on top
-// in bold at full brightness and the others dimmed. Clicking a tab selects it and then tells the parent.
 class TabStrip final : public ParchmentControl
 {
 public:
@@ -57,8 +51,6 @@ private:
     int pressed_tab = -1;
 };
 
-// A checkbox with its label (.chk, and .row in dialogs): the wooden box ticked or not, pressed while held. As a
-// radio button it only ever ticks itself; the view unticks the others of its group.
 class Checkbox final : public ParchmentControl
 {
 public:
@@ -79,9 +71,6 @@ private:
     Style style = { 4, false, UI_LINE_HEIGHT };
 };
 
-// A civ or DLC toggle (.icon-chk): its icon stands in for the checkbox. Enabled, the name is bold; disabled, the
-// icon is grey under the off cross and the name italic and struck through. Civ toggles highlight on hover, gold
-// while enabled and red while disabled.
 class IconToggle final : public ParchmentControl
 {
 public:
@@ -108,8 +97,6 @@ private:
     Icon icon = { ImageId::civ_atlas, ImageId::civ_atlas_grey, CIV_ATLAS_COLUMNS, CIV_ATLAS_CELL, 0, 18, 2, true };
 };
 
-// An edition choice (.edition): the edition's icon in place of a radio circle, which shows its hover look and,
-// while pressed or chosen, its pressed look; the chosen edition's name is bold.
 class EditionRow final : public ParchmentControl
 {
 public:

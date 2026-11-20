@@ -6,9 +6,6 @@
 
 #include "ShareLink.cpp"
 
-// Share links as the web version writes and opens them, with the program's data.json; so the tests hold for any
-// editions and civs it lists.
-
 namespace
 {
     const std::wstring ADDRESS = L"https://frcp.net/#p=";
@@ -21,7 +18,6 @@ namespace
         return catalog;
     }
 
-    // The edition's civs, every third one left out, and up to three draws from the rest in reverse ID order.
     SharedPool SamplePool(const CivCatalog& catalog, int edition)
     {
         SharedPool pool = {};

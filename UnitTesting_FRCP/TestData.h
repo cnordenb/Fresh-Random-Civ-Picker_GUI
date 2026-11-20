@@ -4,8 +4,6 @@
 #include <sstream>
 #include <string>
 
-// The data file the program ships with (data.json is the only place its editions, DLCs and civs are written down),
-// found from this header's place in the repository, whatever folder the tests run in.
 inline std::string ReadProgramDataFile()
 {
     const std::string header = __FILE__;
@@ -16,7 +14,6 @@ inline std::string ReadProgramDataFile()
     return contents.str();
 }
 
-// The data file with its first occurrence of one text replaced by another, to make a file with one problem.
 inline std::string ProgramDataFileWith(const std::string& original, const std::string& replacement)
 {
     std::string data = ReadProgramDataFile();

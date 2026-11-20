@@ -12,11 +12,8 @@
 namespace
 {
     const wchar_t* const MENU_BAR_CLASS = L"FrcpParchmentMenuBar";
-    // .menu-title { padding: 0 7px; border: 1px }
     constexpr float TITLE_PADDING = 7.0f;
     constexpr float TITLE_BORDER = 1.0f;
-    // .menu-list { padding: 2px; border: 1px; min-width: 250px } and its items
-    // { padding: 3px 18px 3px 30px; gap: 24px }
     constexpr int LIST_BORDER = 1;
     constexpr int LIST_PADDING = 2;
     constexpr int LIST_MIN_WIDTH = 250;
@@ -24,12 +21,11 @@ namespace
     constexpr float ITEM_PADDING_LEFT = 30.0f;
     constexpr float ITEM_PADDING_RIGHT = 18.0f;
     constexpr float ITEM_GAP = 24.0f;
-    // .menu-list hr { margin: 3px 2px 3px 30px; border-top: 1px }
     constexpr float SEPARATOR_HEIGHT = 7.0f;
     constexpr float SEPARATOR_MARGIN = 3.0f;
     constexpr float SEPARATOR_RIGHT = 2.0f;
-    constexpr float ICON_LEFT = 9.0f; // the external icon in the item's left margin
-    constexpr int SHADOW_MARGIN = 6; // box-shadow: 2px 2px 3px rgba(0, 0, 0, .25)
+    constexpr float ICON_LEFT = 9.0f;
+    constexpr int SHADOW_MARGIN = 6;
     constexpr PixelPoint SHADOW_OFFSET = { 2, 2 };
     constexpr float SHADOW_SIGMA = 1.5f;
     constexpr float SHADOW_OPACITY = 0.25f;
@@ -66,7 +62,6 @@ bool ParchmentMenuBar::Create(const ControlContext& bar_context, const ControlPl
     if (!list_surface.Create({ MAX_LIST_SIZE.width + 2 * SHADOW_MARGIN, MAX_LIST_SIZE.height + 2 * SHADOW_MARGIN }))
         return false;
     const HINSTANCE instance = reinterpret_cast<HINSTANCE>(GetWindowLongPtr(parent, GWLP_HINSTANCE));
-    // The window procedure needs this object from the first message on, so it travels as the creation parameter.
     window = CreateWindowExW(0, MENU_BAR_CLASS, L"", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS, placement.bounds.left,
                              placement.bounds.top, size.width, size.height, parent, ControlId(placement.id), instance,
                              this);
@@ -78,7 +73,6 @@ bool ParchmentMenuBar::Create(const ControlContext& bar_context, const ControlPl
 
 void ParchmentMenuBar::Destroy()
 {
-    // The list window goes with its owner anyway; destroying it first leaves no stale handle.
     if (list_window != NULL) (void)DestroyWindow(list_window);
     list_window = NULL;
     list_surface.Destroy();
@@ -88,7 +82,6 @@ HWND ParchmentMenuBar::Window() const { return window; }
 
 bool ParchmentMenuBar::IsOpen() const { return open_menu >= 0; }
 
-// The titles sit side by side from the left; each list fits its widest item (CSS grid of label and shortcut).
 bool ParchmentMenuBar::LayOut()
 {
     if (!c_assert(context.renderer != nullptr)) return false;
@@ -133,8 +126,6 @@ bool ParchmentMenuBar::LayOutList(int menu_index)
     return c_assert(list.size.width <= MAX_LIST_SIZE.width && list.size.height <= MAX_LIST_SIZE.height);
 }
 
-// Window procedure of the menu bar. Win32 can only deliver window messages through a function pointer to this
-// procedure (CLAUDE2.md I2); it reaches its menu bar through the window's user data.
 LRESULT CALLBACK ParchmentMenuBar::WindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 {
     if (message == WM_NCCREATE)
@@ -187,7 +178,6 @@ void ParchmentMenuBar::OnPaint()
     (void)EndPaint(window, &paint);
 }
 
-// An open menu's title matches its list; a hovered title is gold like an item.
 void ParchmentMenuBar::PaintTitles(ParchmentRenderer& renderer)
 {
     if (!c_assert(size.height > 2 * static_cast<int>(TITLE_BORDER))) return;
@@ -255,7 +245,6 @@ void ParchmentMenuBar::PaintList(ParchmentRenderer& renderer, const MenuSpec& me
     }
 }
 
-// One item of the open list; the highlighted one is gold with dark text, as a hovered item.
 void ParchmentMenuBar::PaintItem(ParchmentRenderer& renderer, int item_index, const FloatRect& area)
 {
     if (!c_assert(IsOpen()) || !c_assert(HasArea(area))) return;
@@ -295,181 +284,8 @@ bool ParchmentMenuBar::ShowList()
     BLENDFUNCTION blend = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
     if (!UpdateLayeredWindow(list_window, NULL, &position, &frame, list_surface.Dc(), &origin, 0, &blend, ULW_ALPHA))
         return false;
-    // ShowWindow reports the earlier visibility, not success.
     (void)ShowWindow(list_window, SW_SHOWNOACTIVATE);
     return true;
-}
-
-// While a menu is open the bar holds the mouse capture, so it hears about the mouse everywhere.
-void ParchmentMenuBar::OnMouseMove(LPARAM lParam)
-{
-    if (!c_assert(window != NULL)) return;
-    const PixelPoint point = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-    const int title = TitleAt(point);
-    if (!IsOpen())
-    {
-        if (title != hovered_title)
-        {
-            hovered_title = title;
-            TRACKMOUSEEVENT tracking = { sizeof(TRACKMOUSEEVENT), TME_LEAVE, window, 0 };
-            // Without leave tracking the title just stays highlighted until the next move.
-            (void)TrackMouseEvent(&tracking);
-            Redraw();
-        }
-        return;
-    }
-    if (title >= 0 && title != open_menu) Open(title);
-    const int item = ItemAt(point);
-    if (item == highlighted_item) return;
-    highlighted_item = item;
-    // A list that failed to redraw keeps its previous highlight until the next change.
-    (void)ShowList();
-}
-
-void ParchmentMenuBar::OnMouseLeave()
-{
-    hovered_title = -1;
-    Redraw();
-}
-
-void ParchmentMenuBar::OnButtonDown(LPARAM lParam)
-{
-    if (!c_assert(menus.count > 0)) return;
-    const PixelPoint point = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-    const int title = TitleAt(point);
-    if (IsOpen() && title == open_menu)
-    {
-        Close();
-        return;
-    }
-    if (title >= 0)
-    {
-        Open(title);
-        return;
-    }
-    if (IsOpen() && !RectContains(ListArea(), point)) Close();
-}
-
-void ParchmentMenuBar::OnButtonUp(LPARAM lParam)
-{
-    if (!IsOpen()) return;
-    if (!c_assert(open_menu < menus.count)) return;
-    const int item = ItemAt({ GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) });
-    if (item >= 0) Choose(item);
-}
-
-void ParchmentMenuBar::OnCaptureLost()
-{
-    if (IsOpen()) Close();
-}
-
-LRESULT ParchmentMenuBar::OnSetCursor(WPARAM wParam, LPARAM lParam)
-{
-    const HCURSOR cursor = context.renderer != nullptr ? context.renderer->Cursor(CursorId::arrow) : NULL;
-    if (LOWORD(lParam) != HTCLIENT || cursor == NULL) return DefWindowProc(window, WM_SETCURSOR, wParam, lParam);
-    (void)SetCursor(cursor);
-    return TRUE;
-}
-
-// Keys for the menus, from the message loop: Alt with a title's letter or F10 opens a menu; while one is open
-// the arrows, Enter and Esc work it, and any other key closes it and goes on to do its usual job.
-bool ParchmentMenuBar::HandleKey(const MSG& message)
-{
-    if (!c_assert(menus.count > 0 && menus.specs != nullptr)) return false;
-    if (message.message == WM_SYSCHAR) return OpenByMnemonic(static_cast<wchar_t>(message.wParam));
-    const bool key_down = message.message == WM_KEYDOWN || message.message == WM_SYSKEYDOWN;
-    if (!key_down) return false;
-    if (message.wParam == VK_F10 && !IsOpen())
-    {
-        OpenHighlighted(0);
-        return true;
-    }
-    if (!IsOpen()) return false;
-    if (HandleOpenMenuKey(message.wParam)) return true;
-    Close();
-    return false;
-}
-
-bool ParchmentMenuBar::HandleOpenMenuKey(WPARAM key)
-{
-    if (!c_assert(IsOpen() && open_menu < menus.count)) return false;
-    switch (key)
-    {
-        case VK_ESCAPE:
-        case VK_MENU: Close(); return true;
-        case VK_LEFT: OpenHighlighted((open_menu + menus.count - 1) % menus.count); return true;
-        case VK_RIGHT: OpenHighlighted((open_menu + 1) % menus.count); return true;
-        case VK_UP: MoveHighlight(-1); return true;
-        case VK_DOWN: MoveHighlight(1); return true;
-        case VK_RETURN: return ChooseHighlighted();
-        default: return false;
-    }
-}
-
-// Opens the next menu after the open one whose title has this letter, so a letter shared by two titles
-// alternates between them.
-bool ParchmentMenuBar::OpenByMnemonic(wchar_t letter)
-{
-    if (!c_assert(menus.count > 0)) return false;
-    const wchar_t wanted = static_cast<wchar_t>(std::towupper(letter));
-    for (int step = 1; step <= menus.count && step <= MAX_MENUS; step++)
-    {
-        const int index = (open_menu + step + menus.count) % menus.count;
-        if (std::towupper(menus.specs[index].mnemonic) != wanted) continue;
-        OpenHighlighted(index);
-        return true;
-    }
-    return false;
-}
-
-// Lays the lists out again for their items' texts as they are now; an open menu closes first.
-bool ParchmentMenuBar::Remeasure()
-{
-    if (!c_assert(window != NULL)) return false;
-    Close();
-    return LayOut();
-}
-
-bool ParchmentMenuBar::ChooseHighlighted()
-{
-    if (!IsOpen()) return false;
-    if (!c_assert(highlighted_item < MAX_ITEMS)) return false;
-    if (highlighted_item >= 0) Choose(highlighted_item);
-    else Close();
-    return true;
-}
-
-void ParchmentMenuBar::Open(int menu_index)
-{
-    if (!c_assert(menu_index >= 0 && menu_index < menus.count) || !c_assert(window != NULL)) return;
-    open_menu = menu_index;
-    highlighted_item = -1;
-    if (GetCapture() != window) (void)SetCapture(window);
-    Redraw();
-    // A list that can't be shown leaves the title marked open; the next click or key closes it.
-    (void)ShowList();
-}
-
-// Opened from the keyboard, a menu starts with its first item highlighted, as a window menu does.
-void ParchmentMenuBar::OpenHighlighted(int menu_index)
-{
-    if (!c_assert(menu_index >= 0 && menu_index < menus.count)) return;
-    Open(menu_index);
-    if (!IsOpen()) return;
-    highlighted_item = -1;
-    MoveHighlight(1);
-}
-
-void ParchmentMenuBar::Close()
-{
-    if (!IsOpen()) return;
-    if (!c_assert(list_window != NULL)) return;
-    open_menu = -1;
-    highlighted_item = -1;
-    // ShowWindow reports the earlier visibility, and losing the capture is the goal either way.
-    (void)ShowWindow(list_window, SW_HIDE);
-    if (GetCapture() == window) (void)ReleaseCapture();
-    Redraw();
 }
 
 void ParchmentMenuBar::MoveHighlight(int step)
@@ -483,22 +299,9 @@ void ParchmentMenuBar::MoveHighlight(int step)
         item = (item + step + menu.item_count) % menu.item_count;
         if (IsSeparator(menu.items[item])) continue;
         highlighted_item = item;
-        // A list that failed to redraw keeps its previous highlight until the next change.
         (void)ShowList();
         return;
     }
-}
-
-// Closes the menu and posts the item's command to the parent, as a window menu does.
-void ParchmentMenuBar::Choose(int item_index)
-{
-    if (!c_assert(IsOpen())) return;
-    const MenuSpec& menu = menus.specs[open_menu];
-    if (!c_assert(item_index >= 0 && item_index < menu.item_count)) return;
-    const int command = menu.items[item_index].command;
-    Close();
-    // Should the post fail, the click simply does nothing, as a lost click would.
-    (void)PostMessage(parent, WM_COMMAND, MAKEWPARAM(command, 0), 0);
 }
 
 int ParchmentMenuBar::TitleAt(PixelPoint point) const
@@ -530,7 +333,6 @@ int ParchmentMenuBar::ItemAt(PixelPoint point) const
     return -1;
 }
 
-// The open list, in the bar's coordinates: below its title.
 PixelRect ParchmentMenuBar::ListArea() const
 {
     if (!IsOpen()) return { 0, 0, 0, 0 };
@@ -543,6 +345,5 @@ PixelRect ParchmentMenuBar::ListArea() const
 void ParchmentMenuBar::Redraw()
 {
     if (window == NULL) return;
-    // Invalidating a live window can't fail in a way that needs handling; at worst the next paint shows it.
     (void)InvalidateRect(window, nullptr, FALSE);
 }

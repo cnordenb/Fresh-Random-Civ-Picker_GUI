@@ -14,17 +14,12 @@ struct ID2D1RenderTarget;
 struct ID2D1SolidColorBrush;
 struct IWICImagingFactory;
 
-// Draws the parchment theme (View): the one place that talks to Direct2D, DirectWrite and WIC (CC8 boundary).
-// Started once before the windows exist; everything it draws with is built then. A frame binds a device
-// context, takes the drawing calls and ends; opaque frames get ClearType text like a browser, premultiplied
-// frames (for layered windows) keep their alpha.
 class ParchmentRenderer final
 {
 public:
     enum class SurfaceAlpha { opaque, premultiplied };
     enum class Smoothing { smooth, pixelated };
 
-    // The frame covers size pixels of the device context from origin on; (0, 0) is drawn at origin.
     struct FrameTarget
     {
         HDC dc;

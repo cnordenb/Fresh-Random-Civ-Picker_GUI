@@ -15,9 +15,6 @@ struct TextSpan
     FontId font;
 };
 
-// The theme's fonts through DirectWrite (View, part of the Direct2D boundary), set up at startup: a text format
-// per font and alignment, and the font metrics a browser lays text out with. Text is measured from the fonts'
-// glyph advances and kerning, which needs no memory at run time.
 class ParchmentFonts final
 {
 public:

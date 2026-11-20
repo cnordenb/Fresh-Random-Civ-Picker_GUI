@@ -7,26 +7,20 @@
 #include "DialogMetrics.h"
 #include "Resource.h"
 
-// Share links in the view: the web version's Share, Open Link and Open Shared Link dialogs (index.html #dlgShare,
-// #dlgOpen, #dlgPreview), the clipboard, and the status messages (#toast) that say what happened.
-
 namespace
 {
-    // --- Share (#dlgShare): .share { width: 600px }; .share-row { grid-template-columns: 120px 1fr auto; gap: 8px;
-    // align-items: center; margin-bottom: 8px } with a 22 px field and a 23 px button ---
     constexpr int SHARE_BODY_WIDTH = 600;
     constexpr int SHARE_LABEL_WIDTH = 120;
     constexpr int SHARE_ROW_GAP = 8;
     constexpr int SHARE_ROW_HEIGHT = 23;
     constexpr int SHARE_FIELD_HEIGHT = 22;
-    constexpr int SHARE_LABEL_DROP = 3; // a 17 px line centred in the 23 px row
+    constexpr int SHARE_LABEL_DROP = 3;
     constexpr int LINE_BOX = 17;
     const wchar_t* const SHARE_INTRO =
         L"Anyone who opens one of these links gets this civ pool. The log of past rounds isn't included.";
 
-    // --- Open Link (#dlgOpen): a .field of 420 px, its label 4 px above the field, and its error line ---
     constexpr int LINK_ERROR_TOP = 106;
-    constexpr int LINK_ERROR_ROOM = 25; // the error line and its 8 px margin
+    constexpr int LINK_ERROR_ROOM = 25;
     const wchar_t* const LINK_ERROR = L"That isn't a Fresh Random Civ Picker link.";
     const DialogDecoration OPEN_LINK_DECORATIONS[] = {
         { DecorationKind::text, { 27, 55, 447, 72 }, L"Paste a Fresh Random Civ Picker link:" },
@@ -40,8 +34,6 @@ namespace
     const DialogLayout OPEN_LINK_LAYOUT = { L"Open Link", { DialogWidth(420), 168 }, OPEN_LINK_PARTS, 4,
                                             OPEN_LINK_DECORATIONS, 1, nullptr, 0, IDC_BUTTON_OPENLINK };
 
-    // --- Open Shared Link (#dlgPreview): .preview { width: 440px }; .facts { grid-template-columns: auto 1fr;
-    // gap: 3px 12px; margin: 0 0 10px } ---
     constexpr int PREVIEW_BODY_WIDTH = 440;
     constexpr float FACT_ROW_GAP = 3.0f;
     constexpr float FACT_COLUMN_GAP = 12.0f;
@@ -71,17 +63,12 @@ namespace
     }
 }
 
-// ---------------------------------------------------------------------------------------------------
-// Share
-
 void CivPickerView::ShowShareDialog(HWND owner, const ShareLinks& links)
 {
     if (!c_assert(owner != NULL) || !BuildShareLayout(links)) return;
     (void)RunDialog({ owner, ShareDialogProc, reinterpret_cast<LPARAM>(this), &share_layout });
 }
 
-// #dlgShare: the pool's link, and its link with this round's draws, each in a read-only field with its Copy button,
-// and a note on what the second link adds.
 bool CivPickerView::BuildShareLayout(const ShareLinks& links)
 {
     if (!c_assert(links.pool != nullptr && links.round != nullptr) || !c_assert(links.draw_count >= 0)) return false;
@@ -115,7 +102,6 @@ bool CivPickerView::BuildShareLayout(const ShareLinks& links)
     return c_assert(size.height <= ParchmentDialogs::MAX_DIALOG_HEIGHT);
 }
 
-// Dialog procedure of Share, a function pointer Win32 requires (CLAUDE2.md I2).
 INT_PTR CALLBACK CivPickerView::ShareDialogProc(HWND dialog, UINT message, WPARAM wParam, LPARAM lParam) noexcept
 {
     CivPickerView* view = AttachDialog(dialog, message, lParam);
@@ -127,17 +113,14 @@ INT_PTR CALLBACK CivPickerView::ShareDialogProc(HWND dialog, UINT message, WPARA
     return view->OnShareCommand(dialog, LOWORD(wParam)) ? TRUE : FALSE;
 }
 
-// The fields get their links, and Close gets the focus, as the web version's autofocus gives it.
 INT_PTR CivPickerView::BeginShareDialog(HWND dialog)
 {
     if (!c_assert(dialog != NULL)) return FALSE;
     const INT_PTR built = BeginDialog(dialog);
-    // A field that didn't take its link stays empty; its Copy button still copies the link.
     (void)SetDlgItemTextW(dialog, IDC_SHARE_POOL, share_pool_link);
     (void)SetDlgItemTextW(dialog, IDC_SHARE_ROUND, share_round_link);
     const HWND close = GetDlgItem(dialog, IDOK);
     if (close == NULL) return built;
-    // The focus went where it was set, or stays where Windows put it.
     (void)SetFocus(close);
     return FALSE;
 }
@@ -155,7 +138,6 @@ bool CivPickerView::OnShareCommand(HWND dialog, int command_id)
     return EndDialog(dialog, command_id) != FALSE;
 }
 
-// Copies a field's link; if the clipboard can't take it, the link is selected for copying by hand.
 void CivPickerView::CopyFieldLink(HWND dialog, int field_id)
 {
     if (!c_assert(dialog != NULL) || !c_assert(field_id == IDC_SHARE_POOL || field_id == IDC_SHARE_ROUND)) return;
@@ -166,15 +148,10 @@ void CivPickerView::CopyFieldLink(HWND dialog, int field_id)
     }
     const HWND field = GetDlgItem(dialog, field_id);
     if (field == NULL) return;
-    // Focusing and selecting only help the user copy by hand; the dialog works without them.
     (void)SetFocus(field);
     (void)SendMessage(field, EM_SETSEL, 0, -1);
 }
 
-// ---------------------------------------------------------------------------------------------------
-// Open Link
-
-// The pool and round of a link the user pastes; not ok if the dialog was closed without one.
 ShareLink::Opened CivPickerView::AskShareLink(HWND owner)
 {
     opened_link = { false, {} };
@@ -185,7 +162,6 @@ ShareLink::Opened CivPickerView::AskShareLink(HWND owner)
     return opened_link;
 }
 
-// Dialog procedure of Open Link, a function pointer Win32 requires (CLAUDE2.md I2).
 INT_PTR CALLBACK CivPickerView::OpenLinkDialogProc(HWND dialog, UINT message, WPARAM wParam, LPARAM lParam) noexcept
 {
     CivPickerView* view = AttachDialog(dialog, message, lParam);
@@ -201,14 +177,12 @@ INT_PTR CALLBACK CivPickerView::OpenLinkDialogProc(HWND dialog, UINT message, WP
     return EndDialog(dialog, IDCANCEL);
 }
 
-// A text that isn't a link shows the web version's error line under the field, and the dialog grows to make room.
 bool CivPickerView::SubmitShareLink(HWND dialog)
 {
     if (!c_assert(dialog != NULL)) return false;
     const HWND field = GetDlgItem(dialog, IDC_EDIT_SHARELINK);
     if (!c_assert(field != NULL)) return false;
     share_link_input[0] = L'\0';
-    // A text longer than any link can be isn't one; only a text that fits is read.
     const bool fits = GetWindowTextLengthW(field) <= ShareLink::MAX_INPUT_LENGTH;
     if (fits) (void)GetWindowTextW(field, share_link_input, ShareLink::MAX_INPUT_LENGTH + 1);
     opened_link = fits ? ShareLink::Open(model.Catalog(), share_link_input) : ShareLink::Opened{ false, {} };
@@ -221,17 +195,12 @@ bool CivPickerView::SubmitShareLink(HWND dialog)
     return false;
 }
 
-// ---------------------------------------------------------------------------------------------------
-// Open Shared Link
-
-// Shows what a link holds before it replaces the current pool and round; true if the user loads it.
 bool CivPickerView::ConfirmSharedPool(HWND owner, const SharedPool& pool)
 {
     if (!c_assert(owner != NULL) || !BuildPreviewLayout(pool)) return false;
     return RunDialog({ owner, PreviewDialogProc, reinterpret_cast<LPARAM>(this), &preview_layout }) == IDOK;
 }
 
-// Dialog procedure of Open Shared Link, a function pointer Win32 requires (CLAUDE2.md I2).
 INT_PTR CALLBACK CivPickerView::PreviewDialogProc(HWND dialog, UINT message, WPARAM wParam, LPARAM lParam) noexcept
 {
     CivPickerView* view = AttachDialog(dialog, message, lParam);
@@ -241,12 +210,10 @@ INT_PTR CALLBACK CivPickerView::PreviewDialogProc(HWND dialog, UINT message, WPA
     if (frame.handled) return frame.result;
     const int command_id = LOWORD(wParam);
     if (message != WM_COMMAND || (command_id != IDOK && command_id != IDCANCEL)) return FALSE;
-    // Loading the link plays its own sound.
     if (command_id == IDCANCEL) view->PlayAudio(SoundType::button);
     return EndDialog(dialog, command_id);
 }
 
-// #dlgPreview: what the link holds (its edition, civ pool and round) as a list of facts, and what loading it does.
 bool CivPickerView::BuildPreviewLayout(const SharedPool& pool)
 {
     const CivCatalog& catalog = model.Catalog();
@@ -282,7 +249,6 @@ bool CivPickerView::BuildPreviewLayout(const SharedPool& pool)
     return c_assert(size.height <= ParchmentDialogs::MAX_DIALOG_HEIGHT);
 }
 
-// "N of M civs", and the names of the edition's civs it leaves out if there are at most 12 (as openPreview says it).
 void CivPickerView::ComposePreviewPool(const SharedPool& pool)
 {
     const CivCatalog& catalog = model.Catalog();
@@ -296,7 +262,6 @@ void CivPickerView::ComposePreviewPool(const SharedPool& pool)
     }
     (void)swprintf_s(preview_pool, L"%d of %d civs", enabled, catalog.EditionCivCount(pool.edition));
     if (left_out == 0 || left_out > MAX_LEFT_OUT_SHOWN) return;
-    // A list longer than its buffer is cut short, which still shows its start.
     (void)wcsncat_s(preview_pool, _countof(preview_pool), L". Left out: ", _TRUNCATE);
     int listed = 0;
     for (int position = 0; position < catalog.CivCount() && position < MAX_CIVS; position++)
@@ -309,7 +274,6 @@ void CivPickerView::ComposePreviewPool(const SharedPool& pool)
     }
 }
 
-// "N drawn:" and the civs in draw order, or that loading starts a new round.
 void CivPickerView::ComposePreviewRound(const SharedPool& pool)
 {
     const CivCatalog& catalog = model.Catalog();
@@ -323,13 +287,11 @@ void CivPickerView::ComposePreviewRound(const SharedPool& pool)
     for (int i = 0; i < pool.draw_count && i < MAX_CIVS; i++)
     {
         if (!c_assert(pool.draws[i] >= 0 && pool.draws[i] < catalog.CivCount())) return;
-        // A list longer than its buffer is cut short, which still shows its start.
         if (i > 0) (void)wcsncat_s(preview_round, _countof(preview_round), L", ", _TRUNCATE);
         (void)wcsncat_s(preview_round, _countof(preview_round), catalog.CivAt(pool.draws[i]).name.c_str(), _TRUNCATE);
     }
 }
 
-// A term in the hint colour and its text, which wraps beside it; returns where the row ends.
 float CivPickerView::AddPreviewFact(const PreviewFact& fact, float top, float term_width)
 {
     if (!c_assert(fact.term != nullptr && fact.text != nullptr) || !c_assert(term_width > 0.0f)) return top;
@@ -351,11 +313,6 @@ void CivPickerView::AddPreviewDecoration(const DialogDecoration& decoration)
     preview_decoration_count++;
 }
 
-// ---------------------------------------------------------------------------------------------------
-// The clipboard and the status messages
-
-// Puts a text on the clipboard; false if the clipboard is busy or the copy fails. The clipboard takes a memory
-// block it then owns, the one allocation the platform demands here.
 bool CivPickerView::CopyText(const wchar_t* text) const
 {
     if (!c_assert(text != nullptr) || !c_assert(main_window != NULL)) return false;
@@ -389,15 +346,12 @@ void CivPickerView::ShowLinkCopied(int draw_count)
 
 void CivPickerView::ShowLinkLoaded() { ShowToast(L"Loaded the shared link"); }
 
-// The toast fades by the main window's timer, which stops once the message has gone.
 void CivPickerView::ShowToast(const wchar_t* text)
 {
     if (!c_assert(text != nullptr) || !c_assert(main_window != NULL)) return;
-    // A timer that couldn't start leaves the message shown until the next one replaces it.
     if (toast.Show(text)) (void)SetTimer(main_window, TOAST_TIMER, ParchmentToast::TICK_MS, nullptr);
 }
 
-// Whether the Log tab shows any draws (past rounds or this one), which loading a link would keep but move on from.
 bool CivPickerView::HasDrawnLog() const
 {
     if (!c_assert(drawn_log.Window() != NULL)) return false;

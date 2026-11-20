@@ -3,12 +3,6 @@
 #include "framework.h"
 #include "ParchmentControl.h"
 
-// The controls only dialogs have, drawn as the web version's (style.css).
-
-// The slider: the game's left arrow, bar and right arrow, with the bar filled up to the handle. An arrow steps the
-// value down or up, a press on the bar moves the handle there, and the handle drags; the arrows and the handle show
-// their hover look under the mouse and their active look while pressed. It answers like a trackbar: TBM_SETRANGE,
-// TBM_SETPOS and TBM_GETPOS, and WM_HSCROLL to the parent while it moves.
 class SliderControl final : public ParchmentControl
 {
 public:
@@ -37,10 +31,6 @@ private:
     SliderPart pressed_part = SliderPart::none;
 };
 
-// Dropdowns and text fields stay the standard COMBOBOX and EDIT controls, which already behave as the user
-// expects; these functions give them the parchment look. A dropdown (owner-drawn, with strings) is dark brown with
-// the wooden button on the right, and its list items turn gold under the mouse; a text field is a dark box drawn
-// on the dialog's backdrop with white text, showing its placeholder while empty.
 struct FieldLook
 {
     ControlContext context;
@@ -48,11 +38,10 @@ struct FieldLook
     const wchar_t* placeholder;
 };
 
-// A disabled dropdown is translucent, so it paints over the piece of its dialog's backdrop under it.
 struct DropdownLook
 {
     ControlContext context;
-    const PixelSurface* backdrop; // the dialog's client area at the backdrop's top-left corner
+    const PixelSurface* backdrop;
 };
 
 bool StyleDropdown(HWND dropdown, const DropdownLook& look);

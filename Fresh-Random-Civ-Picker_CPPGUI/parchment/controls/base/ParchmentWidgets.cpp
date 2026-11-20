@@ -8,12 +8,12 @@
 
 namespace
 {
-    constexpr int TAB_TEXT_HEIGHT = 22; // .tab { height: 25px; padding-bottom: 3px }
-    constexpr float FOCUS_OFFSET = 2.0f; // outline-offset 1px plus the 1 px outline
-    constexpr float OFF_CROSS_SCALE = 0.9f; // .chk-off { transform: scale(.9) }
-    constexpr float STRIKE_THICKNESS = 2.0f; // text-decoration-thickness: 2px
-    constexpr int EDITION_ICON_SIZE = 28; // .ed-icon
-    constexpr int EDITION_ICON_GAP = 4; // .edition { gap: 4px }
+    constexpr int TAB_TEXT_HEIGHT = 22;
+    constexpr float FOCUS_OFFSET = 2.0f;
+    constexpr float OFF_CROSS_SCALE = 0.9f;
+    constexpr float STRIKE_THICKNESS = 2.0f;
+    constexpr int EDITION_ICON_SIZE = 28;
+    constexpr int EDITION_ICON_GAP = 4;
 
     PixelRect AtlasCell(int column, int row, PixelSize cell)
     {
@@ -21,7 +21,6 @@ namespace
         return { column * cell.width, row * cell.height, (column + 1) * cell.width, (row + 1) * cell.height };
     }
 
-    // A square box of the given size, at the left of the bounds and centred vertically.
     FloatRect BoxAtLeft(const FloatRect& bounds, float size)
     {
         const FloatRect empty = { bounds.left, bounds.top, bounds.left, bounds.top };
@@ -36,8 +35,6 @@ namespace
         return bounds.top + (bounds.bottom - bounds.top - line_height) / 2.0f;
     }
 }
-
-// --- Label ---
 
 void Label::SetStyle(const Style& label_style)
 {
@@ -55,8 +52,6 @@ void Label::Paint(ParchmentRenderer& renderer, const FloatRect& bounds)
 }
 
 bool Label::IsClickable() const { return false; }
-
-// --- TabStrip ---
 
 void TabStrip::SetNames(const wchar_t* const (&tab_names)[TAB_COUNT])
 {
@@ -88,7 +83,6 @@ void TabStrip::Paint(ParchmentRenderer& renderer, const FloatRect& bounds)
     PaintTab(renderer, selected);
 }
 
-// Draw Civ and Civ Pool use the first tab image and Log the second (.tab, #tab-1).
 void TabStrip::PaintTab(ParchmentRenderer& renderer, int tab_index)
 {
     if (!c_assert(tab_index >= 0 && tab_index < TAB_COUNT) || !c_assert(names[tab_index] != nullptr)) return;
@@ -109,7 +103,6 @@ CursorId TabStrip::CursorShape() const { return CursorId::arrow; }
 
 bool TabStrip::ShowsFocus() const { return false; }
 
-// The selected tab lies on top, and of the others each lies over the one before it.
 int TabStrip::TabAt(PixelPoint point) const
 {
     if (!c_assert(selected >= 0 && selected < TAB_COUNT)) return -1;
@@ -137,12 +130,9 @@ void TabStrip::OnPointerLeft() { hovered = -1; }
 
 void TabStrip::OnClicked()
 {
-    // pressed_tab is -1 when the press was between the tabs.
     if (!c_assert(pressed_tab < TAB_COUNT)) return;
     if (pressed_tab >= 0 && pressed_tab < TAB_COUNT) selected = pressed_tab;
 }
-
-// --- Checkbox ---
 
 void Checkbox::SetStyle(const Style& checkbox_style)
 {
@@ -173,8 +163,6 @@ void Checkbox::OnClicked() { Check(style.radio ? true : !IsChecked()); }
 
 LRESULT Checkbox::DialogCode() const { return style.radio ? DLGC_BUTTON | DLGC_RADIOBUTTON : DLGC_BUTTON; }
 
-// --- IconToggle ---
-
 void IconToggle::SetIcon(const Icon& toggle_icon)
 {
     if (!c_assert(toggle_icon.columns > 0 && toggle_icon.cell_size > 0)) return;
@@ -192,7 +180,6 @@ void IconToggle::Paint(ParchmentRenderer& renderer, const FloatRect& bounds)
     PaintName(renderer, bounds);
 }
 
-// The atlas cell, grey under the off cross while disabled (.chk-off: object-fit contain, scaled to 90%).
 void IconToggle::PaintIcon(ParchmentRenderer& renderer, const FloatRect& bounds)
 {
     if (!c_assert(HasArea(bounds)) || !c_assert(icon.size > 0 && icon.columns > 0)) return;
@@ -234,8 +221,6 @@ void IconToggle::PaintName(ParchmentRenderer& renderer, const FloatRect& bounds)
 }
 
 void IconToggle::OnClicked() { Check(!IsChecked()); }
-
-// --- EditionRow ---
 
 void EditionRow::SetEditionIndex(int atlas_edition_index)
 {

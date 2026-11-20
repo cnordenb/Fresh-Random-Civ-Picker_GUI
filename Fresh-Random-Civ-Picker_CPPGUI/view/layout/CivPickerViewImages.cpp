@@ -5,16 +5,10 @@
 
 #include "Assertions.h"
 
-// The images the view draws with (CivPickerView): the icon files data.json names, a word about files that couldn't
-// be loaded, and the cursors' size for the display the window is on.
-
 namespace
 {
-    // The edition icon's looks in the DLC atlas (EDITION_LOOKS): normal, hover and pressed.
     const wchar_t* const EDITION_LOOK_SUFFIXES[EDITION_LOOKS] = { L"", L"_hover", L"_pressed" };
 
-    // A PNG of the image folder, by its path there without ".png". A path too long for the buffer is cut short; its
-    // file then isn't found, and is reported as missing.
     ImageFile PngFile(const std::wstring& name)
     {
         ImageFile file = {};
@@ -24,9 +18,6 @@ namespace
     }
 }
 
-// The icon files of the atlases, in the order of their cells: every civ's by ID, then Random's; every edition's
-// three looks, then the icons of the DLCs that have one; every edition's banner. A new civ, DLC or edition in
-// data.json only needs its files in images\civ or images\dlc.
 ImageSources CivPickerView::CollectImageSources()
 {
     const CivCatalog& catalog = model.Catalog();
@@ -51,7 +42,6 @@ ImageSources CivPickerView::CollectImageSources()
              { edition_banner_files, catalog.EditionCount() } };
 }
 
-// Names the first image file that couldn't be loaded, as the jingles' message does; the program goes on without it.
 void CivPickerView::ReportMissingImages() const
 {
     const int missing = renderer.MissingImageCount();
@@ -65,8 +55,6 @@ void CivPickerView::ReportMissingImages() const
     (void)MessageBox(NULL, message.c_str(), L"Error", MB_OK | MB_ICONERROR);
 }
 
-// The large cursors on a display scaled to 150 % or more, the standard ones otherwise. The program is DPI-unaware,
-// so Windows tells it 96 DPI everywhere; the thread asks as a per-monitor aware one for the display's real DPI.
 void CivPickerView::UpdateCursorSize()
 {
     if (!c_assert(main_window != NULL)) return;
@@ -77,7 +65,6 @@ void CivPickerView::UpdateCursorSize()
     UINT dpi_x = USER_DEFAULT_SCREEN_DPI;
     UINT dpi_y = USER_DEFAULT_SCREEN_DPI;
     const HRESULT result = GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpi_x, &dpi_y);
-    // Going back to the context the switch just left can't fail.
     if (unaware != NULL) (void)SetThreadDpiAwarenessContext(unaware);
     const bool large = SUCCEEDED(result) && dpi_x >= LARGE_CURSOR_DPI;
     renderer.SelectCursorSize(large ? CursorSize::large : CursorSize::standard);

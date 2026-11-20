@@ -5,8 +5,7 @@
 #include "TestData.h"
 
 #include "CivPickerModel.cpp"
-
-// The model with the editions, DLCs and civs of the program's data.json.
+#include "CivPickerModelPool.cpp"
 
 TEST(CompletenessTest, AllCivsAreDrawn)
 {
@@ -112,7 +111,6 @@ TEST(ShareTest, AnUndrawnCivIsNotShared)
     EXPECT_EQ(catalog.CivAt(shared.draws[2]).name, model.GetCurrentCiv());
 }
 
-// Continuous freshness counts civs, as the web version does: the last N civs drawn sit out, N at most half the pool.
 TEST(FreshnessTest, TheLastCivsOfARoundSitOutTheNextRoundsFirstDraws)
 {
     CivCatalog catalog;
@@ -131,7 +129,6 @@ TEST(FreshnessTest, TheLastCivsOfARoundSitOutTheNextRoundsFirstDraws)
         model.DrawCiv(false, L"");
         round[i] = model.GetCurrentCiv();
     }
-    // Each draw of the next round moves the window on by one civ.
     for (int draw = 0; draw < sitting_out; draw++)
     {
         model.DrawCiv(false, L"");
@@ -158,7 +155,6 @@ TEST(FreshnessTest, TheMostFollowsThePoolsSize)
     EXPECT_EQ(model.GetSettings().contfresh_civs, 1);
 }
 
-// The Civ Pool tab's edition and DLC hotkeys are in use as far as data.json gives them editions and DLC toggles.
 TEST(HotkeyTest, TheModelsHotkeysFollowDataJson)
 {
     CivCatalog catalog;

@@ -6,12 +6,6 @@
 
 class DataReader;
 
-// Part of the MODEL: the editions, DLCs and civs. data.json is the only place they are written down (the web
-// version reads the same file); the catalog reads it once at startup and checks it, so the rest of the program can
-// rely on every reference in it. Plain C++, so it is unit-tested with the real file.
-// Editions are numbered in data.json's order, and the first is the default; DLCs in the order of data.json's "dlcs"
-// object; civs by their permanent IDs, which run from 0 without gaps.
-
 struct DlcToggleLayout
 {
     int left;
@@ -33,12 +27,12 @@ struct EditionInfo
     std::wstring name;
     std::wstring short_name;
     std::wstring series;
-    std::wstring url; // the store page; empty for an edition that has a store note instead
+    std::wstring url;
     std::wstring store_note;
-    std::wstring icon; // names its icon files: icon, icon_hover and icon_pressed
-    std::wstring banner; // names its banner file
+    std::wstring icon;
+    std::wstring banner;
     int year = 0;
-    bool legacy_jingles = false; // its civs also have the original game's jingles
+    bool legacy_jingles = false;
     int dlc_toggles[MAX_DLC_TOGGLES] = {};
     int dlc_toggle_count = 0;
     DlcToggleLayout toggle_layout = {};
@@ -54,18 +48,18 @@ struct DlcInfo
     std::wstring name;
     std::wstring short_name;
     std::wstring released;
-    std::wstring icon; // names its icon file; empty for a DLC without one
+    std::wstring icon;
     int edition = 0;
-    int icon_index = -1; // its place among the DLCs that have an icon, or -1
-    int toggle_edition = -1; // the edition whose Civ Pool tab has a toggle for it, or -1
-    int toggle_slot = -1; // that toggle's place in the edition's list
+    int icon_index = -1;
+    int toggle_edition = -1;
+    int toggle_slot = -1;
 };
 
 struct CivInfo
 {
     std::wstring name;
-    std::wstring tech_tree; // its name on aoe2techtree.net
-    std::wstring file_name; // its name in lower case, which names its jingles
+    std::wstring tech_tree;
+    std::wstring file_name;
     int dlc = 0;
     int edition = 0;
     bool legacy_jingle = false;

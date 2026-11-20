@@ -10,13 +10,6 @@
 #include "HotkeyBindings.h"
 #include "ShareLink.h"
 
-// MODEL of the Model-View-Controller design (HFDP ch. 12).
-// Holds all data, state and application logic of the civ picker: the civ pool, the draw sequence,
-// the settings and the save files. It knows nothing about the view or the controller and contains
-// no Win32 code; every state change is reported to its observer (HFDP ch. 2), and the view pulls
-// the state it displays through the const queries below. The editions, DLCs and civs come from its
-// catalog (data.json); an edition or a DLC is its number there, a civ its index (its ID).
-
 enum class LastAction { draw, reset, pool_change };
 
 enum class SaveType { automatic, manual, quick };
@@ -30,9 +23,6 @@ struct Civ
     bool legacy = false;
 };
 
-// Continuous freshness keeps the civs drawn last out of the next draws: as many as the setting says, but at most
-// half the pool. A setting of half the pool or more is "the most", which follows the pool's size (the web version's
-// FRESH_MOST); it is saved as CONTFRESH_MOST.
 constexpr uint8_t CONTFRESH_MOST = MAX_CIVS;
 
 struct Settings
@@ -53,8 +43,6 @@ struct Settings
     uint8_t contfresh_civs = CONTFRESH_MOST;
 };
 
-// Observer interface (HFDP ch. 2) through which the model announces its state changes.
-// The notifications happen at the exact points of each operation where the display has to follow.
 class CivPickerObserver
 {
 public:

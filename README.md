@@ -1,5 +1,5 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/cnordenb/frcp-desktop)](#)
-[![language](https://img.shields.io/badge/language-C-555555)](#)
+[![language](https://img.shields.io/badge/language-C%2B%2B-555555)](#)
 [![license](https://img.shields.io/badge/license-MIT-007FFF)](LICENSE)
 [![testing](https://img.shields.io/badge/testing-yes-C3FF00)](documentation/TESTS.md)
 [![maintainable](https://img.shields.io/badge/maintainable-yes-00FF72)](documentation/MAINTAINER.md)
@@ -33,3 +33,5 @@ To keep Fresh Random Civ Picker working and up to date, see [MAINTAINER.md](docu
 - [Survivalist](https://www.youtube.com/channel/UCmFJUeU8Oubp5Neldbq0JRA) for his https://aoe2-de-tools.herokuapp.com/ webapp which early versions of FRCP linked to for production sustainability calculations and inspired aoe2vils.net.
 
 - Age of Empires II © Microsoft Corporation. Fresh Random Civ Picker was created under Microsoft's "Game Content Usage Rules" using assets from Age of Empires II: Age of Kings, Age of Empires II: HD Edition, and Age of Empires II: Definitive Edition, and it is not endorsed by or affiliated with Microsoft. https://www.xbox.com/en-us/developers/rules
+
+- Development of Fresh Random Civ Picker was accelerated with Claude Fable 5.2.

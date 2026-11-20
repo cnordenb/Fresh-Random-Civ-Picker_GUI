@@ -2,13 +2,8 @@
 
 #include "Assertions.h"
 
-// The hotkeys of the controller (CivPickerController): registered while the main window is active, each keystroke
-// turned into what its hotkey does on the tab shown, their keys in settings.ini, and the Customise Hotkeys dialog
-// (Options > Customise), where the user gives them other keys.
-
 namespace
 {
-    // The model numbers keystrokes as RegisterHotKey and the keyboard messages do.
     static_assert(MODIFIER_ALT == MOD_ALT && MODIFIER_CONTROL == MOD_CONTROL && MODIFIER_SHIFT == MOD_SHIFT,
                   "the model's modifiers are Windows' hotkey modifiers");
     static_assert(KEY_BACKSPACE == VK_BACK && KEY_TAB == VK_TAB && KEY_ENTER == VK_RETURN && KEY_SHIFT == VK_SHIFT &&
@@ -24,19 +19,13 @@ namespace
 
     const wchar_t* const HOTKEYS_SECTION = L"Hotkeys";
     constexpr int MAX_SETTING_TEXT = 64;
-    // In the Customise Hotkeys dialog, Backspace leaves a hotkey without a key.
     constexpr Keystroke CLEARING_KEYSTROKE = { 0, KEY_BACKSPACE };
-    // A keystroke the dialog tries, to see whether another program has it, is registered under the ID after the
-    // hotkeys'.
     constexpr int TRIAL_HOTKEY_ID = HOTKEY_ACTION_COUNT + 1;
 
-    // A hotkey is registered under its action's number, from 1.
     int HotkeyId(int action_index) { return action_index + 1; }
 
     HotkeyAction ActionAt(int action_index) { return static_cast<HotkeyAction>(action_index); }
 
-    // Whether a hotkey before this one, which is registered first, has the same keystroke: hotkeys of different tabs
-    // can share one.
     bool SharesEarlierKeystroke(const HotkeyBindings& hotkeys, int action_index)
     {
         if (!c_assert(action_index >= 0 && action_index < HOTKEY_ACTION_COUNT)) return true;
@@ -48,7 +37,6 @@ namespace
         return false;
     }
 
-    // The Civ Pool tab's hotkeys that change the pool, so auto-reset resets before them, as before the pool's clicks.
     bool ChangesPool(HotkeyAction action)
     {
         const bool all_civs = action == HotkeyAction::enable_all_civs || action == HotkeyAction::disable_all_civs;
@@ -57,11 +45,6 @@ namespace
     }
 }
 
-// ---------------------------------------------------------------------------------------------------
-// Registering the hotkeys and running them
-
-// Registers each keystroke a hotkey in use has, once. A keystroke another program has taken stays without its
-// hotkey, as Windows leaves it to that program; the Customise Hotkeys dialog warns of that.
 void CivPickerController::EnableHotkeys()
 {
     const HotkeyBindings& hotkeys = model.GetHotkeys();
@@ -75,7 +58,6 @@ void CivPickerController::EnableHotkeys()
 
 void CivPickerController::DisableHotkeys()
 {
-    // An ID that has no hotkey registered has nothing to unregister.
     for (int i = 0; i < HOTKEY_ACTION_COUNT; i++) (void)UnregisterHotKey(main_window, HotkeyId(i));
 }
 
@@ -159,7 +141,6 @@ void CivPickerController::CycleTabs()
     SelectTab(selected_tab < CivPickerView::CIV_POOL_TAB ? selected_tab + 1 : CivPickerView::DRAW_TAB);
 }
 
-// The display and sound settings that a hotkey turns on and off.
 void CivPickerController::ToggleDisplaySetting(HotkeyAction action)
 {
     Settings& settings = model.EditSettings();
@@ -245,47 +226,36 @@ void CivPickerController::RunCivPoolHotkey(HotkeyAction action)
     }
 }
 
-// The editions' hotkeys pick the editions in data.json's order.
 void CivPickerController::SelectEditionByPlace(int edition)
 {
     if (edition >= 0 && edition < model.Catalog().EditionCount()) model.SetEdition(edition);
 }
 
-// The DLC slots' hotkeys toggle the DLCs listed first in the current edition's dlcToggles, top to bottom.
 void CivPickerController::ToggleDlcBySlot(int slot)
 {
     const EditionInfo& edition = model.Catalog().EditionAt(model.GetEdition());
     if (slot >= 0 && slot < edition.dlc_toggle_count) ToggleDlc(edition.dlc_toggles[slot]);
 }
 
-// ---------------------------------------------------------------------------------------------------
-// The hotkeys' keys in settings.ini
-
-// [Hotkeys] has a line for each hotkey whose key the user changed: its setting name and its keystroke's name, or
-// None. A line that names no keystroke the hotkey can have is left out, and the hotkey keeps its default key.
 void CivPickerController::LoadHotkeys()
 {
     HotkeyBindings& hotkeys = model.EditHotkeys();
     for (int i = 0; i < HOTKEY_ACTION_COUNT; i++)
     {
         wchar_t text[MAX_SETTING_TEXT] = L"";
-        // A missing line reads as empty, which no keystroke is called.
         (void)GetPrivateProfileStringW(HOTKEYS_SECTION, HotkeyBindings::SettingNameOf(ActionAt(i)), L"", text,
                                        MAX_SETTING_TEXT, settings_file_path.c_str());
         const ReadKeystroke read = ParseKeystroke(text);
         if (!read.ok) continue;
         if (read.keystroke == NO_KEYSTROKE) hotkeys.Clear(ActionAt(i));
-        // One that can't be a hotkey (F12) or a hotkey data.json leaves unused keep their default key.
         else (void)hotkeys.Assign(ActionAt(i), read.keystroke);
     }
 }
 
-// The section is written anew, so a hotkey given its default key again loses its line.
 void CivPickerController::SaveHotkeys() const
 {
     const HotkeyBindings& hotkeys = model.GetHotkeys();
     const wchar_t* ini_file = settings_file_path.c_str();
-    // Removing a section that isn't there leaves nothing to do; a line that can't be written keeps its default.
     (void)WritePrivateProfileStringW(HOTKEYS_SECTION, nullptr, nullptr, ini_file);
     for (int i = 0; i < HOTKEY_ACTION_COUNT; i++)
     {
@@ -296,12 +266,6 @@ void CivPickerController::SaveHotkeys() const
     }
 }
 
-// ---------------------------------------------------------------------------------------------------
-// The Customise Hotkeys dialog
-
-// The hotkeys change as the user gives them keys; Cancel gives them back the keys they had. The keys registered go
-// first: a hotkey registered again under its ID with another key would keep the old key too. The main window
-// registers the hotkeys' keys anew once it is active again.
 void CivPickerController::CustomiseHotkeys(HWND owner)
 {
     view.PlayAudio(SoundType::button);
@@ -311,8 +275,6 @@ void CivPickerController::CustomiseHotkeys(HWND owner)
     view.RefreshHotkeyTexts();
 }
 
-// A key the user pressed for a hotkey: Backspace takes its key away, a keystroke Windows keeps or one without a name
-// is refused, and any other becomes its key, taken from the hotkeys it clashes with.
 void CivPickerController::OnKeyChosen(HWND editor, HotkeyAction action, Keystroke keystroke)
 {
     if (!c_assert(editor != NULL) || !c_assert(model.GetHotkeys().IsUsed(action))) return;
@@ -341,14 +303,11 @@ void CivPickerController::OnKeyChosen(HWND editor, HotkeyAction action, Keystrok
     view.ShowKeyChange(editor, change);
 }
 
-// While the Customise Hotkeys dialog is open the program's own hotkeys are unregistered (CustomiseHotkeys), so a
-// keystroke that can't be registered now is another program's hotkey.
 bool CivPickerController::IsAnotherProgramsHotkey(Keystroke keystroke) const
 {
     if (!c_assert(main_window != NULL)) return false;
     if (!RegisterHotKey(main_window, TRIAL_HOTKEY_ID, keystroke.modifiers, keystroke.key))
         return GetLastError() == ERROR_HOTKEY_ALREADY_REGISTERED;
-    // The trial hotkey was registered a moment ago, so it can be unregistered.
     (void)UnregisterHotKey(main_window, TRIAL_HOTKEY_ID);
     return false;
 }

@@ -4,14 +4,8 @@
 
 #include "Resource.h"
 
-// The user's input to the controller (CivPickerController) other than the hotkeys (CivPickerControllerHotkeys.cpp):
-// the commands of the menus, buttons and toggles, each turned into one of the controller's actions.
-
 namespace
 {
-    // Cap on user-triggered draws. Each draw starts its jingle as a new asynchronous sound, and Windows
-    // frees the interrupted ones only gradually: holding Space at keyboard-repeat speed piled up about
-    // 1 MB per draw. At 10 draws per second the memory use was measured to stay flat.
     const ULONGLONG MAX_DRAWS_PER_SECOND = 10;
     const ULONGLONG MIN_DRAW_INTERVAL_MS = 1000 / MAX_DRAWS_PER_SECOND;
 
@@ -31,9 +25,6 @@ namespace
     };
 }
 
-// ---------------------------------------------------------------------------------------------------
-// Menu, button and checkbox commands
-
 bool CivPickerController::OnCommand(int command_id)
 {
     hotkey_pressed = false;
@@ -48,8 +39,6 @@ bool CivPickerController::OnCommand(int command_id)
     return HandleButtonCommand(command_id);
 }
 
-// The controls whose clicks change the pool, so auto-reset resets before them: the civ and DLC toggles, the edition
-// rows, and Enable All and Disable All.
 bool CivPickerController::IsPoolControl(int command_id) const
 {
     const CivCatalog& catalog = model.Catalog();

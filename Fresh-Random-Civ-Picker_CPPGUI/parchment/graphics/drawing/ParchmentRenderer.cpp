@@ -36,7 +36,6 @@ namespace
         return false;
     }
 
-    // The tiling rule of a nine-slice part along x and y: edges tile along their length, the middle both ways.
     struct PartRules
     {
         TileRule horizontal;
@@ -65,13 +64,10 @@ bool ParchmentRenderer::Start(const ImageSources& image_sources)
                                   reinterpret_cast<void**>(&decoder_factory));
     if (!c_assert(SUCCEEDED(result)) || !CreateTargets()) return false;
 
-    // Images are checked one by one as they load; a missing one is drawn as nothing, so startup goes on.
     (void)images.Load({ image_sources, opaque_target, decoder_factory });
     return fonts.Load();
 }
 
-// Two software DC render targets share every resource: an opaque one for windows (ClearType text) and one
-// with premultiplied alpha for layered windows.
 bool ParchmentRenderer::CreateTargets()
 {
     const D2D1_RENDER_TARGET_PROPERTIES opaque_properties = D2D1::RenderTargetProperties(
@@ -92,7 +88,6 @@ bool ParchmentRenderer::CreateTargets()
     return true;
 }
 
-// Lets go of an image only needed while the windows were built.
 void ParchmentRenderer::ForgetImage(ImageId image)
 {
     if (!c_assert(current_target == nullptr) || !c_assert(static_cast<int>(image) < IMAGE_COUNT)) return;
@@ -140,7 +135,6 @@ bool ParchmentRenderer::EndFrame()
     return c_assert(SUCCEEDED(result));
 }
 
-// Moves where (0, 0) is drawn in the frame, for drawing several controls in one frame.
 void ParchmentRenderer::SetOrigin(PixelPoint origin)
 {
     if (!c_assert(current_target != nullptr)) return;
@@ -160,7 +154,6 @@ void ParchmentRenderer::PopClip()
     current_target->PopAxisAlignedClip();
 }
 
-// Draws everything until PopOpacity at this opacity, as CSS opacity does for a disabled control.
 void ParchmentRenderer::PushOpacity(float opacity)
 {
     if (!c_assert(current_target != nullptr && opacity_layer != nullptr)) return;
@@ -229,8 +222,6 @@ void ParchmentRenderer::DrawSlicePart(const NineSliceDraw& draw, const NineSlice
     current_context->DrawBitmap(slice, &target, 1.0f, D2D1_INTERPOLATION_MODE_HIGH_QUALITY_CUBIC, nullptr, nullptr);
 }
 
-// Tiles one nine-slice part over its area: the tile keeps the slice's proportions at the border's scale
-// (CSS border-image), and the tiling starts where LayOutTiles puts it.
 void ParchmentRenderer::FillTiled(const NineSliceDraw& draw, const FloatRect& area, int part)
 {
     ID2D1Bitmap* slice = images.Slice(draw.nine_slice, part);
@@ -249,7 +240,6 @@ void ParchmentRenderer::FillTiled(const NineSliceDraw& draw, const FloatRect& ar
     current_target->FillRectangle(ToD2DRect(area), brush);
 }
 
-// Clears the whole frame to transparent, for an image built from scratch on a reused surface.
 void ParchmentRenderer::Clear()
 {
     if (!c_assert(current_target != nullptr)) return;
@@ -270,7 +260,6 @@ void ParchmentRenderer::FillRect(const FloatRect& area, Colour colour)
     current_target->FillRectangle(ToD2DRect(area), solid_brush);
 }
 
-// outline: 1px dotted on the outermost pixels of the area, dot by dot where Chrome puts them.
 void ParchmentRenderer::DrawDottedFrame(const FloatRect& area, Colour colour)
 {
     if (!c_assert(current_target != nullptr) || !c_assert(area.right > area.left && area.bottom > area.top)) return;
@@ -301,7 +290,6 @@ void ParchmentRenderer::FillDot(PixelPoint pixel)
     current_target->FillRectangle(D2D1::RectF(x, y, x + 1.0f, y + 1.0f), solid_brush);
 }
 
-// Draws one line of text whose baseline lies at draw.baseline, aligned between draw.left and draw.right.
 void ParchmentRenderer::DrawText(const TextDraw& draw)
 {
     if (!c_assert(current_target != nullptr) || !c_assert(draw.span.text != nullptr)) return;
@@ -319,7 +307,6 @@ float ParchmentRenderer::MeasureText(const TextSpan& span) { return fonts.Measur
 
 const float* ParchmentRenderer::MeasureAdvances(const TextSpan& span) { return fonts.Advances(span); }
 
-// The baseline of a line box (CSS line-height): half the leading above the font's rounded ascent.
 float ParchmentRenderer::BaselineInLine(FontId font, float line_top, float line_height) const
 {
     const float ascent = fonts.LayoutAscent(font);
@@ -327,7 +314,6 @@ float ParchmentRenderer::BaselineInLine(FontId font, float line_top, float line_
     return line_top + (line_height - content) / 2.0f + ascent;
 }
 
-// The baseline of one line with line-height normal, centred in a box, as in a button.
 float ParchmentRenderer::BaselineCentred(FontId font, float box_top, float box_height) const
 {
     const float ascent = fonts.LayoutAscent(font);

@@ -11,18 +11,11 @@
 
 namespace
 {
-    // Special Case object (CC ch. 7) for "no civ drawn yet": it belongs to no edition or DLC, and like the civs
-    // of the original game it has a legacy jingle.
     const Civ RANDOM_CIV = { L"Random", false, CivCatalog::NONE, CivCatalog::NONE, true };
-    // What fills the places past the last civ.
     const Civ NO_CIV = { L"", false, CivCatalog::NONE, CivCatalog::NONE, false };
 
-    const int LOG_SECTION_AMOUNT = 4;
-    // A civ state and a draw for every civ, the edition, and continuous freshness's history of half the civs.
-    const int LOG_LINE_LIMIT = MAX_CIVS + MAX_CIVS + 1 + MAX_CIVS / 2;
     const int INVALID_INDEX = -1;
 
-    // Special Case object (CC ch. 7) that lets the model run without a view, e.g. in unit tests.
     class SilentObserver final : public CivPickerObserver
     {
     public:
@@ -79,7 +72,6 @@ namespace
         return INVALID_INDEX;
     }
 
-    // The most DLC toggles an edition has, which is how many DLC slots on the Civ Pool tab have a use.
     int MostDlcToggles(const CivCatalog& catalog)
     {
         int most = 0;
@@ -110,7 +102,6 @@ CivPickerModel::CivPickerModel(const CivCatalog& civ_catalog) :
     batch_toggle(false),
     custom_civ_pool(false)
 {
-    // The catalog is loaded before the model is made (wWinMain), and it holds 1 to MAX_CIVS civs.
     (void)c_assert(civ_count > 0 && civ_count <= MAX_CIVS);
     for (int i = 0; i < MAX_CIVS; i++)
     {
@@ -124,7 +115,6 @@ CivPickerModel::CivPickerModel(const CivCatalog& civ_catalog) :
 
 const CivCatalog& CivPickerModel::Catalog() const { return catalog; }
 
-// An edition has its own civs and those of every older edition.
 bool CivPickerModel::BelongsToEdition(const Civ& candidate, int edition) const
 {
     const int edition_count = catalog.EditionCount();
@@ -180,7 +170,6 @@ uint8_t CivPickerModel::GetCivIndex(const std::wstring& civ_name) const
     return MAX_CIVS;
 }
 
-// The index of the civ of that name, or CivCatalog::NONE for any other name ("Random" too).
 int CivPickerModel::FindCivIndex(const std::wstring& civ_name) const
 {
     const auto found = civ_name_to_index.find(civ_name);
@@ -245,9 +234,6 @@ std::wstring CivPickerModel::FetchHistory(const std::wstring& civ_name) const
     return converter.from_bytes(utf8_text);
 }
 
-// What a share link carries: the edition, the civ pool, and this round's draws in draw order. drawn_civs holds
-// the round's draws and, after an undraw, the ones that can be redrawn; a civ counts while it is drawn (no longer
-// available) and still in the pool, as the web version shares only draws that are in the pool.
 SharedPool CivPickerModel::GetSharedPool() const
 {
     SharedPool shared = {};
@@ -265,7 +251,6 @@ SharedPool CivPickerModel::GetSharedPool() const
     return shared;
 }
 
-// Whether loading a share link would replace anything: another edition than the first, a civ left out, or a draw.
 bool CivPickerModel::HasCustomState() const
 {
     if (!c_assert(civ_count > 0)) return false;
@@ -401,8 +386,6 @@ bool CivPickerModel::DrawRandomCiv()
     return true;
 }
 
-// Draws until a civ outside the recent-civ window turns up. Each attempt removes one candidate, so the
-// fallback for fewer than two candidates ends the loop before the explicit MAX_CIVS bound (P10 rule 2).
 bool CivPickerModel::DrawFreshCiv()
 {
     std::wstring civ_list_copy[MAX_CIVS];
@@ -453,420 +436,4 @@ void CivPickerModel::RecordDrawnCiv()
     undrawable = true;
     last_action = LastAction::draw;
     if (settings.contfresh_enabled) UpdateContfresh(current_civ);
-}
-
-void CivPickerModel::UndrawCiv()
-{
-    if (!undrawable)
-    {
-        observer->OnActionRejected();
-        return;
-    }
-    observer->OnUndrawAccepted();
-    if (iterator == 0) return;
-
-    iterator--;
-    remaining++;
-    const uint8_t civ_index = GetCivIndex(current_civ);
-    if (civ_index >= MAX_CIVS) return;
-
-    civ_list[civ_index] = current_civ;
-    available_civs[civ_index] = true;
-    current_civ = (iterator >= 1) ? drawn_civs[iterator - 1] : L"Random";
-    ValidateRemainCount();
-    observer->OnCivUndrawn();
-    redrawable = true;
-}
-
-void CivPickerModel::RedrawCiv()
-{
-    if (!redrawable || iterator >= MAX_CIVS || drawn_civs[iterator] == L"")
-    {
-        observer->OnActionRejected();
-        return;
-    }
-    const uint8_t civ_index = GetCivIndex(drawn_civs[iterator]);
-    if (civ_index >= MAX_CIVS || !available_civs[civ_index])
-    {
-        observer->OnActionRejected();
-        return;
-    }
-
-    current_civ = drawn_civs[iterator];
-    civ_list[civ_index] = L"";
-    available_civs[civ_index] = false;
-    iterator++;
-    remaining--;
-    ValidateRemainCount();
-    observer->OnCivRedrawn();
-
-    if (iterator == custom_max_civs) redrawable = false;
-}
-
-void CivPickerModel::AddCiv(const std::wstring& civ_name)
-{
-    if (GetCiv(civ_name).enabled) return;
-    const uint8_t civ_index = GetCivIndex(civ_name);
-    if (civ_index >= MAX_CIVS) return;
-
-    civ_list[civ_index] = civ_name;
-    available_civs[civ_index] = true;
-    FindCiv(civ_name).enabled = true;
-    custom_max_civs++;
-    if (custom_max_civs == civ_count) custom_civ_pool = false;
-
-    ValidateRemainCount();
-    observer->OnPoolChanged(civ_index);
-    last_action = LastAction::pool_change;
-}
-
-void CivPickerModel::RemoveCiv(const std::wstring& civ_name)
-{
-    if (!GetCiv(civ_name).enabled) return;
-    const uint8_t civ_index = GetCivIndex(civ_name);
-    if (civ_index >= MAX_CIVS) return;
-
-    if (!available_civs[civ_index])
-    {
-        iterator--;
-        remaining++;
-    }
-
-    custom_civ_pool = true;
-    civ_list[civ_index] = L"";
-    available_civs[civ_index] = false;
-    FindCiv(civ_name).enabled = false;
-    custom_max_civs--;
-
-    ValidateRemainCount();
-    observer->OnPoolChanged(civ_index);
-    last_action = LastAction::pool_change;
-}
-
-void CivPickerModel::EnableAll()
-{
-    batch_toggle = true;
-    custom_civ_pool = false;
-    for (int i = 0; i < civ_count && i < MAX_CIVS; i++)
-    {
-        if (BelongsToEdition(civ[i], edition_state)) AddCiv(civ[i].name);
-    }
-
-    if (settings.autoreset_enabled) ResetProgram(true);
-    observer->OnBulkPoolChanged();
-    batch_toggle = false;
-}
-
-void CivPickerModel::DisableAll()
-{
-    batch_toggle = true;
-    custom_civ_pool = true;
-    for (int i = 0; i < civ_count && i < MAX_CIVS; i++) RemoveCiv(civ[i].name);
-
-    if (settings.autoreset_enabled) ResetProgram(true);
-    observer->OnBulkPoolChanged();
-    batch_toggle = false;
-}
-
-void CivPickerModel::SetDlcEnabled(int dlc, bool enabled)
-{
-    if (!c_assert(dlc >= 0 && dlc < catalog.DlcCount())) return;
-    batch_toggle = true;
-    if (enabled) EnableDlc(dlc);
-    else DisableDlc(dlc);
-    observer->OnDlcPoolChanged();
-    batch_toggle = false;
-}
-
-void CivPickerModel::EnableDlc(int dlc)
-{
-    if (!c_assert(dlc >= 0 && dlc < catalog.DlcCount())) return;
-    for (int i = 0; i < civ_count && i < MAX_CIVS; i++) if (civ[i].dlc == dlc) AddCiv(civ[i].name);
-}
-
-void CivPickerModel::DisableDlc(int dlc)
-{
-    if (!c_assert(dlc >= 0 && dlc < catalog.DlcCount())) return;
-    for (int i = 0; i < civ_count && i < MAX_CIVS; i++) if (civ[i].dlc == dlc) RemoveCiv(civ[i].name);
-}
-
-// The DLCs of older editions that come with this one (data.json's olderDlcs), which auto-toggle switches on.
-void CivPickerModel::SetOldDlcsEnabled(int edition, bool enabled)
-{
-    if (!c_assert(edition >= 0 && edition < catalog.EditionCount())) return;
-    const EditionInfo& info = catalog.EditionAt(edition);
-    for (int i = 0; i < info.older_dlc_count && i < MAX_DLCS; i++)
-    {
-        if (enabled) EnableDlc(info.older_dlcs[i]);
-        else DisableDlc(info.older_dlcs[i]);
-    }
-}
-
-void CivPickerModel::RemoveCivsOutsideEdition(int edition)
-{
-    if (!c_assert(edition >= 0 && edition < catalog.EditionCount())) return;
-    for (int i = 0; i < civ_count && i < MAX_CIVS; i++)
-    {
-        if (!BelongsToEdition(civ[i], edition)) RemoveCiv(civ[i].name);
-    }
-}
-
-void CivPickerModel::SetEdition(int edition)
-{
-    if (!c_assert(edition >= 0 && edition < catalog.EditionCount())) return;
-    batch_toggle = true;
-    if (settings.autotoggle_enabled && !startup) SetOldDlcsEnabled(edition, true);
-    RemoveCivsOutsideEdition(edition);
-    edition_state = edition;
-    observer->OnEditionChanged();
-    batch_toggle = false;
-}
-
-void CivPickerModel::EnforceEditionPool() { RemoveCivsOutsideEdition(edition_state); }
-
-// A share link's edition and civ pool, then a new round with the link's draws in their order. The round that was
-// going on ends, as a reset ends it.
-void CivPickerModel::LoadSharedPool(const SharedPool& shared)
-{
-    if (!c_assert(shared.edition >= 0 && shared.edition < catalog.EditionCount())) return;
-    if (!c_assert(shared.draw_count >= 0 && shared.draw_count <= civ_count)) return;
-    ResetProgram(true);
-    // The link says which civs are on, so its edition comes without switching older civs on.
-    const bool autotoggle_was_enabled = settings.autotoggle_enabled;
-    settings.autotoggle_enabled = false;
-    SetEdition(shared.edition);
-    settings.autotoggle_enabled = autotoggle_was_enabled;
-    batch_toggle = true;
-    for (int i = 0; i < civ_count && i < MAX_CIVS; i++)
-    {
-        if (shared.enabled[i]) AddCiv(civ[i].name);
-        else RemoveCiv(civ[i].name);
-    }
-    batch_toggle = false;
-    observer->OnBulkPoolChanged();
-    ResetProgram(true);
-    for (int i = 0; i < shared.draw_count && i < MAX_CIVS; i++)
-    {
-        const int drawn = shared.draws[i];
-        if (!c_assert(drawn >= 0 && drawn < civ_count && civ[drawn].enabled)) return;
-        DrawCiv(true, civ[drawn].name);
-    }
-}
-
-void CivPickerModel::SetAutoToggle(bool enabled)
-{
-    settings.autotoggle_enabled = enabled;
-    SetOldDlcsEnabled(edition_state, enabled);
-}
-
-// The history of recent draws, oldest first, keeps as many civs as can ever sit out of this pool: half of it. The
-// setting decides how many of the newest ones do (IsContfreshCiv), so a new setting holds from the next draw on.
-void CivPickerModel::UpdateContfresh(const std::wstring& drawn_civ)
-{
-    if (!c_assert(!drawn_civ.empty())) return;
-    const int capacity = FreshnessMaximum();
-    int length = ContfreshHistoryLength();
-    if (length >= capacity)
-    {
-        // The oldest civs make room, so the newest capacity - 1 stay.
-        const int dropped = length - capacity + 1;
-        for (int i = 0; i + dropped < length && i < MAX_CIVS; i++)
-            contfresh_array[i].swap(contfresh_array[i + dropped]);
-        for (int i = length - dropped; i < length && i < MAX_CIVS; i++) contfresh_array[i].clear();
-        length -= dropped;
-    }
-    if (!c_assert(length >= 0 && length < MAX_CIVS)) return;
-    contfresh_array[length] = drawn_civ;
-}
-
-// A civ may be drawn unless it is among the newest civs of the history, as many as the setting lets sit out.
-bool CivPickerModel::IsContfreshCiv(const std::wstring& candidate_civ) const
-{
-    if (custom_max_civs < 2) return true;
-    const int length = ContfreshHistoryLength();
-    const int first_sitting_out = length > FreshnessLimit() ? length - FreshnessLimit() : 0;
-    for (int i = first_sitting_out; i < length && i < MAX_CIVS; i++)
-    {
-        if (contfresh_array[i] == candidate_civ) return false;
-    }
-    return true;
-}
-
-int CivPickerModel::ContfreshHistoryLength() const
-{
-    for (int i = 0; i < MAX_CIVS; i++)
-    {
-        if (contfresh_array[i].empty()) return i;
-    }
-    return MAX_CIVS;
-}
-
-// The most civs that can sit out: half the pool, and at least one.
-int CivPickerModel::FreshnessMaximum() const { return std::max(custom_max_civs / 2, 1); }
-
-// How many civs sit out: the setting, but no more than half the pool.
-int CivPickerModel::FreshnessLimit() const
-{
-    const int maximum = FreshnessMaximum();
-    if (!c_assert(settings.contfresh_civs >= 1)) return 1;
-    return std::min(static_cast<int>(settings.contfresh_civs), maximum);
-}
-
-// The Options slider's choice: a number of civs, where its top (half the pool) means the most.
-void CivPickerModel::SetFreshness(int civs)
-{
-    if (!c_assert(civs >= 1 && civs <= MAX_CIVS)) return;
-    settings.contfresh_civs = civs >= FreshnessMaximum() ? CONTFRESH_MOST : static_cast<uint8_t>(civs);
-}
-
-void CivPickerModel::DiscardRedoHistory()
-{
-    bool current_found = false;
-    for (int i = 0; i < MAX_CIVS; i++)
-    {
-        if (drawn_civs[i] == current_civ) current_found = true;
-        else if (!current_found) continue;
-        if (drawn_civs[i] != current_civ) drawn_civs[i] = L"";
-    }
-}
-
-bool CivPickerModel::WriteLogFile(const std::wstring& path) const
-{
-    std::wofstream out_file(path.c_str());
-    if (!out_file) return false;
-
-    out_file << L"CivStates:" << std::endl;
-    for (int i = 0; i < civ_count && i < MAX_CIVS; i++)
-        out_file << civ[i].name << L" " << (civ[i].enabled ? L"1" : L"0") << std::endl;
-
-    out_file << L"DrawnCivs:" << std::endl;
-    for (int i = 0; i < MAX_CIVS && drawn_civs[i] != L""; i++) out_file << drawn_civs[i] << std::endl;
-
-    // The edition is saved by its ID in data.json.
-    out_file << L"EditionState:" << std::endl;
-    out_file << catalog.EditionAt(edition_state).id << std::endl;
-
-    if (settings.contfresh_enabled)
-    {
-        out_file << L"ContfreshCivArray:" << std::endl;
-        for (int i = 0; i < MAX_CIVS && contfresh_array[i] != L""; i++) out_file << contfresh_array[i] << std::endl;
-    }
-    out_file.close();
-    return true;
-}
-
-void CivPickerModel::SaveAutomaticLog()
-{
-    DiscardRedoHistory();
-    // A failed automatic save is skipped silently, as it always has been; the next save tries again.
-    (void)WriteLogFile(log_file_path);
-}
-
-bool CivPickerModel::LoadLogFile(const std::wstring& path, SaveType type)
-{
-    std::wifstream in_file(path.c_str());
-    if (!in_file) return false;
-
-    if (type == SaveType::automatic) InitialiseCivs();
-    ParseLog(in_file);
-    in_file.close();
-
-    ValidateRemainCount();
-    observer->OnLogLoaded(type);
-    if (iterator > 0) reset_state = false;
-    return true;
-}
-
-// Reads at most LOG_LINE_LIMIT entry lines plus the section headers (P10 rule 2).
-void CivPickerModel::ParseLog(std::wistream& in_file)
-{
-    LogReader reader;
-    int lines_applied = 0;
-    std::wstring line;
-
-    for (int lines_read = 0; lines_read < LOG_LINE_LIMIT + LOG_SECTION_AMOUNT; lines_read++)
-    {
-        if (!std::getline(in_file, line)) return;
-        if (lines_applied >= LOG_LINE_LIMIT || line == L"") return;
-        if (StartLogSection(line, reader)) continue;
-        if (!ApplyLogLine(line, reader)) return;
-        lines_applied++;
-    }
-}
-
-bool CivPickerModel::StartLogSection(const std::wstring& line, LogReader& reader) const
-{
-    if (line == L"CivStates:" && !reader.states_read)
-    {
-        reader.section = LogSection::civ_states;
-        reader.states_read = true;
-    }
-    else if (settings.contfresh_enabled && line == L"ContfreshCivArray:" && !reader.contfresh_read)
-    {
-        reader.section = LogSection::contfresh;
-        reader.contfresh_read = true;
-    }
-    else if (line == L"DrawnCivs:" && !reader.drawn_read)
-    {
-        reader.section = LogSection::drawn_civs;
-        reader.drawn_read = true;
-    }
-    else if (line == L"EditionState:") reader.section = LogSection::edition;
-    else return false;
-
-    reader.section_line = 0;
-    return true;
-}
-
-bool CivPickerModel::ApplyLogLine(const std::wstring& line, LogReader& reader)
-{
-    switch (reader.section)
-    {
-        case LogSection::civ_states:
-            if (reader.section_line >= MAX_CIVS) return false;
-            ApplyCivStateLine(line);
-            break;
-        case LogSection::contfresh:
-            if (reader.section_line >= MAX_CIVS) return false;
-            // The saved history takes the place of the one the replayed draws built.
-            if (reader.section_line == 0)
-            {
-                for (std::wstring& entry : contfresh_array) entry.clear();
-            }
-            contfresh_array[reader.section_line] = line;
-            break;
-        case LogSection::drawn_civs:
-            if (reader.section_line >= MAX_CIVS) return false;
-            DrawCiv(true, line);
-            break;
-        case LogSection::edition:
-            ApplyEditionLine(line);
-            break;
-        case LogSection::none:
-            break;
-        default:
-            (void)c_assert(false);
-            break;
-    }
-    reader.section_line++;
-    return true;
-}
-
-void CivPickerModel::ApplyCivStateLine(const std::wstring& line)
-{
-    std::wistringstream line_stream(line);
-    std::wstring civ_name;
-    int state = 0;
-    if (line_stream >> civ_name >> state && state == 0) RemoveCiv(civ_name);
-}
-
-void CivPickerModel::ApplyEditionLine(const std::wstring& line)
-{
-    const bool autotoggle_was_enabled = settings.autotoggle_enabled;
-    settings.autotoggle_enabled = false;
-
-    const int edition = catalog.FindEdition(line);
-    if (edition != CivCatalog::NONE) SetEdition(edition);
-
-    if (autotoggle_was_enabled) settings.autotoggle_enabled = true;
 }

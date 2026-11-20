@@ -14,7 +14,6 @@ struct IWICBitmapFrameDecode;
 struct IWICFormatConverter;
 struct IWICImagingFactory;
 
-// A file of the image folder, by its path there (L"civ\\aztecs.png").
 struct ImageFile
 {
     static constexpr int MAX_PATH_LENGTH = 64;
@@ -22,14 +21,12 @@ struct ImageFile
     wchar_t path[MAX_PATH_LENGTH];
 };
 
-// The files an atlas is built from, one per cell in the atlas's order.
 struct AtlasFiles
 {
     const ImageFile* files;
     int count;
 };
 
-// Where the images come from: the image folder, and the icon files data.json names for the atlases (ImageId).
 struct ImageSources
 {
     const wchar_t* folder;
@@ -38,11 +35,6 @@ struct ImageSources
     AtlasFiles edition_banners;
 };
 
-// The theme's images as Direct2D bitmaps (View, part of the Direct2D boundary). Everything is decoded and built at
-// startup: the PNG files through WIC, the atlases from their icon files, the CSS-filtered variants (greyed icons,
-// dimmed tabs, recoloured icons), the tiles of each nine-slice, and the cursors in both sizes. A file that can't be
-// loaded leaves its image, cell or tile empty, which the renderer then skips, so a missing file costs a picture but
-// not the program; the files that couldn't be loaded are counted, and the first is named.
 class ParchmentImages final
 {
 public:
@@ -68,14 +60,11 @@ public:
     const wchar_t* FirstMissingFile() const;
 
 private:
-    // Images decode a strip of rows at a time through the scratch buffer, so it stays small; the nine-slice
-    // images, the atlas cells and the cursors are small enough to fit in it whole.
     static constexpr int MAX_SCRATCH_PIXELS = 48 * 1024;
     static constexpr int MAX_IMAGE_HEIGHT = 4096;
 
     enum class PixelOrder { straight, premultiplied };
 
-    // An image file opened through WIC, converted to BGRA with straight or premultiplied alpha; Close releases it.
     struct OpenedImage
     {
         IWICBitmapDecoder* decoder;
@@ -98,8 +87,6 @@ private:
         int image_width;
     };
 
-    // One cell of an atlas being built, and of its grey twin (-1 for none): its place, and the file it shows
-    // (nullptr for a cell past the files).
     struct AtlasCell
     {
         int atlas;

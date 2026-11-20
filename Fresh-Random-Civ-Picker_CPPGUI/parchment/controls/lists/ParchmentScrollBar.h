@@ -2,8 +2,6 @@
 
 #include "ParchmentControl.h"
 
-// The game's scrollbar as the logs draw it (.sb): an up button, the track and a down button, SCROLLBAR_WIDTH wide
-// from the bar's left edge, and the knob knob_offset pixels down the track.
 struct ScrollbarDraw
 {
     FloatRect bar;
@@ -12,9 +10,6 @@ struct ScrollbarDraw
 
 void DrawScrollbar(ParchmentRenderer& renderer, const ScrollbarDraw& draw);
 
-// A scrollbar control of the parchment theme (View) for a list of rows, of which it shows `shown` from `first` on.
-// A button scrolls a row and the track a page, both repeating while held, and the knob drags. Each scroll made
-// with it tells the parent the new first row, as a scrollbar control does: WM_VSCROLL with SB_THUMBPOSITION.
 class ScrollBar final : public ParchmentControl
 {
 public:

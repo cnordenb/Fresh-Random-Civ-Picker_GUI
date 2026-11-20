@@ -8,7 +8,6 @@
 namespace
 {
     const wchar_t* const CONTROL_CLASS = L"FrcpParchmentControl";
-    // Set once by RegisterWindowClass; tells parchment controls apart from a window's other children.
     ATOM control_class_atom = 0;
 
     HMENU ControlId(int id) { return reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)); }
@@ -39,16 +38,13 @@ bool ParchmentControl::Create(const ControlContext& control_context, const Contr
     text_length = wcsncpy_s(text, initial_text, _TRUNCATE) == 0 ? static_cast<int>(wcslen(text)) : 0;
     const HINSTANCE instance = reinterpret_cast<HINSTANCE>(GetWindowLongPtr(parent, GWLP_HINSTANCE));
     const PixelRect& bounds = placement.bounds;
-    // The window procedure needs this object from the first message on, so it travels as the creation parameter.
     const DWORD style = static_cast<DWORD>(WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | (IsClickable() ? WS_TABSTOP : 0));
     window = CreateWindowExW(0, CONTROL_CLASS, initial_text, style,
                              bounds.left, bounds.top, RectWidth(bounds), RectHeight(bounds), parent, ControlId(id),
                              instance, this);
-    // A new control goes below the earlier ones, so the tab order of a dialog is the order of creation.
     return c_assert(window != NULL);
 }
 
-// Forgets a window that was destroyed with its dialog, so the control can be created again next time.
 void ParchmentControl::Release()
 {
     window = NULL;
@@ -76,7 +72,6 @@ void ParchmentControl::Check(bool now_checked)
 void ParchmentControl::Redraw()
 {
     if (window == NULL) return;
-    // Invalidating a live window can't fail in a way that needs handling; at worst the next paint shows it.
     (void)InvalidateRect(window, nullptr, FALSE);
 }
 
@@ -113,14 +108,12 @@ void ParchmentControl::OnFocusLost() {}
 
 bool ParchmentControl::IsPressed() const { return pressed; }
 
-// Tells the parent about the control, as a standard control sends WM_COMMAND or WM_HSCROLL.
 void ParchmentControl::NotifyParent(UINT message, WPARAM wParam) const
 {
     if (!c_assert(parent != NULL) || !c_assert(window != NULL)) return;
     (void)SendMessage(parent, message, wParam, reinterpret_cast<LPARAM>(window));
 }
 
-// Tells the parent once this control's message is handled, for a parent that then changes this control.
 void ParchmentControl::NotifyParentLater(UINT message, WPARAM wParam) const
 {
     if (!c_assert(parent != NULL) || !c_assert(window != NULL)) return;
@@ -143,8 +136,6 @@ TextSpan ParchmentControl::Text(FontId font) const
     return { text, text_length, font };
 }
 
-// Window procedure of every parchment control. Win32 can only deliver window messages through a function pointer
-// to this procedure (CLAUDE2.md I2); it reaches its control through the window's user data.
 LRESULT CALLBACK ParchmentControl::WindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 {
     if (message == WM_NCCREATE)
@@ -156,7 +147,6 @@ LRESULT CALLBACK ParchmentControl::WindowProc(HWND window, UINT message, WPARAM 
     ParchmentControl* control = reinterpret_cast<ParchmentControl*>(GetWindowLongPtr(window, GWLP_USERDATA));
     if (control == nullptr) return DefWindowProc(window, message, wParam, lParam);
     if (message == WM_NCCREATE) control->window = window;
-    // A control forgotten with its dialog (Release) no longer answers for the window being destroyed.
     if (control->window != window) return DefWindowProc(window, message, wParam, lParam);
     return control->HandleMessage(message, wParam, lParam);
 }
@@ -202,8 +192,6 @@ void ParchmentControl::OnPaint()
     (void)EndPaint(window, &paint);
 }
 
-// This control and every visible sibling control still waiting for its paint. Each is drawn over its own copy
-// of the backdrop, so controls that overlap one already taken are left to their own paint.
 ParchmentControl::Batch ParchmentControl::WaitingBatch()
 {
     Batch batch = {};
@@ -213,16 +201,13 @@ ParchmentControl::Batch ParchmentControl::WaitingBatch()
     for (int i = 0; i < MAX_SIBLINGS && sibling != NULL; i++)
     {
         ParchmentControl* control = WaitingSibling(sibling);
-        // A control the batch can't take is drawn by its own paint.
         if (control != nullptr) (void)batch.Add(control);
         sibling = GetWindow(sibling, GW_HWNDNEXT);
     }
-    // Siblings past MAX_SIBLINGS are drawn by their own paints.
     (void)c_assert(sibling == NULL);
     return batch;
 }
 
-// A sibling control waiting for its paint that draws with the same renderer and back buffer, or nullptr.
 ParchmentControl* ParchmentControl::WaitingSibling(HWND sibling) const
 {
     if (!c_assert(sibling != NULL) || sibling == window) return nullptr;
@@ -239,12 +224,10 @@ PixelRect ParchmentControl::AreaInParent() const
     RECT client = {};
     POINT origin = { 0, 0 };
     if (!c_assert(GetClientRect(window, &client) != FALSE)) return { 0, 0, 0, 0 };
-    // MapWindowPoints returns the offset it applied, which can rightly be zero.
     (void)MapWindowPoints(window, parent, &origin, 1);
     return { origin.x, origin.y, origin.x + client.right, origin.y + client.bottom };
 }
 
-// Takes the control if it fits the back buffer and overlaps none already taken, and says whether it did.
 bool ParchmentControl::Batch::Add(ParchmentControl* control)
 {
     if (!c_assert(control != nullptr) || count >= MAX_BATCH) return false;
@@ -266,8 +249,6 @@ bool ParchmentControl::Batch::Overlaps(const PixelRect& area) const
     return false;
 }
 
-// Draws every control of the batch over its backdrop into the back buffer, at its place in the parent, in one
-// frame.
 bool ParchmentControl::RenderBatch(const Batch& batch) const
 {
     PixelSurface* buffer = context.back_buffer;
@@ -294,7 +275,6 @@ bool ParchmentControl::CopyBackdropTo(PixelSurface& buffer, const PixelRect& are
                            area.left, area.top, SRCCOPY) != FALSE);
 }
 
-// Draws the control at its area of the parent, in a frame whose (0, 0) is frame_origin of the parent.
 void ParchmentControl::PaintInFrame(ParchmentRenderer& renderer, const PixelRect& area, PixelPoint frame_origin)
 {
     if (!c_assert(RectWidth(area) > 0 && RectHeight(area) > 0)) return;
@@ -305,7 +285,6 @@ void ParchmentControl::PaintInFrame(ParchmentRenderer& renderer, const PixelRect
     renderer.PopClip();
 }
 
-// Shows each control's part of the back buffer: this one through its paint, the others right away.
 void ParchmentControl::ShowBatch(HDC target, const Batch& batch) const
 {
     if (!c_assert(target != NULL) || !c_assert(batch.count > 0)) return;
@@ -316,25 +295,21 @@ void ParchmentControl::ShowBatch(HDC target, const Batch& batch) const
     }
 }
 
-// Shows a waiting control's drawing outside its paint, which it then no longer waits for.
 void ParchmentControl::ShowWaitingPaint(const PixelRect& area) const
 {
     if (!c_assert(window != NULL) || !c_assert(HasArea(area))) return;
     const HDC target = GetDC(window);
     if (!c_assert(target != NULL)) return;
     ShowArea(target, area);
-    // ReleaseDC can't fail for a window's own device context, and ValidateRect only drops the pending paint.
     (void)ReleaseDC(window, target);
     (void)ValidateRect(window, nullptr);
 }
 
-// Copies the control's area of the back buffer to the control.
 void ParchmentControl::ShowArea(HDC target, const PixelRect& area) const
 {
     const PixelSurface* buffer = context.back_buffer;
     if (!c_assert(buffer != nullptr) || !c_assert(target != NULL)) return;
     if (!c_assert(HasArea(area) && buffer->Contains(area))) return;
-    // A failed copy leaves the control's earlier look until its next paint.
     (void)BitBlt(target, 0, 0, RectWidth(area), RectHeight(area), buffer->Dc(), area.left, area.top, SRCCOPY);
 }
 
@@ -346,14 +321,12 @@ void ParchmentControl::OnMouseMove(WPARAM wParam, LPARAM lParam)
     {
         hot = true;
         TRACKMOUSEEVENT tracking = { sizeof(TRACKMOUSEEVENT), TME_LEAVE, window, 0 };
-        // Without leave tracking the control just stays highlighted until the next move; nothing breaks.
         (void)TrackMouseEvent(&tracking);
         Redraw();
     }
     ForwardMouseMove(wParam, lParam);
 }
 
-// The parent shows the tooltips, so it hears about every move over its controls (as it did with buttons).
 void ParchmentControl::ForwardMouseMove(WPARAM wParam, LPARAM lParam) const
 {
     if (!c_assert(parent != NULL) || !c_assert(window != NULL)) return;
@@ -386,7 +359,6 @@ void ParchmentControl::OnButtonUp(LPARAM lParam)
     const POINT point = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
     RECT client = {};
     const bool inside = GetClientRect(window, &client) && PtInRect(&client, point);
-    // Releasing ends the press through WM_CAPTURECHANGED; a click counts only when let go over the control.
     (void)ReleaseCapture();
     if (inside) Click();
 }
@@ -426,7 +398,6 @@ void ParchmentControl::OnKillFocus()
     Redraw();
 }
 
-// Space presses and releases a focused control, as on a button in a dialog.
 void ParchmentControl::OnKey(UINT message, WPARAM key)
 {
     if (!c_assert(message == WM_KEYDOWN || message == WM_KEYUP)) return;
