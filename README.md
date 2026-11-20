@@ -6,7 +6,8 @@
 
 # Fresh Random Civ Picker
 
-<img width="981" height="1063" alt="image" src="https://github.com/user-attachments/assets/cb179be9-9582-4d22-9c95-56ef0ed7df05" />
+<img width="500" height="542" alt="image" src="https://github.com/user-attachments/assets/25590be2-2d13-4c97-b740-e7bee93bccf1" />
+
 
 
 ## Usage  
